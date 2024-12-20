@@ -67,6 +67,7 @@ repositories {
     maven("https://repo.spongepowered.org/maven/")
     // If you don't want to log in with your real minecraft account, remove this line
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
+    maven("https://repo.hypixel.net/repository/Hypixel/")
 }
 
 val shadowImpl: Configuration by configurations.creating {
@@ -77,6 +78,9 @@ dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
+//    implementation("com.google.code.gson:gson:2.11.0")
+    implementation ("net.hypixel:hypixel-api-transport-reactor:4.4")
+    implementation ("net.hypixel:hypixel-api-transport-apache:4.4")
 
     // If you don't want mixins, remove these lines
     shadowImpl("org.spongepowered:mixin:0.7.11-SNAPSHOT") {

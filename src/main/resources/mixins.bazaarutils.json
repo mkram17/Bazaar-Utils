@@ -1,8 +1,7 @@
 {
-  "package": "${basePackage}.mixin",
-  "plugin": "${basePackage}.init.AutoDiscoveryMixinPlugin",
-  "refmap": "mixins.${modid}.refmap.json",
+  "package": "com.github.sirmegabite.bazaarutils.mixin",
+  "plugin": "com.github.sirmegabite.bazaarutils.init.AutoDiscoveryMixinPlugin",
+  "refmap": "mixins.bazaarutils.refmap.json",
   "minVersion": "0.7",
-  "compatibilityLevel": "JAVA_8",
-  "__comment": "You do not need to manually register mixins in this template. Check the auto discovery mixin plugin for more info."
+  "compatibilityLevel": "JAVA_8"
 }

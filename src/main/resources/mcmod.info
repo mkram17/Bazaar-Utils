@@ -1,14 +1,14 @@
 [
   {
-    "modid": "${modid}",
-    "name": "Xample Mod",
-    "description": "A mod that is used as an example.",
-    "version": "${version}",
-    "mcversion": "${mcversion}",
+    "modid": "bazaarutils",
+    "name": "Bazaar Utils",
+    "description": "Adds Bazaar QOL improvements.",
+    "version": "0.0.1",
+    "mcversion": "1.8.9",
     "url": "https://github.com/romangraef/Forge1.8.9Template/",
     "updateUrl": "",
     "authorList": [
-      "You"
+      "sirmegabyte"
     ],
     "credits": "",
     "logoFile": "",

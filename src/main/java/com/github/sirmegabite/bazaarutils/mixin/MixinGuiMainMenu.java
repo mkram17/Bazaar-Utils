@@ -1,4 +1,4 @@
-package com.github.sirmega-bite.bazaarutils.mixin;
+package com.github.sirmegabite.bazaarutils.mixin;
 
 import net.minecraft.client.gui.GuiMainMenu;
 import org.spongepowered.asm.mixin.Mixin;
