@@ -20,8 +20,9 @@ public class BazaarUtils {
     public static final String VERSION = "0.0.1";
     public static boolean modEnabled = true;
     public static List<ItemData> watchedItems = new ArrayList<>();
-    public static String apiKey = "2a454670-745f-46c4-9fc6-20bfc67d5d36";
     public static ContainerChest container;
+    public static boolean ctrlDown = false;
+    public static boolean vDown = false;
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {

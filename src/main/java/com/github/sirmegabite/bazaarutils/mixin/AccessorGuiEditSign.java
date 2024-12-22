@@ -9,5 +9,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface AccessorGuiEditSign {
     @Accessor("tileSign")
     TileEntitySign getTileSign();
+
+    @Accessor("editLine")
+    int getEditLine();
 }
 

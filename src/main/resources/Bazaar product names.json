@@ -1,0 +1,834 @@
+[
+   {
+      "bazaar_product_id":"SEEDS",
+      "bazaar_product_name":"Seeds"
+   },
+   {
+      "bazaar_product_id":"WHEAT",
+      "bazaar_product_name":"Wheat"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_BREAD",
+      "bazaar_product_name":"Enchanted Bread"
+   },
+   {
+      "bazaar_product_id":"HAY_BLOCK",
+      "bazaar_product_name":"Hay Bale"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_HAY_BLOCK",
+      "bazaar_product_name":"Enchanted Hay Bale"
+   },
+   {
+      "bazaar_product_id":"CARROT_ITEM",
+      "bazaar_product_name":"Carrot"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_CARROT",
+      "bazaar_product_name":"Enchanted Carrot"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_GOLDEN_CARROT",
+      "bazaar_product_name":"Enchanted Golden Carrot"
+   },
+   {
+      "bazaar_product_id":"POTATO_ITEM",
+      "bazaar_product_name":"Potato"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_POTATO",
+      "bazaar_product_name":"Enchanted Potato"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_BAKED_POTATO",
+      "bazaar_product_name":"Enchanted Baked Potato"
+   },
+   {
+      "bazaar_product_id":"PUMPKIN",
+      "bazaar_product_name":"Pumpkin"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_PUMPKIN",
+      "bazaar_product_name":"Enchanted Pumpkin"
+   },
+   {
+      "bazaar_product_id":"MELON",
+      "bazaar_product_name":"Melon"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_MELON",
+      "bazaar_product_name":"Enchanted Melon"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_GLISTERING_MELON",
+      "bazaar_product_name":"Enchanted Glistering Melon"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_MELON_BLOCK",
+      "bazaar_product_name":"Enchanted Melon Block"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SEEDS",
+      "bazaar_product_name":"Enchanted Seeds"
+   },
+   {
+      "bazaar_product_id":"RED_MUSHROOM",
+      "bazaar_product_name":"Red Mushroom"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_RED_MUSHROOM",
+      "bazaar_product_name":"Enchanted Red Mushroom"
+   },
+   {
+      "bazaar_product_id":"HUGE_MUSHROOM_2",
+      "bazaar_product_name":"Red Mushroom Block"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_HUGE_MUSHROOM_2",
+      "bazaar_product_name":"Enchanted Red Mushroom Block"
+   },
+   {
+      "bazaar_product_id":"BROWN_MUSHROOM",
+      "bazaar_product_name":"Brown Mushroom"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_BROWN_MUSHROOM",
+      "bazaar_product_name":"Enchanted Brown Mushroom"
+   },
+   {
+      "bazaar_product_id":"HUGE_MUSHROOM_1",
+      "bazaar_product_name":"Brown Mushroom Block"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_HUGE_MUSHROOM_1",
+      "bazaar_product_name":"Enchanted Brown Mushroom Block"
+   },
+   {
+      "bazaar_product_id":"INK_SACK:3",
+      "bazaar_product_name":"Cocoa Beans"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_COCOA",
+      "bazaar_product_name":"Enchanted Cocoa Bean"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_COOKIE",
+      "bazaar_product_name":"Enchanted Cookie"
+   },
+   {
+      "bazaar_product_id":"CACTUS",
+      "bazaar_product_name":"Cactus"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_CACTUS_GREEN",
+      "bazaar_product_name":"Enchanted Cactus Green"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_CACTUS",
+      "bazaar_product_name":"Enchanted Cactus"
+   },
+   {
+      "bazaar_product_id":"SUGAR_CANE",
+      "bazaar_product_name":"Sugar Cane"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SUGAR",
+      "bazaar_product_name":"Enchanted Sugar"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_PAPER",
+      "bazaar_product_name":"Enchanted Paper"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SUGAR_CANE",
+      "bazaar_product_name":"Enchanted Sugar Cane"
+   },
+   {
+      "bazaar_product_id":"FEATHER",
+      "bazaar_product_name":"Feather"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_FEATHER",
+      "bazaar_product_name":"Enchanted Feather"
+   },
+   {
+      "bazaar_product_id":"LEATHER",
+      "bazaar_product_name":"Leather"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_LEATHER",
+      "bazaar_product_name":"Enchanted Leather"
+   },
+   {
+      "bazaar_product_id":"RAW_BEEF",
+      "bazaar_product_name":"Raw Beef"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_RAW_BEEF",
+      "bazaar_product_name":"Enchanted Raw Beef"
+   },
+   {
+      "bazaar_product_id":"PORK",
+      "bazaar_product_name":"Raw Porkchop"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_PORK",
+      "bazaar_product_name":"Enchanted Pork"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_GRILLED_PORK",
+      "bazaar_product_name":"Enchanted Grilled Pork"
+   },
+   {
+      "bazaar_product_id":"RAW_CHICKEN",
+      "bazaar_product_name":"Raw Chicken"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_RAW_CHICKEN",
+      "bazaar_product_name":"Enchanted Raw Chicken"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_EGG",
+      "bazaar_product_name":"Enchanted Egg"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_CAKE",
+      "bazaar_product_name":"Enchanted Cake"
+   },
+   {
+      "bazaar_product_id":"SUPER_EGG",
+      "bazaar_product_name":"Super Enchanted Egg"
+   },
+   {
+      "bazaar_product_id":"MUTTON",
+      "bazaar_product_name":"Mutton"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_MUTTON",
+      "bazaar_product_name":"Enchanted Mutton"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_COOKED_MUTTON",
+      "bazaar_product_name":"Enchanted Cooked Mutton"
+   },
+   {
+      "bazaar_product_id":"RABBIT",
+      "bazaar_product_name":"Raw Rabbit"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_RABBIT",
+      "bazaar_product_name":"Enchanted Raw Rabbit"
+   },
+   {
+      "bazaar_product_id":"RABBIT_FOOT",
+      "bazaar_product_name":"Rabbit's Foot"
+   },
+   {
+      "bazaar_product_id":"RABBIT_HIDE",
+      "bazaar_product_name":"Rabbit Hide"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_RABBIT_FOOT",
+      "bazaar_product_name":"Enchanted Rabbit Foot"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_RABBIT_HIDE",
+      "bazaar_product_name":"Enchanted Rabbit Hide"
+   },
+   {
+      "bazaar_product_id":"NETHER_STALK",
+      "bazaar_product_name":"Nether Wart"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_NETHER_STALK",
+      "bazaar_product_name":"Enchanted Nether Wart"
+   },
+   {
+      "bazaar_product_id":"ROTTEN_FLESH",
+      "bazaar_product_name":"Rotten Flesh"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_ROTTEN_FLESH",
+      "bazaar_product_name":"Enchanted Rotten Flesh"
+   },
+   {
+      "bazaar_product_id":"BONE",
+      "bazaar_product_name":"Bone"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_BONE",
+      "bazaar_product_name":"Enchanted Bone"
+   },
+   {
+      "bazaar_product_id":"STRING",
+      "bazaar_product_name":"String"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_STRING",
+      "bazaar_product_name":"Enchanted String"
+   },
+   {
+      "bazaar_product_id":"SPIDER_EYE",
+      "bazaar_product_name":"Spider Eye"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SPIDER_EYE",
+      "bazaar_product_name":"Enchanted Spider Eye"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_FERMENTED_SPIDER_EYE",
+      "bazaar_product_name":"Enchanted Fermented Spider Eye"
+   },
+   {
+      "bazaar_product_id":"SULPHUR",
+      "bazaar_product_name":"Gunpowder"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_GUNPOWDER",
+      "bazaar_product_name":"Enchanted Gunpowder"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_FIREWORK_ROCKET",
+      "bazaar_product_name":"Enchanted Firework Rocket"
+   },
+   {
+      "bazaar_product_id":"ENDER_PEARL",
+      "bazaar_product_name":"Ender Pearl"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_ENDER_PEARL",
+      "bazaar_product_name":"Enchanted Ender Pearl"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_EYE_OF_ENDER",
+      "bazaar_product_name":"Enchanted Eye of Ender"
+   },
+   {
+      "bazaar_product_id":"GHAST_TEAR",
+      "bazaar_product_name":"Ghast Tear"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_GHAST_TEAR",
+      "bazaar_product_name":"Enchanted Ghast Tear"
+   },
+   {
+      "bazaar_product_id":"SLIME_BALL",
+      "bazaar_product_name":"Slimeball"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SLIME_BALL",
+      "bazaar_product_name":"Enchanted Slimeball"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SLIME_BLOCK",
+      "bazaar_product_name":"Enchanted Slime Block"
+   },
+   {
+      "bazaar_product_id":"BLAZE_ROD",
+      "bazaar_product_name":"Blaze Rod"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_BLAZE_POWDER",
+      "bazaar_product_name":"Enchanted Blaze Powder"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_BLAZE_ROD",
+      "bazaar_product_name":"Enchanted Blaze Rod"
+   },
+   {
+      "bazaar_product_id":"MAGMA_CREAM",
+      "bazaar_product_name":"Magma Cream"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_MAGMA_CREAM",
+      "bazaar_product_name":"Enchanted Magma Cream"
+   },
+   {
+      "bazaar_product_id":"COBBLESTONE",
+      "bazaar_product_name":"Cobblestone"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_COBBLESTONE",
+      "bazaar_product_name":"Enchanted Cobblestone"
+   },
+   {
+      "bazaar_product_id":"COAL",
+      "bazaar_product_name":"Coal"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_COAL",
+      "bazaar_product_name":"Enchanted Coal"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_CHARCOAL",
+      "bazaar_product_name":"Enchanted Charcoal"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_COAL_BLOCK",
+      "bazaar_product_name":"Enchanted Block of Coal"
+   },
+   {
+      "bazaar_product_id":"IRON_INGOT",
+      "bazaar_product_name":"Iron Ingot"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_IRON",
+      "bazaar_product_name":"Enchanted Iron"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_IRON_BLOCK",
+      "bazaar_product_name":"Enchanted Iron Block"
+   },
+   {
+      "bazaar_product_id":"GOLD_INGOT",
+      "bazaar_product_name":"Gold Ingot"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_GOLD",
+      "bazaar_product_name":"Enchanted Gold"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_GOLD_BLOCK",
+      "bazaar_product_name":"Enchanted Gold Block"
+   },
+   {
+      "bazaar_product_id":"DIAMOND",
+      "bazaar_product_name":"Diamond"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_DIAMOND",
+      "bazaar_product_name":"Enchanted Diamond"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_DIAMOND_BLOCK",
+      "bazaar_product_name":"Enchanted Diamond Block"
+   },
+   {
+      "bazaar_product_id":"INK_SACK:4",
+      "bazaar_product_name":"Lapis Lazuli"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_LAPIS_LAZULI",
+      "bazaar_product_name":"Enchanted Lapis Lazuli"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_LAPIS_LAZULI_BLOCK",
+      "bazaar_product_name":"Enchanted Lapis Block"
+   },
+   {
+      "bazaar_product_id":"EMERALD",
+      "bazaar_product_name":"Emerald"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_EMERALD",
+      "bazaar_product_name":"Enchanted Emerald"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_EMERALD_BLOCK",
+      "bazaar_product_name":"Enchanted Emerald Block"
+   },
+   {
+      "bazaar_product_id":"REDSTONE",
+      "bazaar_product_name":"Redstone"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_REDSTONE",
+      "bazaar_product_name":"Enchanted Redstone"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_REDSTONE_BLOCK",
+      "bazaar_product_name":"Enchanted Redstone Block"
+   },
+   {
+      "bazaar_product_id":"QUARTZ",
+      "bazaar_product_name":"Nether Quartz"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_QUARTZ",
+      "bazaar_product_name":"Enchanted Quartz"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_QUARTZ_BLOCK",
+      "bazaar_product_name":"Enchanted Quartz Block"
+   },
+   {
+      "bazaar_product_id":"OBSIDIAN",
+      "bazaar_product_name":"Obsidian"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_OBSIDIAN",
+      "bazaar_product_name":"Enchanted Obsidian"
+   },
+   {
+      "bazaar_product_id":"GLOWSTONE_DUST",
+      "bazaar_product_name":"Glowstone Dust"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_GLOWSTONE_DUST",
+      "bazaar_product_name":"Enchanted Glowstone Dust"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_GLOWSTONE",
+      "bazaar_product_name":"Enchanted Glowstone"
+   },
+   {
+      "bazaar_product_id":"GRAVEL",
+      "bazaar_product_name":"Gravel"
+   },
+   {
+      "bazaar_product_id":"FLINT",
+      "bazaar_product_name":"Flint"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_FLINT",
+      "bazaar_product_name":"Enchanted Flint"
+   },
+   {
+      "bazaar_product_id":"ICE",
+      "bazaar_product_name":"Ice"
+   },
+   {
+      "bazaar_product_id":"PACKED_ICE",
+      "bazaar_product_name":"Packed Ice"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_ICE",
+      "bazaar_product_name":"Enchanted Ice"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_PACKED_ICE",
+      "bazaar_product_name":"Enchanted Packed Ice"
+   },
+   {
+      "bazaar_product_id":"NETHERRACK",
+      "bazaar_product_name":"Netherrack"
+   },
+   {
+      "bazaar_product_id":"SAND",
+      "bazaar_product_name":"Sand"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SAND",
+      "bazaar_product_name":"Enchanted Sand"
+   },
+   {
+      "bazaar_product_id":"ENDER_STONE",
+      "bazaar_product_name":"End Stone"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_ENDSTONE",
+      "bazaar_product_name":"Enchanted End Stone"
+   },
+   {
+      "bazaar_product_id":"SNOW_BALL",
+      "bazaar_product_name":"Snowball"
+   },
+   {
+      "bazaar_product_id":"SNOW_BLOCK",
+      "bazaar_product_name":"Snow Block"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SNOW_BLOCK",
+      "bazaar_product_name":"Enchanted Snow Block"
+   },
+   {
+      "bazaar_product_id":"LOG",
+      "bazaar_product_name":"Oak Wood"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_OAK_LOG",
+      "bazaar_product_name":"Enchanted Oak Wood"
+   },
+   {
+      "bazaar_product_id":"LOG:1",
+      "bazaar_product_name":"Spruce Wood"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SPRUCE_LOG",
+      "bazaar_product_name":"Enchanted Spruce Wood"
+   },
+   {
+      "bazaar_product_id":"LOG:2",
+      "bazaar_product_name":"Birch Wood"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_BIRCH_LOG",
+      "bazaar_product_name":"Enchanted Birch Wood"
+   },
+   {
+      "bazaar_product_id":"LOG_2:1",
+      "bazaar_product_name":"Dark Oak Wood"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_DARK_OAK_LOG",
+      "bazaar_product_name":"Enchanted Dark Oak Wood"
+   },
+   {
+      "bazaar_product_id":"LOG_2",
+      "bazaar_product_name":"Acacia Wood"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_ACACIA_LOG",
+      "bazaar_product_name":"Enchanted Acacia Wood"
+   },
+   {
+      "bazaar_product_id":"LOG:3",
+      "bazaar_product_name":"Jungle Wood"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_JUNGLE_LOG",
+      "bazaar_product_name":"Enchanted Jungle Wood"
+   },
+   {
+      "bazaar_product_id":"RAW_FISH",
+      "bazaar_product_name":"Raw Fish"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_RAW_FISH",
+      "bazaar_product_name":"Enchanted Raw Fish"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_COOKED_FISH",
+      "bazaar_product_name":"Enchanted Cooked Fish"
+   },
+   {
+      "bazaar_product_id":"RAW_FISH:1",
+      "bazaar_product_name":"Raw Salmon"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_RAW_SALMON",
+      "bazaar_product_name":"Enchanted Raw Salmon"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_COOKED_SALMON",
+      "bazaar_product_name":"Enchanted Cooked Salmon"
+   },
+   {
+      "bazaar_product_id":"RAW_FISH:2",
+      "bazaar_product_name":"Clownfish"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_CLOWNFISH",
+      "bazaar_product_name":"Enchanted Clownfish"
+   },
+   {
+      "bazaar_product_id":"RAW_FISH:3",
+      "bazaar_product_name":"Pufferfish"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_PUFFERFISH",
+      "bazaar_product_name":"Enchanted Pufferfish"
+   },
+   {
+      "bazaar_product_id":"PRISMARINE_SHARD",
+      "bazaar_product_name":"Prismarine Shard"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_PRISMARINE_SHARD",
+      "bazaar_product_name":"Enchanted Prismarine Shard"
+   },
+   {
+      "bazaar_product_id":"PRISMARINE_CRYSTALS",
+      "bazaar_product_name":"Prismarine Crystals"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_PRISMARINE_CRYSTALS",
+      "bazaar_product_name":"Enchanted Prismarine Crystals"
+   },
+   {
+      "bazaar_product_id":"CLAY_BALL",
+      "bazaar_product_name":"Clay"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_CLAY_BALL",
+      "bazaar_product_name":"Enchanted Clay"
+   },
+   {
+      "bazaar_product_id":"WATER_LILY",
+      "bazaar_product_name":"Lily Pad"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_WATER_LILY",
+      "bazaar_product_name":"Enchanted Lily Pad"
+   },
+   {
+      "bazaar_product_id":"INK_SACK",
+      "bazaar_product_name":"Ink Sack"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_INK_SACK",
+      "bazaar_product_name":"Enchanted Ink Sack"
+   },
+   {
+      "bazaar_product_id":"SPONGE",
+      "bazaar_product_name":"Sponge"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_SPONGE",
+      "bazaar_product_name":"Enchanted Sponge"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_WET_SPONGE",
+      "bazaar_product_name":"Enchanted Wet Sponge"
+   },
+   {
+      "bazaar_product_id":"REVENANT_FLESH",
+      "bazaar_product_name":"Revenant Flesh"
+   },
+   {
+      "bazaar_product_id":"REVENANT_VISCERA",
+      "bazaar_product_name":"Revenant Viscera"
+   },
+   {
+      "bazaar_product_id":"TARANTULA_WEB",
+      "bazaar_product_name":"Tarantula Web"
+   },
+   {
+      "bazaar_product_id":"TARANTULA_SILK",
+      "bazaar_product_name":"Tarantula Silk"
+   },
+   {
+      "bazaar_product_id":"WOLF_TOOTH",
+      "bazaar_product_name":"Wolf Tooth"
+   },
+   {
+      "bazaar_product_id":"GOLDEN_TOOTH",
+      "bazaar_product_name":"Golden Tooth"
+   },
+   {
+      "bazaar_product_id":"HOT_POTATO_BOOK",
+      "bazaar_product_name":"Hot Potato Book"
+   },
+   {
+      "bazaar_product_id":"COMPACTOR",
+      "bazaar_product_name":"Compactor"
+   },
+   {
+      "bazaar_product_id":"SUPER_COMPACTOR_3000",
+      "bazaar_product_name":"Super Compactor 3000"
+   },
+   {
+      "bazaar_product_id":"SUMMONING_EYE",
+      "bazaar_product_name":"Summoning Eye"
+   },
+   {
+      "bazaar_product_id":"PROTECTOR_FRAGMENT",
+      "bazaar_product_name":"Protector Fragment"
+   },
+   {
+      "bazaar_product_id":"OLD_FRAGMENT",
+      "bazaar_product_name":"Old Dragon Fragment"
+   },
+   {
+      "bazaar_product_id":"UNSTABLE_FRAGMENT",
+      "bazaar_product_name":"Unstable Dragon Fragment"
+   },
+   {
+      "bazaar_product_id":"STRONG_FRAGMENT",
+      "bazaar_product_name":"Strong Dragon Fragment"
+   },
+   {
+      "bazaar_product_id":"YOUNG_FRAGMENT",
+      "bazaar_product_name":"Young Dragon Fragment"
+   },
+   {
+      "bazaar_product_id":"WISE_FRAGMENT",
+      "bazaar_product_name":"Wise Dragon Fragment"
+   },
+   {
+      "bazaar_product_id":"SUPERIOR_FRAGMENT",
+      "bazaar_product_name":"Superior Dragon Fragment"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_REDSTONE_LAMP",
+      "bazaar_product_name":"Enchanted Redstone Lamp"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_LAVA_BUCKET",
+      "bazaar_product_name":"Enchanted Lava Bucket"
+   },
+   {
+      "bazaar_product_id":"HAMSTER_WHEEL",
+      "bazaar_product_name":"Hamster Wheel"
+   },
+   {
+      "bazaar_product_id":"FOUL_FLESH",
+      "bazaar_product_name":"Foul Flesh"
+   },
+   {
+      "bazaar_product_id":"CATALYST",
+      "bazaar_product_name":"Catalyst"
+   },
+   {
+      "bazaar_product_id":"GREEN_CANDY",
+      "bazaar_product_name":"Green Candy"
+   },
+   {
+      "bazaar_product_id":"PURPLE_CANDY",
+      "bazaar_product_name":"Purple Candy"
+   },
+   {
+      "bazaar_product_id":"WHITE_GIFT",
+      "bazaar_product_name":"White Gift"
+   },
+   {
+      "bazaar_product_id":"GREEN_GIFT",
+      "bazaar_product_name":"Green Gift"
+   },
+   {
+      "bazaar_product_id":"RED_GIFT",
+      "bazaar_product_name":"Red Gift"
+   },
+   {
+      "bazaar_product_id":"STOCK_OF_STONKS",
+      "bazaar_product_name":"Stock of Stonks"
+   },
+   {
+      "bazaar_product_id":"BLESSED_BAIT",
+      "bazaar_product_name":"Blessed Bait"
+   },
+   {
+      "bazaar_product_name":"Carrot Bait",
+      "bazaar_product_id":"CARROT_BAIT"
+   },
+   {
+      "bazaar_product_id":"DARK_BAIT",
+      "bazaar_product_name":"Dark Bait"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_CARROT_STICK",
+      "bazaar_product_name":"Enchanted Carrot on a Stick"
+   },
+   {
+      "bazaar_product_id":"FISH_BAIT",
+      "bazaar_product_name":"Fish Bait"
+   },
+   {
+      "bazaar_product_id":"ICE_BAIT",
+      "bazaar_product_name":"Ice Bait"
+   },
+   {
+      "bazaar_product_id":"LIGHT_BAIT",
+      "bazaar_product_name":"Light Bait"
+   },
+   {
+      "bazaar_product_id":"MINNOW_BAIT",
+      "bazaar_product_name":"Minnow Bait"
+   },
+   {
+      "bazaar_product_id":"SPIKED_BAIT",
+      "bazaar_product_name":"Spiked Bait"
+   },
+   {
+      "bazaar_product_id":"SPOOKY_BAIT",
+      "bazaar_product_name":"Spooky Bait"
+   },
+   {
+      "bazaar_product_id":"WHALE_BAIT",
+      "bazaar_product_name":"Whale Bait"
+   },
+   {
+      "bazaar_product_id":"ENCHANTED_CARROT_ON_A_STICK",
+      "bazaar_product_name":"Enchanted Carrot on a Stick"
+   }
+]
