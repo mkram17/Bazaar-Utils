@@ -36,7 +36,7 @@ public class APIUtils {
                 return;
             }
 
-            System.out.println(result);
+//            System.out.println(result);
 
             System.exit(0);
         };

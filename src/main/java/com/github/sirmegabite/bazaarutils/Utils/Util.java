@@ -37,7 +37,7 @@ public class Util {
 
     public static void addWatchedItem(String itemName, Double price, boolean isSellOrder, int volume){
         itemName = itemName.toLowerCase();
-        if(BazaarData.getProductIdFromName(itemName) != null) {
+        if(BazaarData.findProductId(itemName) != null) {
             if(isSellOrder)
                 watchedItems.add(new ItemData(itemName, price, "buyPrice", volume));
             else
@@ -63,7 +63,7 @@ public class Util {
 
     }
     public static void copyItem(String itemName, String priceType){
-        String productID = BazaarData.getProductIdFromName(itemName);
+        String productID = BazaarData.findProductId(itemName);
         double price = BazaarData.findItemPrice(productID, priceType);
             try {
                 if(priceType.equals("buyPrice")){
@@ -152,6 +152,9 @@ public class Util {
         }
 
         return input.substring(0, index);
+    }
+    public static double removeTrailingZeroes(double value) {
+        return Double.parseDouble(String.valueOf(value).replaceFirst("\\.?0*$", ""));
     }
 
     @FunctionalInterface

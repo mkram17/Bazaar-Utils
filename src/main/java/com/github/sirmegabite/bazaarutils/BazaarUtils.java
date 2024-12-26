@@ -16,7 +16,8 @@ import java.util.List;
 @Mod(modid = BazaarUtils.MODID, version = BazaarUtils.VERSION)
 public class BazaarUtils {
     //product id is what its called in json file, product name is the natural language version of it
-    public static final String MODID = "AutoBazaar";
+    public static final String MODID = "bazaarutils";
+    public static final String NAME = "Bazaar Utils";
     public static final String VERSION = "0.0.1";
     public static boolean modEnabled = true;
     public static List<ItemData> watchedItems = new ArrayList<>();
@@ -29,8 +30,7 @@ public class BazaarUtils {
         MinecraftForge.EVENT_BUS.register(new EventHandlers());
         MinecraftForge.EVENT_BUS.register(this);
         ClientCommandHandler.instance.registerCommand(new StarterCommands());
-        BazaarData data = new BazaarData();
-        data.scheduleBazaar();
+        BazaarData.scheduleBazaar();
 
     }
     public void preinit(FMLInitializationEvent event) {

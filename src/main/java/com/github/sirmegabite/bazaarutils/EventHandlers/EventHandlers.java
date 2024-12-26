@@ -121,8 +121,6 @@ public class EventHandlers {
 
         //update the global container variable
 
-        //only runs once when the gui is opened
-//        if(AutoBazaar.container == null || containerName.contains("Bazaar") && !containerName.equals(AutoBazaar.container.getLowerChestInventory().getDisplayName().getFormattedText())) {
         //nea89o
 
         for (ItemStack item : bazaarStack) {
@@ -178,7 +176,7 @@ public class EventHandlers {
     }
 
     @SubscribeEvent
-    public void guiOpenedEvent(GuiOpenEvent e) {
+    public void guiChestOpenedEvent(GuiOpenEvent e) {
         canPaste = true;
         if (!(e.gui instanceof GuiChest))
             return;

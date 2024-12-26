@@ -5,9 +5,6 @@ import com.google.gson.*;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -18,9 +15,8 @@ public class BazaarData {
 
     private static String jsonString;
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private static final String bazaarDataFile = "C:\\mc modding\\AutoBazaar\\src\\main\\resources\\Bazaar Data";
-    private static final String productNameFile = "C:\\mc modding\\Bazaar-Utils\\src\\main\\resources\\Bazaar product names.json";
-    ScheduledExecutorService bzExecutor = Executors.newScheduledThreadPool(5);
+    private static final String productNameFile = "C:\\mc modding\\Bazaar-Utils\\src\\main\\resources\\Bazaar Resources.json";
+    static ScheduledExecutorService bzExecutor = Executors.newScheduledThreadPool(5);
 
     public static<T> String getAsPrettyJsonObject(T object){
         return gson.toJson(object);
@@ -30,18 +26,17 @@ public class BazaarData {
     }
 
     //called in init
-    public void scheduleBazaar(){
+    public static void scheduleBazaar(){
         bzExecutor.scheduleAtFixedRate(() -> {
             if(BazaarUtils.modEnabled) {
                 APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
                     if (throwable != null) {
-                        Util.notifyAll("Exception thrown trying to get bazaar data" , this.getClass());
+                        Util.notifyAll("Exception thrown trying to get bazaar data" , BazaarData.class);
                         throwable.printStackTrace();
                     } else {
                         jsonString = getAsPrettyJsonObject(reply);
 //                    Util.sendFirst(jsonString, 100, "Bazaar future returned: ");
 //                        FMLLog.info("Bazaar future returned without thrown exception");
-                        writeFile();
                         if (!watchedItems.isEmpty()) {
                             ItemData.update();
                         } else {
@@ -94,42 +89,25 @@ public class BazaarData {
     }
 
     //returns null if it cant find anything, gets product id from natural name
-    public static String getProductIdFromName(String name){
-        String productId = null;
-        JsonArray bazaarNames;
+    public static String findProductId(String name){
+        JsonObject resources;
+        JsonObject bazaarConversions;
 
         try (FileReader reader = new FileReader(productNameFile)){
-            bazaarNames = gson.fromJson(reader, JsonArray.class);
+            resources = gson.fromJson(reader, JsonObject.class);
+            bazaarConversions = resources.getAsJsonObject("bazaarConversions");
 
-            for (int i = 0; i < bazaarNames.size(); i++) {
-                JsonObject obj = bazaarNames.get(i).getAsJsonObject();
-
-                if (obj.get("bazaar_product_name").getAsString().equalsIgnoreCase(name)) {
-                    productId = obj.get("bazaar_product_id").getAsString();
-                    System.out.println("Bazaar product found: " + productId + " from: " + name);
-                    break;
+            for (String key : bazaarConversions.keySet()) {
+                if (bazaarConversions.get(key).getAsString().equalsIgnoreCase(name)) {
+                    return key;
                 }
             }
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return productId;
+        return null;
     }
 
-    //writes json file of bazaar data
-
-    private static void writeFile() {
-        //assumes that jsonString is already set with getBazaarJson future
-//        System.out.println("Writing data to file...");
-        try{
-            Files.write(Paths.get(bazaarDataFile), jsonString.getBytes());
-//            Util.notifyConsole("Data written to file successfully.", BazaarData.class);
-//            Util.sendFirst(jsonString, 500, "Written to file: ");
-        }catch (Exception e){
-            System.out.println("Failed to write data to file");
-            e.printStackTrace();
-        }
-    }
 
 }

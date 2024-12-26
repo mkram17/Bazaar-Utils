@@ -15,3 +15,8 @@ Util.notifyAll produced null pointer exceptions when in tickEvent
 
 Bugs:
 finding item from price and volume does not work if two items have the same volume
+
+
+Thanks:
+To nea89o for his amazing modding guides
+To meyi from Bazaar Notifier for the resource conversion json

@@ -6,6 +6,7 @@ plugins {
     id("gg.essential.loom") version "0.10.0.+"
     id("dev.architectury.architectury-pack200") version "0.1.3"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+
 }
 
 //Constants:
@@ -29,7 +30,8 @@ loom {
         "client" {
             // If you don't want mixins, remove these lines
             property("mixin.debug", "true")
-            arg("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
+//            arg("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
+            arg("--tweakClass", "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker")
         }
     }
     runConfigs {
@@ -61,6 +63,9 @@ sourceSets.main {
 }
 
 // Dependencies:
+val shade: Configuration by configurations.creating {
+    configurations.implementation.get().extendsFrom(this)
+}
 
 repositories {
     mavenCentral()
@@ -68,6 +73,7 @@ repositories {
     // If you don't want to log in with your real minecraft account, remove this line
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://repo.hypixel.net/repository/Hypixel/")
+    maven("https://repo.polyfrost.cc/releases")
 }
 
 val shadowImpl: Configuration by configurations.creating {
@@ -82,6 +88,11 @@ dependencies {
     implementation ("net.hypixel:hypixel-api-transport-reactor:4.4")
     implementation ("net.hypixel:hypixel-api-transport-apache:4.4")
 
+    // Basic OneConfig dependencies for legacy versions. See OneConfig example mod for more info
+    compileOnly("cc.polyfrost:oneconfig-1.8.9-forge:0.2.2-alpha+") // Should not be included in jar
+    // include should be replaced with a configuration that includes this in the jar
+//    include("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+") // Should be included in jar
+    shade("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta17")
     // If you don't want mixins, remove these lines
     shadowImpl("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
         isTransitive = false
@@ -136,6 +147,12 @@ val remapJar by tasks.named<net.fabricmc.loom.task.RemapJarTask>("remapJar") {
 tasks.jar {
     archiveClassifier.set("without-deps")
     destinationDirectory.set(layout.buildDirectory.dir("intermediates"))
+    manifest.attributes += mapOf(
+        "ModSide" to "CLIENT",
+        "TweakOrder" to 0,
+        "ForceLoadAsMod" to true,
+        "TweakClass" to "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker"
+    )
 }
 
 tasks.shadowJar {

@@ -79,14 +79,14 @@ public class ItemData {
         this.name = name;
         this.priceType = priceType;
         this.price = price;
-        this.productId = BazaarData.getProductIdFromName(name);
+        this.productId = BazaarData.findProductId(name);
         this.status = "set";
     }
     public ItemData(String name, Double price, String priceType, int volume) {
         this.name = name;
         this.priceType = priceType;
         this.price = price;
-        this.productId = BazaarData.getProductIdFromName(name);
+        this.productId = BazaarData.findProductId(name);
         this.volume = volume;
         this.fullPrice = price*volume;
         this.status = "set";
@@ -164,6 +164,12 @@ public class ItemData {
         }
         this.isCopied = true;
     }
+
+    public void unsetCopied(){
+        this.isCopied = false;
+    }
+
+
 
     public static void setItemFilled(String name, int volume){
         ArrayList<String> itemNames = getNames();
