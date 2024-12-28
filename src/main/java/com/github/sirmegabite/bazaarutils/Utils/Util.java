@@ -117,11 +117,16 @@ public class Util {
 
     public static void pasteIntoSign(){
         String str = getClipboardContents();
+        addToSign(str);
+    }
+
+    public static void addToSign(String info){
         GuiScreen thisGui = Minecraft.getMinecraft().currentScreen;
         if(!(thisGui instanceof AccessorGuiEditSign)) return;
+
         IChatComponent[] lines = ((AccessorGuiEditSign) thisGui).getTileSign().signText;
         int index = ((AccessorGuiEditSign) thisGui).getEditLine();
-        String text = lines[index].getUnformattedText() + str;
+        String text = lines[index].getUnformattedText() + info;
         lines[index] = new ChatComponentText(capAtMinecraftLength(text,91));
     }
 

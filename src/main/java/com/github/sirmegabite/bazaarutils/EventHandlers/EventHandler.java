@@ -4,6 +4,7 @@ import com.github.sirmegabite.bazaarutils.BazaarUtils;
 import com.github.sirmegabite.bazaarutils.Utils.ItemData;
 import com.github.sirmegabite.bazaarutils.Utils.Util;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -23,22 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventHandler {
-    List<ItemStack> bazaarStack = new ArrayList<>();
-
-    public static String getContainerName() {
-        return containerName;
-    }
-
-    private static String containerName = null;
-
-    public static String getItemLookingAt() {
-        return itemLookingAt;
-    }
-
-    private static String itemLookingAt = null;
+    public static List<ItemStack> bazaarStack = new ArrayList<>();
+    public static String containerName = null;
+    public static String itemLookingAt = null;
     //to run code once when gui opened
-    private static boolean justOpened = false;
-    private static boolean canPaste = true;
+    public static boolean justOpened = false;
 
     @SubscribeEvent
     public void onBazaarChat(ClientChatReceivedEvent e) {
@@ -78,22 +68,18 @@ public class EventHandler {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent e) {
         GuiScreen gui = Minecraft.getMinecraft().currentScreen;
-        try {
-            BUConfig.ctrlDown = Util.isKeyHeld(Keyboard.KEY_LCONTROL);
-            BUConfig.vDown = Util.isKeyHeld(Keyboard.KEY_V);
-        } catch (Exception ex) {
-//            Util.notifyAll("Error due to pressed keys", this.getClass());
-            ex.printStackTrace();
+        if(gui instanceof  AccessorGuiEditSign){
+
         }
 
-        if(BUConfig.ctrlDown && BUConfig.vDown){
-            //paste the clipboard
-            if(canPaste && gui instanceof AccessorGuiEditSign){
-                Util.notifyAll("Attempting to paste into sign");
-                Util.pasteIntoSign();
-                canPaste = false;
-            }
-        }
+//        if(BUConfig.pasting.isActive()){
+//            //paste the clipboard
+//            if(canPaste && gui instanceof AccessorGuiEditSign){
+//                Util.notifyAll("Attempting to paste into sign");
+//                Util.pasteIntoSign();
+//                canPaste = false;
+//            }
+//        }
 
     }
 
@@ -120,65 +106,18 @@ public class EventHandler {
 
         //update the global container variable
 
-        //nea89o
+        if(BUConfig.autoFlip)
+            AutoFlipper.autoAddToSign();
 
-        for (ItemStack item : bazaarStack) {
-            byte STRING_NBT_TAG = new NBTTagString().getId();
-            NBTTagCompound tagCompound = item.getTagCompound();
-
-            if (tagCompound == null) continue;
-
-            String displayName = Util.removeFormatting(tagCompound.getCompoundTag("display").getString("Name"));
-            NBTTagList loreList = tagCompound.getCompoundTag("display").getTagList("Lore", STRING_NBT_TAG);
-
-            //if in flip screen and it has been loaded in
-            if (containerName.contains("Order options") && displayName.contains("Flip Order")) {
-                double orderPrice = -1;
-                int orderVolume = -1;
-
-                //get order volume and price of item that is being flipped
-                try {
-                    String orderPriceNBT = Util.removeFormatting(loreList.getStringTagAt(3));
-                    orderPrice = Double.parseDouble(orderPriceNBT.substring(orderPriceNBT.indexOf(":") + 2, orderPriceNBT.indexOf("coins") - 1));
-                    String orderVolumeNBT = Util.removeFormatting(loreList.getStringTagAt(1));
-                    orderVolume = Integer.parseInt(orderVolumeNBT.substring(0, orderVolumeNBT.indexOf("x")));
-
-                } catch (Exception ex) {
-                    Util.notifyAll("Error while trying to find order price or volume ");
-                    ex.printStackTrace();
-                }
-                //tries to match order volume and price of item being flipped to the item in watchedItems
-                if (displayName.equalsIgnoreCase("Flip Order")) {
-                    //if they both return a match and find the same match
-                    if (ItemData.findIndex(orderPrice, orderVolume) != -1) {
-                        int itemIndex = ItemData.findIndex(orderPrice, orderVolume);
-                        String itemName = BUConfig.watchedItems.get(itemIndex).getName();
-                        String priceType = BUConfig.watchedItems.get(itemIndex).getPriceType();
-                        if (BUConfig.watchedItems.get(itemIndex).getStatus().equalsIgnoreCase("filled")) {
-                            if (!justOpened) {
-                                Util.notifyAll("Found a match: " + itemName);
-                                justOpened = true;
-                                //finds the price of opposite of order type, since it is being flipped
-                                if (priceType.equalsIgnoreCase("sellPrice"))
-                                    Util.copyItem(itemName, "buyPrice");
-                                else
-                                    Util.copyItem(itemName, "sellPrice");
-                            }
-
-                        }
-                    }
-                }
-            }
-
-        }
         BazaarUtils.container = guiContainer;
     }
 
     @SubscribeEvent
     public void guiChestOpenedEvent(GuiOpenEvent e) {
-        canPaste = true;
+
         if (!(e.gui instanceof GuiChest))
             return;
+        AutoFlipper.allowPaste();
         justOpened = false;
         GuiChest chestScreen = (GuiChest) e.gui;
         ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
