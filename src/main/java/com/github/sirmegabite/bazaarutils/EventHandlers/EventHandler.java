@@ -3,6 +3,7 @@ package com.github.sirmegabite.bazaarutils.EventHandlers;
 import com.github.sirmegabite.bazaarutils.BazaarUtils;
 import com.github.sirmegabite.bazaarutils.Utils.ItemData;
 import com.github.sirmegabite.bazaarutils.Utils.Util;
+import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -21,10 +22,7 @@ import org.lwjgl.input.Keyboard;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.sirmegabite.bazaarutils.BazaarUtils.*;
-
-public class EventHandlers {
-    private static int tickCount = 0;
+public class EventHandler {
     List<ItemStack> bazaarStack = new ArrayList<>();
 
     public static String getContainerName() {
@@ -37,7 +35,7 @@ public class EventHandlers {
         return itemLookingAt;
     }
 
-    public static String itemLookingAt = null;
+    private static String itemLookingAt = null;
     //to run code once when gui opened
     private static boolean justOpened = false;
     private static boolean canPaste = true;
@@ -59,38 +57,39 @@ public class EventHandlers {
             volume = Integer.parseInt(orderText.substring(orderText.indexOf("!") + 2, orderText.indexOf("x")).replace(",", ""));
             price = Double.parseDouble(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("coins") - 1).replace(",", "")) / volume;
             Util.addWatchedItem(item, price, !orderText.contains("Buy"), volume);
-            Util.notifyAll(item + " was added with a price of " + price, this.getClass());
+            Util.notifyAll(item + " was added with a price of " + price);
         }
         if (orderText.contains("was filled!")) {
             volume = Integer.parseInt(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("x")).replace(",", ""));
             item = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("was") - 1);
             ItemData.setItemFilled(item, volume);
-            Util.notifyAll(item + " was filled", this.getClass());
+            Util.notifyAll(item + " was filled");
         }
         if (orderText.contains("Claimed")){
             volume = Integer.parseInt(orderText.substring(orderText.indexOf("Claimed") + 8, orderText.indexOf("x")).replace(",", ""));
             item = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("worth") - 1);
             price = Double.parseDouble(orderText.substring(orderText.indexOf("worth") + 6, orderText.indexOf("coins") - 1).replace(",", ""))/volume;
             ItemData.removeItem(item, volume, price);
-            Util.notifyAll(item + " was removed", this.getClass());
+            Util.notifyAll(item + " was removed");
         }
 
     }
+
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent e) {
         GuiScreen gui = Minecraft.getMinecraft().currentScreen;
         try {
-            ctrlDown = Util.isKeyHeld(Keyboard.KEY_LCONTROL);
-            vDown = Util.isKeyHeld(Keyboard.KEY_V);
+            BUConfig.ctrlDown = Util.isKeyHeld(Keyboard.KEY_LCONTROL);
+            BUConfig.vDown = Util.isKeyHeld(Keyboard.KEY_V);
         } catch (Exception ex) {
 //            Util.notifyAll("Error due to pressed keys", this.getClass());
             ex.printStackTrace();
         }
 
-        if(ctrlDown && vDown){
+        if(BUConfig.ctrlDown && BUConfig.vDown){
             //paste the clipboard
             if(canPaste && gui instanceof AccessorGuiEditSign){
-                Util.notifyAll("Attempting to paste into sign", this.getClass());
+                Util.notifyAll("Attempting to paste into sign");
                 Util.pasteIntoSign();
                 canPaste = false;
             }
@@ -101,9 +100,9 @@ public class EventHandlers {
     @SubscribeEvent
     public void onBazaarTick(TickEvent.ClientTickEvent e) {
         //if it isnt end phase, return
-        if (e.phase == TickEvent.Phase.END) {
-            tickCount++;
-        } else return;
+        if (e.phase != TickEvent.Phase.END) {
+            return;
+        }
 
         //if we arent a gui, return
         GuiScreen currentScreen = Minecraft.getMinecraft().currentScreen;
@@ -145,7 +144,7 @@ public class EventHandlers {
                     orderVolume = Integer.parseInt(orderVolumeNBT.substring(0, orderVolumeNBT.indexOf("x")));
 
                 } catch (Exception ex) {
-                    Util.notifyAll("Error while trying to find order price or volume ", this.getClass());
+                    Util.notifyAll("Error while trying to find order price or volume ");
                     ex.printStackTrace();
                 }
                 //tries to match order volume and price of item being flipped to the item in watchedItems
@@ -153,11 +152,11 @@ public class EventHandlers {
                     //if they both return a match and find the same match
                     if (ItemData.findIndex(orderPrice, orderVolume) != -1) {
                         int itemIndex = ItemData.findIndex(orderPrice, orderVolume);
-                        String itemName = watchedItems.get(itemIndex).getName();
-                        String priceType = watchedItems.get(itemIndex).getPriceType();
-                        if (watchedItems.get(itemIndex).getStatus().equalsIgnoreCase("filled")) {
+                        String itemName = BUConfig.watchedItems.get(itemIndex).getName();
+                        String priceType = BUConfig.watchedItems.get(itemIndex).getPriceType();
+                        if (BUConfig.watchedItems.get(itemIndex).getStatus().equalsIgnoreCase("filled")) {
                             if (!justOpened) {
-                                Util.notifyAll("Found a match: " + itemName, this.getClass());
+                                Util.notifyAll("Found a match: " + itemName);
                                 justOpened = true;
                                 //finds the price of opposite of order type, since it is being flipped
                                 if (priceType.equalsIgnoreCase("sellPrice"))
@@ -184,7 +183,7 @@ public class EventHandlers {
         GuiChest chestScreen = (GuiChest) e.gui;
         ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
         containerName = guiContainer.getLowerChestInventory().getDisplayName().getFormattedText();
-        Util.notifyAll("Container Name: " + containerName, this.getClass());
+        Util.notifyAll("Container Name: " + containerName);
 
     }
 

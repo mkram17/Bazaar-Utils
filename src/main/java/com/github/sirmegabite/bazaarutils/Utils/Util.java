@@ -16,10 +16,10 @@ import java.awt.datatransfer.StringSelection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static com.github.sirmegabite.bazaarutils.BazaarUtils.watchedItems;
+import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class Util {
-    public static<T> void notifyAll(T message, Class<?> className) {
+    public static<T> void notifyAll(T message) {
         String messageStr = message.toString();
         if(messageStr.toLowerCase().contains("exception"))
             messageStr = "§c" + messageStr;
@@ -27,12 +27,10 @@ public class Util {
             messageStr = "§a" + messageStr;
 
         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(messageStr));
-        LogManager.getLogger(className.getName()).info("[AutoBz] Message[" + message + "]");
-//        FMLLog.info("[AutoBz] Message (FMLLog)[" + message + "]");
+        LogManager.getLogger(getCallingClassName()).info("[AutoBz] Message [" + message + "]");
     }
-    public static<T> void notifyConsole(T message, Class<?> className) {
-        LogManager.getLogger(className.getName()).info("[AutoBz] Message[" + message + "]");
-//        FMLLog.info("[AutoBz] Message (FMLLog)[" + message + "]");
+    public static<T> void notifyConsole(T message) {
+        LogManager.getLogger(getCallingClassName()).info("[AutoBz] Message [" + message + "]");
     }
 
     public static void addWatchedItem(String itemName, Double price, boolean isSellOrder, int volume){
@@ -42,13 +40,17 @@ public class Util {
                 watchedItems.add(new ItemData(itemName, price, "buyPrice", volume));
             else
                 watchedItems.add(new ItemData(itemName, price, "sellPrice", volume));
-            notifyAll("Added item: § " + itemName, StarterCommands.class);
+            notifyAll("Added item: § " + itemName);
         } else {
-            notifyAll("Could not add item: § " + itemName + " §a (is it spelled correctly?)", StarterCommands.class);
+            notifyAll("Could not add item: § " + itemName + " §a (is it spelled correctly?)");
         }
     }
+    public static String getCallingClassName() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        return stackTrace[3].getClassName();
+    }
 
-    public static void copyToClipboard(String clip, int watchedNum){
+    public static void copyToClipboard(String clip){
         StringSelection selection = new StringSelection(clip);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(selection, null);
@@ -67,14 +69,12 @@ public class Util {
         double price = BazaarData.findItemPrice(productID, priceType);
             try {
                 if(priceType.equals("buyPrice")){
-                    StringSelection stringSelection = new StringSelection(Double.toString(price-.1));
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
+                    copyToClipboard(Double.toString(price-.1));
                 }else{
-                    StringSelection stringSelection = new StringSelection(Double.toString(price+.1));
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
+                    copyToClipboard(Double.toString(price+.1));
                 }
             } catch (Exception e){
-                Util.notifyAll("Failed to copy updated buy price to clipboard", ItemData.class);
+                Util.notifyAll("Failed to copy updated buy price to clipboard");
             }
         }
 
@@ -106,8 +106,8 @@ public class Util {
         //assumes that jsonString is already set with getBazaarJson future
 //        System.out.println("Writing data to file...");
         try{
-            Files.write(Paths.get("C:\\mc modding\\AutoBazaar\\src\\main\\resources\\Gui Data"), print.toString().getBytes());
-            Util.notifyConsole("Data written to file successfully.", this.getClass());
+            Files.write(Paths.get(""), print.toString().getBytes());
+            Util.notifyConsole("Data written to file successfully.");
 //            Util.sendFirst(jsonString, 500, "Written to file: ");
         }catch (Exception e){
             System.out.println("Failed to write data to file");
@@ -133,7 +133,11 @@ public class Util {
             return null;
         }
     }
+    public static boolean isSimilar(double d1, double d2){
+        double factor = Math.pow(10, 2);
+        return Math.round(d1 * factor) == Math.round(d1 * factor);
 
+    }
     public static String capAtMinecraftLength(String input, int limit) {
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
         return capAtLength(input, limit, fontRenderer::getCharWidth);
@@ -156,6 +160,7 @@ public class Util {
     public static double removeTrailingZeroes(double value) {
         return Double.parseDouble(String.valueOf(value).replaceFirst("\\.?0*$", ""));
     }
+
 
     @FunctionalInterface
     public interface LengthJudger {

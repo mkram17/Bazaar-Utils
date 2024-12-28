@@ -2,7 +2,7 @@ package com.github.sirmegabite.bazaarutils.Utils;
 
 import java.util.ArrayList;
 
-import static com.github.sirmegabite.bazaarutils.BazaarUtils.watchedItems;
+import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class ItemData {
     public String getName() {
@@ -74,6 +74,7 @@ public class ItemData {
     //can be "set" or "filled"
     private String status;
     private int volume;
+    private int amountFilled;
 
     public ItemData(String name, Double price, String priceType) {
         this.name = name;
@@ -146,8 +147,9 @@ public class ItemData {
 
     public static int findIndex(double price, int volume){
         int index = -1;
+        //if any watchedItems have the same price and volume to what is being searched for
         for (int i = 0; i < getPrices().size(); i++) {
-            if (getPrices().get(i) == price && getVolumes().get(i) == volume) {
+            if (Util.isSimilar(getPrices().get(i),price) && getVolumes().get(i)==volume) {
                 index = i;
                 break;
             }
@@ -158,7 +160,7 @@ public class ItemData {
     public void setCopied(){
         for(ItemData item : watchedItems){
             if(item.isCopied) {
-                Util.notifyConsole("Another item is already copied. Uncopying that one.", ItemData.class);
+                Util.notifyConsole("Another item is already copied. Uncopying that one.");
                 item.isCopied = false;
             }
         }

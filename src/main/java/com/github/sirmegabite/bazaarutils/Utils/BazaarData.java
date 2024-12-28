@@ -1,6 +1,6 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
-import com.github.sirmegabite.bazaarutils.BazaarUtils;
+import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.google.gson.*;
 
 import java.io.FileReader;
@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.sirmegabite.bazaarutils.BazaarUtils.watchedItems;
+import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class BazaarData {
 
@@ -28,10 +28,10 @@ public class BazaarData {
     //called in init
     public static void scheduleBazaar(){
         bzExecutor.scheduleAtFixedRate(() -> {
-            if(BazaarUtils.modEnabled) {
+            if(BUConfig.modEnabled) {
                 APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
                     if (throwable != null) {
-                        Util.notifyAll("Exception thrown trying to get bazaar data" , BazaarData.class);
+                        Util.notifyAll("Exception thrown trying to get bazaar data");
                         throwable.printStackTrace();
                     } else {
                         jsonString = getAsPrettyJsonObject(reply);
@@ -40,7 +40,7 @@ public class BazaarData {
                         if (!watchedItems.isEmpty()) {
                             ItemData.update();
                         } else {
-                            Util.notifyConsole("no items in watchedItems", BazaarData.class);
+                            Util.notifyConsole("no items in watchedItems");
                         }
                     }
                 });
@@ -77,7 +77,7 @@ public class BazaarData {
             return buyPrice.getAsDouble();
         }
         //code executed after this point will only run if cant find lookingFor
-        Util.notifyAll("Could not find lookingFor: " + lookingFor, BazaarData.class);
+        Util.notifyAll("Could not find lookingFor: " + lookingFor);
         //could not find what lookingFor is, so return null
         return null;
     }

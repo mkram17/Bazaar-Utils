@@ -1,6 +1,7 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
 import com.github.sirmegabite.bazaarutils.BazaarUtils;
+import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
@@ -10,7 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.github.sirmegabite.bazaarutils.BazaarUtils.watchedItems;
+import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class StarterCommands extends CommandBase {
     @Override
@@ -25,25 +26,25 @@ public class StarterCommands extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args){
-        Util.notifyConsole("Command: autobz" + "Command received: " + Arrays.toString(args) + " args length: " + args.length, this.getClass());
+        Util.notifyConsole("Command: autobz" + "Command received: " + Arrays.toString(args) + " args length: " + args.length);
         if (args.length > 0) {
             //to start the mod
 
             if (args[0].equals("start")) {
-                if (!BazaarUtils.modEnabled) {
-                    BazaarUtils.modEnabled = true;
-                    Util.notifyAll("§aMod enabled", this.getClass());
+                if (!BUConfig.modEnabled) {
+                    BUConfig.modEnabled = true;
+                    Util.notifyAll("§aMod enabled");
                 } else {
-                    Util.notifyAll("§aMod already enabled!", this.getClass());
+                    Util.notifyAll("§aMod already enabled!");
                 }
             }
             //to stop the mod
             if (args[0].equals("stop")) {
-                if (BazaarUtils.modEnabled) {
-                    BazaarUtils.modEnabled = false;
-                    Util.notifyAll("§aMod disabled", this.getClass());
+                if (BUConfig.modEnabled) {
+                    BUConfig.modEnabled = false;
+                    Util.notifyAll("§aMod disabled");
                 } else {
-                    Util.notifyAll("§aMod already disabled!", this.getClass());
+                    Util.notifyAll("§aMod already disabled!");
                 }
             }
 
@@ -58,14 +59,14 @@ public class StarterCommands extends CommandBase {
                 }
                 //uses reflection to get variable values while playing minecraft (must remove in build)
                 if (args[0].equals("dev")) {
-                    Util.notifyConsole("Tried to do dev stuff " + "(" + args[1] + ")", this.getClass());
+                    Util.notifyConsole("Tried to do dev stuff " + "(" + args[1] + ")");
                     try {
                         Field field = BazaarUtils.class.getDeclaredField(args[1]);
                         field.setAccessible(true);
                         Object value = field.get(null);  // Assuming the field is static
-                        Util.notifyAll(args[1] + ": " + value, this.getClass());
+                        Util.notifyAll(args[1] + ": " + value);
                     } catch (NoSuchFieldException | IllegalAccessException e) {
-                        Util.notifyAll("Error: Could not access " + args[1], this.getClass());
+                        Util.notifyAll("Error: Could not access " + args[1]);
                     }
                 }
             }
