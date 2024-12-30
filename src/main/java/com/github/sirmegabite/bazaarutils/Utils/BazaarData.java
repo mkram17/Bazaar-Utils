@@ -18,6 +18,7 @@ public class BazaarData {
     private static final String productNameFile = "C:\\mc modding\\Bazaar-Utils\\src\\main\\resources\\Bazaar Resources.json";
     static ScheduledExecutorService bzExecutor = Executors.newScheduledThreadPool(5);
 
+
     public static<T> String getAsPrettyJsonObject(T object){
         return gson.toJson(object);
     }
@@ -49,36 +50,30 @@ public class BazaarData {
     }
 
     //(product id, what you are looking for in quick status-- either buyPrice or sellPrice)
-    public static Double findItemPrice(String prod, String lookingFor) {
-
-        JsonElement sellPrice = null;
-        JsonElement buyPrice = null;
-//        System.out.println("finding price of: "+  lookingFor);
+    public static Double findItemPrice(String productId, ItemData.priceTypes priceType) {
+        double sellPrice = -1;
+        double buyPrice = -1;
         try {
             JsonObject products = getAsJsonObjectFromString(jsonString).get("products").getAsJsonObject();
-            JsonObject item = products.get(prod).getAsJsonObject();
+            JsonObject item = products.get(productId).getAsJsonObject();
             JsonArray buy_summary = item.get("buy_summary").getAsJsonArray();
             JsonArray sell_summary = item.get("sell_summary").getAsJsonArray();
             //sell summary is buy orders, and buy summary is sell orders
-            sellPrice =  sell_summary.get(0).getAsJsonObject().get("pricePerUnit");
-            buyPrice = buy_summary.get(0).getAsJsonObject().get("pricePerUnit");
+            sellPrice =  sell_summary.get(0).getAsJsonObject().get("pricePerUnit").getAsDouble();
+            buyPrice = buy_summary.get(0).getAsJsonObject().get("pricePerUnit").getAsDouble();
 //            System.out.println("Buy/sell price of: "+  lookingFor + " " + buyPrice + "/" + sellPrice);
         } catch (Exception e) {
-            System.out.println("There was an error fetching Json objects (probably caused by incorrect item name): ");
+            Util.notifyAll("There was an error fetching Json objects (probably caused by incorrect item name): ");
             e.printStackTrace();
         }
 
-        /* condition ? expressionIfTrue : expressionIfFalse; */
-        if ("sellPrice".equals(lookingFor)) {
-            assert sellPrice != null;
-            return sellPrice.getAsDouble();
-        } else if ("buyPrice".equals(lookingFor)) {
-            assert buyPrice != null;
-            return buyPrice.getAsDouble();
+        if (priceType == ItemData.priceTypes.INSTASELL) {
+//            Util.notifyAll("Price found: " + sellPrice);
+            return sellPrice;
+        } else if (priceType == ItemData.priceTypes.INSTABUY) {
+//            Util.notifyAll("Price found: " +buyPrice);
+            return buyPrice;
         }
-        //code executed after this point will only run if cant find lookingFor
-        Util.notifyAll("Could not find lookingFor: " + lookingFor);
-        //could not find what lookingFor is, so return null
         return null;
     }
 

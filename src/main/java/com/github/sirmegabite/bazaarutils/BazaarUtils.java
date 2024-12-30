@@ -4,6 +4,7 @@ import com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler;
 import com.github.sirmegabite.bazaarutils.Utils.BazaarData;
 import com.github.sirmegabite.bazaarutils.Utils.StarterCommands;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,6 +23,7 @@ public class BazaarUtils {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new EventHandler());
+        MinecraftForge.EVENT_BUS.register(new AutoFlipper());
         MinecraftForge.EVENT_BUS.register(this);
         ClientCommandHandler.instance.registerCommand(new StarterCommands());
         BazaarData.scheduleBazaar();

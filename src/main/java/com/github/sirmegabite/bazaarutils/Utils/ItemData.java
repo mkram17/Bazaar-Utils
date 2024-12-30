@@ -41,6 +41,21 @@ public class ItemData {
     public int getVolume() {
         return volume;
     }
+    public priceTypes getPriceType() {
+        return priceType;
+    }
+
+    public void setPriceType(priceTypes priceType) {
+        this.priceType = priceType;
+    }
+
+    public statuses getStatus() {
+        return status;
+    }
+
+    public void setStatus(statuses status) {
+        this.status = status;
+    }
 
     public void setVolume(int volume) {
         this.volume = volume;
@@ -50,47 +65,38 @@ public class ItemData {
     private double price;
     private boolean isCopied = false;
 
-    public String getPriceType() {
-        return priceType;
+    public enum priceTypes{INSTASELL,INSTABUY;
+        private priceTypes opposite;
+        static {
+            INSTASELL.opposite = INSTABUY;
+            INSTABUY.opposite = INSTASELL;
+        }
+        public priceTypes getOpposite(){
+            return opposite;
+        }
     }
 
-    public void setPriceType(String priceType) {
-        this.priceType = priceType;
-    }
 
-    private String priceType;
+
+    private priceTypes priceType;
     //the sell or buy price of lowest/highest offer
     private double marketPrice;
     //item price * volume
     private double fullPrice;
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-    //can be "set" or "filled"
-    private String status;
+    public enum statuses{SET,FILLED}
+    private statuses status;
     private int volume;
     private int amountFilled;
 
-    public ItemData(String name, Double price, String priceType) {
-        this.name = name;
-        this.priceType = priceType;
-        this.price = price;
-        this.productId = BazaarData.findProductId(name);
-        this.status = "set";
-    }
-    public ItemData(String name, Double price, String priceType, int volume) {
+    public ItemData(String name, Double price, priceTypes priceType, int volume) {
         this.name = name;
         this.priceType = priceType;
         this.price = price;
         this.productId = BazaarData.findProductId(name);
         this.volume = volume;
         this.fullPrice = price*volume;
-        this.status = "set";
+        this.status = statuses.SET;
     }
 
 
@@ -148,7 +154,7 @@ public class ItemData {
     public static int findIndex(double price, int volume){
         int index = -1;
         //if any watchedItems have the same price and volume to what is being searched for
-        for (int i = 0; i < getPrices().size(); i++) {
+        for (int i = 0; i < watchedItems.size(); i++) {
             if (Util.isSimilar(getPrices().get(i),price) && getVolumes().get(i)==volume) {
                 index = i;
                 break;
@@ -156,7 +162,13 @@ public class ItemData {
         }
         return index;
     }
-
+    public double getFlipPrice(){
+        if (priceType == ItemData.priceTypes.INSTABUY) {
+            return (BazaarData.findItemPrice(name, priceTypes.INSTASELL) + .1);
+        } else {
+            return (BazaarData.findItemPrice(productId, priceTypes.INSTABUY) - .1);
+        }
+    }
     public void setCopied(){
         for(ItemData item : watchedItems){
             if(item.isCopied) {
@@ -178,7 +190,7 @@ public class ItemData {
         ArrayList<Integer> itemVolumes = getVolumes();
         for(int i = 0; i < itemNames.size(); i++){
             if(itemNames.get(i).equalsIgnoreCase(name) && itemVolumes.get(i) == volume){
-                watchedItems.get(i).setStatus("filled");
+                watchedItems.get(i).setStatus(statuses.FILLED);
             }
         }
     }

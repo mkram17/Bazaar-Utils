@@ -20,14 +20,16 @@ import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class Util {
     public static<T> void notifyAll(T message) {
+        String callingName = getCallingClassName();
+        String simpleCallingName = callingName.substring(callingName.lastIndexOf(".")+1);
         String messageStr = message.toString();
         if(messageStr.toLowerCase().contains("exception"))
             messageStr = "§c" + messageStr;
         else
             messageStr = "§a" + messageStr;
 
-        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(messageStr));
-        LogManager.getLogger(getCallingClassName()).info("[AutoBz] Message [" + message + "]");
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
+        LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
     }
     public static<T> void notifyConsole(T message) {
         LogManager.getLogger(getCallingClassName()).info("[AutoBz] Message [" + message + "]");
@@ -37,9 +39,9 @@ public class Util {
         itemName = itemName.toLowerCase();
         if(BazaarData.findProductId(itemName) != null) {
             if(isSellOrder)
-                watchedItems.add(new ItemData(itemName, price, "buyPrice", volume));
+                watchedItems.add(new ItemData(itemName, price, ItemData.priceTypes.INSTABUY, volume));
             else
-                watchedItems.add(new ItemData(itemName, price, "sellPrice", volume));
+                watchedItems.add(new ItemData(itemName, price, ItemData.priceTypes.INSTASELL, volume));
             notifyAll("Added item: § " + itemName);
         } else {
             notifyAll("Could not add item: § " + itemName + " §a (is it spelled correctly?)");
@@ -64,11 +66,11 @@ public class Util {
             System.out.println(info + itemToSend.toString().substring(0, howLong));
 
     }
-    public static void copyItem(String itemName, String priceType){
+    public static void copyItem(String itemName, ItemData.priceTypes priceType){
         String productID = BazaarData.findProductId(itemName);
         double price = BazaarData.findItemPrice(productID, priceType);
             try {
-                if(priceType.equals("buyPrice")){
+                if(priceType == ItemData.priceTypes.INSTABUY){
                     copyToClipboard(Double.toString(price-.1));
                 }else{
                     copyToClipboard(Double.toString(price+.1));
@@ -117,13 +119,11 @@ public class Util {
 
     public static void pasteIntoSign(){
         String str = getClipboardContents();
-        addToSign(str);
+//        addToSign(str);
     }
 
-    public static void addToSign(String info){
-        GuiScreen thisGui = Minecraft.getMinecraft().currentScreen;
-        if(!(thisGui instanceof AccessorGuiEditSign)) return;
-
+    //thanks to SkyHanni
+    public static void addToSign(String info, GuiScreen thisGui){
         IChatComponent[] lines = ((AccessorGuiEditSign) thisGui).getTileSign().signText;
         int index = ((AccessorGuiEditSign) thisGui).getEditLine();
         String text = lines[index].getUnformattedText() + info;
@@ -140,7 +140,7 @@ public class Util {
     }
     public static boolean isSimilar(double d1, double d2){
         double factor = Math.pow(10, 2);
-        return Math.round(d1 * factor) == Math.round(d1 * factor);
+        return Math.round(d1 * factor) == Math.round(d2 * factor);
 
     }
     public static String capAtMinecraftLength(String input, int limit) {
@@ -164,6 +164,15 @@ public class Util {
     }
     public static double removeTrailingZeroes(double value) {
         return Double.parseDouble(String.valueOf(value).replaceFirst("\\.?0*$", ""));
+    }
+    public static double truncateNumber(double number) {
+        return Double.parseDouble(String.format("%.2f", number));
+    }
+    public static double getPrettyNumber(double num){
+        double newNum;
+        newNum = removeTrailingZeroes(num);
+        newNum = truncateNumber(newNum);
+        return newNum;
     }
 
 

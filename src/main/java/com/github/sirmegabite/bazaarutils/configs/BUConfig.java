@@ -41,6 +41,7 @@ public class BUConfig extends Config {
     @HUD(name = "Developer",
             category = "Developer"
     )
-    public Developer developer = new Developer("watched items");
+//    public Developer developer = new Developer();
+    public Developer developer = new Developer();
 
 }
