@@ -29,6 +29,11 @@ public class StarterCommands extends CommandBase {
         Util.notifyConsole("Command: autobz" + "Command received: " + Arrays.toString(args) + " args length: " + args.length);
         if (args.length > 0) {
             //to start the mod
+            if(args[0].equalsIgnoreCase("remove")){
+                ItemData.getItem(Integer.parseInt(args[1])).remove();
+
+                Util.notifyAll("Removed " + watchedItems.get(0).getName());
+            }
 
             if (args[0].equals("start")) {
                 if (!BUConfig.modEnabled) {

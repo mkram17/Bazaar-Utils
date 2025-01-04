@@ -10,6 +10,10 @@ import java.util.stream.IntStream;
 import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class ItemData {
+    public static ItemData getItem(int index){
+        return watchedItems.get(index);
+    }
+
     public String getName() {
         return name;
     }
@@ -161,43 +165,15 @@ public class ItemData {
     }
 
     public static int findIndex(String name, Double price, Integer volume) {
-        return IntStream.range(0, watchedItems.size())
+        int index = IntStream.range(0, watchedItems.size())
                 .filter(i -> (price == null || Util.isSimilar(prices.get(i), price)) &&
                         (volume == null || volumes.get(i) == volume + amountClaimeds.get(i)) &&
                         (name == null || name.equalsIgnoreCase(names.get(i))))
                 .findFirst()
                 .orElse(-1);
-    }
-
-//    public static int findIndex(double price, int volume) {
-//        for (int i = 0; i < watchedItems.size(); i++) {
-//            if (Util.isSimilar(prices.get(i), price) && (volumes.get(i) - amountClaimeds.get(i)) == volume) {
-//                return i;
-//            }
-//        }
-//        return -1;
-//    }
-
-//    public static int findIndex(double price, int volume, String name) {
-//        for (int i = 0; i < watchedItems.size(); i++) {
-//            if (Util.isSimilar(prices.get(i), price) && volumes.get(i) == volume && name.equalsIgnoreCase(names.get(i))) {
-//                return i;
-//            }
-//        }
-//        return -1;
-//    }
-//
-//    public static int findIndex(String name, int volume) {
-//        for (int i = 0; i < names.size(); i++) {
-//            if (names.get(i).equalsIgnoreCase(name) && volumes.get(i) == volume) {
-//                return i;
-//            }
-//        }
-//        return -1;
-//    }
-
-    public static ItemData getItem(int index){
-        return watchedItems.get(index);
+        if(index == -1)
+            Util.notifyAll("Could not find item with values: [name: " + name + ", price " + price + ", volume: " + volume + "]");
+        return index;
     }
 
     public double getFlipPrice(){
@@ -228,6 +204,13 @@ public class ItemData {
 
     public static void removeItem(ItemData item){
         watchedItems.remove(item);
+    }
+    public void remove(){
+        watchedItems.remove(this);
+    }
+    public static void clearItems(){
+        for(ItemData item: watchedItems)
+            removeItem(item);
     }
 
 }

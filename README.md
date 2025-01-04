@@ -25,6 +25,7 @@ finding item from price and volume does not work if two items have the same volu
 ~~finditemindex doesnt work right -- just gets item w same volume~~
 Autoflipper adds price to every sign -- very annoying
 Claiming order sometimes has diff messages(?) and removing watchedItem doesnt always work
+Sometimes findItemPrice gives error
 
 Thanks:
 To nea89o for his amazing modding guides

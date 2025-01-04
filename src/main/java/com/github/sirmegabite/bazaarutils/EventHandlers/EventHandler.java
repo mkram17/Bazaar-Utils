@@ -5,17 +5,12 @@ import com.github.sirmegabite.bazaarutils.Utils.ItemData;
 import com.github.sirmegabite.bazaarutils.Utils.Util;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
-import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -28,13 +23,13 @@ import java.util.concurrent.CompletableFuture;
 public class EventHandler {
     public static List<ItemStack> bazaarStack = new ArrayList<>();
     public static String containerName = null;
-    //to run code once when gui opened
 
+    //to run code once when gui opened
     public void onGuiLoaded(){
         CompletableFuture.runAsync(EventHandler::checkIfGuiLoaded).thenRun(() ->{
             bazaarStack = getBazaarStack(BazaarUtils.container);
             if(BUConfig.autoFlip && AutoFlipper.inFlipGui() && (AutoFlipper.guiType == AutoFlipper.guiTypes.CHEST)) {
-                AutoFlipper.flipPrice = AutoFlipper.getPrice();
+                AutoFlipper.flipPrice = AutoFlipper.getFlipItem().getFlipPrice();
             }
         });
     }
@@ -85,7 +80,7 @@ public class EventHandler {
         if(orderText.contains("at")){
             volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("selling") + 8, orderText.indexOf("x")).replace(",", ""));
             itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("at") - 1);
-            price = Double.parseDouble(orderText.substring(orderText.indexOf("Claimed") + 8, orderText.indexOf("coins") - 1).replace(",", ""))/volumeClaimed;
+            price = Double.parseDouble(orderText.substring(orderText.indexOf("at") + 3, orderText.indexOf("each") - 1).replace(",", ""))/volumeClaimed;
         }
 
         //wont work when the amount claimed is equal to the volume of another order

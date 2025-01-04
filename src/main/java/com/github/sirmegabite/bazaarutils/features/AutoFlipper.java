@@ -9,7 +9,6 @@ import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -57,7 +56,7 @@ public class AutoFlipper {
 
     }
 
-    public static double getPrice(){
+    public static ItemData getFlipItem(){
         GuiChest chestScreen = (GuiChest) Minecraft.getMinecraft().currentScreen;
         ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
         bazaarStack = EventHandler.getBazaarStack(guiContainer);
@@ -80,11 +79,11 @@ public class AutoFlipper {
                     int itemIndex = ItemData.findIndex(null, orderPrice, orderVolumeFilled);
                     ItemData flipItem = watchedItems.get(itemIndex);
                     Util.notifyAll("Found a match: " + flipItem.getName());
-                    return flipItem.getFlipPrice();
+                    return flipItem;
                 } else Util.notifyAll("Couldnt find a match");
             }
         }
-        return -1;
+        return null;
     }
 
 
