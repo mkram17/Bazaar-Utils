@@ -2,22 +2,20 @@ package com.github.sirmegabite.bazaarutils.features;
 
 import com.github.sirmegabite.bazaarutils.BazaarUtils;
 import com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler;
-import com.github.sirmegabite.bazaarutils.Utils.BazaarData;
 import com.github.sirmegabite.bazaarutils.Utils.ItemData;
 import com.github.sirmegabite.bazaarutils.Utils.Util;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import static com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler.*;
 import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
@@ -26,7 +24,7 @@ public class AutoFlipper {
     public static boolean canPaste = true;
     public static double flipPrice;
     private static double orderPrice = -1;
-    private static int orderVolume = -1;
+    private static int orderVolumeFilled = -1;
     public enum guiTypes {CHEST, SIGN}
     public static guiTypes guiType;
 
@@ -53,6 +51,7 @@ public class AutoFlipper {
 
 
     public static void autoAddToSign(GuiOpenEvent e) {
+        if(flipPrice != -1)
          Util.addToSign(Double.toString(Util.getPrettyNumber(flipPrice)), e.gui);
 //         Minecraft.getMinecraft().thePlayer.closeScreen();
 
@@ -78,31 +77,16 @@ public class AutoFlipper {
                 //tries to match order volume and price of item being flipped to the item in watchedItems
                 //if they both return a match and find the same match
                 if (matchFound()) {
-                    int itemIndex = ItemData.findIndex(orderPrice, orderVolume);
-                    String itemName = watchedItems.get(itemIndex).getName();
-                    ItemData.priceTypes priceType = watchedItems.get(itemIndex).getPriceType();
-                    Util.notifyAll("Found a match: " + itemName);
-                    return watchedItems.get(itemIndex).getFlipPrice();
-                }
+                    int itemIndex = ItemData.findIndex(null, orderPrice, orderVolumeFilled);
+                    ItemData flipItem = watchedItems.get(itemIndex);
+                    Util.notifyAll("Found a match: " + flipItem.getName());
+                    return flipItem.getFlipPrice();
+                } else Util.notifyAll("Couldnt find a match");
             }
         }
         return -1;
     }
 
-
-
-    public static void waitForLoadingItem(NBTTagCompound tagCompound){
-        String displayName = Util.removeFormatting(tagCompound.getCompoundTag("display").getString("Name"));
-        while (displayName.contains("Loading")){
-            displayName = Util.removeFormatting(tagCompound.getCompoundTag("display").getString("Name"));
-            try {
-                Thread.sleep(30);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        Util.notifyAll("New tag after load " + Util.removeFormatting(tagCompound.getCompoundTag("display").getString("Name")));
-    }
 
     public static boolean inSign(){
         return Minecraft.getMinecraft().currentScreen instanceof AccessorGuiEditSign;
@@ -114,7 +98,7 @@ public class AutoFlipper {
             String orderPriceNBT = Util.removeFormatting(loreList.getStringTagAt(3));
             orderPrice = Double.parseDouble(orderPriceNBT.substring(orderPriceNBT.indexOf(":") + 2, orderPriceNBT.indexOf("coins") - 1));
             String orderVolumeNBT = Util.removeFormatting(loreList.getStringTagAt(1));
-            orderVolume = Integer.parseInt(orderVolumeNBT.substring(0, orderVolumeNBT.indexOf("x")));
+            orderVolumeFilled = Integer.parseInt(orderVolumeNBT.substring(0, orderVolumeNBT.indexOf("x")));
 
         } catch (Exception ex) {
             Util.notifyAll("Error while trying to find order price or volume ");
@@ -128,23 +112,22 @@ public class AutoFlipper {
     }
 
     public static boolean matchFound() {
-        if (ItemData.findIndex(orderPrice, orderVolume) != -1) {
-            int itemIndex = ItemData.findIndex(orderPrice, orderVolume);
+        int itemIndex = ItemData.findIndex(null, orderPrice, orderVolumeFilled);
+        if (itemIndex != -1)
             return watchedItems.get(itemIndex).getStatus() == ItemData.statuses.FILLED;
-        }
         return false;
     }
-
-    public static void copyPriceToClipboard(String itemName, String priceType) {
-        //finds the price of opposite of order type, since it is being flipped
-        if (canPaste) {
-            if (priceType.equalsIgnoreCase("sellPrice"))
-                Util.copyItem(itemName, ItemData.priceTypes.INSTABUY);
-            else
-                Util.copyItem(itemName, ItemData.priceTypes.INSTASELL);
-            disablePaste();
-        }
-    }
+//
+//    public static void copyPriceToClipboard(String itemName, String priceType) {
+//        //finds the price of opposite of order type, since it is being flipped
+//        if (canPaste) {
+//            if (priceType.equalsIgnoreCase("sellPrice"))
+//                Util.copyItem(itemName, ItemData.priceTypes.INSTABUY);
+//            else
+//                Util.copyItem(itemName, ItemData.priceTypes.INSTASELL);
+//            disablePaste();
+//        }
+//    }
 
     public static void allowPaste() {
         canPaste = true;

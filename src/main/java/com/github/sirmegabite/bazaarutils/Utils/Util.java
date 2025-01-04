@@ -1,5 +1,6 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
+import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -27,7 +28,6 @@ public class Util {
             messageStr = "§c" + messageStr;
         else
             messageStr = "§a" + messageStr;
-
         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
         LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
     }
@@ -46,6 +46,7 @@ public class Util {
         } else {
             notifyAll("Could not add item: § " + itemName + " §a (is it spelled correctly?)");
         }
+        ItemData.update();
     }
     public static String getCallingClassName() {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();

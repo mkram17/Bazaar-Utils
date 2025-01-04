@@ -1,6 +1,11 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
+import scala.Int;
+
 import java.util.ArrayList;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
@@ -61,9 +66,21 @@ public class ItemData {
         this.volume = volume;
     }
 
-    //insta sell and insta buy
-    private double price;
-    private boolean isCopied = false;
+    public int getAmountFilled() {
+        return amountFilled;
+    }
+
+    public void setAmountFilled(int amountFilled) {
+        this.amountFilled = amountFilled;
+    }
+
+    public int getAmountClaimed() {
+        return amountClaimed;
+    }
+
+    public void setAmountClaimed(int amountClaimed) {
+        this.amountClaimed = amountClaimed;
+    }
 
     public enum priceTypes{INSTASELL,INSTABUY;
         private priceTypes opposite;
@@ -75,19 +92,27 @@ public class ItemData {
             return opposite;
         }
     }
+    public enum statuses{SET,FILLED}
 
-
-
+    //insta sell and insta buy
+    private double price;
+    private boolean isCopied = false;
     private priceTypes priceType;
     //the sell or buy price of lowest/highest offer
     private double marketPrice;
     //item price * volume
     private double fullPrice;
-
-    public enum statuses{SET,FILLED}
     private statuses status;
     private int volume;
+
+    private int amountClaimed;
     private int amountFilled;
+
+    //lists
+    public static ArrayList<Double> prices = getVariables(ItemData::getPrice);
+    public static ArrayList<Integer> volumes = getVariables(ItemData::getVolume);
+    public static ArrayList<String> names = getVariables(ItemData::getName);
+    public static ArrayList<Integer> amountClaimeds = getVariables(ItemData::getAmountClaimed);
 
     public ItemData(String name, Double price, priceTypes priceType, int volume) {
         this.name = name;
@@ -107,26 +132,14 @@ public class ItemData {
 //            System.out.println("new buy price: " +  BazaarData.findItemPrice(item.productId, "buyPrice"));
 
         }
-
+        updateLists();
     }
 
-
-    public static int findFromVolume(int volume){
-        int i = 0;
-        for(ItemData item : watchedItems){
-            if(item.getVolume() == volume) return i;
-            i++;
-        }
-        return -1;
-    }
-
-    public static int findFromPrice(double price){
-        int i = 0;
-        for(ItemData item : watchedItems){
-            if(item.getPrice() == price) return i;
-            i++;
-        }
-        return -1;
+    private static void updateLists(){
+        prices = getVariables(ItemData::getPrice);
+        volumes = getVariables(ItemData::getVolume);
+        names = getVariables(ItemData::getName);
+        amountClaimeds = getVariables(ItemData::getAmountClaimed);
     }
 
     public static ArrayList<String> getNames(){
@@ -136,32 +149,57 @@ public class ItemData {
         }
         return itemNames;
     }
-    public static ArrayList<Integer> getVolumes(){
-        ArrayList<Integer> itemPrices = new ArrayList<>();
+
+    //untested
+    //run by ex: getVariables((item) -> item.getPrice()) or (chatgpt) ItemData.getVariables(ItemData::getPrice);
+    public static <T> ArrayList<T> getVariables(Function<ItemData, T> variable){
+        ArrayList<T> variables = new ArrayList<>();
         for(ItemData item : watchedItems){
-            itemPrices.add(item.getVolume());
+            variables.add(variable.apply(item));
         }
-        return itemPrices;
-    }
-    public static ArrayList<Double> getPrices(){
-        ArrayList<Double> itemPrices = new ArrayList<>();
-        for(ItemData item : watchedItems){
-            itemPrices.add(item.getPrice());
-        }
-        return itemPrices;
+        return variables;
     }
 
-    public static int findIndex(double price, int volume){
-        int index = -1;
-        //if any watchedItems have the same price and volume to what is being searched for
-        for (int i = 0; i < watchedItems.size(); i++) {
-            if (Util.isSimilar(getPrices().get(i),price) && getVolumes().get(i)==volume) {
-                index = i;
-                break;
-            }
-        }
-        return index;
+    public static int findIndex(String name, Double price, Integer volume) {
+        return IntStream.range(0, watchedItems.size())
+                .filter(i -> (price == null || Util.isSimilar(prices.get(i), price)) &&
+                        (volume == null || volumes.get(i) == volume + amountClaimeds.get(i)) &&
+                        (name == null || name.equalsIgnoreCase(names.get(i))))
+                .findFirst()
+                .orElse(-1);
     }
+
+//    public static int findIndex(double price, int volume) {
+//        for (int i = 0; i < watchedItems.size(); i++) {
+//            if (Util.isSimilar(prices.get(i), price) && (volumes.get(i) - amountClaimeds.get(i)) == volume) {
+//                return i;
+//            }
+//        }
+//        return -1;
+//    }
+
+//    public static int findIndex(double price, int volume, String name) {
+//        for (int i = 0; i < watchedItems.size(); i++) {
+//            if (Util.isSimilar(prices.get(i), price) && volumes.get(i) == volume && name.equalsIgnoreCase(names.get(i))) {
+//                return i;
+//            }
+//        }
+//        return -1;
+//    }
+//
+//    public static int findIndex(String name, int volume) {
+//        for (int i = 0; i < names.size(); i++) {
+//            if (names.get(i).equalsIgnoreCase(name) && volumes.get(i) == volume) {
+//                return i;
+//            }
+//        }
+//        return -1;
+//    }
+
+    public static ItemData getItem(int index){
+        return watchedItems.get(index);
+    }
+
     public double getFlipPrice(){
         if (priceType == ItemData.priceTypes.INSTABUY) {
             return (BazaarData.findItemPrice(name, priceTypes.INSTASELL) + .1);
@@ -183,26 +221,13 @@ public class ItemData {
         this.isCopied = false;
     }
 
-
-
-    public static void setItemFilled(String name, int volume){
-        ArrayList<String> itemNames = getNames();
-        ArrayList<Integer> itemVolumes = getVolumes();
-        for(int i = 0; i < itemNames.size(); i++){
-            if(itemNames.get(i).equalsIgnoreCase(name) && itemVolumes.get(i) == volume){
-                watchedItems.get(i).setStatus(statuses.FILLED);
-            }
-        }
+    public static void setItemFilled(ItemData item){
+        item.amountFilled = item.volume;
+        item.status = statuses.FILLED;
     }
-    public static void removeItem(String name, int volume, double price){
-        ArrayList<String> itemNames = getNames();
-        ArrayList<Integer> itemVolumes = getVolumes();
-        ArrayList<Double> itemPrices = getPrices();
-        for(int i = 0; i < itemNames.size(); i++){
-            if(itemNames.get(i).equalsIgnoreCase(name) && itemVolumes.get(i) == volume && itemPrices.get(i) == price){
-                watchedItems.remove(i);
-            }
-        }
+
+    public static void removeItem(ItemData item){
+        watchedItems.remove(item);
     }
 
 }

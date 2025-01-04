@@ -63,7 +63,7 @@ public class BazaarData {
             buyPrice = buy_summary.get(0).getAsJsonObject().get("pricePerUnit").getAsDouble();
 //            System.out.println("Buy/sell price of: "+  lookingFor + " " + buyPrice + "/" + sellPrice);
         } catch (Exception e) {
-            Util.notifyAll("There was an error fetching Json objects (probably caused by incorrect item name): ");
+            Util.notifyAll("There was an error fetching Json objects (probably caused by incorrect product ID [" + productId + "]): ");
             e.printStackTrace();
         }
 

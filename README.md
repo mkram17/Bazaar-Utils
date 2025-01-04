@@ -18,6 +18,7 @@ Potential bugs:
 make two of the exact same order (volume and item), but the one made later is filled first. Might not remove correct item from watchedItems
 Seems like it might not find the item in order page all of the time
 Util.notifyAll produced null pointer exceptions when in tickEvent
+Using the fewer param findIndex methods might not return correct item
 
 Bugs:
 finding item from price and volume does not work if two items have the same volume (and price) -- maybe try to use amount filled?

@@ -11,6 +11,8 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
@@ -27,15 +29,12 @@ public class EventHandler {
     public static List<ItemStack> bazaarStack = new ArrayList<>();
     public static String containerName = null;
     //to run code once when gui opened
-    public static boolean justOpened = false;
-    public static boolean guiLoaded = false;
 
     public void onGuiLoaded(){
         CompletableFuture.runAsync(EventHandler::checkIfGuiLoaded).thenRun(() ->{
             bazaarStack = getBazaarStack(BazaarUtils.container);
             if(BUConfig.autoFlip && AutoFlipper.inFlipGui() && (AutoFlipper.guiType == AutoFlipper.guiTypes.CHEST)) {
                 AutoFlipper.flipPrice = AutoFlipper.getPrice();
-
             }
         });
     }
@@ -45,44 +44,63 @@ public class EventHandler {
         if (!(e.message.getFormattedText().contains("[Bazaar]"))) return;
 
         String orderText;
-        String item;
+        String itemName;
         int volume = -1;
         double price = -1;
+        ItemData item;
 
         String unformattedOrderText = e.message.getFormattedText();
         orderText = Util.removeFormatting(unformattedOrderText);
         if (orderText.contains("Order Setup!")) {
 //            item = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("for") - 1);
-            item = orderText.substring(orderText.indexOf("x")+2, orderText.indexOf("f")-1);
+            itemName = orderText.substring(orderText.indexOf("x")+2, orderText.indexOf("f")-1);
             volume = Integer.parseInt(orderText.substring(orderText.indexOf("!") + 2, orderText.indexOf("x")).replace(",", ""));
             price = Double.parseDouble(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("coins") - 1).replace(",", "")) / volume;
-            Util.addWatchedItem(item, price, !orderText.contains("Buy"), volume);
-            Util.notifyAll(item + " was added with a price of " + price);
+            Util.addWatchedItem(itemName, price, !orderText.contains("Buy"), volume);
+            Util.notifyAll(itemName + " was added with a price of " + price);
         }
         if (orderText.contains("was filled!")) {
             volume = Integer.parseInt(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("x")).replace(",", ""));
-            item = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("was") - 1);
-            ItemData.setItemFilled(item, volume);
-            Util.notifyAll(item + " was filled");
+            itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("was") - 1);
+            item = ItemData.getItem(ItemData.findIndex(itemName, null, volume));
+            ItemData.setItemFilled(item);
+            Util.notifyAll(itemName + " was filled");
         }
         if (orderText.contains("Claimed")){
-            //there might be different claim messages
-            volume = Integer.parseInt(orderText.substring(orderText.indexOf("selling") + 8, orderText.indexOf("x")).replace(",", ""));
-            if(orderText.contains("worth"))
-              item = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("worth") - 1);
-            else
-                item = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("at") - 1);
-            price = Double.parseDouble(orderText.substring(orderText.indexOf("worth") + 6, orderText.indexOf("coins") - 1).replace(",", ""))/volume;
-            ItemData.removeItem(item, volume, price);
-            Util.notifyAll(item + " was removed");
+            handleClaimed(orderText);
         }
     }
+    public static void handleClaimed(String orderText){
+        Util.notifyAll("Claim msg: " + orderText);
+        Integer volumeClaimed = null;
+        Double price = null;
+        String itemName = null;
+        int index;
+        //there might be different claim messages
+        if(orderText.contains("worth")) {
+            volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("Claimed") + 8, orderText.indexOf("x")).replace(",", ""));
+            itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("worth") - 1);
+            price = Double.parseDouble(orderText.substring(orderText.indexOf("worth") + 6, orderText.indexOf("coins") - 1).replace(",", ""))/volumeClaimed;
+        }
+        if(orderText.contains("at")){
+            volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("selling") + 8, orderText.indexOf("x")).replace(",", ""));
+            itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("at") - 1);
+            price = Double.parseDouble(orderText.substring(orderText.indexOf("Claimed") + 8, orderText.indexOf("coins") - 1).replace(",", ""))/volumeClaimed;
+        }
 
-    @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent e) {
-        GuiScreen gui = Minecraft.getMinecraft().currentScreen;
-        if(gui instanceof  AccessorGuiEditSign){
+        //wont work when the amount claimed is equal to the volume of another order
+        if(ItemData.volumes.contains(volumeClaimed))
+            index = ItemData.findIndex(itemName, price, volumeClaimed);
+        else
+            index = ItemData.findIndex(itemName, price, null);
 
+        ItemData item = ItemData.getItem(index);
+        if(item.getVolume() == volumeClaimed) {
+            ItemData.removeItem(item);
+            Util.notifyAll(itemName + " was removed");
+        } else {
+            item.setAmountClaimed(item.getAmountClaimed() + volumeClaimed);
+            Util.notifyAll(itemName + " has claimed " + item.getAmountClaimed() + " out of " + item.getVolume());
         }
     }
 
@@ -101,15 +119,10 @@ public class EventHandler {
             return;
         }
 
-//        thanks to nea89o for this part
         GuiChest chestScreen = (GuiChest) currentScreen;
         ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
 
         bazaarStack = this.getBazaarStack(guiContainer);
-
-        //update the global container variable
-
-
 
         BazaarUtils.container = guiContainer;
     }
@@ -117,8 +130,6 @@ public class EventHandler {
     @SubscribeEvent
     public void guiChestOpenedEvent(GuiOpenEvent e) {
         if ((e.gui instanceof GuiChest)) {
-            guiLoaded = false;
-            justOpened = false;
             GuiChest chestScreen = (GuiChest) e.gui;
             ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
             containerName = guiContainer.getLowerChestInventory().getDisplayName().getFormattedText();
@@ -151,7 +162,6 @@ public class EventHandler {
 
                 if (bottomRightItem != null && !isItemLoading()) {
                     Util.notifyAll("Item detected in the bottom-right corner: " + bottomRightItem.getDisplayName());
-                    guiLoaded = true;
                     break;
                 }
             }
@@ -184,6 +194,4 @@ public class EventHandler {
         }
         return bzStack;
     }
-
-
 }
