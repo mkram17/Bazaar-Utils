@@ -20,7 +20,6 @@ import static com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler.*;
 import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class AutoFlipper {
-    public static boolean canPaste = true;
     public static double flipPrice;
     private static double orderPrice = -1;
     private static int orderVolumeFilled = -1;
@@ -31,7 +30,6 @@ public class AutoFlipper {
     public void guiChestOpenedEvent(GuiOpenEvent e) {
         if (!(e.gui instanceof GuiChest))
             return;
-        AutoFlipper.allowPaste();
         guiType = guiTypes.CHEST;
         Util.notifyAll("I am in a chest");
     }
@@ -46,8 +44,6 @@ public class AutoFlipper {
         Util.notifyAll("I am in a sign");
          autoAddToSign(e);
     }
-
-
 
     public static void autoAddToSign(GuiOpenEvent e) {
         if(flipPrice != -1)
@@ -86,13 +82,8 @@ public class AutoFlipper {
         return null;
     }
 
-
-    public static boolean inSign(){
-        return Minecraft.getMinecraft().currentScreen instanceof AccessorGuiEditSign;
-    }
     public static void getItemInfo(NBTTagList loreList) {
         //get order volume and price of item that is being flipped
-
         try {
             String orderPriceNBT = Util.removeFormatting(loreList.getStringTagAt(3));
             orderPrice = Double.parseDouble(orderPriceNBT.substring(orderPriceNBT.indexOf(":") + 2, orderPriceNBT.indexOf("coins") - 1));
@@ -116,23 +107,5 @@ public class AutoFlipper {
             return watchedItems.get(itemIndex).getStatus() == ItemData.statuses.FILLED;
         return false;
     }
-//
-//    public static void copyPriceToClipboard(String itemName, String priceType) {
-//        //finds the price of opposite of order type, since it is being flipped
-//        if (canPaste) {
-//            if (priceType.equalsIgnoreCase("sellPrice"))
-//                Util.copyItem(itemName, ItemData.priceTypes.INSTABUY);
-//            else
-//                Util.copyItem(itemName, ItemData.priceTypes.INSTASELL);
-//            disablePaste();
-//        }
-//    }
 
-    public static void allowPaste() {
-        canPaste = true;
-    }
-
-    public static void disablePaste() {
-        canPaste = false;
-    }
 }

@@ -36,12 +36,10 @@ public class BazaarData {
                         throwable.printStackTrace();
                     } else {
                         jsonString = getAsPrettyJsonObject(reply);
-//                    Util.sendFirst(jsonString, 100, "Bazaar future returned: ");
-//                        FMLLog.info("Bazaar future returned without thrown exception");
                         if (!watchedItems.isEmpty()) {
                             ItemData.update();
                         } else {
-                            Util.notifyConsole("no items in watchedItems");
+                            Util.notifyAll("no items in watchedItems");
                         }
                     }
                 });
@@ -75,12 +73,6 @@ public class BazaarData {
             return buyPrice;
         }
         return null;
-    }
-
-
-
-    public static String getJsonString(){
-        return jsonString;
     }
 
     //returns null if it cant find anything, gets product id from natural name

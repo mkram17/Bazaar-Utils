@@ -1,6 +1,6 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
-import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+import com.github.sirmegabite.bazaarutils.configs.Developer;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -28,11 +28,9 @@ public class Util {
             messageStr = "§c" + messageStr;
         else
             messageStr = "§a" + messageStr;
-        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
+        if(Developer.devMessages)
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
         LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
-    }
-    public static<T> void notifyConsole(T message) {
-        LogManager.getLogger(getCallingClassName()).info("[AutoBz] Message [" + message + "]");
     }
 
     public static void addWatchedItem(String itemName, Double price, boolean isSellOrder, int volume){
@@ -65,7 +63,6 @@ public class Util {
             System.out.println(itemToSend.toString().substring(0, howLong));
         else
             System.out.println(info + itemToSend.toString().substring(0, howLong));
-
     }
     public static void copyItem(String itemName, ItemData.priceTypes priceType){
         String productID = BazaarData.findProductId(itemName);
@@ -88,21 +85,10 @@ public class Util {
                 str = str.substring(0, index) + str.substring(index + 2);
             } else {
                 str = str.substring(0, index);
-            };
+            }
         }
         str = str.replace(",", "");
         return str;
-    }
-
-    public static boolean isKeyHeld(int key) {
-        if (key == 0) {
-            return false;
-        } else if (key >= Keyboard.KEYBOARD_SIZE) {
-            int pressedKey = (Keyboard.getEventKey() == 0) ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey();
-            return Keyboard.getEventKeyState() && key == pressedKey;
-        } else {
-            return Keyboard.isKeyDown(key);
-        }
     }
 
     public <T> void writeFile(T print) {
@@ -110,17 +96,12 @@ public class Util {
 //        System.out.println("Writing data to file...");
         try{
             Files.write(Paths.get(""), print.toString().getBytes());
-            Util.notifyConsole("Data written to file successfully.");
+            Util.notifyAll("Data written to file successfully.");
 //            Util.sendFirst(jsonString, 500, "Written to file: ");
         }catch (Exception e){
             System.out.println("Failed to write data to file");
             e.printStackTrace();
         }
-    }
-
-    public static void pasteIntoSign(){
-        String str = getClipboardContents();
-//        addToSign(str);
     }
 
     //thanks to SkyHanni

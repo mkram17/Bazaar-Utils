@@ -35,13 +35,13 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public void onBazaarChat(ClientChatReceivedEvent e) throws Exception  {
+    public void onBazaarChat(ClientChatReceivedEvent e){
         if (!(e.message.getFormattedText().contains("[Bazaar]"))) return;
 
         String orderText;
         String itemName;
-        int volume = -1;
-        double price = -1;
+        int volume;
+        double price;
         ItemData item;
 
         String unformattedOrderText = e.message.getFormattedText();
@@ -117,7 +117,7 @@ public class EventHandler {
         GuiChest chestScreen = (GuiChest) currentScreen;
         ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
 
-        bazaarStack = this.getBazaarStack(guiContainer);
+        bazaarStack = getBazaarStack(guiContainer);
 
         BazaarUtils.container = guiContainer;
     }

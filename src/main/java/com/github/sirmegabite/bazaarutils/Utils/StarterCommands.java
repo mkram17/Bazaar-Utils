@@ -26,7 +26,7 @@ public class StarterCommands extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args){
-        Util.notifyConsole("Command: autobz" + "Command received: " + Arrays.toString(args) + " args length: " + args.length);
+        Util.notifyAll("Command: autobz" + "Command received: " + Arrays.toString(args) + " args length: " + args.length);
         if (args.length > 0) {
             //to start the mod
             if(args[0].equalsIgnoreCase("remove")){
@@ -64,7 +64,7 @@ public class StarterCommands extends CommandBase {
                 }
                 //uses reflection to get variable values while playing minecraft (must remove in build)
                 if (args[0].equals("dev")) {
-                    Util.notifyConsole("Tried to do dev stuff " + "(" + args[1] + ")");
+                    Util.notifyAll("Tried to do dev stuff " + "(" + args[1] + ")");
                     try {
                         Field field = BazaarUtils.class.getDeclaredField(args[1]);
                         field.setAccessible(true);
@@ -85,7 +85,7 @@ public class StarterCommands extends CommandBase {
 
     @Override
     public List<String> getCommandAliases() {
-        return Arrays.asList("autobazaar");
+        return Collections.singletonList("autobazaar");
     }
 
     @Override

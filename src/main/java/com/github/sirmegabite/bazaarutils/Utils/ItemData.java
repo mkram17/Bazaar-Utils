@@ -1,10 +1,7 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
-import scala.Int;
-
 import java.util.ArrayList;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
@@ -18,20 +15,12 @@ public class ItemData {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getProductID() {
         return productId;
     }
 
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
-
-    private String name;
-    private String productId;
+    private final String name;
+    private final String productId;
 
     public double getPrice() {
         return price;
@@ -44,9 +33,6 @@ public class ItemData {
         return marketPrice;
     }
 
-    public void setMarketPrice(double marketPrice) {
-        this.marketPrice = marketPrice;
-    }
     public int getVolume() {
         return volume;
     }
@@ -64,10 +50,6 @@ public class ItemData {
 
     public void setStatus(statuses status) {
         this.status = status;
-    }
-
-    public void setVolume(int volume) {
-        this.volume = volume;
     }
 
     public int getAmountFilled() {
@@ -105,12 +87,12 @@ public class ItemData {
     //the sell or buy price of lowest/highest offer
     private double marketPrice;
     //item price * volume
-    private double fullPrice;
+    private final double fullPrice;
     private statuses status;
-    private int volume;
+    private final int volume;
 
-    private int amountClaimed;
-    private int amountFilled;
+    private int amountClaimed = 0;
+    private int amountFilled = 0;
 
     //lists
     public static ArrayList<Double> prices = getVariables(ItemData::getPrice);
@@ -182,19 +164,6 @@ public class ItemData {
         } else {
             return (BazaarData.findItemPrice(productId, priceTypes.INSTABUY) - .1);
         }
-    }
-    public void setCopied(){
-        for(ItemData item : watchedItems){
-            if(item.isCopied) {
-                Util.notifyConsole("Another item is already copied. Uncopying that one.");
-                item.isCopied = false;
-            }
-        }
-        this.isCopied = true;
-    }
-
-    public void unsetCopied(){
-        this.isCopied = false;
     }
 
     public static void setItemFilled(ItemData item){
