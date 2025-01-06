@@ -8,6 +8,7 @@ import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -15,6 +16,9 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.input.Keyboard;
+
+import java.util.concurrent.CompletableFuture;
 
 import static com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler.*;
 import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
@@ -31,7 +35,7 @@ public class AutoFlipper {
         if (!(e.gui instanceof GuiChest))
             return;
         guiType = guiTypes.CHEST;
-        Util.notifyAll("I am in a chest");
+        Util.notifyAll("In a chest", Util.notificationTypes.GUI);
     }
 
     @SubscribeEvent
@@ -41,15 +45,15 @@ public class AutoFlipper {
             return;
         guiType = guiTypes.SIGN;
 
-        Util.notifyAll("I am in a sign");
+        Util.notifyAll("In a sign", Util.notificationTypes.GUI);
          autoAddToSign(e);
     }
 
     public static void autoAddToSign(GuiOpenEvent e) {
-        if(flipPrice != -1)
-         Util.addToSign(Double.toString(Util.getPrettyNumber(flipPrice)), e.gui);
-//         Minecraft.getMinecraft().thePlayer.closeScreen();
-
+        if(flipPrice != -1 && inFlipGui()) {
+            Util.addToSign(Double.toString(Util.getPrettyNumber(flipPrice)), e.gui);
+            CompletableFuture.runAsync(AutoFlipper::closeGui);
+        }
     }
 
     public static ItemData getFlipItem(){
@@ -74,9 +78,8 @@ public class AutoFlipper {
                 if (matchFound()) {
                     int itemIndex = ItemData.findIndex(null, orderPrice, orderVolumeFilled);
                     ItemData flipItem = watchedItems.get(itemIndex);
-                    Util.notifyAll("Found a match: " + flipItem.getName());
                     return flipItem;
-                } else Util.notifyAll("Couldnt find a match");
+                }
             }
         }
         return null;
@@ -103,9 +106,27 @@ public class AutoFlipper {
 
     public static boolean matchFound() {
         int itemIndex = ItemData.findIndex(null, orderPrice, orderVolumeFilled);
-        if (itemIndex != -1)
-            return watchedItems.get(itemIndex).getStatus() == ItemData.statuses.FILLED;
+        if (itemIndex != -1) {
+            ItemData item = watchedItems.get(itemIndex);
+            if (item.getStatus() == ItemData.statuses.FILLED) {
+                Util.notifyAll("Found a match: " + item.getName(), Util.notificationTypes.ITEMDATA);
+                return true;
+            }else {
+                Util.notifyAll("found match, but isnt filled");
+                return true;
+            }
+        }
+        Util.notifyAll("Couldnt find a match");
         return false;
+    }
+    public static void closeGui(){
+        try{
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        Util.notifyAll("Closing gui", Util.notificationTypes.GUI);
+        Minecraft.getMinecraft().displayGuiScreen(null);
     }
 
 }

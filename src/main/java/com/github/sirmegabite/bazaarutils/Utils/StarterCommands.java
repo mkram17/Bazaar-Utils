@@ -26,13 +26,17 @@ public class StarterCommands extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args){
-        Util.notifyAll("Command: autobz" + "Command received: " + Arrays.toString(args) + " args length: " + args.length);
+        Util.notifyAll("Command: autobz" + "Command received: " + Arrays.toString(args) + " args length: " + args.length, Util.notificationTypes.COMMAND);
         if (args.length > 0) {
             //to start the mod
             if(args[0].equalsIgnoreCase("remove")){
+                Util.notifyAll("Removed " + watchedItems.get(Integer.parseInt(args[1])).getName(), Util.notificationTypes.COMMAND);
                 ItemData.getItem(Integer.parseInt(args[1])).remove();
+            }
+            if(args[0].equalsIgnoreCase("info")){
+                ItemData item = ItemData.getItem(Integer.parseInt(args[1]));
 
-                Util.notifyAll("Removed " + watchedItems.get(0).getName());
+                Util.notifyAll("Item: " + item.getName() + ", price: " + item.getPrice() + ", volume: " + item.getVolume(), Util.notificationTypes.COMMAND);
             }
 
             if (args[0].equals("start")) {
@@ -71,7 +75,7 @@ public class StarterCommands extends CommandBase {
                         Object value = field.get(null);  // Assuming the field is static
                         Util.notifyAll(args[1] + ": " + value);
                     } catch (NoSuchFieldException | IllegalAccessException e) {
-                        Util.notifyAll("Error: Could not access " + args[1]);
+                        Util.notifyAll("Error: Could not access " + args[1], Util.notificationTypes.COMMAND);
                     }
                 }
             }

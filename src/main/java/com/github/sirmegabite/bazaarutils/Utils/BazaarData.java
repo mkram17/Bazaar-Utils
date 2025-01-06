@@ -38,8 +38,6 @@ public class BazaarData {
                         jsonString = getAsPrettyJsonObject(reply);
                         if (!watchedItems.isEmpty()) {
                             ItemData.update();
-                        } else {
-                            Util.notifyAll("no items in watchedItems");
                         }
                     }
                 });
@@ -59,17 +57,16 @@ public class BazaarData {
             //sell summary is buy orders, and buy summary is sell orders
             sellPrice =  sell_summary.get(0).getAsJsonObject().get("pricePerUnit").getAsDouble();
             buyPrice = buy_summary.get(0).getAsJsonObject().get("pricePerUnit").getAsDouble();
-//            System.out.println("Buy/sell price of: "+  lookingFor + " " + buyPrice + "/" + sellPrice);
         } catch (Exception e) {
-            Util.notifyAll("There was an error fetching Json objects (probably caused by incorrect product ID [" + productId + "]): ");
+            Util.notifyAll("There was an error fetching Json objects (probably caused by incorrect product ID [" + productId + "]): ", Util.notificationTypes.BAZAARDATA);
             e.printStackTrace();
         }
 
         if (priceType == ItemData.priceTypes.INSTASELL) {
-//            Util.notifyAll("Price found: " + sellPrice);
+            Util.notifyAll("Price found: " + sellPrice, Util.notificationTypes.BAZAARDATA);
             return sellPrice;
         } else if (priceType == ItemData.priceTypes.INSTABUY) {
-//            Util.notifyAll("Price found: " +buyPrice);
+            Util.notifyAll("Price found: " +buyPrice, Util.notificationTypes.BAZAARDATA);
             return buyPrice;
         }
         return null;
@@ -93,6 +90,7 @@ public class BazaarData {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        Util.notifyAll("Couldnt find product id", Util.notificationTypes.BAZAARDATA);
         return null;
     }
 

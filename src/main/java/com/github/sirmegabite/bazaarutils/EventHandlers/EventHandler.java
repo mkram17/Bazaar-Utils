@@ -52,21 +52,20 @@ public class EventHandler {
             volume = Integer.parseInt(orderText.substring(orderText.indexOf("!") + 2, orderText.indexOf("x")).replace(",", ""));
             price = Double.parseDouble(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("coins") - 1).replace(",", "")) / volume;
             Util.addWatchedItem(itemName, price, !orderText.contains("Buy"), volume);
-            Util.notifyAll(itemName + " was added with a price of " + price);
+            Util.notifyAll(itemName + " was added with a price of " + price, Util.notificationTypes.ITEMDATA);
         }
         if (orderText.contains("was filled!")) {
             volume = Integer.parseInt(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("x")).replace(",", ""));
             itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("was") - 1);
             item = ItemData.getItem(ItemData.findIndex(itemName, null, volume));
             ItemData.setItemFilled(item);
-            Util.notifyAll(itemName + " was filled");
+            Util.notifyAll(itemName + " was filled", Util.notificationTypes.ITEMDATA);
         }
         if (orderText.contains("Claimed")){
             handleClaimed(orderText);
         }
     }
     public static void handleClaimed(String orderText){
-        Util.notifyAll("Claim msg: " + orderText);
         Integer volumeClaimed = null;
         Double price = null;
         String itemName = null;
@@ -80,7 +79,7 @@ public class EventHandler {
         if(orderText.contains("at")){
             volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("selling") + 8, orderText.indexOf("x")).replace(",", ""));
             itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("at") - 1);
-            price = Double.parseDouble(orderText.substring(orderText.indexOf("at") + 3, orderText.indexOf("each") - 1).replace(",", ""))/volumeClaimed;
+            price = Double.parseDouble(orderText.substring(orderText.indexOf("at") + 3, orderText.indexOf("each") - 1).replace(",", ""));
         }
 
         //wont work when the amount claimed is equal to the volume of another order
@@ -92,10 +91,10 @@ public class EventHandler {
         ItemData item = ItemData.getItem(index);
         if(item.getVolume() == volumeClaimed) {
             ItemData.removeItem(item);
-            Util.notifyAll(itemName + " was removed");
+            Util.notifyAll(itemName + " was removed", Util.notificationTypes.ITEMDATA);
         } else {
             item.setAmountClaimed(item.getAmountClaimed() + volumeClaimed);
-            Util.notifyAll(itemName + " has claimed " + item.getAmountClaimed() + " out of " + item.getVolume());
+            Util.notifyAll(itemName + " has claimed " + item.getAmountClaimed() + " out of " + item.getVolume(), Util.notificationTypes.ITEMDATA);
         }
     }
 
@@ -128,7 +127,7 @@ public class EventHandler {
             GuiChest chestScreen = (GuiChest) e.gui;
             ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
             containerName = guiContainer.getLowerChestInventory().getDisplayName().getFormattedText();
-            Util.notifyAll("Container Name: " + containerName);
+            Util.notifyAll("Container Name: " + containerName, Util.notificationTypes.GUI);
             onGuiLoaded();
         }
 
@@ -156,7 +155,7 @@ public class EventHandler {
                 ItemStack bottomRightItem = container.getLowerChestInventory().getStackInSlot(size - 1);
 
                 if (bottomRightItem != null && !isItemLoading()) {
-                    Util.notifyAll("Item detected in the bottom-right corner: " + bottomRightItem.getDisplayName());
+                    Util.notifyAll("Item detected in the bottom-right corner: " + bottomRightItem.getDisplayName(), Util.notificationTypes.GUI);
                     break;
                 }
             }
@@ -169,7 +168,7 @@ public class EventHandler {
             if (tagCompound == null) continue;
             String displayName = Util.removeFormatting(tagCompound.getCompoundTag("display").getString("Name"));
             if(displayName.contains("Loading")) {
-                Util.notifyAll("Loading item...");
+                Util.notifyAll("Loading item...", Util.notificationTypes.GUI);
                 return true;
             }
         }

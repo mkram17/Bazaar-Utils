@@ -154,7 +154,7 @@ public class ItemData {
                 .findFirst()
                 .orElse(-1);
         if(index == -1)
-            Util.notifyAll("Could not find item with values: [name: " + name + ", price " + price + ", volume: " + volume + "]");
+            Util.notifyAll("Could not find item with values: [name: " + name + ", price: " + price + ", volume: " + volume + "]");
         return index;
     }
 

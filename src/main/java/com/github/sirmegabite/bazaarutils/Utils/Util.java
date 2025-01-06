@@ -20,6 +20,21 @@ import java.nio.file.Paths;
 import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class Util {
+    public enum notificationTypes {ERROR, GUI, FEATURE, BAZAARDATA, COMMAND, ITEMDATA;
+        private boolean isEnabled;
+        static {
+            ERROR.isEnabled = Developer.errorMessages;
+            GUI.isEnabled = Developer.guiMessages;
+            FEATURE.isEnabled = Developer.featureMessages;
+            BAZAARDATA.isEnabled = Developer.bazaarDataMessages;
+            COMMAND.isEnabled = Developer.commandMessages;
+            ITEMDATA.isEnabled = Developer.itemDataMessages;
+        }
+        public boolean isEnabled(){
+            return isEnabled;
+        }
+
+    }
     public static<T> void notifyAll(T message) {
         String callingName = getCallingClassName();
         String simpleCallingName = callingName.substring(callingName.lastIndexOf(".")+1);
@@ -29,6 +44,18 @@ public class Util {
         else
             messageStr = "§a" + messageStr;
         if(Developer.devMessages)
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
+        LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
+    }
+    public static<T> void notifyAll(T message, notificationTypes notiType) {
+        String callingName = getCallingClassName();
+        String simpleCallingName = callingName.substring(callingName.lastIndexOf(".")+1);
+        String messageStr = message.toString();
+        messageStr = "§a" + messageStr;
+        if(notiType == notificationTypes.ERROR)
+            messageStr = "§c" + messageStr;
+
+        if(Developer.devMessages && (notiType.isEnabled() || Developer.allMessages))
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
         LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
     }
