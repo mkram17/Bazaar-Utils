@@ -31,7 +31,7 @@ public class Util {
             ITEMDATA.isEnabled = Developer.itemDataMessages;
         }
         public boolean isEnabled(){
-            return isEnabled;
+            return Developer.isDeveloperVariableEnabled(this);
         }
 
     }

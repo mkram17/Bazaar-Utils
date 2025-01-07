@@ -8,7 +8,6 @@ import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -16,7 +15,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.lwjgl.input.Keyboard;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -76,9 +74,7 @@ public class AutoFlipper {
                 //tries to match order volume and price of item being flipped to the item in watchedItems
                 //if they both return a match and find the same match
                 if (matchFound()) {
-                    int itemIndex = ItemData.findIndex(null, orderPrice, orderVolumeFilled);
-                    ItemData flipItem = watchedItems.get(itemIndex);
-                    return flipItem;
+                    return ItemData.findItem(null, orderPrice, orderVolumeFilled);
                 }
             }
         }
@@ -105,9 +101,8 @@ public class AutoFlipper {
     }
 
     public static boolean matchFound() {
-        int itemIndex = ItemData.findIndex(null, orderPrice, orderVolumeFilled);
-        if (itemIndex != -1) {
-            ItemData item = watchedItems.get(itemIndex);
+        ItemData item = ItemData.findItem(null, orderPrice, orderVolumeFilled);
+        if (item != null) {
             if (item.getStatus() == ItemData.statuses.FILLED) {
                 Util.notifyAll("Found a match: " + item.getName(), Util.notificationTypes.ITEMDATA);
                 return true;

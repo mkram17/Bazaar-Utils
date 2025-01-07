@@ -12,7 +12,7 @@ Dont need to find item to get the new price for it for flip? or at least make a 
 ~~Also only let onGuiLoaded() finish when none of items say "loading..."~~
 ~~Change pricetype to enum~~, make it change when autoflip does its thing
 ~~Improve developer chat messages~~
-Switch from using watchedItems item name to the object when possible
+~~Switch from using watchedItems item name to the object when possible~~
 Detect when orders are outdated
 Switch commands to oneconfig?
 Update price when item gets flipped

@@ -1,8 +1,9 @@
 package com.github.sirmegabite.bazaarutils;
 
+import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler;
 import com.github.sirmegabite.bazaarutils.Utils.BazaarData;
-import com.github.sirmegabite.bazaarutils.Utils.StarterCommands;
+import com.github.sirmegabite.bazaarutils.Utils.Commands;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
 import net.minecraft.inventory.ContainerChest;
@@ -25,7 +26,7 @@ public class BazaarUtils {
         MinecraftForge.EVENT_BUS.register(new EventHandler());
         MinecraftForge.EVENT_BUS.register(new AutoFlipper());
         MinecraftForge.EVENT_BUS.register(this);
-        ClientCommandHandler.instance.registerCommand(new StarterCommands());
+        CommandManager.register(new Commands());
         BazaarData.scheduleBazaar();
         config = new BUConfig(true, true);
 

@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.data.OptionSize;
 import cc.polyfrost.oneconfig.hud.SingleTextHud;
 import com.github.sirmegabite.bazaarutils.Utils.ItemData;
+import com.github.sirmegabite.bazaarutils.Utils.Util;
 
 public class Developer extends SingleTextHud {
 
@@ -58,6 +59,18 @@ public class Developer extends SingleTextHud {
         if(!ItemData.names.isEmpty())
             return String.join(", ", ItemData.getNames());
         else return "No watched items";
+    }
+
+    public static boolean isDeveloperVariableEnabled(Util.notificationTypes type) {
+        switch (type) {
+            case ERROR: return errorMessages;
+            case GUI: return guiMessages;
+            case FEATURE: return featureMessages;
+            case BAZAARDATA: return bazaarDataMessages;
+            case COMMAND: return commandMessages;
+            case ITEMDATA: return itemDataMessages;
+            default: throw new IllegalArgumentException("Unknown type: " + type);
+        }
     }
 
 }

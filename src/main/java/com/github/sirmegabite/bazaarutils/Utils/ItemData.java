@@ -8,7 +8,9 @@ import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class ItemData {
     public static ItemData getItem(int index){
-        return watchedItems.get(index);
+        if(index != -1)
+         return watchedItems.get(index);
+        else return null;
     }
 
     public String getName() {
@@ -146,16 +148,17 @@ public class ItemData {
         return variables;
     }
 
-    public static int findIndex(String name, Double price, Integer volume) {
-        int index = IntStream.range(0, watchedItems.size())
+    public static ItemData findItem(String name, Double price, Integer volume) {
+        ItemData item = getItem(IntStream.range(0, watchedItems.size())
                 .filter(i -> (price == null || Util.isSimilar(prices.get(i), price)) &&
                         (volume == null || volumes.get(i) == volume + amountClaimeds.get(i)) &&
                         (name == null || name.equalsIgnoreCase(names.get(i))))
                 .findFirst()
-                .orElse(-1);
-        if(index == -1)
+                .orElse(-1));
+        if(item == null)
             Util.notifyAll("Could not find item with values: [name: " + name + ", price: " + price + ", volume: " + volume + "]");
-        return index;
+        return item;
+
     }
 
     public double getFlipPrice(){

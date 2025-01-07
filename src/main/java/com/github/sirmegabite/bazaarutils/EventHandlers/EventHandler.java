@@ -57,7 +57,7 @@ public class EventHandler {
         if (orderText.contains("was filled!")) {
             volume = Integer.parseInt(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("x")).replace(",", ""));
             itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("was") - 1);
-            item = ItemData.getItem(ItemData.findIndex(itemName, null, volume));
+            item = ItemData.findItem(itemName, null, volume);
             ItemData.setItemFilled(item);
             Util.notifyAll(itemName + " was filled", Util.notificationTypes.ITEMDATA);
         }
@@ -70,6 +70,7 @@ public class EventHandler {
         Double price = null;
         String itemName = null;
         int index;
+        ItemData item;
         //there might be different claim messages
         if(orderText.contains("worth")) {
             volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("Claimed") + 8, orderText.indexOf("x")).replace(",", ""));
@@ -84,11 +85,10 @@ public class EventHandler {
 
         //wont work when the amount claimed is equal to the volume of another order
         if(ItemData.volumes.contains(volumeClaimed))
-            index = ItemData.findIndex(itemName, price, volumeClaimed);
+            item = ItemData.findItem(itemName, price, volumeClaimed);
         else
-            index = ItemData.findIndex(itemName, price, null);
+            item = ItemData.findItem(itemName, price, null);
 
-        ItemData item = ItemData.getItem(index);
         if(item.getVolume() == volumeClaimed) {
             ItemData.removeItem(item);
             Util.notifyAll(itemName + " was removed", Util.notificationTypes.ITEMDATA);
