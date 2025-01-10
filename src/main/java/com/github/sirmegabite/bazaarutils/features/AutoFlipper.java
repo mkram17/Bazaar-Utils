@@ -27,6 +27,7 @@ public class AutoFlipper {
     private static int orderVolumeFilled = -1;
     public enum guiTypes {CHEST, SIGN}
     public static guiTypes guiType;
+    private static ItemData item;
 
     @SubscribeEvent
     public void guiChestOpenedEvent(GuiOpenEvent e) {
@@ -51,6 +52,7 @@ public class AutoFlipper {
         if(flipPrice != -1 && inFlipGui()) {
             Util.addToSign(Double.toString(Util.getPrettyNumber(flipPrice)), e.gui);
             CompletableFuture.runAsync(AutoFlipper::closeGui);
+            item.setPriceType(ItemData.priceTypes.INSTABUY);
         }
     }
 
@@ -59,9 +61,9 @@ public class AutoFlipper {
         ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
         bazaarStack = EventHandler.getBazaarStack(guiContainer);
 
-        for (ItemStack item : bazaarStack) {
+        for (ItemStack rawItem : bazaarStack) {
             byte STRING_NBT_TAG = new NBTTagString().getId();
-            NBTTagCompound tagCompound = item.getTagCompound();
+            NBTTagCompound tagCompound = rawItem.getTagCompound();
 
             if (tagCompound == null) continue;
 
@@ -71,10 +73,9 @@ public class AutoFlipper {
             if(displayName.contains("Flip Order")) {
                 getItemInfo(loreList);
 
-                //tries to match order volume and price of item being flipped to the item in watchedItems
-                //if they both return a match and find the same match
+                //method updates item var
                 if (matchFound()) {
-                    return ItemData.findItem(null, orderPrice, orderVolumeFilled);
+                    return item;
                 }
             }
         }
@@ -101,10 +102,9 @@ public class AutoFlipper {
     }
 
     public static boolean matchFound() {
-        ItemData item = ItemData.findItem(null, orderPrice, orderVolumeFilled);
+        item = ItemData.findItem(null, orderPrice, orderVolumeFilled);
         if (item != null) {
             if (item.getStatus() == ItemData.statuses.FILLED) {
-                Util.notifyAll("Found a match: " + item.getName(), Util.notificationTypes.ITEMDATA);
                 return true;
             }else {
                 Util.notifyAll("found match, but isnt filled");

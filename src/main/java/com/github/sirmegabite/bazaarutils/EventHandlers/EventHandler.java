@@ -46,22 +46,29 @@ public class EventHandler {
 
         String unformattedOrderText = e.message.getFormattedText();
         orderText = Util.removeFormatting(unformattedOrderText);
-        if (orderText.contains("Order Setup!")) {
-//            item = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("for") - 1);
-            itemName = orderText.substring(orderText.indexOf("x")+2, orderText.indexOf("f")-1);
-            volume = Integer.parseInt(orderText.substring(orderText.indexOf("!") + 2, orderText.indexOf("x")).replace(",", ""));
-            price = Double.parseDouble(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("coins") - 1).replace(",", "")) / volume;
-            Util.addWatchedItem(itemName, price, !orderText.contains("Buy"), volume);
-            Util.notifyAll(itemName + " was added with a price of " + price, Util.notificationTypes.ITEMDATA);
+        Util.notifyAll(orderText, Util.notificationTypes.ITEMDATA);
+        try {
+              if (orderText.contains("Order Setup!") || orderText.contains("Offer Setup!")) {
+                  itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.lastIndexOf("f") - 1);
+                  volume = Integer.parseInt(orderText.substring(orderText.indexOf("!") + 2, orderText.indexOf("x")).replace(",", ""));
+                  price = Double.parseDouble(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("coins") - 1).replace(",", "")) / volume;
+                  Util.addWatchedItem(itemName, price, !orderText.contains("Buy"), volume);
+                  Util.notifyAll(itemName + " was added with a price of " + price, Util.notificationTypes.ITEMDATA);
+              }
+              if (orderText.contains("was filled!")) {
+                  volume = Integer.parseInt(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("x")).replace(",", ""));
+                  itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("was") - 1);
+                  item = ItemData.findItem(itemName, null, volume);
+                  ItemData.setItemFilled(item);
+                  Util.notifyAll(item.getName() + "[" + item.getIndex() + "] was filled", Util.notificationTypes.ITEMDATA);
+              }
+        }catch (Exception ex) {
+            Util.notifyAll("Order text: " + orderText, Util.notificationTypes.ITEMDATA);
+            Util.notifyAll("Error with order", Util.notificationTypes.ERROR);
+            ex.printStackTrace();
         }
-        if (orderText.contains("was filled!")) {
-            volume = Integer.parseInt(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("x")).replace(",", ""));
-            itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("was") - 1);
-            item = ItemData.findItem(itemName, null, volume);
-            ItemData.setItemFilled(item);
-            Util.notifyAll(itemName + " was filled", Util.notificationTypes.ITEMDATA);
-        }
-        if (orderText.contains("Claimed")){
+
+        if (orderText.contains("Claimed")) {
             handleClaimed(orderText);
         }
     }
@@ -72,29 +79,34 @@ public class EventHandler {
         int index;
         ItemData item;
         //there might be different claim messages
-        if(orderText.contains("worth")) {
-            volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("Claimed") + 8, orderText.indexOf("x")).replace(",", ""));
-            itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("worth") - 1);
-            price = Double.parseDouble(orderText.substring(orderText.indexOf("worth") + 6, orderText.indexOf("coins") - 1).replace(",", ""))/volumeClaimed;
-        }
-        if(orderText.contains("at")){
-            volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("selling") + 8, orderText.indexOf("x")).replace(",", ""));
-            itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("at") - 1);
-            price = Double.parseDouble(orderText.substring(orderText.indexOf("at") + 3, orderText.indexOf("each") - 1).replace(",", ""));
-        }
+        try {
+            if (orderText.contains("worth")) {
+                volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("Claimed") + 8, orderText.indexOf("x")).replace(",", ""));
+                itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("worth") - 1);
+                price = Double.parseDouble(orderText.substring(orderText.indexOf("worth") + 6, orderText.indexOf("coins") - 1).replace(",", "")) / volumeClaimed;
+            }
+            if (orderText.contains("at")) {
+                volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("selling") + 8, orderText.indexOf("x")).replace(",", ""));
+                itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("at") - 1);
+//            price = Double.parseDouble(orderText.substring(orderText.indexOf("at") + 3, orderText.indexOf("each") - 1).replace(",", ""));
+            }
 
-        //wont work when the amount claimed is equal to the volume of another order
-        if(ItemData.volumes.contains(volumeClaimed))
-            item = ItemData.findItem(itemName, price, volumeClaimed);
-        else
-            item = ItemData.findItem(itemName, price, null);
+            //wont work when the amount claimed is equal to the volume of another order
+            if (ItemData.volumes.contains(volumeClaimed))
+                item = ItemData.findItem(itemName, price, volumeClaimed);
+            else
+                item = ItemData.findItem(itemName, price, null);
 
-        if(item.getVolume() == volumeClaimed) {
-            ItemData.removeItem(item);
-            Util.notifyAll(itemName + " was removed", Util.notificationTypes.ITEMDATA);
-        } else {
-            item.setAmountClaimed(item.getAmountClaimed() + volumeClaimed);
-            Util.notifyAll(itemName + " has claimed " + item.getAmountClaimed() + " out of " + item.getVolume(), Util.notificationTypes.ITEMDATA);
+            if (item.getVolume() == volumeClaimed) {
+                Util.notifyAll(item.getGeneralInfo() + " was removed", Util.notificationTypes.ITEMDATA);
+                ItemData.removeItem(item);
+            } else {
+                item.setAmountClaimed(item.getAmountClaimed() + volumeClaimed);
+                Util.notifyAll(item.getName() + " has claimed " + item.getAmountClaimed() + " out of " + item.getVolume(), Util.notificationTypes.ITEMDATA);
+            }
+        } catch (Exception ex) {
+            Util.notifyAll("Unexpected error in order text: " + orderText, Util.notificationTypes.ERROR);
+            ex.printStackTrace();
         }
     }
 

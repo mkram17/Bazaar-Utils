@@ -21,8 +21,13 @@ public class Commands{
 
     @SubCommand(description = "Remove watched item")
     private void remove(@Description(autoCompletesTo = {"remove"}, description = "array index") int arg) {
-        Util.notifyAll("Removed " + watchedItems.get(arg).getName(), Util.notificationTypes.COMMAND);
+        Util.notifyAll("Removed " + watchedItems.get(arg).getGeneralInfo(), Util.notificationTypes.COMMAND);
         ItemData.removeItem(ItemData.getItem(arg));
+    }
+
+    @SubCommand(description = "Get general info")
+    private void info(@Description(autoCompletesTo = {"info"}) int arg){
+        Util.notifyAll(watchedItems.get(arg).getGeneralInfo());
     }
 
 

@@ -37,14 +37,13 @@ public class Util {
     }
     public static<T> void notifyAll(T message) {
         String callingName = getCallingClassName();
-        String simpleCallingName = callingName.substring(callingName.lastIndexOf(".")+1);
         String messageStr = message.toString();
         if(messageStr.toLowerCase().contains("exception"))
             messageStr = "§c" + messageStr;
         else
             messageStr = "§a" + messageStr;
         if(Developer.devMessages)
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + callingName + "] " + messageStr));
         LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
     }
     public static<T> void notifyAll(T message, notificationTypes notiType) {
@@ -55,9 +54,10 @@ public class Util {
         if(notiType == notificationTypes.ERROR)
             messageStr = "§c" + messageStr;
 
-        if(Developer.devMessages && (notiType.isEnabled() || Developer.allMessages))
+        if(Developer.devMessages && (notiType.isEnabled() || Developer.allMessages)) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
-        LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
+            LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
+        }
     }
 
     public static void addWatchedItem(String itemName, Double price, boolean isSellOrder, int volume){
@@ -75,7 +75,8 @@ public class Util {
     }
     public static String getCallingClassName() {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        return stackTrace[3].getClassName();
+        String className = stackTrace[3].getClassName();
+        return className.substring(className.lastIndexOf(".")+1);
     }
 
     public static void copyToClipboard(String clip){

@@ -1,7 +1,11 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
+import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
@@ -68,6 +72,12 @@ public class ItemData {
 
     public void setAmountClaimed(int amountClaimed) {
         this.amountClaimed = amountClaimed;
+    }
+
+    public int getIndex(){return watchedItems.indexOf(this);}
+
+    public String getGeneralInfo(){
+        return "(name: " + name + "[" + getIndex() + "]" + ", price:" + price + ", volume: " + volume + ", type: " + priceType + ")";
     }
 
     public enum priceTypes{INSTASELL,INSTABUY;
@@ -149,16 +159,28 @@ public class ItemData {
     }
 
     public static ItemData findItem(String name, Double price, Integer volume) {
-        ItemData item = getItem(IntStream.range(0, watchedItems.size())
+//        Util.notifyAll("Called from: " + Util.getCallingClassName(), Util.notificationTypes.ITEMDATA);
+        List<Integer> matchingIndices = IntStream.range(0, watchedItems.size())
                 .filter(i -> (price == null || Util.isSimilar(prices.get(i), price)) &&
                         (volume == null || volumes.get(i) == volume + amountClaimeds.get(i)) &&
                         (name == null || name.equalsIgnoreCase(names.get(i))))
-                .findFirst()
-                .orElse(-1));
-        if(item == null)
-            Util.notifyAll("Could not find item with values: [name: " + name + ", price: " + price + ", volume: " + volume + "]");
-        return item;
+                .boxed()
+                .collect(Collectors.toList()); // Use Collectors.toList() for older Java versions.
 
+        if (matchingIndices.isEmpty()) {
+            Util.notifyAll("Could not find item with info: [name: " + name + ", price: " + price + ", volume: " + volume + "]", Util.notificationTypes.ITEMDATA);
+            return null;
+        }
+
+        if (matchingIndices.size() > 1) {
+            matchingIndices.forEach(index -> {
+                ItemData duplicate = getItem(index);
+                Util.notifyAll("Duplicate item: " + duplicate.getGeneralInfo(), Util.notificationTypes.ITEMDATA);
+            });
+        }
+
+        ItemData item = getItem(matchingIndices.get(0)); // Get the first match.
+        return item;
     }
 
     public double getFlipPrice(){
