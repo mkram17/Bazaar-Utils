@@ -20,20 +20,20 @@ Make method to update orders in "Co-op Bazaar Orders" gui
 Find user's bazaar tax
 Add buy Max Amount button for buy orders
 
-Potential bugs:
+### Potential bugs:
 make two of the exact same order (volume and item), but the one made later is filled first. Might not remove correct item from watchedItems
 Seems like it might not find the item in order page all of the time
 Using the fewer param findIndex methods might not return correct item
 When claiming partial sell orders uses sell price? which wouldnt match price variable because it doesnt update when item is flipped
 If order gets filled while not online to get messages, item status is never updated
 
-Bugs:
+### Bugs:
 finding item from price and volume does not work if two items have the same volume (and price) -- maybe try to use amount filled?
 ~~finditemindex doesnt work right -- just gets item w same volume~~
 Autoflipper adds price to every sign -- very annoying
 Claiming order sometimes has diff messages(?) and removing watchedItem doesnt always work
 Sometimes findItemPrice gives error
 
-Thanks:
+### Thanks:
 To nea89o for his amazing modding guides
 To meyi from Bazaar Notifier for the resource conversion json
