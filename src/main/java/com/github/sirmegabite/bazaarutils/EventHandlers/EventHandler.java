@@ -51,7 +51,12 @@ public class EventHandler {
               if (orderText.contains("Order Setup!") || orderText.contains("Offer Setup!")) {
                   itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.lastIndexOf("f") - 1);
                   volume = Integer.parseInt(orderText.substring(orderText.indexOf("!") + 2, orderText.indexOf("x")).replace(",", ""));
-                  price = Double.parseDouble(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("coins") - 1).replace(",", "")) / volume;
+                  double priceBeforeTax = Double.parseDouble(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("coins") - 1).replace(",", "")) / volume;
+                  if(orderText.contains("Offer Setup!"))
+                    price = priceBeforeTax / (1-BUConfig.bzTax);
+                  else
+                      price = priceBeforeTax;
+                  price = (Math.round(price*10))/10.0;
                   Util.addWatchedItem(itemName, price, !orderText.contains("Buy"), volume);
                   Util.notifyAll(itemName + " was added with a price of " + price, Util.notificationTypes.ITEMDATA);
               }
@@ -97,6 +102,7 @@ public class EventHandler {
             else
                 item = ItemData.findItem(itemName, price, null);
 
+            assert item != null;
             if (item.getVolume() == volumeClaimed) {
                 Util.notifyAll(item.getGeneralInfo() + " was removed", Util.notificationTypes.ITEMDATA);
                 ItemData.removeItem(item);

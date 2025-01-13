@@ -17,6 +17,8 @@ Detect when orders are outdated
 Switch commands to oneconfig?
 Update price when item gets flipped
 Make method to update orders in "Co-op Bazaar Orders" gui
+Find user's bazaar tax
+Add buy Max Amount button for buy orders
 
 Potential bugs:
 make two of the exact same order (volume and item), but the one made later is filled first. Might not remove correct item from watchedItems

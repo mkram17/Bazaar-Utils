@@ -10,7 +10,7 @@ public class Developer extends SingleTextHud {
 
     public Developer() {
 
-        super("Watched items: ", true);
+        super("Watched Items: ", true);
     }
     @Switch(
             name = "Developer Messages",
@@ -19,7 +19,8 @@ public class Developer extends SingleTextHud {
     public static boolean devMessages = false;
     @Switch(
             name = "All Messages",
-            size = OptionSize.SINGLE // optional, declares whether the element is single column or dual column
+            size = OptionSize.SINGLE, // optional, declares whether the element is single column or dual column
+            description = "Enable all messages. Overrides others when active."
     )
     public static boolean allMessages = false;
     @Switch(

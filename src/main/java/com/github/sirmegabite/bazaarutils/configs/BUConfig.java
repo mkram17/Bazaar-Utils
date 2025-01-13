@@ -17,6 +17,7 @@ import java.util.List;
 public class BUConfig extends Config {
     public static List<ItemData> watchedItems = new ArrayList<>();
     public static OneKeyBind pasting = new OneKeyBind(Keyboard.KEY_V, Keyboard.KEY_LCONTROL);
+    public static double bzTax = 0.0125;
 
     public BUConfig(boolean enabled, boolean canToggle) {
         super(new Mod("BazaarUtils", ModType.SKYBLOCK,"/icon.png"), "/bazaarutils.json", enabled, canToggle);

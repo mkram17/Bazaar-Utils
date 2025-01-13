@@ -4,6 +4,7 @@ import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.google.gson.*;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,6 +17,7 @@ public class BazaarData {
     private static String jsonString;
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private static final String productNameFile = "C:\\mc modding\\Bazaar-Utils\\src\\main\\resources\\Bazaar Resources.json";
+    private static final String dataFile = "C:\\mc modding\\Bazaar-Utils\\src\\main\\resources\\Bazaar Json.json";
     static ScheduledExecutorService bzExecutor = Executors.newScheduledThreadPool(5);
 
 
@@ -36,6 +38,8 @@ public class BazaarData {
                         throwable.printStackTrace();
                     } else {
                         jsonString = getAsPrettyJsonObject(reply);
+                        writeJsonToFile(jsonString);
+
                         if (!watchedItems.isEmpty()) {
                             ItemData.update();
                         }
@@ -43,6 +47,15 @@ public class BazaarData {
                 });
             }
         }, 1, 2, TimeUnit.SECONDS);
+    }
+
+    private static void writeJsonToFile(String jsonString) {
+        try (FileWriter writer = new FileWriter(dataFile)) {
+            writer.write(jsonString);
+        } catch (IOException e) {
+            Util.notifyAll("Error writing JSON data to file: " + e.getMessage(), Util.notificationTypes.BAZAARDATA);
+            e.printStackTrace();
+        }
     }
 
     //(product id, what you are looking for in quick status-- either buyPrice or sellPrice)

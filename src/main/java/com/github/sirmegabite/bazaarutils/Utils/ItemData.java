@@ -1,8 +1,7 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
-import com.github.sirmegabite.bazaarutils.configs.BUConfig;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -77,7 +76,12 @@ public class ItemData {
     public int getIndex(){return watchedItems.indexOf(this);}
 
     public String getGeneralInfo(){
-        return "(name: " + name + "[" + getIndex() + "]" + ", price:" + price + ", volume: " + volume + ", type: " + priceType + ")";
+        String str = "(name: " + name + "[" + getIndex() + "]" + ", price:" + price + ", volume: " + volume;
+        if(amountClaimed != 0)
+            str += ", amount claimed: " + amountClaimed;
+        str += ", type: " + priceType;
+        str +=  ")";
+        return str;
     }
 
     public enum priceTypes{INSTASELL,INSTABUY;
@@ -112,6 +116,8 @@ public class ItemData {
     public static ArrayList<String> names = getVariables(ItemData::getName);
     public static ArrayList<Integer> amountClaimeds = getVariables(ItemData::getAmountClaimed);
 
+    private static List<ItemData> outdated = new ArrayList<>(Collections.emptyList());
+
     public ItemData(String name, Double price, priceTypes priceType, int volume) {
         this.name = name;
         this.priceType = priceType;
@@ -124,13 +130,10 @@ public class ItemData {
 
 
     public static void update(){
-        for(ItemData item: watchedItems) {
-//            System.out.println("trying to update item: " + item.getName());
-            item.marketPrice = BazaarData.findItemPrice(item.productId, item.priceType);
-//            System.out.println("new buy price: " +  BazaarData.findItemPrice(item.productId, "buyPrice"));
-
-        }
+        updateMarketPrices();
         updateLists();
+        findOutdated();
+        notifyOutdated();
     }
 
     private static void updateLists(){
@@ -138,6 +141,13 @@ public class ItemData {
         volumes = getVariables(ItemData::getVolume);
         names = getVariables(ItemData::getName);
         amountClaimeds = getVariables(ItemData::getAmountClaimed);
+    }
+
+    private static void updateMarketPrices(){
+        for(ItemData item: watchedItems) {
+            item.marketPrice = BazaarData.findItemPrice(item.productId, item.priceType);
+            Util.notifyAll(item.getGeneralInfo() + " has new market price: " + item.getMarketPrice(), Util.notificationTypes.BAZAARDATA);
+        }
     }
 
     public static ArrayList<String> getNames(){
@@ -183,8 +193,30 @@ public class ItemData {
         return item;
     }
 
+    public static void notifyOutdated(){
+        for(ItemData item: outdated){
+            Util.notifyAll(item.getGeneralInfo() + " is outdated.");
+        }
+    }
+
+    private static void findOutdated(){
+        outdated.clear();
+        for(ItemData item: watchedItems){
+            if(!item.isOutdated())
+                outdated.add(item);
+        }
+    }
+
+    private boolean isOutdated(){
+        if (priceType == priceTypes.INSTABUY) {
+            return this.price > this.marketPrice;
+        } else {
+            return this.price < this.marketPrice;
+        }
+    }
+
     public double getFlipPrice(){
-        if (priceType == ItemData.priceTypes.INSTABUY) {
+        if (priceType == priceTypes.INSTABUY) {
             return (BazaarData.findItemPrice(name, priceTypes.INSTASELL) + .1);
         } else {
             return (BazaarData.findItemPrice(productId, priceTypes.INSTABUY) - .1);
@@ -207,4 +239,5 @@ public class ItemData {
             removeItem(item);
     }
 
-}
+
+    }
