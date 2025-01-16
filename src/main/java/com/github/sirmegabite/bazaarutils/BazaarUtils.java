@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler;
 import com.github.sirmegabite.bazaarutils.Utils.BazaarData;
 import com.github.sirmegabite.bazaarutils.Utils.Commands;
+import com.github.sirmegabite.bazaarutils.Utils.Util;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
 import net.minecraft.inventory.ContainerChest;
@@ -27,7 +28,7 @@ public class BazaarUtils {
         MinecraftForge.EVENT_BUS.register(new AutoFlipper());
         MinecraftForge.EVENT_BUS.register(this);
         CommandManager.register(new Commands());
-        BazaarData.scheduleBazaar();
+        Util.startExecutors();
         config = new BUConfig(true, true);
 
     }

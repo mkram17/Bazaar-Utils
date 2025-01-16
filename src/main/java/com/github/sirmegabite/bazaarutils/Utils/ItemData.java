@@ -1,8 +1,13 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
+import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -96,9 +101,11 @@ public class ItemData {
     }
     public enum statuses{SET,FILLED}
 
+    static ScheduledExecutorService timeExecutor = Executors.newScheduledThreadPool(5);
+
     //insta sell and insta buy
     private double price;
-    private boolean isCopied = false;
+    private final boolean isCopied = false;
     private priceTypes priceType;
     //the sell or buy price of lowest/highest offer
     private double marketPrice;
@@ -116,7 +123,7 @@ public class ItemData {
     public static ArrayList<String> names = getVariables(ItemData::getName);
     public static ArrayList<Integer> amountClaimeds = getVariables(ItemData::getAmountClaimed);
 
-    private static List<ItemData> outdated = new ArrayList<>(Collections.emptyList());
+    private static final List<ItemData> outdated = new ArrayList<>(Collections.emptyList());
 
     public ItemData(String name, Double price, priceTypes priceType, int volume) {
         this.name = name;
@@ -126,16 +133,21 @@ public class ItemData {
         this.volume = volume;
         this.fullPrice = price*volume;
         this.status = statuses.SET;
+        updateLists();
     }
 
 
     public static void update(){
         updateMarketPrices();
-        updateLists();
         findOutdated();
-        notifyOutdated();
     }
 
+    public static void scheduleNotifyOutdated(int seconds){
+        //if its a decimal, it will schedule decimal for every second as ex: .3 = every 3 seconds
+        if(BUConfig.notifyOutdated) {
+            timeExecutor.scheduleAtFixedRate(() ->notifyOutdated(seconds), 0, 1, TimeUnit.SECONDS);
+        }
+    }
     private static void updateLists(){
         prices = getVariables(ItemData::getPrice);
         volumes = getVariables(ItemData::getVolume);
@@ -193,7 +205,7 @@ public class ItemData {
         return item;
     }
 
-    public static void notifyOutdated(){
+    public static void notifyOutdated(int executionsPer){
         for(ItemData item: outdated){
             Util.notifyAll(item.getGeneralInfo() + " is outdated.");
         }

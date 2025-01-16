@@ -1,5 +1,6 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
+import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.configs.Developer;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
@@ -45,6 +46,11 @@ public class Util {
         if(Developer.devMessages)
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + callingName + "] " + messageStr));
         LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
+    }
+
+    public static void startExecutors(){
+        BazaarData.scheduleBazaar();
+        ItemData.scheduleNotifyOutdated(BUConfig.outdatedTiming);
     }
     public static<T> void notifyAll(T message, notificationTypes notiType) {
         String callingName = getCallingClassName();

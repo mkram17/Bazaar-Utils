@@ -2,12 +2,14 @@ package com.github.sirmegabite.bazaarutils.configs;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.HUD;
+import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.OptionSize;
 import cc.polyfrost.oneconfig.config.migration.JsonMigrator;
+import cc.polyfrost.oneconfig.libs.checker.units.qual.min;
 import com.github.sirmegabite.bazaarutils.Utils.ItemData;
 import org.lwjgl.input.Keyboard;
 
@@ -39,10 +41,26 @@ public class BUConfig extends Config {
     )
     public static boolean autoFlip = true; // this is the default value.
 
+    @Switch(
+            name = "Notify Outdated",
+            description = "Notifies you when your buy or sell orders get outbid"
+    )
+    public static boolean notifyOutdated = true;
+
+    @Number(
+            name = "Notify Outdated Timing",
+            description = "The time between each time you will be notified in minutes",
+            min = 1,
+            max = 60
+    )
+    public static int outdatedTiming = 5;
+
     @HUD(name = "Developer",
             category = "Developer"
     )
 //    public Developer developer = new Developer();
     public Developer developer = new Developer();
+
+
 
 }
