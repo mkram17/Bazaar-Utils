@@ -12,12 +12,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.github.sirmegabite.bazaarutils.configs.BUConfig.outdatedTiming;
 import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class ItemData {
     public static ItemData getItem(int index){
         if(index != -1)
-         return watchedItems.get(index);
+            return watchedItems.get(index);
         else return null;
     }
 
@@ -102,10 +103,10 @@ public class ItemData {
     public enum statuses{SET,FILLED}
 
     static ScheduledExecutorService timeExecutor = Executors.newScheduledThreadPool(5);
+    private static int notifyOutdatedSeconds = 0;
 
     //insta sell and insta buy
     private double price;
-    private final boolean isCopied = false;
     private priceTypes priceType;
     //the sell or buy price of lowest/highest offer
     private double marketPrice;
@@ -123,7 +124,7 @@ public class ItemData {
     public static ArrayList<String> names = getVariables(ItemData::getName);
     public static ArrayList<Integer> amountClaimeds = getVariables(ItemData::getAmountClaimed);
 
-    private static final List<ItemData> outdated = new ArrayList<>(Collections.emptyList());
+    private static List<ItemData> outdated = new ArrayList<>(Collections.emptyList());
 
     public ItemData(String name, Double price, priceTypes priceType, int volume) {
         this.name = name;
@@ -133,12 +134,12 @@ public class ItemData {
         this.volume = volume;
         this.fullPrice = price*volume;
         this.status = statuses.SET;
-        updateLists();
     }
 
 
     public static void update(){
         updateMarketPrices();
+        updateLists();
         findOutdated();
     }
 
@@ -157,18 +158,13 @@ public class ItemData {
 
     private static void updateMarketPrices(){
         for(ItemData item: watchedItems) {
+            double oldPrice = item.marketPrice;
             item.marketPrice = BazaarData.findItemPrice(item.productId, item.priceType);
-            Util.notifyAll(item.getGeneralInfo() + " has new market price: " + item.getMarketPrice(), Util.notificationTypes.BAZAARDATA);
+            if(oldPrice != item.marketPrice)
+                Util.notifyAll(item.getGeneralInfo() + " has new market price: " + item.getMarketPrice(), Util.notificationTypes.BAZAARDATA);
         }
     }
 
-    public static ArrayList<String> getNames(){
-        ArrayList<String> itemNames = new ArrayList<>();
-        for(ItemData item : watchedItems){
-            itemNames.add(item.getName());
-        }
-        return itemNames;
-    }
 
     //untested
     //run by ex: getVariables((item) -> item.getPrice()) or (chatgpt) ItemData.getVariables(ItemData::getPrice);
@@ -206,15 +202,18 @@ public class ItemData {
     }
 
     public static void notifyOutdated(int executionsPer){
-        for(ItemData item: outdated){
-            Util.notifyAll(item.getGeneralInfo() + " is outdated.");
+        if(notifyOutdatedSeconds % executionsPer == 0) {
+            for (ItemData item : outdated) {
+                Util.notifyAll(item.getGeneralInfo() + " is outdated.");
+            }
         }
+        notifyOutdatedSeconds++;
     }
 
     private static void findOutdated(){
         outdated.clear();
         for(ItemData item: watchedItems){
-            if(!item.isOutdated())
+            if(item.isOutdated())
                 outdated.add(item);
         }
     }
@@ -252,4 +251,4 @@ public class ItemData {
     }
 
 
-    }
+}

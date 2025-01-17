@@ -47,15 +47,12 @@ public class EventHandler {
         String unformattedOrderText = e.message.getFormattedText();
         orderText = Util.removeFormatting(unformattedOrderText);
         Util.notifyAll(orderText, Util.notificationTypes.ITEMDATA);
-        try {
               if (orderText.contains("Order Setup!") || orderText.contains("Offer Setup!")) {
                   itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.lastIndexOf("f") - 1);
                   volume = Integer.parseInt(orderText.substring(orderText.indexOf("!") + 2, orderText.indexOf("x")).replace(",", ""));
-                  double priceBeforeTax = Double.parseDouble(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("coins") - 1).replace(",", "")) / volume;
+                  price = Double.parseDouble(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("coins") - 1).replace(",", "")) / volume;
                   if(orderText.contains("Offer Setup!"))
-                    price = priceBeforeTax / (1-BUConfig.bzTax);
-                  else
-                      price = priceBeforeTax;
+                    price /= (1-BUConfig.bzTax);
                   price = (Math.round(price*10))/10.0;
                   Util.addWatchedItem(itemName, price, !orderText.contains("Buy"), volume);
                   Util.notifyAll(itemName + " was added with a price of " + price, Util.notificationTypes.ITEMDATA);
@@ -64,14 +61,10 @@ public class EventHandler {
                   volume = Integer.parseInt(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("x")).replace(",", ""));
                   itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("was") - 1);
                   item = ItemData.findItem(itemName, null, volume);
+                  assert item != null: "Could not find item";
                   ItemData.setItemFilled(item);
                   Util.notifyAll(item.getName() + "[" + item.getIndex() + "] was filled", Util.notificationTypes.ITEMDATA);
               }
-        }catch (Exception ex) {
-            Util.notifyAll("Order text: " + orderText, Util.notificationTypes.ITEMDATA);
-            Util.notifyAll("Error with order", Util.notificationTypes.ERROR);
-            ex.printStackTrace();
-        }
 
         if (orderText.contains("Claimed")) {
             handleClaimed(orderText);
@@ -102,7 +95,10 @@ public class EventHandler {
             else
                 item = ItemData.findItem(itemName, price, null);
 
-            assert item != null;
+            if (item == null) {
+                Util.notifyAll("Could not find claimed item: " + itemName, Util.notificationTypes.ITEMDATA);
+                return; // Or throw an exception depending on how you want to handle this error
+            }
             if (item.getVolume() == volumeClaimed) {
                 Util.notifyAll(item.getGeneralInfo() + " was removed", Util.notificationTypes.ITEMDATA);
                 ItemData.removeItem(item);
@@ -113,6 +109,7 @@ public class EventHandler {
         } catch (Exception ex) {
             Util.notifyAll("Unexpected error in order text: " + orderText, Util.notificationTypes.ERROR);
             ex.printStackTrace();
+            System.out.println("error test");
         }
     }
 

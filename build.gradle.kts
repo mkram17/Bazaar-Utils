@@ -89,7 +89,7 @@ dependencies {
     implementation ("net.hypixel:hypixel-api-transport-apache:4.4")
 
     // Basic OneConfig dependencies for legacy versions. See OneConfig example mod for more info
-    compileOnly("cc.polyfrost:oneconfig-1.8.9-forge:0.2.2-alpha+") // Should not be included in jar
+    compileOnly("cc.polyfrost:oneconfig-1.8.9-forge:0.2.2-alpha221") // Should not be included in jar
     // include should be replaced with a configuration that includes this in the jar
 //    include("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+") // Should be included in jar
     shade("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta17")

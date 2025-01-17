@@ -49,7 +49,7 @@ public class AutoFlipper {
     }
 
     public static void autoAddToSign(GuiOpenEvent e) {
-        if(flipPrice != -1 && inFlipGui()) {
+        if(flipPrice != 0 && inFlipGui()) {
             Util.addToSign(Double.toString(Util.getPrettyNumber(flipPrice)), e.gui);
             CompletableFuture.runAsync(AutoFlipper::closeGui);
             item.setPriceType(ItemData.priceTypes.INSTABUY);
