@@ -1,6 +1,7 @@
 package com.github.sirmegabite.bazaarutils.EventHandlers;
 
 import com.github.sirmegabite.bazaarutils.BazaarUtils;
+import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
 import com.github.sirmegabite.bazaarutils.Utils.ItemData;
 import com.github.sirmegabite.bazaarutils.Utils.Util;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
@@ -21,18 +22,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class EventHandler {
-    public static List<ItemStack> bazaarStack = new ArrayList<>();
-    public static String containerName = null;
-
-    //to run code once when gui opened
-    public void onGuiLoaded(){
-        CompletableFuture.runAsync(EventHandler::checkIfGuiLoaded).thenRun(() ->{
-            bazaarStack = getBazaarStack(BazaarUtils.container);
-            if(BUConfig.autoFlip && AutoFlipper.inFlipGui() && (AutoFlipper.guiType == AutoFlipper.guiTypes.CHEST)) {
-                AutoFlipper.flipPrice = AutoFlipper.getFlipItem().getFlipPrice();
-            }
-        });
-    }
 
     @SubscribeEvent
     public void onBazaarChat(ClientChatReceivedEvent e){
@@ -74,7 +63,6 @@ public class EventHandler {
         Integer volumeClaimed = null;
         Double price = null;
         String itemName = null;
-        int index;
         ItemData item;
         //there might be different claim messages
         try {
@@ -83,7 +71,7 @@ public class EventHandler {
                 itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("worth") - 1);
                 price = Double.parseDouble(orderText.substring(orderText.indexOf("worth") + 6, orderText.indexOf("coins") - 1).replace(",", "")) / volumeClaimed;
             }
-            if (orderText.contains("at")) {
+            else if (orderText.contains("at")) {
                 volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("selling") + 8, orderText.indexOf("x")).replace(",", ""));
                 itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("at") - 1);
 //            price = Double.parseDouble(orderText.substring(orderText.indexOf("at") + 3, orderText.indexOf("each") - 1).replace(",", ""));
@@ -114,93 +102,8 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public void onBazaarTick(TickEvent.ClientTickEvent e) {
-        //if it isnt end phase, return
-        if (e.phase != TickEvent.Phase.END) {
-            return;
-        }
-
-        //if we arent a gui, return
-        GuiScreen currentScreen = Minecraft.getMinecraft().currentScreen;
-
-        if (!(currentScreen instanceof GuiChest)) {
-            BazaarUtils.container = null;
-            return;
-        }
-
-        GuiChest chestScreen = (GuiChest) currentScreen;
-        ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
-
-        bazaarStack = getBazaarStack(guiContainer);
-
-        BazaarUtils.container = guiContainer;
-    }
-
-    @SubscribeEvent
     public void guiChestOpenedEvent(GuiOpenEvent e) {
-        if ((e.gui instanceof GuiChest)) {
-            GuiChest chestScreen = (GuiChest) e.gui;
-            ContainerChest guiContainer = (ContainerChest) chestScreen.inventorySlots;
-            containerName = guiContainer.getLowerChestInventory().getDisplayName().getFormattedText();
-            Util.notifyAll("Container Name: " + containerName, Util.notificationTypes.GUI);
-            onGuiLoaded();
-        }
-
+        BazaarUtils.gui = new GUIUtils(e);
     }
 
-
-    public static void checkIfGuiLoaded() {
-            while (true) {
-                //sometimes gui has not loaded at this point causing errors but wont say anything
-                try {
-                    Thread.sleep(20);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-                GuiChest chestScreen = (GuiChest) screen;
-                ContainerChest container = (ContainerChest) chestScreen.inventorySlots;
-                bazaarStack = getBazaarStack(container);
-
-                int size = container.getLowerChestInventory().getSizeInventory();
-                if (size == 0) {
-                    continue;
-                }
-
-                ItemStack bottomRightItem = container.getLowerChestInventory().getStackInSlot(size - 1);
-
-                if (bottomRightItem != null && !isItemLoading()) {
-                    Util.notifyAll("Item detected in the bottom-right corner: " + bottomRightItem.getDisplayName(), Util.notificationTypes.GUI);
-                    break;
-                }
-            }
-    }
-
-    public static boolean isItemLoading(){
-        for (ItemStack item : bazaarStack) {
-            NBTTagCompound tagCompound = item.getTagCompound();
-
-            if (tagCompound == null) continue;
-            String displayName = Util.removeFormatting(tagCompound.getCompoundTag("display").getString("Name"));
-            if(displayName.contains("Loading")) {
-                Util.notifyAll("Loading item...", Util.notificationTypes.GUI);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //returns a list with all ItemStacks in gui
-    public static List<ItemStack> getBazaarStack(ContainerChest container) {
-        List<ItemStack> bzStack = new ArrayList<>();
-        for (int i = 0; i < container.getLowerChestInventory().getSizeInventory(); i++) {
-            ItemStack stack = container.getLowerChestInventory().getStackInSlot(i);
-
-            if (stack != null) {
-//                Util.notifyAll("Slot " + i + ": " + stack, this.getClass());
-                bzStack.add(stack);
-            }
-        }
-        return bzStack;
-    }
 }

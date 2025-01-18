@@ -1,5 +1,6 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
+import com.github.sirmegabite.bazaarutils.BazaarUtils;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.google.gson.*;
 
@@ -31,7 +32,7 @@ public class BazaarData {
     //called in init
     public static void scheduleBazaar(){
         bzExecutor.scheduleAtFixedRate(() -> {
-            if(BUConfig.modEnabled) {
+            if(BazaarUtils.config.enabled) {
                 APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
                     if (throwable != null) {
                         Util.notifyAll("Exception thrown trying to get bazaar data");

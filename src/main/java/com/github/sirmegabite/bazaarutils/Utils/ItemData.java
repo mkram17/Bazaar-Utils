@@ -143,13 +143,13 @@ public class ItemData {
         findOutdated();
     }
 
-    public static void scheduleNotifyOutdated(int seconds){
+    public static void scheduleNotifyOutdated(){
         //if its a decimal, it will schedule decimal for every second as ex: .3 = every 3 seconds
         if(BUConfig.notifyOutdated) {
-            timeExecutor.scheduleAtFixedRate(() ->notifyOutdated(seconds), 0, 1, TimeUnit.SECONDS);
+            timeExecutor.scheduleAtFixedRate(ItemData::notifyOutdated, 0, 1, TimeUnit.SECONDS);
         }
     }
-    private static void updateLists(){
+    public static void updateLists(){
         prices = getVariables(ItemData::getPrice);
         volumes = getVariables(ItemData::getVolume);
         names = getVariables(ItemData::getName);
@@ -163,6 +163,11 @@ public class ItemData {
             if(oldPrice != item.marketPrice)
                 Util.notifyAll(item.getGeneralInfo() + " has new market price: " + item.getMarketPrice(), Util.notificationTypes.BAZAARDATA);
         }
+    }
+
+    public void flipItem(){
+        this.priceType = this.priceType.getOpposite();
+        this.price = this.getFlipPrice();
     }
 
 
@@ -201,8 +206,8 @@ public class ItemData {
         return item;
     }
 
-    public static void notifyOutdated(int executionsPer){
-        if(notifyOutdatedSeconds % executionsPer == 0) {
+    public static void notifyOutdated(){
+        if(notifyOutdatedSeconds % outdatedTiming == 0) {
             for (ItemData item : outdated) {
                 Util.notifyAll(item.getGeneralInfo() + " is outdated.");
             }
@@ -227,10 +232,11 @@ public class ItemData {
     }
 
     public double getFlipPrice(){
+        updateMarketPrices();
         if (priceType == priceTypes.INSTABUY) {
-            return (BazaarData.findItemPrice(name, priceTypes.INSTASELL) + .1);
+            return (marketPrice + .1);
         } else {
-            return (BazaarData.findItemPrice(productId, priceTypes.INSTABUY) - .1);
+            return (marketPrice - .1);
         }
     }
 

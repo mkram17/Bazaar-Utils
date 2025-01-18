@@ -19,19 +19,12 @@ import java.util.List;
 public class BUConfig extends Config {
     public static List<ItemData> watchedItems = new ArrayList<>();
     public static OneKeyBind pasting = new OneKeyBind(Keyboard.KEY_V, Keyboard.KEY_LCONTROL);
-    public static double bzTax = 0.0125;
+    public static double bzTax = 0.01125;
 
     public BUConfig(boolean enabled, boolean canToggle) {
         super(new Mod("BazaarUtils", ModType.SKYBLOCK,"/icon.png"), "/bazaarutils.json", enabled, canToggle);
         initialize();
     }
-    @Switch(
-            name = "Mod Enabled",
-            size = OptionSize.DUAL, // optional, declares whether the element is single column or dual column
-            category = "General", // optional
-            subcategory = "Switches" // optional
-    )
-    public static boolean modEnabled = true;
     @Switch(
             name = "Auto Flip",
             size = OptionSize.SINGLE, // optional, declares whether the element is single column or dual column

@@ -1,15 +1,10 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
-import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.configs.Developer;
-import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
 import org.apache.logging.log4j.LogManager;
-import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -50,7 +45,7 @@ public class Util {
 
     public static void startExecutors(){
         BazaarData.scheduleBazaar();
-        ItemData.scheduleNotifyOutdated(BUConfig.outdatedTiming);
+        ItemData.scheduleNotifyOutdated();
     }
     public static<T> void notifyAll(T message, notificationTypes notiType) {
         String callingName = getCallingClassName();
@@ -136,14 +131,6 @@ public class Util {
             System.out.println("Failed to write data to file");
             e.printStackTrace();
         }
-    }
-
-    //thanks to SkyHanni
-    public static void addToSign(String info, GuiScreen thisGui){
-        IChatComponent[] lines = ((AccessorGuiEditSign) thisGui).getTileSign().signText;
-        int index = ((AccessorGuiEditSign) thisGui).getEditLine();
-        String text = lines[index].getUnformattedText() + info;
-        lines[index] = new ChatComponentText(capAtMinecraftLength(text,91));
     }
 
     public static String getClipboardContents() {

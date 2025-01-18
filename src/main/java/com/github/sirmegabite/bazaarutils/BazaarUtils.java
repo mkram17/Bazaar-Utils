@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler;
 import com.github.sirmegabite.bazaarutils.Utils.BazaarData;
 import com.github.sirmegabite.bazaarutils.Utils.Commands;
+import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
 import com.github.sirmegabite.bazaarutils.Utils.Util;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
@@ -19,7 +20,7 @@ public class BazaarUtils {
     public static final String MODID = "bazaarutils";
     public static final String NAME = "Bazaar Utils";
     public static final String VERSION = "0.0.1";
-    public static ContainerChest container;
+    public static GUIUtils gui;
     public static BUConfig config;
 
     @Mod.EventHandler
