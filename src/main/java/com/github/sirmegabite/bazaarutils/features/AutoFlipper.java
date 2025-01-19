@@ -30,9 +30,12 @@ public class AutoFlipper {
          autoAddToSign(e);
     }
 
-    public static void updateFlip(){
-        item = getFlipItem();
-        flipPrice = item.getFlipPrice();
+    public static void updateFlipData(){
+        if(BUConfig.autoFlip && GUIUtils.flipGUI.wasLastChestFlip()) {
+            item = getFlipItem();
+            assert item != null : "Could not find flip item.";
+            flipPrice = item.getFlipPrice();
+        }
     }
 
     public static void autoAddToSign(GuiOpenEvent e) {

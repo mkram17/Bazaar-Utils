@@ -16,6 +16,7 @@ import net.minecraftforge.client.event.GuiOpenEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GUIUtils {
 
@@ -72,6 +73,7 @@ public class GUIUtils {
     private String containerName;
     private guiTypes guiType;
     private  List<ItemStack> itemStacks = new ArrayList<>();
+    private final List<Runnable> postLoadTasks = new CopyOnWriteArrayList<>();
 
     public static GUIUtils flipGUI;
 
@@ -98,7 +100,6 @@ public class GUIUtils {
         //gui not loaded at this point, so is null
         Util.notifyAll("In a chest.", Util.notificationTypes.GUI);
         onChestLoaded();
-
     }
 
     public void loadSign(){
@@ -106,6 +107,11 @@ public class GUIUtils {
         Util.notifyAll("In a sign", Util.notificationTypes.GUI);
 
     }
+
+    public void addPostLoadTask(Runnable task) {
+        postLoadTasks.add(task);
+    }
+
     public void onChestLoaded(){
         CompletableFuture.runAsync(this::checkIfGuiLoaded).thenRun(() ->{
             guiType = guiType.CHEST;
@@ -113,10 +119,8 @@ public class GUIUtils {
             containerName = this.getContainerChest().getLowerChestInventory().getDisplayName().getFormattedText();
             Util.notifyAll("Container Name: " + this.getContainerName(), Util.notificationTypes.GUI);
             updateFlipGui();
-            AutoFlipper.updateFlip();
-            if(BUConfig.autoFlip && wasLastChestFlip() && guiType == guiTypes.CHEST) {
-                AutoFlipper.flipPrice = AutoFlipper.getFlipItem().getFlipPrice();
-            }
+            AutoFlipper.updateFlipData();
+            postLoadTasks.forEach(Runnable::run); // Execute registered tasks
         });
     }
 
