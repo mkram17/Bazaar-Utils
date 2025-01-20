@@ -77,11 +77,8 @@ public class GUIUtils {
     public enum guiTypes {CHEST, SIGN}
 
     @SubscribeEvent
-    public void load(GuiOpenEvent e){
-        BazaarUtils.gui = this;
-    }
-    @SubscribeEvent
     public void loadSign(GuiOpenEvent e){
+        BazaarUtils.gui = this;
         if(!(e.gui instanceof AccessorGuiEditSign))
             return;
         guiType = guiType.SIGN;

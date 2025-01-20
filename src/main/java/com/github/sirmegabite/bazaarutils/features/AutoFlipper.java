@@ -22,12 +22,18 @@ public class AutoFlipper {
 
 
     @SubscribeEvent
-    public void onSignOpenedEvent(GuiOpenEvent e){
-        //is the gui a Accessorguieditsign even after the event? maybe not
-        if (!BUConfig.autoFlip || !(BazaarUtils.gui.getGuiType() == GUIUtils.guiTypes.SIGN))
+    public void onSignOpenedEvent(GuiOpenEvent e) {
+        // Ensure auto flip is enabled
+        if (!BUConfig.autoFlip)
             return;
-        if(item != null)
-         autoAddToSign(e);
+
+        // Check if gui is initialized and of the correct type
+        if (BazaarUtils.gui == null || BazaarUtils.gui.getGuiType() != GUIUtils.guiTypes.SIGN)
+            return;
+
+        // Proceed only if item is not null
+        if (item != null)
+            autoAddToSign(e);
     }
 
     public static void updateFlipData(){
