@@ -100,10 +100,4 @@ public class EventHandler {
             System.out.println("error test");
         }
     }
-
-    @SubscribeEvent
-    public void guiChestOpenedEvent(GuiOpenEvent e) {
-        BazaarUtils.gui = new GUIUtils(e);
-    }
-
 }

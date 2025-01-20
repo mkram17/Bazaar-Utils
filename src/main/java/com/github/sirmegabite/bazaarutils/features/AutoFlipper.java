@@ -31,7 +31,7 @@ public class AutoFlipper {
     }
 
     public static void updateFlipData(){
-        if(BUConfig.autoFlip && GUIUtils.flipGUI.wasLastChestFlip()) {
+        if(BUConfig.autoFlip && BazaarUtils.gui.wasLastChestFlip()) {
             item = getFlipItem();
             assert item != null : "Could not find flip item.";
             flipPrice = item.getFlipPrice();

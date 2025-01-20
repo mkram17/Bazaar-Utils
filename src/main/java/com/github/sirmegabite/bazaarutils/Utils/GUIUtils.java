@@ -1,6 +1,7 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
-import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+import com.github.sirmegabite.bazaarutils.BazaarUtils;
+import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
 import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
@@ -8,15 +9,13 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GUIUtils {
 
@@ -63,7 +62,7 @@ public class GUIUtils {
 
 
     public boolean wasLastChestFlip(){
-        return flipGUI.inFlipGui();
+        return inFlipGui;
     }
 
     private GuiOpenEvent event;
@@ -73,110 +72,33 @@ public class GUIUtils {
     private String containerName;
     private guiTypes guiType;
     private  List<ItemStack> itemStacks = new ArrayList<>();
-    private final List<Runnable> postLoadTasks = new CopyOnWriteArrayList<>();
+    public static boolean inFlipGui;
 
-    public static GUIUtils flipGUI;
+    public enum guiTypes {CHEST, SIGN}
 
-    public enum guiTypes {CHEST, SIGN, OTHER, LOADINGCHEST}
-
-    public GUIUtils(GuiOpenEvent event) {
-        this.event = event;
-        this.gui = event.gui;
-        load();
+    @SubscribeEvent
+    public void load(GuiOpenEvent e){
+        BazaarUtils.gui = this;
     }
-
-    public void load(){
-        if(gui instanceof GuiChest){
-            loadChest();
-        } else if (gui instanceof AccessorGuiEditSign){
-            loadSign();
-        } else {
-            guiType = guiType.OTHER;
-        }
-    }
-
-    public void loadChest(){
-        guiType = guiType.LOADINGCHEST;
-        //gui not loaded at this point, so is null
-        Util.notifyAll("In a chest.", Util.notificationTypes.GUI);
-        onChestLoaded();
-    }
-
-    public void loadSign(){
+    @SubscribeEvent
+    public void loadSign(GuiOpenEvent e){
+        if(!(e.gui instanceof AccessorGuiEditSign))
+            return;
         guiType = guiType.SIGN;
         Util.notifyAll("In a sign", Util.notificationTypes.GUI);
-
     }
 
-    public void addPostLoadTask(Runnable task) {
-        postLoadTasks.add(task);
+    @SubscribeEvent
+    public void onChestLoaded(ChestLoadedEvent e){
+        guiType = guiType.CHEST;
+        Util.notifyAll("In a chest.", Util.notificationTypes.GUI);
+        itemStacks = e.getItemStacks();
+        containerName = e.getContainerName();
+        Util.notifyAll("Container Name: " + this.getContainerName(), Util.notificationTypes.GUI);
+        updateFlipGui();
+        AutoFlipper.updateFlipData();
     }
 
-    public void onChestLoaded(){
-        CompletableFuture.runAsync(this::checkIfGuiLoaded).thenRun(() ->{
-            guiType = guiType.CHEST;
-            updateItemStacks();
-            containerName = this.getContainerChest().getLowerChestInventory().getDisplayName().getFormattedText();
-            Util.notifyAll("Container Name: " + this.getContainerName(), Util.notificationTypes.GUI);
-            updateFlipGui();
-            AutoFlipper.updateFlipData();
-            postLoadTasks.forEach(Runnable::run); // Execute registered tasks
-        });
-    }
-
-    public void checkIfGuiLoaded() {
-        while (true) {
-            //sometimes gui has not loaded at this point causing errors but wont say anything
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            gui = Minecraft.getMinecraft().currentScreen;
-            chestScreen = (GuiChest) gui;
-            containerChest = (ContainerChest) chestScreen.inventorySlots;
-
-            updateItemStacks();
-            int size = containerChest.getLowerChestInventory().getSizeInventory();
-
-            if (size == 0) {
-                continue;
-            }
-
-            ItemStack bottomRightItem = containerChest.getLowerChestInventory().getStackInSlot(size - 1);
-
-            if (bottomRightItem != null && areItemsLoaded()) {
-                Util.notifyAll("Item detected in the bottom-right corner: " + bottomRightItem.getDisplayName(), Util.notificationTypes.GUI);
-                break;
-            }
-        }
-    }
-
-    public boolean areItemsLoaded(){
-        for (ItemStack item : itemStacks) {
-            NBTTagCompound tagCompound = item.getTagCompound();
-
-            if (tagCompound == null) continue;
-            String displayName = Util.removeFormatting(tagCompound.getCompoundTag("display").getString("Name"));
-            if(displayName.contains("Loading")) {
-                Util.notifyAll("Loading item...", Util.notificationTypes.GUI);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public void updateItemStacks() {
-        itemStacks.clear();
-        for (int i = 0; i < containerChest.getLowerChestInventory().getSizeInventory(); i++) {
-            ItemStack stack = containerChest.getLowerChestInventory().getStackInSlot(i);
-
-            if (stack != null) {
-//                Util.notifyAll("Slot " + i + ": " + stack, this.getClass());
-                itemStacks.add(stack);
-            }
-        }
-    }
     public static void closeGui(){
         try{
             Thread.sleep(200);
@@ -199,13 +121,14 @@ public class GUIUtils {
         if(containerName == null) return false;
         return containerName.contains("Order options");
     }
+
     public void updateFlipGui(){
         if(inFlipGui()) {
-            flipGUI = this;
+            inFlipGui = true;
             Util.notifyAll("In flip gui", Util.notificationTypes.GUI);
         }
         else if(guiType == guiTypes.CHEST) {
-            flipGUI = null;
+            inFlipGui = false;
             Util.notifyAll("Flip gui removed", Util.notificationTypes.GUI);
         }
     }
