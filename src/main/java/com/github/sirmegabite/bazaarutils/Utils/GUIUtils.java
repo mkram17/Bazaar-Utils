@@ -13,6 +13,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,13 +78,24 @@ public class GUIUtils {
     public enum guiTypes {CHEST, SIGN}
 
     @SubscribeEvent
-    public void loadSign(GuiOpenEvent e){
+    public void onGui(GuiOpenEvent e){
         BazaarUtils.gui = this;
+        inFlipGui = false;
+    }
+    @SubscribeEvent
+    public void loadSign(GuiOpenEvent e){
         if(!(e.gui instanceof AccessorGuiEditSign))
             return;
         guiType = guiType.SIGN;
         Util.notifyAll("In a sign", Util.notificationTypes.GUI);
     }
+//    @SubscribeEvent
+//    public void loadSign(TickEvent.ClientTickEvent e){
+//        if(!(Minecraft.getMinecraft().currentScreen instanceof AccessorGuiEditSign))
+//            return;
+//        guiType = guiType.SIGN;
+//
+//    }
 
     @SubscribeEvent
     public void onChestLoaded(ChestLoadedEvent e){
@@ -91,7 +103,6 @@ public class GUIUtils {
         Util.notifyAll("In a chest.", Util.notificationTypes.GUI);
         itemStacks = e.getItemStacks();
         containerName = e.getContainerName();
-        Util.notifyAll("Container Name: " + this.getContainerName(), Util.notificationTypes.GUI);
         updateFlipGui();
         AutoFlipper.updateFlipData();
     }

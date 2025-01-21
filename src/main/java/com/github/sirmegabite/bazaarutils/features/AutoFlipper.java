@@ -1,10 +1,13 @@
 package com.github.sirmegabite.bazaarutils.features;
 
 import com.github.sirmegabite.bazaarutils.BazaarUtils;
+import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
 import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
 import com.github.sirmegabite.bazaarutils.Utils.ItemData;
 import com.github.sirmegabite.bazaarutils.Utils.Util;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -23,25 +26,28 @@ public class AutoFlipper {
 
     @SubscribeEvent
     public void onSignOpenedEvent(GuiOpenEvent e) {
-        // Ensure auto flip is enabled
         if (!BUConfig.autoFlip)
             return;
 
-        // Check if gui is initialized and of the correct type
-        if (BazaarUtils.gui == null || BazaarUtils.gui.getGuiType() != GUIUtils.guiTypes.SIGN)
+        //for some reason gui loads twice, and second time it works
+        if (BazaarUtils.gui == null || !(Minecraft.getMinecraft().currentScreen instanceof AccessorGuiEditSign))
             return;
 
-        // Proceed only if item is not null
         if (item != null)
             autoAddToSign(e);
     }
 
-    public static void updateFlipData(){
+    @SubscribeEvent
+    public void guiChestOpenedEvent(ChestLoadedEvent e) {
         if(BUConfig.autoFlip && BazaarUtils.gui.wasLastChestFlip()) {
-            item = getFlipItem();
+            item = getFlipItem(e);
             assert item != null : "Could not find flip item.";
             flipPrice = item.getFlipPrice();
         }
+    }
+
+    public static void updateFlipData(){
+
     }
 
     public static void autoAddToSign(GuiOpenEvent e) {
@@ -52,9 +58,9 @@ public class AutoFlipper {
         }
     }
 
-    public static ItemData getFlipItem(){
+    public static ItemData getFlipItem(ChestLoadedEvent e){
 
-        for (ItemStack rawItem : BazaarUtils.gui.getItemStacks()) {
+        for (ItemStack rawItem : e.getItemStacks()) {
             byte STRING_NBT_TAG = new NBTTagString().getId();
             NBTTagCompound tagCompound = rawItem.getTagCompound();
 
@@ -93,13 +99,14 @@ public class AutoFlipper {
         item = ItemData.findItem(null, orderPrice, orderVolumeFilled);
         if (item != null) {
             if (item.getStatus() == ItemData.statuses.FILLED) {
+                Util.notifyAll("Found match.", Util.notificationTypes.ITEMDATA);
                 return true;
             }else {
-                Util.notifyAll("found match, but isnt filled");
+                Util.notifyAll("found match, but isnt filled", Util.notificationTypes.ERROR);
                 return true;
             }
         }
-        Util.notifyAll("Couldnt find a match");
+        Util.notifyAll("Couldnt find a match", Util.notificationTypes.ITEMDATA);
         return false;
     }
 
