@@ -3,6 +3,7 @@ package com.github.sirmegabite.bazaarutils;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
 import com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler;
+import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
 import com.github.sirmegabite.bazaarutils.Utils.BazaarData;
 import com.github.sirmegabite.bazaarutils.Utils.Commands;
 import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
@@ -31,6 +32,7 @@ public class BazaarUtils {
         MinecraftForge.EVENT_BUS.register(new AutoFlipper());
         MinecraftForge.EVENT_BUS.register(new GUIUtils());
         MinecraftForge.EVENT_BUS.register(new ChestLoadedEvent());
+        MinecraftForge.EVENT_BUS.register(new SignOpenEvent());
         MinecraftForge.EVENT_BUS.register(this);
         CommandManager.register(new Commands());
         Util.startExecutors();

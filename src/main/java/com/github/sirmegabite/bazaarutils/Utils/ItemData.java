@@ -86,6 +86,8 @@ public class ItemData {
         if(amountClaimed != 0)
             str += ", amount claimed: " + amountClaimed;
         str += ", type: " + priceType;
+        if(status == statuses.FILLED)
+            str += ", status: " + status;
         str +=  ")";
         return str;
     }
@@ -119,10 +121,11 @@ public class ItemData {
     private int amountFilled = 0;
 
     //lists
-    public static ArrayList<Double> prices = getVariables(ItemData::getPrice);
-    public static ArrayList<Integer> volumes = getVariables(ItemData::getVolume);
-    public static ArrayList<String> names = getVariables(ItemData::getName);
-    public static ArrayList<Integer> amountClaimeds = getVariables(ItemData::getAmountClaimed);
+    public static ArrayList<Double> priceList = getVariables(ItemData::getPrice);
+    public static ArrayList<Integer> volumeList = getVariables(ItemData::getVolume);
+    public static ArrayList<String> nameList = getVariables(ItemData::getName);
+    public static ArrayList<Integer> amountClaimedList = getVariables(ItemData::getAmountClaimed);
+    public static ArrayList<priceTypes> priceTypesList = getVariables(ItemData::getPriceType);
 
     private static List<ItemData> outdated = new ArrayList<>(Collections.emptyList());
 
@@ -150,16 +153,17 @@ public class ItemData {
         }
     }
     public static void updateLists(){
-        prices = getVariables(ItemData::getPrice);
-        volumes = getVariables(ItemData::getVolume);
-        names = getVariables(ItemData::getName);
-        amountClaimeds = getVariables(ItemData::getAmountClaimed);
+        priceList = getVariables(ItemData::getPrice);
+        volumeList = getVariables(ItemData::getVolume);
+        nameList = getVariables(ItemData::getName);
+        amountClaimedList = getVariables(ItemData::getAmountClaimed);
+        priceTypesList = getVariables(ItemData::getPriceType);
     }
 
     private static void updateMarketPrices(){
         for(ItemData item: watchedItems) {
             double oldPrice = item.marketPrice;
-            item.marketPrice = BazaarData.findItemPrice(item.productId, item.priceType);
+            item.marketPrice = Util.getPrettyNumber(BazaarData.findItemPrice(item.productId, item.priceType));
             if(oldPrice != item.marketPrice)
                 Util.notifyAll(item.getGeneralInfo() + " has new market price: " + item.getMarketPrice(), Util.notificationTypes.BAZAARDATA);
         }
@@ -181,12 +185,13 @@ public class ItemData {
         return variables;
     }
 
-    public static ItemData findItem(String name, Double price, Integer volume) {
+    public static ItemData findItem(String name, Double price, Integer volume, priceTypes priceType) {
 //        Util.notifyAll("Called from: " + Util.getCallingClassName(), Util.notificationTypes.ITEMDATA);
         List<Integer> matchingIndices = IntStream.range(0, watchedItems.size())
-                .filter(i -> (price == null || Util.isSimilar(prices.get(i), price)) &&
-                        (volume == null || volumes.get(i) == volume + amountClaimeds.get(i)) &&
-                        (name == null || name.equalsIgnoreCase(names.get(i))))
+                .filter(i -> (price == null || Util.isSimilar(priceList.get(i), price)) &&
+                        (volume == null || volumeList.get(i) == volume + amountClaimedList.get(i)) &&
+                        (name == null || name.equalsIgnoreCase(nameList.get(i))) &&
+                        (priceType == null || priceType == priceTypesList.get(i)))
                 .boxed()
                 .collect(Collectors.toList()); // Use Collectors.toList() for older Java versions.
 

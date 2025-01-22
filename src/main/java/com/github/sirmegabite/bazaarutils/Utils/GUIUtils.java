@@ -2,6 +2,7 @@ package com.github.sirmegabite.bazaarutils.Utils;
 
 import com.github.sirmegabite.bazaarutils.BazaarUtils;
 import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
+import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
 import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class GUIUtils {
 
@@ -81,40 +83,34 @@ public class GUIUtils {
     public void onGui(GuiOpenEvent e){
         BazaarUtils.gui = this;
         inFlipGui = false;
+        if (e.gui instanceof GuiChest) {
+            containerName = Util.removeFormatting(((ContainerChest) ((GuiChest) e.gui).inventorySlots).getLowerChestInventory().getDisplayName().getFormattedText());
+            Util.notifyAll("Container Name: " + containerName, Util.notificationTypes.GUI);
+
+        }
+        updateFlipGui();
     }
     @SubscribeEvent
-    public void loadSign(GuiOpenEvent e){
-        if(!(e.gui instanceof AccessorGuiEditSign))
-            return;
+    public void loadSign(SignOpenEvent e){
         guiType = guiType.SIGN;
-        Util.notifyAll("In a sign", Util.notificationTypes.GUI);
     }
-//    @SubscribeEvent
-//    public void loadSign(TickEvent.ClientTickEvent e){
-//        if(!(Minecraft.getMinecraft().currentScreen instanceof AccessorGuiEditSign))
-//            return;
-//        guiType = guiType.SIGN;
-//
-//    }
 
     @SubscribeEvent
     public void onChestLoaded(ChestLoadedEvent e){
         guiType = guiType.CHEST;
-        Util.notifyAll("In a chest.", Util.notificationTypes.GUI);
         itemStacks = e.getItemStacks();
-        containerName = e.getContainerName();
-        updateFlipGui();
-        AutoFlipper.updateFlipData();
     }
 
     public static void closeGui(){
-        try{
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        Util.notifyAll("Closing gui", Util.notificationTypes.GUI);
-        Minecraft.getMinecraft().displayGuiScreen(null);
+        CompletableFuture.runAsync(() -> {
+            try{
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            Util.notifyAll("Closing gui", Util.notificationTypes.GUI);
+            Minecraft.getMinecraft().displayGuiScreen(null);
+        });
     }
 
     //thanks to SkyHanni
@@ -126,7 +122,7 @@ public class GUIUtils {
     }
 
     public boolean inFlipGui(){
-        if(containerName == null) return false;
+        if(containerName == null || Minecraft.getMinecraft().currentScreen == null) return false;
         return containerName.contains("Order options");
     }
 

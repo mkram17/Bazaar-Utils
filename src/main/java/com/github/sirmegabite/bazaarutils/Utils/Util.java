@@ -56,7 +56,8 @@ public class Util {
             messageStr = "§c" + messageStr;
 
         if(Developer.devMessages && (notiType.isEnabled() || Developer.allMessages)) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
+            if(Minecraft.getMinecraft().thePlayer != null)
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[" + simpleCallingName + "] " + messageStr));
             LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
         }
     }

@@ -2,6 +2,7 @@ package com.github.sirmegabite.bazaarutils.features;
 
 import com.github.sirmegabite.bazaarutils.BazaarUtils;
 import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
+import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
 import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
 import com.github.sirmegabite.bazaarutils.Utils.ItemData;
 import com.github.sirmegabite.bazaarutils.Utils.Util;
@@ -25,12 +26,8 @@ public class AutoFlipper {
 
 
     @SubscribeEvent
-    public void onSignOpenedEvent(GuiOpenEvent e) {
+    public void onSignOpenedEvent(SignOpenEvent e) {
         if (!BUConfig.autoFlip)
-            return;
-
-        //for some reason gui loads twice, and second time it works
-        if (BazaarUtils.gui == null || !(Minecraft.getMinecraft().currentScreen instanceof AccessorGuiEditSign))
             return;
 
         if (item != null)
@@ -39,21 +36,18 @@ public class AutoFlipper {
 
     @SubscribeEvent
     public void guiChestOpenedEvent(ChestLoadedEvent e) {
-        if(BUConfig.autoFlip && BazaarUtils.gui.wasLastChestFlip()) {
+        if(BUConfig.autoFlip && BazaarUtils.gui.inFlipGui()) {
             item = getFlipItem(e);
             assert item != null : "Could not find flip item.";
             flipPrice = item.getFlipPrice();
         }
     }
 
-    public static void updateFlipData(){
-
-    }
-
-    public static void autoAddToSign(GuiOpenEvent e) {
+    @SubscribeEvent
+    public static void autoAddToSign(SignOpenEvent e) {
             if(flipPrice != 0 && BazaarUtils.gui.wasLastChestFlip()) {
-            GUIUtils.addToSign(Double.toString(Util.getPrettyNumber(flipPrice)), e.gui);
-            CompletableFuture.runAsync(GUIUtils::closeGui);
+            GUIUtils.addToSign(Double.toString(Util.getPrettyNumber(flipPrice)), e.getGuiScreen());
+            GUIUtils.closeGui();
             item.setPriceType(ItemData.priceTypes.INSTABUY);
         }
     }
@@ -96,7 +90,7 @@ public class AutoFlipper {
     }
 
     public static boolean matchFound() {
-        item = ItemData.findItem(null, orderPrice, orderVolumeFilled);
+        item = ItemData.findItem(null, orderPrice, orderVolumeFilled, ItemData.priceTypes.INSTASELL);
         if (item != null) {
             if (item.getStatus() == ItemData.statuses.FILLED) {
                 Util.notifyAll("Found match.", Util.notificationTypes.ITEMDATA);

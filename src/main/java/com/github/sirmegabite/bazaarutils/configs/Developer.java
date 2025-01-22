@@ -57,9 +57,9 @@ public class Developer extends SingleTextHud {
     @Override
     public String getText(boolean example) {
         if(example) return "I'm in Example mode";
-        if(!ItemData.names.isEmpty()) {
+        if(!ItemData.nameList.isEmpty()) {
             ItemData.updateLists();
-            return String.join(", ", ItemData.names);
+            return String.join(", ", ItemData.nameList);
         }
         else return "No watched items";
     }

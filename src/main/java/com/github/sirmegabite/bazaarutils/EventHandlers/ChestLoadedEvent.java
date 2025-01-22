@@ -34,10 +34,6 @@ public class ChestLoadedEvent extends Event {
                 eventToPost.containerName = Util.removeFormatting(eventToPost.lowerChestInventory.getDisplayName().getFormattedText());
                 eventToPost.itemStacks = returnItemStacks();
 
-
-                Util.notifyAll("Container name: " + containerName, Util.notificationTypes.GUI);
-
-
                 MinecraftForge.EVENT_BUS.post(eventToPost); // Post the *new* event
             }
         });
@@ -73,7 +69,7 @@ public class ChestLoadedEvent extends Event {
             itemStacks = returnItemStacks();
             ItemStack bottomRightItem = container.getLowerChestInventory().getStackInSlot(size - 1);
             if (bottomRightItem != null && !isItemLoading()) {
-                Util.notifyAll("Item detected in the bottom-right corner: " + bottomRightItem.getDisplayName(), Util.notificationTypes.GUI);
+//                Util.notifyAll("Item detected in the bottom-right corner: " + bottomRightItem.getDisplayName(), Util.notificationTypes.GUI);
                 break;
             }
         }
