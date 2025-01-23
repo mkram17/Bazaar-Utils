@@ -3,18 +3,19 @@ package com.github.sirmegabite.bazaarutils.Utils;
 import com.github.sirmegabite.bazaarutils.BazaarUtils;
 import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
 import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
-import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
 import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,10 @@ public class GUIUtils {
         return inFlipGui;
     }
 
+    public boolean inBuyOrderScreen(){
+        if(containerName == null) return false;
+        return containerName.contains("How many do you want?");
+    }
     private GuiOpenEvent event;
     private GuiScreen gui;
     private GuiChest chestScreen;
@@ -115,6 +120,10 @@ public class GUIUtils {
 
     //thanks to SkyHanni
     public static void addToSign(String info, GuiScreen thisGui){
+        if(!(thisGui instanceof AccessorGuiEditSign)) {
+            Util.notifyAll("Cannot add to sign. GUI not recognized as sign", Util.notificationTypes.ERROR);
+            return;
+        }
         IChatComponent[] lines = ((AccessorGuiEditSign) thisGui).getTileSign().signText;
         int index = ((AccessorGuiEditSign) thisGui).getEditLine();
         String text = lines[index].getUnformattedText() + info;
@@ -133,7 +142,39 @@ public class GUIUtils {
         }
         else if(guiType == guiTypes.CHEST) {
             inFlipGui = false;
-            Util.notifyAll("Flip gui removed", Util.notificationTypes.GUI);
+//            Util.notifyAll("Flip gui removed", Util.notificationTypes.GUI);
         }
+    }
+
+    public static void clickItem(int itemId){
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+        Container openContainer = player.openContainer;
+        // Validate FIRST
+        if (openContainer == null) {
+            Util.notifyAll("No open container!", Util.notificationTypes.ERROR);
+            return;
+        }
+
+        // Validate slotId range (0-26 for chest slots)
+        if (itemId < 0 || itemId >= openContainer.inventorySlots.size()) {
+            Util.notifyAll("Invalid slot: " + itemId, Util.notificationTypes.ERROR);
+            return;
+        }
+
+        // Now safe to access slots
+        CompletableFuture.runAsync(() -> {
+            try{
+                Thread.sleep(30);
+                Minecraft.getMinecraft().playerController.windowClick(
+                        openContainer.windowId,
+                        itemId,
+                        0,          // Left click
+                        0,          // Normal click type
+                        player
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

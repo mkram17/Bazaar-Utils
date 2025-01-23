@@ -33,6 +33,7 @@ public class BazaarUtils {
         MinecraftForge.EVENT_BUS.register(new GUIUtils());
         MinecraftForge.EVENT_BUS.register(new ChestLoadedEvent());
         MinecraftForge.EVENT_BUS.register(new SignOpenEvent());
+        MinecraftForge.EVENT_BUS.register(new CustomOrder(BUConfig.buyMaxEnabled, 71680, 17));
         MinecraftForge.EVENT_BUS.register(this);
         CommandManager.register(new Commands());
         Util.startExecutors();

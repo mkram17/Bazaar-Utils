@@ -1,8 +1,12 @@
 package com.github.sirmegabite.bazaarutils.features;
 
+import com.github.sirmegabite.bazaarutils.BazaarUtils;
 import com.github.sirmegabite.bazaarutils.EventHandlers.ReplaceItemEvent;
+import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
+import com.github.sirmegabite.bazaarutils.EventHandlers.SlotClickEvent;
+import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -12,13 +16,17 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class CustomOrder {
     private final int orderAmount;
     private final int replaceSlotNumber;
-    public CustomOrder(int orderAmount, int replaceSlotNumber){
+    public boolean enabled;
+    private boolean signClicked = false;
+
+    public CustomOrder(boolean enabled, int orderAmount, int replaceSlotNumber){
+        this.enabled = enabled;
         this.orderAmount = orderAmount;
         this.replaceSlotNumber = replaceSlotNumber;
     }
     @SubscribeEvent
     public void onGUI(ReplaceItemEvent event){
-        if(!(event.getInventory().getDisplayName().equals("Order options")))
+        if(!BazaarUtils.gui.inBuyOrderScreen() || !enabled)
             return;
         if(event.getSlotNumber() != replaceSlotNumber)
             return;
@@ -37,5 +45,29 @@ public class CustomOrder {
         purpleGlassPane.getTagCompound().setTag("display", displayTag);
 
         event.replaceWith(purpleGlassPane);
+    }
+
+    @SubscribeEvent
+    public void onSlotClicked(SlotClickEvent event){
+        if(!BazaarUtils.gui.inBuyOrderScreen() || !enabled)
+            return;
+        if(event.slot.slotNumber != replaceSlotNumber)
+            return;
+        openSign(event.slotId);
+    }
+
+    @SubscribeEvent
+    public void onSignOpened(SignOpenEvent event){
+        if(!(signClicked)) return;
+        GUIUtils.addToSign(Integer.toString(orderAmount), Minecraft.getMinecraft().currentScreen);
+        GUIUtils.closeGui();
+        signClicked = false;
+    }
+
+
+    public void openSign(int slotId) {
+        int signSlotId = slotId - 1;
+        GUIUtils.clickItem(signSlotId);
+        signClicked = true;
     }
 }

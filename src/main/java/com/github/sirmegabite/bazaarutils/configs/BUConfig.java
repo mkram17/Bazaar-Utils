@@ -8,9 +8,8 @@ import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.OptionSize;
-import cc.polyfrost.oneconfig.config.migration.JsonMigrator;
-import cc.polyfrost.oneconfig.libs.checker.units.qual.min;
 import com.github.sirmegabite.bazaarutils.Utils.ItemData;
+import com.github.sirmegabite.bazaarutils.features.CustomOrder;
 import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
@@ -33,6 +32,13 @@ public class BUConfig extends Config {
             description = "Automatically paste the right price into the flip order sign"
     )
     public static boolean autoFlip = true; // this is the default value.
+
+    @Switch(
+            name = "Buy Max Option",
+            size = OptionSize.DUAL,
+            description = "Give an option to buy the maximum amount (71680) of an item in buy order screen."
+    )
+    public static boolean buyMaxEnabled = true;
 
     @Switch(
             name = "Notify Outdated",

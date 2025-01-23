@@ -43,7 +43,6 @@ public class AutoFlipper {
         }
     }
 
-    @SubscribeEvent
     public static void autoAddToSign(SignOpenEvent e) {
             if(flipPrice != 0 && BazaarUtils.gui.wasLastChestFlip()) {
             GUIUtils.addToSign(Double.toString(Util.getPrettyNumber(flipPrice)), e.getGuiScreen());
