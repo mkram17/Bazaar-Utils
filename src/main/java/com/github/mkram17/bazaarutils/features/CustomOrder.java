@@ -1,10 +1,10 @@
-package com.github.sirmegabite.bazaarutils.features;
+package com.github.mkram17.bazaarutils.features;
 
-import com.github.sirmegabite.bazaarutils.BazaarUtils;
-import com.github.sirmegabite.bazaarutils.EventHandlers.ReplaceItemEvent;
-import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
-import com.github.sirmegabite.bazaarutils.EventHandlers.SlotClickEvent;
-import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
+import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.EventHandlers.ReplaceItemEvent;
+import com.github.mkram17.bazaarutils.EventHandlers.SignOpenEvent;
+import com.github.mkram17.bazaarutils.EventHandlers.SlotClickEvent;
+import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;

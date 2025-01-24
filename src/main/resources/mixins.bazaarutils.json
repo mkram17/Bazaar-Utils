@@ -1,6 +1,6 @@
 {
   "package": "com.github.sirmegabite.bazaarutils.mixin",
-  "plugin": "com.github.sirmegabite.bazaarutils.init.AutoDiscoveryMixinPlugin",
+  "plugin": "com.github.mkram17.bazaarutils.init.AutoDiscoveryMixinPlugin",
   "refmap": "mixins.bazaarutils.refmap.json",
   "minVersion": "0.7",
   "compatibilityLevel": "JAVA_8"

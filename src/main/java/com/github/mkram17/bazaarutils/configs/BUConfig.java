@@ -1,4 +1,4 @@
-package com.github.sirmegabite.bazaarutils.configs;
+package com.github.mkram17.bazaarutils.configs;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.HUD;
@@ -8,8 +8,8 @@ import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.OptionSize;
-import com.github.sirmegabite.bazaarutils.Utils.ItemData;
-import com.github.sirmegabite.bazaarutils.features.CustomOrder;
+import com.github.mkram17.bazaarutils.Utils.ItemData;
+import com.github.mkram17.bazaarutils.features.CustomOrder;
 import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
@@ -19,6 +19,7 @@ public class BUConfig extends Config {
     public static List<ItemData> watchedItems = new ArrayList<>();
     public static OneKeyBind pasting = new OneKeyBind(Keyboard.KEY_V, Keyboard.KEY_LCONTROL);
     public static double bzTax = 0.01125;
+    public static final CustomOrder maxBuyOrder = new CustomOrder(BUConfig.buyMaxEnabled, 71680, 17);
 
     public BUConfig(boolean enabled, boolean canToggle) {
         super(new Mod("BazaarUtils", ModType.SKYBLOCK,"/icon.png"), "/bazaarutils.json", enabled, canToggle);

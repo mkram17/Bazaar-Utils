@@ -1,8 +1,8 @@
-package com.github.sirmegabite.bazaarutils.EventHandlers;
+package com.github.mkram17.bazaarutils.EventHandlers;
 
-import com.github.sirmegabite.bazaarutils.Utils.ItemData;
-import com.github.sirmegabite.bazaarutils.Utils.Util;
-import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+import com.github.mkram17.bazaarutils.Utils.ItemData;
+import com.github.mkram17.bazaarutils.Utils.Util;
+import com.github.mkram17.bazaarutils.configs.BUConfig;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 

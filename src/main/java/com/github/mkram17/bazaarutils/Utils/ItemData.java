@@ -1,6 +1,6 @@
-package com.github.sirmegabite.bazaarutils.Utils;
+package com.github.mkram17.bazaarutils.Utils;
 
-import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+import com.github.mkram17.bazaarutils.configs.BUConfig;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,8 +12,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.github.sirmegabite.bazaarutils.configs.BUConfig.outdatedTiming;
-import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
+import static com.github.mkram17.bazaarutils.configs.BUConfig.outdatedTiming;
+import static com.github.mkram17.bazaarutils.configs.BUConfig.watchedItems;
 
 public class ItemData {
     public static ItemData getItem(int index){
