@@ -73,6 +73,10 @@ public class GUIUtils {
         if(containerName == null) return false;
         return containerName.contains("How many do you want?");
     }
+    public boolean inBazaar(){
+        if(containerName == null) return false;
+        return (containerName.contains("How many do you want?") || containerName.contains("Order options") || containerName.contains("Bazaar"));
+    }
     private GuiOpenEvent event;
     private GuiScreen gui;
     private GuiChest chestScreen;
@@ -109,7 +113,7 @@ public class GUIUtils {
     public static void closeGui(){
         CompletableFuture.runAsync(() -> {
             try{
-                Thread.sleep(200);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -176,5 +180,9 @@ public class GUIUtils {
                 e.printStackTrace();
             }
         });
+    }
+
+    public static void openBazaar(){
+        Minecraft.getMinecraft().thePlayer.sendChatMessage("/bz");
     }
 }

@@ -1,6 +1,8 @@
 package com.github.sirmegabite.bazaarutils.Utils;
 
+import com.github.sirmegabite.bazaarutils.EventHandlers.OutdatedItemEvent;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -211,6 +213,7 @@ public class ItemData {
         return item;
     }
 
+    //maybe replace with using ItemOutdatedEvent?
     public static void notifyOutdated(){
         if(notifyOutdatedSeconds % outdatedTiming == 0) {
             for (ItemData item : outdated) {
@@ -221,10 +224,14 @@ public class ItemData {
     }
 
     private static void findOutdated(){
+        List<ItemData> oldOutdated = outdated;
         outdated.clear();
         for(ItemData item: watchedItems){
-            if(item.isOutdated())
+            if(item.isOutdated()) {
                 outdated.add(item);
+                if(!oldOutdated.contains(item))
+                    MinecraftForge.EVENT_BUS.post(new OutdatedItemEvent(item));
+            }
         }
     }
 

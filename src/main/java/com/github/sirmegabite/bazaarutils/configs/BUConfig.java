@@ -3,6 +3,7 @@ package com.github.sirmegabite.bazaarutils.configs;
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.HUD;
 import cc.polyfrost.oneconfig.config.annotations.Number;
+import cc.polyfrost.oneconfig.config.annotations.Slider;
 import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
@@ -32,14 +33,35 @@ public class BUConfig extends Config {
             description = "Automatically paste the right price into the flip order sign"
     )
     public static boolean autoFlip = true; // this is the default value.
-
+    @Switch(
+            name = "Auto Open Bazaar",
+            description = "Automatically open bazaar after 3 seconds when item becomes outdated"
+    )
+    public static boolean autoOpenBazaar = true;
     @Switch(
             name = "Buy Max Option",
-            size = OptionSize.DUAL,
-            description = "Give an option to buy the maximum amount (71680) of an item in buy order screen."
+            size = OptionSize.SINGLE,
+            description = "Give an option to buy the maximum amount (71680) of an item in buy order screen"
     )
     public static boolean buyMaxEnabled = true;
 
+    @Switch(
+            name = "Buy Custom Option",
+            description = "Give an option to buy a custom amount of an item in buy order screen"
+    )
+    public static boolean buyCustomEnabled = true;
+
+    @Slider(
+            name = "Buy Custom Amount",
+            min = 0, max = 76180
+    )
+    public static int buyCustomAmount = 0;
+
+    @Number(
+            name = "Buy Custom Slot",
+            min = 1, max = 36
+    )
+    public static int buyCustomSlot = 8;
     @Switch(
             name = "Notify Outdated",
             description = "Notifies you when your buy or sell orders get outbid"
@@ -50,7 +72,7 @@ public class BUConfig extends Config {
             name = "Notify Outdated Timing",
             description = "The time between each time you will be notified in minutes",
             min = 1,
-            max = 60
+            max = 300
     )
     public static int outdatedTiming = 5;
 

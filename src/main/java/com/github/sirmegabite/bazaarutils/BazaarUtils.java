@@ -4,15 +4,13 @@ import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
 import com.github.sirmegabite.bazaarutils.EventHandlers.EventHandler;
 import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
-import com.github.sirmegabite.bazaarutils.Utils.BazaarData;
 import com.github.sirmegabite.bazaarutils.Utils.Commands;
 import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
 import com.github.sirmegabite.bazaarutils.Utils.Util;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
 import com.github.sirmegabite.bazaarutils.features.CustomOrder;
-import net.minecraft.inventory.ContainerChest;
-import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraft.init.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -28,19 +26,25 @@ public class BazaarUtils {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(new EventHandler());
-        MinecraftForge.EVENT_BUS.register(new AutoFlipper());
-        MinecraftForge.EVENT_BUS.register(new GUIUtils());
-        MinecraftForge.EVENT_BUS.register(new ChestLoadedEvent());
-        MinecraftForge.EVENT_BUS.register(new SignOpenEvent());
-        MinecraftForge.EVENT_BUS.register(new CustomOrder(BUConfig.buyMaxEnabled, 71680, 17));
-        MinecraftForge.EVENT_BUS.register(this);
+        registerEventUsers();
         CommandManager.register(new Commands());
         Util.startExecutors();
         config = new BUConfig(true, true);
 
     }
     public void preinit(FMLInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(this);
+
+    }
+
+    private void registerEventUsers(){
+        MinecraftForge.EVENT_BUS.register(new EventHandler());
+        MinecraftForge.EVENT_BUS.register(new AutoFlipper());
+        MinecraftForge.EVENT_BUS.register(new GUIUtils());
+        MinecraftForge.EVENT_BUS.register(new ChestLoadedEvent());
+        MinecraftForge.EVENT_BUS.register(new SignOpenEvent());
+        MinecraftForge.EVENT_BUS.register(new CustomOrder(() -> BUConfig.buyMaxEnabled, () -> 71680, () -> 17, 10));
+        MinecraftForge.EVENT_BUS.register(new CustomOrder(() -> BUConfig.buyCustomEnabled, () -> BUConfig.buyCustomAmount, () -> BUConfig.buyCustomSlot, 3));
         MinecraftForge.EVENT_BUS.register(this);
 
     }
