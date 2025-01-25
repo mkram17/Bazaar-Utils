@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "com.github.mkram17.bazaarutils.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"ExampleMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
