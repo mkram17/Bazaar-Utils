@@ -1,9 +1,9 @@
-package com.github.mkram17.bazaarutils.Utils;
+package com.github.sirmegabite.bazaarutils.Utils;
 
 import cc.polyfrost.oneconfig.utils.commands.annotations.*;
-import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.sirmegabite.bazaarutils.BazaarUtils;
 
-import static com.github.mkram17.bazaarutils.configs.BUConfig.watchedItems;
+import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 @Command(value = "bazaarutils", aliases = {"bu"})
 public class Commands{

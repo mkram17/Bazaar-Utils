@@ -1,6 +1,6 @@
-package com.github.mkram17.bazaarutils.Utils;
+package com.github.sirmegabite.bazaarutils.Utils;
 
-import com.github.mkram17.bazaarutils.configs.Developer;
+import com.github.sirmegabite.bazaarutils.configs.Developer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ChatComponentText;
@@ -13,7 +13,7 @@ import java.awt.datatransfer.StringSelection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static com.github.mkram17.bazaarutils.configs.BUConfig.watchedItems;
+import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
 
 public class Util {
     public enum notificationTypes {ERROR, GUI, FEATURE, BAZAARDATA, COMMAND, ITEMDATA;

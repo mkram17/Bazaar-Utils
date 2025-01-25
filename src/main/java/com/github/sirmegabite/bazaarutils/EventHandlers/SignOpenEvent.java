@@ -1,7 +1,7 @@
-package com.github.mkram17.bazaarutils.EventHandlers;
+package com.github.sirmegabite.bazaarutils.EventHandlers;
 
-import com.github.mkram17.bazaarutils.Utils.Util;
-import com.github.mkram17.bazaarutils.mixin.AccessorGuiEditSign;
+import com.github.sirmegabite.bazaarutils.Utils.Util;
+import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;

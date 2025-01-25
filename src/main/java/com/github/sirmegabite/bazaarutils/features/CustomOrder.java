@@ -5,7 +5,6 @@ import com.github.sirmegabite.bazaarutils.EventHandlers.ReplaceItemEvent;
 import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
 import com.github.sirmegabite.bazaarutils.EventHandlers.SlotClickEvent;
 import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;

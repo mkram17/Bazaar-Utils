@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.mixin;
+package com.github.sirmegabite.bazaarutils.mixin;
 
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;

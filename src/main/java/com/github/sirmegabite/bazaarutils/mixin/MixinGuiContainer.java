@@ -17,9 +17,9 @@
  * along with NotEnoughUpdates. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.github.mkram17.bazaarutils.mixin;
+package com.github.sirmegabite.bazaarutils.mixin;
 
-import com.github.mkram17.bazaarutils.EventHandlers.SlotClickEvent;
+import com.github.sirmegabite.bazaarutils.EventHandlers.SlotClickEvent;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Slot;

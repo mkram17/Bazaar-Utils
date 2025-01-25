@@ -1,6 +1,6 @@
-package com.github.mkram17.bazaarutils.EventHandlers;
+package com.github.sirmegabite.bazaarutils.EventHandlers;
 
-import com.github.mkram17.bazaarutils.Utils.Util;
+import com.github.sirmegabite.bazaarutils.Utils.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;

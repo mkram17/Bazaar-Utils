@@ -10,7 +10,6 @@ import com.github.sirmegabite.bazaarutils.Utils.Util;
 import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import com.github.sirmegabite.bazaarutils.features.AutoFlipper;
 import com.github.sirmegabite.bazaarutils.features.CustomOrder;
-import net.minecraft.init.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -43,7 +42,7 @@ public class BazaarUtils {
         MinecraftForge.EVENT_BUS.register(new GUIUtils());
         MinecraftForge.EVENT_BUS.register(new ChestLoadedEvent());
         MinecraftForge.EVENT_BUS.register(new SignOpenEvent());
-        MinecraftForge.EVENT_BUS.register(new CustomOrder(() -> BUConfig.buyMaxEnabled, () -> 71680, () -> 17, 10));
+        MinecraftForge.EVENT_BUS.register(BUConfig.maxBuyOrder);
         MinecraftForge.EVENT_BUS.register(new CustomOrder(() -> BUConfig.buyCustomEnabled, () -> BUConfig.buyCustomAmount, () -> BUConfig.buyCustomSlot, 3));
         MinecraftForge.EVENT_BUS.register(this);
 

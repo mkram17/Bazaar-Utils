@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.EventHandlers;
+package com.github.sirmegabite.bazaarutils.EventHandlers;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;

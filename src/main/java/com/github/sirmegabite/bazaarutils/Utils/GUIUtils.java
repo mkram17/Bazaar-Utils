@@ -1,9 +1,9 @@
-package com.github.mkram17.bazaarutils.Utils;
+package com.github.sirmegabite.bazaarutils.Utils;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.EventHandlers.ChestLoadedEvent;
-import com.github.mkram17.bazaarutils.EventHandlers.SignOpenEvent;
-import com.github.mkram17.bazaarutils.mixin.AccessorGuiEditSign;
+import com.github.sirmegabite.bazaarutils.BazaarUtils;
+import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
+import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
+import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;

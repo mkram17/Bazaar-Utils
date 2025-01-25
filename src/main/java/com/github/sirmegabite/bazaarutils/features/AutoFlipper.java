@@ -1,12 +1,12 @@
-package com.github.mkram17.bazaarutils.features;
+package com.github.sirmegabite.bazaarutils.features;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.EventHandlers.ChestLoadedEvent;
-import com.github.mkram17.bazaarutils.EventHandlers.SignOpenEvent;
-import com.github.mkram17.bazaarutils.Utils.GUIUtils;
-import com.github.mkram17.bazaarutils.Utils.ItemData;
-import com.github.mkram17.bazaarutils.Utils.Util;
-import com.github.mkram17.bazaarutils.configs.BUConfig;
+import com.github.sirmegabite.bazaarutils.BazaarUtils;
+import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
+import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
+import com.github.sirmegabite.bazaarutils.Utils.GUIUtils;
+import com.github.sirmegabite.bazaarutils.Utils.ItemData;
+import com.github.sirmegabite.bazaarutils.Utils.Util;
+import com.github.sirmegabite.bazaarutils.configs.BUConfig;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;

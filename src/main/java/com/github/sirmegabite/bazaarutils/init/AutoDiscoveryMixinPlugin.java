@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.init;
+package com.github.sirmegabite.bazaarutils.init;
 
 import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -79,7 +79,7 @@ public class AutoDiscoveryMixinPlugin implements IMixinConfigPlugin {
      * Get the path inside the class root to the mixin package
      */
     public String getMixinBaseDir() {
-        return "com/github/mkram17/bazaarutils/mixin";
+        return "com/github/sirmegabite/bazaarutils/mixin";
     }
 
     /**
