@@ -1,17 +1,9 @@
-package com.github.sirmegabite.bazaarutils.Utils;
+package com.github.mkram17.bazaarutils.Utils;
 
-import cc.polyfrost.oneconfig.gui.OneConfigGui;
-import cc.polyfrost.oneconfig.libs.universal.ChatColor;
-import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.utils.commands.annotations.*;
-import cc.polyfrost.oneconfig.utils.gui.GuiUtils;
-import com.github.sirmegabite.bazaarutils.BazaarUtils;
-import com.github.sirmegabite.bazaarutils.configs.BUConfig;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.inventory.Container;
+import com.github.mkram17.bazaarutils.BazaarUtils;
 
-import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
+import static com.github.mkram17.bazaarutils.configs.BUConfig.watchedItems;
 
 @Command(value = "bazaarutils", aliases = {"bu"})
 public class Commands{

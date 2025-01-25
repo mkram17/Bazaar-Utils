@@ -1,7 +1,6 @@
-package com.github.sirmegabite.bazaarutils.Utils;
+package com.github.mkram17.bazaarutils.Utils;
 
-import com.github.sirmegabite.bazaarutils.BazaarUtils;
-import com.github.sirmegabite.bazaarutils.configs.BUConfig;
+import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.google.gson.*;
 
 import java.io.FileReader;
@@ -11,7 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.sirmegabite.bazaarutils.configs.BUConfig.watchedItems;
+import static com.github.mkram17.bazaarutils.configs.BUConfig.watchedItems;
 
 public class BazaarData {
 

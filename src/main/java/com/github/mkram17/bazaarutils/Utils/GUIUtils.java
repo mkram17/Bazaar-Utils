@@ -1,9 +1,9 @@
-package com.github.sirmegabite.bazaarutils.Utils;
+package com.github.mkram17.bazaarutils.Utils;
 
-import com.github.sirmegabite.bazaarutils.BazaarUtils;
-import com.github.sirmegabite.bazaarutils.EventHandlers.ChestLoadedEvent;
-import com.github.sirmegabite.bazaarutils.EventHandlers.SignOpenEvent;
-import com.github.sirmegabite.bazaarutils.mixin.AccessorGuiEditSign;
+import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.EventHandlers.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.EventHandlers.SignOpenEvent;
+import com.github.mkram17.bazaarutils.mixin.AccessorGuiEditSign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
@@ -11,7 +11,6 @@ import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.GuiOpenEvent;

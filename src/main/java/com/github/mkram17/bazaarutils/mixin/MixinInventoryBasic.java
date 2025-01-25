@@ -1,6 +1,6 @@
-package com.github.sirmegabite.bazaarutils.mixin;
+package com.github.mkram17.bazaarutils.mixin;
 
-import com.github.sirmegabite.bazaarutils.EventHandlers.ReplaceItemEvent;
+import com.github.mkram17.bazaarutils.EventHandlers.ReplaceItemEvent;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IChatComponent;

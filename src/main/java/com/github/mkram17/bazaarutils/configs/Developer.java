@@ -1,10 +1,10 @@
-package com.github.sirmegabite.bazaarutils.configs;
+package com.github.mkram17.bazaarutils.configs;
 
 import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.data.OptionSize;
 import cc.polyfrost.oneconfig.hud.SingleTextHud;
-import com.github.sirmegabite.bazaarutils.Utils.ItemData;
-import com.github.sirmegabite.bazaarutils.Utils.Util;
+import com.github.mkram17.bazaarutils.Utils.ItemData;
+import com.github.mkram17.bazaarutils.Utils.Util;
 
 public class Developer extends SingleTextHud {
 

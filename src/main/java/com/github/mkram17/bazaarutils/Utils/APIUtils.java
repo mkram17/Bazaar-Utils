@@ -1,4 +1,4 @@
-package com.github.sirmegabite.bazaarutils.Utils;
+package com.github.mkram17.bazaarutils.Utils;
 
 import net.hypixel.api.HypixelAPI;
 import net.hypixel.api.apache.ApacheHttpClient;
