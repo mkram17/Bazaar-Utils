@@ -1,22 +1,21 @@
 {
 	"schemaVersion": 1,
-	"id": "bazaar-utils",
-	"version": "${version}",
+	"id": "bazaarutils",
+	"version": "0.0.1",
 	"name": "Bazaar Utils",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "A mod for Hypixel Skyblock 1.21 AND 1.8.9 that adds useful features for the bazaar.",
 	"authors": [
-		"Me!"
+		"mkram17"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/mkram17/Bazaar-Utils/tree/1.21.4"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/bazaar-utils/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
-		"main": [
-			"com.github.mkram17.bazaarutils.BazaarUtils"
+		"client": [
+			"com.github.mkram17.bazaarutils.BazaarUtilsClientInitializer"
 		],
 		"fabric-datagen": [
 			"com.github.mkram17.bazaarutils.BazaarUtilsDataGenerator"
@@ -30,8 +29,5 @@
 		"minecraft": "~1.21.4",
 		"java": ">=21",
 		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }

@@ -1,6 +1,13 @@
 plugins {
 	id 'fabric-loom' version '1.9-SNAPSHOT'
 	id 'maven-publish'
+	id 'org.jetbrains.kotlin.jvm' version '2.0.0'
+//	id 'dev.deftu.gradle.tools' version '2.22.0'
+//	id 'dev.deftu.gradle.tools.resources' version '2.22.0'
+//	id 'dev.deftu.gradle.tools.bloom' version '2.22.0'
+//	id 'dev.deftu.gradle.tools.shadow' version '2.22.0'
+//	id 'dev.deftu.gradle.tools.minecraft.loom' version '2.22.0'
+//	id 'dev.deftu.gradle.tools.minecraft.releases' version '2.22.0'
 }
 
 version = project.mod_version
@@ -16,14 +23,18 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
-}
-
-fabricApi {
-	configureDataGeneration {
-		client = true
+	maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
+	maven {
+		//https://github.com/MeteorDevelopment/orbit
+		name = "meteor-maven"
+		url = "https://maven.meteordev.org/releases"
 	}
-}
+	maven {
+		name = "Hypixel"
+		url = "https://repo.hypixel.net/repository/Hypixel/"
+	}
 
+}
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -32,9 +43,31 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	
+	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
+	implementation "meteordevelopment:orbit:0.2.3"
+//	modImplementation "com.ptsmods:devlogin:3.5"
+
+	implementation ("net.hypixel:hypixel-api-transport-apache:4.4")
+
+
+}
+fabricApi {
+	configureDataGeneration {
+		client = true
+	}
 }
 
+
+loom {
+	runs {
+		removeIf { it.name != "client" }
+		named("client") {
+			property("devauth.enabled", "true")
+			property("fabric.log.level", "info")
+			vmArg("-ea")
+		}
+	}
+}
 processResources {
 	inputs.property "version", project.version
 
