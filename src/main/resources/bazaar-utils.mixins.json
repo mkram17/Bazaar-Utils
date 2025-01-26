@@ -3,7 +3,10 @@
 	"package": "com.github.mkram17.bazaarutils.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"MixinHandledScreen",
+		"MixinScreenAccessor",
+		"MixinSignOpen",
+		"MixinSimpleInventory"
 	],
 	"injectors": {
 		"defaultRequire": 1

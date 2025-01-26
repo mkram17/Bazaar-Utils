@@ -15,10 +15,7 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"com.github.mkram17.bazaarutils.BazaarUtilsClientInitializer"
-		],
-		"fabric-datagen": [
-			"com.github.mkram17.bazaarutils.BazaarUtilsDataGenerator"
+			"com.github.mkram17.bazaarutils.BazaarUtils"
 		]
 	},
 	"mixins": [
