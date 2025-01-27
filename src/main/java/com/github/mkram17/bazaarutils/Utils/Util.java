@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.Utils;
 
+import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.BazaarData;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -13,22 +14,24 @@ import java.awt.datatransfer.StringSelection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
+
 public class Util {
     public enum notificationTypes {
         ERROR, GUI, FEATURE, BAZAARDATA, COMMAND, ITEMDATA;
         private boolean isEnabled;
 
         static {
-            ERROR.isEnabled = Developer.errorMessages;
-            GUI.isEnabled = Developer.guiMessages;
-            FEATURE.isEnabled = Developer.featureMessages;
-            BAZAARDATA.isEnabled = Developer.bazaarDataMessages;
-            COMMAND.isEnabled = Developer.commandMessages;
-            ITEMDATA.isEnabled = Developer.itemDataMessages;
+            ERROR.isEnabled = BUConfig.Developer.errorMessages;
+            GUI.isEnabled = BUConfig.Developer.guiMessages;
+            FEATURE.isEnabled = BUConfig.Developer.featureMessages;
+            BAZAARDATA.isEnabled = BUConfig.Developer.bazaarDataMessages;
+            COMMAND.isEnabled = BUConfig.Developer.commandMessages;
+            ITEMDATA.isEnabled = BUConfig.Developer.itemDataMessages;
         }
 
         public boolean isEnabled() {
-            return Developer.isDeveloperVariableEnabled(this);
+            return BUConfig.Developer.isDeveloperVariableEnabled(this);
         }
     }
 
@@ -37,9 +40,9 @@ public class Util {
         String messageStr = message.toString();
         messageStr = messageStr.toLowerCase().contains("exception") ? "§c" + messageStr : "§a" + messageStr;
 
-        if (Developer.devMessages) {
-            MinecraftClient.getInstance().player.sendMessage(Text.literal("[" + callingName + "] " + messageStr), true);
-        }
+//        if (BUConfig.Developer.devMessages) {
+            MinecraftClient.getInstance().player.sendMessage(Text.literal("[" + callingName + "] " + messageStr), false);
+//        }
         LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
     }
 
@@ -53,12 +56,12 @@ public class Util {
         String simpleCallingName = callingName.substring(callingName.lastIndexOf(".") + 1);
         String messageStr = notiType == notificationTypes.ERROR ? "§c" + message : "§a" + message;
 
-        if (Developer.devMessages && (notiType.isEnabled() || Developer.allMessages)) {
+//        if (BUConfig.Developer.devMessages && (notiType.isEnabled() || BUConfig.Developer.allMessages)) {
             if (MinecraftClient.getInstance().player != null) {
-                MinecraftClient.getInstance().player.sendMessage(Text.literal("[" + simpleCallingName + "] " + messageStr), true);
+                MinecraftClient.getInstance().player.sendMessage(Text.literal("[" + simpleCallingName + "] " + messageStr), false);
             }
             LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
-        }
+//        }
     }
 
     public static void addWatchedItem(String itemName, Double price, boolean isSellOrder, int volume) {

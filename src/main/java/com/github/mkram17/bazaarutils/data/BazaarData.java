@@ -11,6 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
+
 public class BazaarData {
 
     private static String jsonString;
@@ -30,7 +32,6 @@ public class BazaarData {
     //called in init
     public static void scheduleBazaar(){
         bzExecutor.scheduleAtFixedRate(() -> {
-            if(BazaarUtils.config.enabled) {
                 APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
                     if (throwable != null) {
                         Util.notifyAll("Exception thrown trying to get bazaar data");
@@ -44,7 +45,6 @@ public class BazaarData {
                         }
                     }
                 });
-            }
         }, 1, 2, TimeUnit.SECONDS);
     }
 

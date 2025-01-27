@@ -1,5 +1,10 @@
 package com.github.mkram17.bazaarutils.Utils;
 
+import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.Events.OutdatedItemEvent;
+import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.data.BazaarData;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +14,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.github.mkram17.bazaarutils.config.BUConfig.outdatedTiming;
+import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
 
 public class ItemData {
     public static ItemData getItem(int index){
@@ -223,7 +231,7 @@ public class ItemData {
             if(item.isOutdated()) {
                 outdated.add(item);
                 if(!oldOutdated.contains(item))
-                    MinecraftForge.EVENT_BUS.post(new OutdatedItemEvent(item));
+                    BazaarUtils.eventBus.post(new OutdatedItemEvent(item));
             }
         }
     }

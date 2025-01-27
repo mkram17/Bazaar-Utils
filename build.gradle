@@ -33,7 +33,14 @@ repositories {
 		name = "Hypixel"
 		url = "https://repo.hypixel.net/repository/Hypixel/"
 	}
-
+	maven {
+		name = "YACL"
+		url = "https://maven.isxander.dev/releases"
+	}
+	maven {
+		name = "Terraformers (for gui)"
+		url = "https://maven.terraformersmc.com/"
+	}
 }
 dependencies {
 	// To change the versions see the gradle.properties file
@@ -49,6 +56,9 @@ dependencies {
 
 	implementation ("net.hypixel:hypixel-api-transport-apache:4.4")
 
+	modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+
+	modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
 
 }
 fabricApi {

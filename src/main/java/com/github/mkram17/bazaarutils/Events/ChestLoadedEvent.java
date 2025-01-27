@@ -38,6 +38,7 @@ public class ChestLoadedEvent implements ICancellable {
 
                         // Post to custom event bus
                         BazaarUtils.eventBus.post(new ChestLoadedEvent());
+                        Util.notifyAll("Chest Loaded Event posted!");
                     }
                 });
             }

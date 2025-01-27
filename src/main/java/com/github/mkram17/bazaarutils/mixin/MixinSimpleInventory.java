@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.ReplaceItemEvent;
+import com.github.mkram17.bazaarutils.Utils.Util;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
@@ -24,6 +25,7 @@ public abstract class MixinSimpleInventory {
 
         ReplaceItemEvent event = new ReplaceItemEvent(this.heldStacks.get(slot),(SimpleInventory) (Object) this,slot);
         BazaarUtils.eventBus.post(event);
+//        Util.notifyAll("Replace Item Event posted!");
         if (event.getReplacement() != event.getOriginal()) {
             cir.setReturnValue(event.getReplacement());
         }

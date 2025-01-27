@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.SignOpenEvent;
+import com.github.mkram17.bazaarutils.Utils.Util;
 import meteordevelopment.orbit.EventBus;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -22,6 +23,7 @@ public class MixinSignOpen {
             // Post the SignOpenEvent
             SignOpenEvent event = new SignOpenEvent((SignEditScreen) screen);
             BazaarUtils.eventBus.post(event);
+            Util.notifyAll("Sign Open Event posted!");
 
             // Cancel the screen opening if the event is cancelled
             if (event.isCancelled()) {

@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils;
 
 import com.github.mkram17.bazaarutils.Events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.Events.ReplaceItemEvent;
+import com.github.mkram17.bazaarutils.config.BUConfig;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
@@ -15,7 +16,11 @@ public class BazaarUtils implements ClientModInitializer {
         eventBus.registerLambdaFactory("com.github.sirmegabite.bazaarutils", (lookupInMethod, klass) ->
                 (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
-        // Register event handlers
+        BUConfig.HANDLER.load();
+        registerEvents();
+    }
+
+    private static void registerEvents(){
         ChestLoadedEvent.register();
         eventBus.subscribe(new ChestLoadedEvent());
     }
