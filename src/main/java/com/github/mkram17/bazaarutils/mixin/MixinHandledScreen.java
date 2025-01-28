@@ -25,7 +25,7 @@ public abstract class MixinHandledScreen {
 		BazaarUtils.eventBus.post(event);
 		Util.notifyAll("Mouse Click Posted");
 // Use the accessor to safely get the client instance
-		MinecraftClient client = ((MixinScreenAccessor) screen).getClient();
+		MinecraftClient client = ((AccessorSign) screen).getClient();
 		if (event.isCancelled()) {
 			ci.cancel();
 			return;

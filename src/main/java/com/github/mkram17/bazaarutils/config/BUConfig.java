@@ -25,7 +25,7 @@ public class BUConfig {
                     .build())
             .build();
 
-    public void openGui(){
+    public static void openGui(){
         YetAnotherConfigLib.createBuilder()
                 .title(Text.literal("Bazaar Utils"))
                 .category(ConfigCategory.createBuilder()
@@ -37,7 +37,7 @@ public class BUConfig {
                                 .option(Option.<Boolean>createBuilder()
                                         .name(Text.literal("Boolean Option"))
                                         .description(OptionDescription.of(Text.literal("This text will appear as a tooltip when you hover over the option.")))
-                                        .binding(true, () -> this.myCoolBoolean, newVal -> this.myCoolBoolean = newVal)
+                                        .binding(true, () -> BUConfig.myCoolBoolean, newVal -> BUConfig.myCoolBoolean = newVal)
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .build())
@@ -54,7 +54,7 @@ public class BUConfig {
     public static boolean notifyOutdated = true;
 
     @SerialEntry
-    public boolean myCoolBoolean = true;
+    public static boolean myCoolBoolean = true;
 
     @SerialEntry
     public int myCoolInteger = 5;

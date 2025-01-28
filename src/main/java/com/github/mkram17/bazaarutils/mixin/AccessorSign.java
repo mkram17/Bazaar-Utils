@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(Screen.class)
-public interface MixinScreenAccessor {
+public interface AccessorSign {
     @Accessor("client")
     MinecraftClient getClient();
 }
