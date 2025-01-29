@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//used for SlotClickEvent
 @Mixin(HandledScreen.class)
 public abstract class MixinHandledScreen {
 
@@ -25,7 +26,7 @@ public abstract class MixinHandledScreen {
 		BazaarUtils.eventBus.post(event);
 		Util.notifyAll("Mouse Click Posted");
 // Use the accessor to safely get the client instance
-		MinecraftClient client = ((AccessorSign) screen).getClient();
+		MinecraftClient client = ((AccessorScreen) screen).getClient();
 		if (event.isCancelled()) {
 			ci.cancel();
 			return;

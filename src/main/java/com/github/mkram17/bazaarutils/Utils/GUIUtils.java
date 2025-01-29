@@ -5,16 +5,13 @@ import com.github.mkram17.bazaarutils.Events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.Events.SignOpenEvent;
 import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -74,7 +71,7 @@ public class GUIUtils {
     public void register(){
 
     }
-    public void registerGui(){
+    public void registerScreenEvent(){
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
             BazaarUtils.gui = this;
             if (screen instanceof GenericContainerScreen genericContainerScreen) {
@@ -85,13 +82,13 @@ public class GUIUtils {
             updateFlipGui();
         });
     }
-    @EventHandler
-    public void loadSign(SignOpenEvent e){
+    @EventHandler(priority = EventPriority.HIGH)
+    private void loadSign(SignOpenEvent e){
         guiType = guiType.SIGN;
     }
 
-    @EventHandler
-    public void onChestLoaded(ChestLoadedEvent e){
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onChestLoaded(ChestLoadedEvent e){
         guiType = guiType.CHEST;
         itemStacks = e.getItemStacks();
     }
@@ -111,24 +108,21 @@ public class GUIUtils {
     public static void setSignText(String text, boolean front) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.currentScreen instanceof SignEditScreen screen) {
-            SignBlockEntity sign = ((AccessorSignEditScreen) screen).getBlockEntity();
-
-            // Get the current SignText to modify
-            SignText signText = front ? sign.getFrontText() : sign.getBackText();
-
-            // Split text into lines
+            AccessorSignEditScreen signScreen = (AccessorSignEditScreen) screen;
             String[] lines = text.split("\n", 4);
 
-            // Update each line of the sign
+            // Save original row to restore later
+            int originalRow = signScreen.getCurrentRow();
+
+            // Update all 4 lines
             for (int i = 0; i < 4; i++) {
-                String lineContent = i < lines.length ? lines[i] : "";
-                Text lineText = Text.literal(lineContent);
-                signText = signText.withMessage(i, lineText);
+                String line = i < lines.length ? lines[i] : "";
+                signScreen.setCurrentRow(i); // Set the target row
+                signScreen.setCurrentRowMessage(line); // Update the line
             }
 
-            sign.setText(signText, front);
-
-            closeGui();
+            // Restore original row
+            signScreen.setCurrentRow(originalRow);
         }
     }
 
@@ -147,7 +141,7 @@ public class GUIUtils {
 //            Util.notifyAll("Flip gui removed", Util.notificationTypes.GUI);
         }
     }
-    public void clickSlot(int slotIndex, int button) {
+    public static void clickSlot(int slotIndex, int button) {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerInteractionManager interactionManager = client.interactionManager;
         ClientPlayerEntity player = client.player;

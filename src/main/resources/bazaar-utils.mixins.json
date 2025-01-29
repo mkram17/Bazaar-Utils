@@ -4,7 +4,8 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"MixinHandledScreen",
-      "AccessorSign",
+      "AccessorScreen",
+		"AccessorSignEditScreen",
 		"MixinSignOpen",
 		"MixinSimpleInventory"
 	],

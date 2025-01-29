@@ -5,11 +5,9 @@ import com.github.mkram17.bazaarutils.Utils.Util;
 import meteordevelopment.orbit.ICancellable;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
@@ -23,7 +21,7 @@ public class ChestLoadedEvent implements ICancellable {
     private List<ItemStack> itemStacks = new ArrayList<>();
     private String containerName;
 
-    public static void register() {
+    public static void registerScreenEvent() {
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
             if (screen instanceof GenericContainerScreen genericContainerScreen) {
                 CompletableFuture.runAsync(() -> checkIfGuiLoaded(genericContainerScreen)).thenRun(() -> {

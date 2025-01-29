@@ -3,15 +3,14 @@ package com.github.mkram17.bazaarutils.mixin;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.SignOpenEvent;
 import com.github.mkram17.bazaarutils.Utils.Util;
-import meteordevelopment.orbit.EventBus;
-import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.gui.screen.Screen;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//used for SignOpenEvent -- maybe try to do this with AbstractSignEditScreen init() and see if it works to be more efficient
 @Mixin(Screen.class)
 public class MixinSignOpen {
     @Inject(method = "init", at = @At("HEAD"))

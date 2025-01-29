@@ -10,11 +10,8 @@ import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
-
-import static com.github.mkram17.bazaarutils.Utils.Util.notificationTypes.*;
 
 public class BUConfig {
     public static ConfigClassHandler<BUConfig> HANDLER = ConfigClassHandler.createBuilder(BUConfig.class)
@@ -22,6 +19,7 @@ public class BUConfig {
                     .setPath(FabricLoader.getInstance().getConfigDir().resolve("bazaarutils.json"))
                     .appendGsonBuilder(GsonBuilder::setPrettyPrinting) // not needed, pretty print by default
                     .setJson5(true)
+
                     .build())
             .build();
 
@@ -37,13 +35,17 @@ public class BUConfig {
                                 .option(Option.<Boolean>createBuilder()
                                         .name(Text.literal("Boolean Option"))
                                         .description(OptionDescription.of(Text.literal("This text will appear as a tooltip when you hover over the option.")))
-                                        .binding(true, () -> BUConfig.myCoolBoolean, newVal -> BUConfig.myCoolBoolean = newVal)
+                                        .binding(true, () -> BUConfig.buyMaxEnabled, newVal -> BUConfig.buyMaxEnabled = newVal)
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .build())
                         .build())
+
                 .build();
+
     }
+
+
     @SerialEntry
     public static ArrayList<ItemData> watchedItems = new ArrayList<>();
 
@@ -54,10 +56,8 @@ public class BUConfig {
     public static boolean notifyOutdated = true;
 
     @SerialEntry
-    public static boolean myCoolBoolean = true;
+    public static boolean buyMaxEnabled = true;
 
-    @SerialEntry
-    public int myCoolInteger = 5;
 
     public static class Developer{
         public static boolean devMessages = false;

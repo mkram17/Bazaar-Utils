@@ -5,8 +5,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+
+import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
 
 public class Commands {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -14,7 +15,7 @@ public class Commands {
         dispatcher.register(ClientCommandManager.literal("bazaarutils")
                 .executes(context -> {
                     // Open GUI
-                    BUConfig.openGui();
+                    BUConfig.HANDLER.generateGui();
                     return 1;
                 })
         );

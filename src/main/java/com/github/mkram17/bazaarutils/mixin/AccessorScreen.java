@@ -5,8 +5,9 @@ import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
+//used for SlotClickEvent
 @Mixin(Screen.class)
-public interface AccessorSign {
+public interface AccessorScreen {
     @Accessor("client")
     MinecraftClient getClient();
 }

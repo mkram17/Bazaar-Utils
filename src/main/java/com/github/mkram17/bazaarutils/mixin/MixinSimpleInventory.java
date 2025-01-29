@@ -2,7 +2,6 @@ package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.Utils.Util;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
@@ -13,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+//used for ReplaceItemEvent
 @Mixin(SimpleInventory.class)
 public abstract class MixinSimpleInventory {
     @Final
