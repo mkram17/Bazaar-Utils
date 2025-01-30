@@ -3,12 +3,13 @@
 	"id": "bazaarutils",
 	"version": "0.0.1",
 	"name": "Bazaar Utils",
-	"description": "A mod for Hypixel Skyblock 1.21 AND 1.8.9 that adds useful features for the bazaar.",
+	"description": "A mod for Hypixel Skyblock that adds useful features for the bazaar for Minecraft 1.21 AND 1.8.9.",
 	"authors": [
 		"mkram17"
 	],
 	"contact": {
-		"sources": "https://github.com/mkram17/Bazaar-Utils/tree/1.21.4"
+		"sources": "https://github.com/mkram17/Bazaar-Utils/tree/1.21.4",
+		"Modrinth": "https://modrinth.com/project/bazaar-utils"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/bazaar-utils/icon.png",
@@ -16,6 +17,9 @@
 	"entrypoints": {
 		"client": [
 			"com.github.mkram17.bazaarutils.BazaarUtils"
+		],
+		"modmenu": [
+			"com.github.mkram17.bazaarutils.config.BUModMenu"
 		]
 	},
 	"mixins": [

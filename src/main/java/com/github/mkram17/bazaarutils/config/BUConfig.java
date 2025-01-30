@@ -2,13 +2,17 @@ package com.github.mkram17.bazaarutils.config;
 
 import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
+import com.github.mkram17.bazaarutils.features.CustomOrder;
 import com.google.gson.GsonBuilder;
-import dev.isxander.yacl3.api.*;
-import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.YetAnotherConfigLib;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -23,28 +27,22 @@ public class BUConfig {
                     .build())
             .build();
 
-    public static void openGui(){
-        YetAnotherConfigLib.createBuilder()
-                .title(Text.literal("Bazaar Utils"))
-                .category(ConfigCategory.createBuilder()
-                        .name(Text.literal("Auto Flip"))
-                        .tooltip(Text.literal("Automatically paste the right price into the flip order sign"))
-                        .group(OptionGroup.createBuilder()
-                                .name(Text.literal("Name of the group"))
-                                .description(OptionDescription.of(Text.literal("This text will appear when you hover over the name or focus on the collapse button with Tab.")))
-                                .option(Option.<Boolean>createBuilder()
-                                        .name(Text.literal("Boolean Option"))
-                                        .description(OptionDescription.of(Text.literal("This text will appear as a tooltip when you hover over the option.")))
-                                        .binding(true, () -> BUConfig.buyMaxEnabled, newVal -> BUConfig.buyMaxEnabled = newVal)
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .build())
-                        .build())
-
-                .build();
-
+    public static void openConfig(){
+        MinecraftClient.getInstance().setScreen(createGUI(MinecraftClient.getInstance().currentScreen));
+        Util.notifyAll("Tried to open GUI", Util.notificationTypes.GUI);
     }
 
+    public static Screen createGUI(Screen parent) {
+        return YetAnotherConfigLib.create(HANDLER, (defaults, config, builder) -> {
+            builder.title(Text.literal("Bazaar Utils"))
+                    .category(CustomOrder.create());
+            return builder;
+        }).generateScreen(parent);
+    }
+
+    public static BooleanControllerBuilder createBooleanController(Option<Boolean> opt) {
+        return BooleanControllerBuilder.create(opt).yesNoFormatter().coloured(true);
+    }
 
     @SerialEntry
     public static ArrayList<ItemData> watchedItems = new ArrayList<>();

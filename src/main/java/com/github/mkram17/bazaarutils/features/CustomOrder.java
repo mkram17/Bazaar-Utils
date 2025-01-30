@@ -5,6 +5,9 @@ import com.github.mkram17.bazaarutils.Events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.Events.SignOpenEvent;
 import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.Utils.GUIUtils;
+import com.github.mkram17.bazaarutils.config.BUConfig;
+import dev.isxander.yacl3.api.ConfigCategory;
+import dev.isxander.yacl3.api.Option;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
@@ -80,5 +83,19 @@ public class CustomOrder {
         int signSlotId = getReplaceSlotNumber() - 1;
         GUIUtils.clickSlot(signSlotId, 0);
         signClicked = true;
+    }
+
+    public static ConfigCategory create() {
+        return ConfigCategory.createBuilder()
+                .name(Text.literal("Buy Orders"))
+
+                .option(Option.<Boolean>createBuilder()
+                        .name(Text.literal("Buy Max Enabled"))
+                        .binding(BUConfig.buyMaxEnabled,
+                                () -> BUConfig.buyMaxEnabled,
+                                newVal -> BUConfig.buyMaxEnabled = newVal)
+                        .controller(BUConfig::createBooleanController)
+                        .build())
+                .build();
     }
 }
