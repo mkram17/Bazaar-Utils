@@ -74,7 +74,7 @@ public class CustomOrder {
     private void onSignOpened(SignOpenEvent event) {
         if (!signClicked) return;
 
-        GUIUtils.setSignText(Integer.toString(getOrderAmount()), true);
+        GUIUtils.setSignText(Integer.toString(getOrderAmount()));
 //        GUIUtils.closeGui();
         signClicked = false;
     }

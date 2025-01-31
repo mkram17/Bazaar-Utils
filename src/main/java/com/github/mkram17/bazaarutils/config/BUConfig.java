@@ -27,9 +27,9 @@ public class BUConfig {
                     .build())
             .build();
 
-    public static void openConfig(){
-        MinecraftClient.getInstance().setScreen(createGUI(MinecraftClient.getInstance().currentScreen));
-        Util.notifyAll("Tried to open GUI", Util.notificationTypes.GUI);
+    public static void openGUI(){
+        MinecraftClient client = MinecraftClient.getInstance();
+        client.send(() -> client.setScreen(BUConfig.createGUI(null)));
     }
 
     public static Screen createGUI(Screen parent) {
@@ -41,20 +41,20 @@ public class BUConfig {
     }
 
     public static BooleanControllerBuilder createBooleanController(Option<Boolean> opt) {
-        return BooleanControllerBuilder.create(opt).yesNoFormatter().coloured(true);
+        return BooleanControllerBuilder.create(opt).onOffFormatter().coloured(true);
     }
 
-    @SerialEntry
-    public static ArrayList<ItemData> watchedItems = new ArrayList<>();
+    @SerialEntry public static ArrayList<ItemData> watchedItems = new ArrayList<>();
 
-    @SerialEntry
-    public static int outdatedTiming = 5;
+    @SerialEntry public static double bzTax = 0.01125;
 
-    @SerialEntry
-    public static boolean notifyOutdated = true;
+    @SerialEntry public static boolean autoFlip;
 
-    @SerialEntry
-    public static boolean buyMaxEnabled = true;
+    @SerialEntry public static int outdatedTiming = 5;
+
+    @SerialEntry public static boolean notifyOutdated = true;
+
+    @SerialEntry public static boolean buyMaxEnabled = true;
 
 
     public static class Developer{

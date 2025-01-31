@@ -20,6 +20,9 @@ public class ChestLoadedEvent implements ICancellable {
     private Inventory lowerChestInventory;
     private List<ItemStack> itemStacks = new ArrayList<>();
     private String containerName;
+    public static void subscribe(){
+        registerScreenEvent();
+    }
 
     public static void registerScreenEvent() {
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {

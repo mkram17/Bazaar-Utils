@@ -103,7 +103,7 @@ public class Util {
     }
 
     public static String removeFormatting(String str) {
-        return str.replaceAll("§.", "").replace(",", "");
+        return str.replaceAll("§.", "").replace(",", "").trim();
     }
 
     public static <T> void writeFile(T content) {

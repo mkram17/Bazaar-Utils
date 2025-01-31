@@ -1,13 +1,12 @@
 package com.github.mkram17.bazaarutils.Utils;
 
-import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 
+import static com.github.mkram17.bazaarutils.config.BUConfig.openGUI;
 import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
 
 public class Commands {
@@ -15,8 +14,7 @@ public class Commands {
         // Main command: /bazaarutils
         dispatcher.register(ClientCommandManager.literal("bazaarutils")
                 .executes(context -> {
-                    MinecraftClient client = MinecraftClient.getInstance();
-                    client.send(() -> client.setScreen(BUConfig.createGUI(null)));
+                    openGUI();
                     return 1;
                 })
         );
@@ -24,8 +22,7 @@ public class Commands {
         // Alias: /bu
         dispatcher.register(ClientCommandManager.literal("bu")
                 .executes(context -> {
-                    MinecraftClient client = MinecraftClient.getInstance();
-                    client.send(() -> client.setScreen(BUConfig.createGUI(null)));
+                    openGUI();
                     return 1;
                 })
         );

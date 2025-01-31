@@ -105,7 +105,7 @@ public class GUIUtils {
         });
     }
 
-    public static void setSignText(String text, boolean front) {
+    public static void setSignText(String text) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.currentScreen instanceof SignEditScreen screen) {
             AccessorSignEditScreen signScreen = (AccessorSignEditScreen) screen;

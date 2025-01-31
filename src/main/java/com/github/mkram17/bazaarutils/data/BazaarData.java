@@ -17,8 +17,8 @@ public class BazaarData {
 
     private static String jsonString;
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private static final String productNameFile = "C:\\mc modding\\Bazaar-Utils\\src\\main\\resources\\Bazaar Resources.json";
-    private static final String dataFile = "C:\\mc modding\\Bazaar-Utils\\src\\main\\resources\\Bazaar Json.json";
+    private static final String productNameFile = "C:\\mc modding\\Bazaar-Utils-1.21.4\\src\\main\\resources\\Bazaar Resources.json";
+    private static final String dataFile = "C:\\mc modding\\Bazaar-Utils-1.21.4\\src\\main\\resources\\Bazaar Json.json";
     static ScheduledExecutorService bzExecutor = Executors.newScheduledThreadPool(5);
 
 
