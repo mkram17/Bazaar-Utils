@@ -3,7 +3,6 @@ package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
-import com.github.mkram17.bazaarutils.Utils.Util;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;
@@ -24,7 +23,7 @@ public abstract class MixinHandledScreen {
 		HandledScreen<?> screen = (HandledScreen<?>) (Object) this;
 		SlotClickEvent event = new SlotClickEvent(screen, slot, slotId, button, actionType);
 		BazaarUtils.eventBus.post(event);
-		Util.notifyAll("Mouse Click Posted");
+//		Util.notifyAll("Mouse Click Posted");
 // Use the accessor to safely get the client instance
 		MinecraftClient client = ((AccessorScreen) screen).getClient();
 		if (event.isCancelled()) {

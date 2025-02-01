@@ -19,6 +19,7 @@ public abstract class MixinSimpleInventory {
     @Shadow
     public DefaultedList<ItemStack> heldStacks;
 
+
     @Inject(method = "getStack(I)Lnet/minecraft/item/ItemStack;",at = @At("HEAD"), cancellable = true)
     private void onGetStack(int slot, CallbackInfoReturnable<ItemStack> cir) {
         if (slot < 0 || slot >= this.heldStacks.size()) return;

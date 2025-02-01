@@ -2,7 +2,6 @@ package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.SignOpenEvent;
-import com.github.mkram17.bazaarutils.Utils.Util;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,7 +21,7 @@ public class MixinSignOpen {
             // Post the SignOpenEvent
             SignOpenEvent event = new SignOpenEvent((SignEditScreen) screen);
             BazaarUtils.eventBus.post(event);
-            Util.notifyAll("Sign Open Event posted!");
+//            Util.notifyAll("Sign Open Event posted!");
 
             // Cancel the screen opening if the event is cancelled
             if (event.isCancelled()) {

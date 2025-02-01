@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.Events.EventHandler;
 import com.github.mkram17.bazaarutils.Utils.Commands;
 import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.data.BazaarData;
 import com.github.mkram17.bazaarutils.features.AutoFlipper;
 import com.github.mkram17.bazaarutils.features.CustomOrder;
 import meteordevelopment.orbit.EventBus;
@@ -23,6 +24,7 @@ public class BazaarUtils implements ClientModInitializer {
         BUConfig.HANDLER.load();
         registerCommands();
         registerEvents();
+        BazaarData.scheduleBazaar();
     }
 
     private void registerEvents(){

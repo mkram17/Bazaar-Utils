@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
 import com.github.mkram17.bazaarutils.features.CustomOrder;
 import com.google.gson.GsonBuilder;
+import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
@@ -26,8 +27,22 @@ public class BUConfig {
 
                     .build())
             .build();
+    @SerialEntry
+    public static ArrayList<ItemData> watchedItems = new ArrayList<>();
+    @SerialEntry
+    public static double bzTax = 0.01125;
+    @SerialEntry
+    public static boolean autoFlip;
+    @SerialEntry
+    public static int outdatedTiming = 5;
+    @SerialEntry
+    public static boolean notifyOutdated = true;
+    @SerialEntry
+    public static boolean buyMaxEnabled = true;
+    @SerialEntry(comment = "This string is amazing")
+    public String myCoolString = "How amazing!";
 
-    public static void openGUI(){
+    public static void openGUI() {
         MinecraftClient client = MinecraftClient.getInstance();
         client.send(() -> client.setScreen(BUConfig.createGUI(null)));
     }
@@ -35,7 +50,9 @@ public class BUConfig {
     public static Screen createGUI(Screen parent) {
         return YetAnotherConfigLib.create(HANDLER, (defaults, config, builder) -> {
             builder.title(Text.literal("Bazaar Utils"))
-                    .category(CustomOrder.create());
+                    .category(CustomOrder.create())
+                    .category(Developer.create());
+
             return builder;
         }).generateScreen(parent);
     }
@@ -44,21 +61,7 @@ public class BUConfig {
         return BooleanControllerBuilder.create(opt).onOffFormatter().coloured(true);
     }
 
-    @SerialEntry public static ArrayList<ItemData> watchedItems = new ArrayList<>();
-
-    @SerialEntry public static double bzTax = 0.01125;
-
-    @SerialEntry public static boolean autoFlip;
-
-    @SerialEntry public static int outdatedTiming = 5;
-
-    @SerialEntry public static boolean notifyOutdated = true;
-
-    @SerialEntry public static boolean buyMaxEnabled = true;
-
-
-    public static class Developer{
-        public static boolean devMessages = false;
+    public static class Developer {
         public static boolean allMessages = false;
         public static boolean errorMessages = false;
         public static boolean guiMessages = false;
@@ -67,13 +70,60 @@ public class BUConfig {
         public static boolean commandMessages = false;
         public static boolean itemDataMessages = false;
 
-        public String getText(boolean example) {
-            if(example) return "I'm in Example mode";
-            if(!ItemData.nameList.isEmpty()) {
-                ItemData.updateLists();
-                return String.join(", ", ItemData.nameList);
-            }
-            else return "No watched items";
+        public static ConfigCategory create() {
+            return ConfigCategory.createBuilder()
+                    .name(Text.literal("Developer"))
+
+                    .option(Option.<Boolean>createBuilder()
+                            .name(Text.literal("All Messages"))
+                            .binding(allMessages,
+                                    () -> allMessages,
+                                    newVal -> allMessages = newVal)
+                            .controller(BUConfig::createBooleanController)
+                            .build())
+                    .option(Option.<Boolean>createBuilder()
+                            .name(Text.literal("Error Messages"))
+                            .binding(errorMessages,
+                                    () -> errorMessages,
+                                    newVal -> errorMessages = newVal)
+                            .controller(BUConfig::createBooleanController)
+                            .build())
+                    .option(Option.<Boolean>createBuilder()
+                            .name(Text.literal("GUI Messages"))
+                            .binding(guiMessages,
+                                    () -> guiMessages,
+                                    newVal -> guiMessages = newVal)
+                            .controller(BUConfig::createBooleanController)
+                            .build())
+                    .option(Option.<Boolean>createBuilder()
+                            .name(Text.literal("Feature Messages"))
+                            .binding(featureMessages,
+                                    () -> featureMessages,
+                                    newVal -> featureMessages = newVal)
+                            .controller(BUConfig::createBooleanController)
+                            .build())
+                    .option(Option.<Boolean>createBuilder()
+                            .name(Text.literal("Bazaar Data Messages"))
+                            .binding(bazaarDataMessages,
+                                    () -> bazaarDataMessages,
+                                    newVal -> bazaarDataMessages = newVal)
+                            .controller(BUConfig::createBooleanController)
+                            .build())
+                    .option(Option.<Boolean>createBuilder()
+                            .name(Text.literal("Command Messages"))
+                            .binding(commandMessages,
+                                    () -> commandMessages,
+                                    newVal -> commandMessages = newVal)
+                            .controller(BUConfig::createBooleanController)
+                            .build())
+                    .option(Option.<Boolean>createBuilder()
+                            .name(Text.literal("Item Data Messages"))
+                            .binding(itemDataMessages,
+                                    () -> itemDataMessages,
+                                    newVal -> itemDataMessages = newVal)
+                            .controller(BUConfig::createBooleanController)
+                            .build())
+                    .build();
         }
 
         public static boolean isDeveloperVariableEnabled(Util.notificationTypes type) {
@@ -87,8 +137,13 @@ public class BUConfig {
                 default -> throw new IllegalArgumentException("Unknown type: " + type);
             };
         }
-    }
 
-    @SerialEntry(comment = "This string is amazing")
-    public String myCoolString = "How amazing!";
+        public String getText(boolean example) {
+            if (example) return "I'm in Example mode";
+            if (!ItemData.nameList.isEmpty()) {
+                ItemData.updateLists();
+                return String.join(", ", ItemData.nameList);
+            } else return "No watched items";
+        }
+    }
 }

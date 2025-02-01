@@ -4,8 +4,9 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"MixinHandledScreen",
-      "AccessorScreen",
+      	"AccessorScreen",
 		"AccessorSignEditScreen",
+		"MixinDrawContent",
 		"MixinSignOpen",
 		"MixinSimpleInventory",
 		"YggdrasilMinecraftSessionServiceMixin",

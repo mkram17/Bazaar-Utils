@@ -6,82 +6,85 @@ import com.github.mkram17.bazaarutils.config.BUConfig;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.text.Text;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventHandler {
-    public static void subscribe(){
+    private enum messageTypes {BUYORDER, SELLORDER, FILLED, CLAIMED}
+
+    public static void subscribe() {
         registerBazaarChat();
     }
 
-    private enum messageTypes {BUYORDER, SELLORDER}
-
-    public static void registerBazaarChat(){
+    public static void registerBazaarChat() {
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (!(message.getString().contains("[Bazaar]"))) return;
-            if(message.getSiblings().size() < 1) return;
-            if(message.getSiblings().get(1).getString().contains("escrow")) return;
-            if(message.getSiblings().get(1).getString().contains("Submitting")) return;
+            if (!message.getSiblings().isEmpty()) {
+                if (message.getSiblings().get(1).getString().contains("escrow")
+                        || message.getSiblings().get(1).getString().contains("Submitting")
+                        || message.getSiblings().get(1).getString().contains("Executing")
+                        || message.getSiblings().get(1).getString().contains("Claiming")) return;
+            }
 
-
-            Text[] siblings = message.getSiblings().toArray(new Text[0]);
-
+            ArrayList<Text> siblings = new ArrayList<>(message.getSiblings());
 
             String itemName;
             int volume;
             double price;
             ItemData item;
             messageTypes messageType = null;
-            List<Text> orderText = message.getSiblings();
-//            Util.notifyAll(orderText, Util.notificationTypes.ITEMDATA);
+            List<Text> messageSiblings = message.getSiblings();
 
-            if(siblings.length >=3 && siblings[2].getString().contains("Buy Order Setup!")) messageType = messageTypes.BUYORDER;
-            if(siblings.length >=3 && siblings[2].getString().contains("Sell Offer Setup!")) messageType = messageTypes.SELLORDER;
+            if (siblings.isEmpty() && message.getString().contains("was filled!")) messageType = messageTypes.FILLED;
+            if (siblings.size() >= 3 && siblings.get(2).getString().contains("Buy Order Setup!"))
+                messageType = messageTypes.BUYORDER;
+            if (siblings.size() >= 3 && siblings.get(2).getString().contains("Sell Offer Setup!"))
+                messageType = messageTypes.SELLORDER;
+            if(siblings.size() >= 3 && siblings.get(2).getString().contains("Claimed")) messageType = messageTypes.CLAIMED;
 
-            if(messageType == messageTypes.BUYORDER || messageType == messageTypes.SELLORDER){
-                itemName = Util.removeFormatting(siblings[5].getString());
-                volume = Integer.parseInt(siblings[3].getString());
-                price = Double.parseDouble(siblings[7].getString().substring(0, siblings[7].getString().indexOf(" coin"))) / volume;
-                if(messageType == messageTypes.SELLORDER)
-                    price /= (1- BUConfig.bzTax);
-                price = (Math.round(price*10))/10.0;
+            if (messageType == messageTypes.BUYORDER || messageType == messageTypes.SELLORDER) {
+                itemName = Util.removeFormatting(siblings.get(5).getString());
+                volume = Integer.parseInt(siblings.get(3).getString());
+                price = Util.getPrettyNumber(Double.parseDouble(siblings.get(7).getString().substring(0, siblings.get(7).getString().indexOf(" coin")).replace(",", ""))) / volume;
+                if (messageType == messageTypes.SELLORDER)
+                    price /= (1 - BUConfig.bzTax);
+                price = (Math.round(price * 10)) / 10.0;
                 Util.addWatchedItem(itemName, price, !(messageType == messageTypes.BUYORDER), volume);
                 Util.notifyAll(itemName + " was added with a price of " + price, Util.notificationTypes.ITEMDATA);
             }
 
-//            if (orderText.contains("was filled!")) {
-//                volume = Integer.parseInt(orderText.substring(orderText.indexOf("for") + 4, orderText.indexOf("x")).replace(",", ""));
-//                itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("was") - 1);
-//                item = ItemData.findItem(itemName, null, volume, null);
-//                assert item != null: "Could not find item";
-//                ItemData.setItemFilled(item);
-//                Util.notifyAll(item.getName() + "[" + item.getIndex() + "] was filled", Util.notificationTypes.ITEMDATA);
-//            }
-//
-//            if (orderText.contains("Claimed")) {
-//                handleClaimed(orderText);
-//            }
-        });
+            if (messageType == messageTypes.FILLED) {
+                String messageText = Util.removeFormatting(message.getString());
+                volume = Integer.parseInt(messageText.substring(messageText.indexOf("for") + 4, messageText.indexOf("x")).replace(",", ""));
+                itemName = messageText.substring(messageText.indexOf("x") + 2, messageText.indexOf("was") - 1);
+                item = ItemData.findItem(itemName, null, volume, ItemData.priceTypes.INSTASELL);
+                assert item != null : "Could not find item";
+                ItemData.setItemFilled(item);
+                Util.notifyAll(item.getName() + "[" + item.getIndex() + "] was filled", Util.notificationTypes.ITEMDATA);
+            }
 
+            if (messageType == messageTypes.CLAIMED) {
+                handleClaimed(siblings);
+            }
+        });
     }
-    public static void handleClaimed(String orderText){
+
+
+    public static void handleClaimed(ArrayList<Text> siblings) {
         Integer volumeClaimed = null;
         Double price = null;
         String itemName = null;
         ItemData item;
-        //there might be different claim messages
+
         try {
-            if (orderText.contains("worth")) {
-                volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("Claimed") + 8, orderText.indexOf("x")).replace(",", ""));
-                itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("worth") - 1);
-                price = Double.parseDouble(orderText.substring(orderText.indexOf("worth") + 6, orderText.indexOf("coins") - 1).replace(",", "")) / volumeClaimed;
-            }
-            else if (orderText.contains("at")) {
-                volumeClaimed = Integer.parseInt(orderText.substring(orderText.indexOf("selling") + 8, orderText.indexOf("x")).replace(",", ""));
-                itemName = orderText.substring(orderText.indexOf("x") + 2, orderText.indexOf("at") - 1);
-//            price = Double.parseDouble(orderText.substring(orderText.indexOf("at") + 3, orderText.indexOf("each") - 1).replace(",", ""));
+            if (siblings.get(6).getString().contains("worth")) {
+                volumeClaimed = Integer.parseInt(siblings.get(3).getString());
+                itemName = siblings.get(5).getString().trim();
+                price = Double.parseDouble(siblings.get(9).getString().trim());
+            } else {
+                Util.notifyAll("claimed message, but not worth");
             }
 
-            //wont work when the amount claimed is equal to the volume of another order
             if (ItemData.volumeList.contains(volumeClaimed))
                 item = ItemData.findItem(itemName, price, volumeClaimed, null);
             else
@@ -89,7 +92,7 @@ public class EventHandler {
 
             if (item == null) {
                 Util.notifyAll("Could not find claimed item: " + itemName, Util.notificationTypes.ITEMDATA);
-                return; // Or throw an exception depending on how you want to handle this error
+                return;
             }
             if (item.getVolume() == volumeClaimed) {
                 Util.notifyAll(item.getGeneralInfo() + " was removed", Util.notificationTypes.ITEMDATA);
@@ -99,9 +102,9 @@ public class EventHandler {
                 Util.notifyAll(item.getName() + " has claimed " + item.getAmountClaimed() + " out of " + item.getVolume(), Util.notificationTypes.ITEMDATA);
             }
         } catch (Exception ex) {
-            Util.notifyAll("Unexpected error in order text: " + orderText, Util.notificationTypes.ERROR);
+            Util.notifyAll("Error in order text: " + siblings, Util.notificationTypes.ERROR);
             ex.printStackTrace();
-            System.out.println("error test");
         }
     }
+
 }

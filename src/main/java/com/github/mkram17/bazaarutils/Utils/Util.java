@@ -40,9 +40,7 @@ public class Util {
         String messageStr = message.toString();
         messageStr = messageStr.toLowerCase().contains("exception") ? "§c" + messageStr : "§a" + messageStr;
 
-//        if (BUConfig.Developer.devMessages) {
             MinecraftClient.getInstance().player.sendMessage(Text.literal("[" + callingName + "] " + messageStr), false);
-//        }
         LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
     }
 
@@ -56,12 +54,12 @@ public class Util {
         String simpleCallingName = callingName.substring(callingName.lastIndexOf(".") + 1);
         String messageStr = notiType == notificationTypes.ERROR ? "§c" + message : "§a" + message;
 
-//        if (BUConfig.Developer.devMessages && (notiType.isEnabled() || BUConfig.Developer.allMessages)) {
+        if (notiType.isEnabled() || BUConfig.Developer.allMessages) {
             if (MinecraftClient.getInstance().player != null) {
                 MinecraftClient.getInstance().player.sendMessage(Text.literal("[" + simpleCallingName + "] " + messageStr), false);
             }
             LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
-//        }
+        }
     }
 
     public static void addWatchedItem(String itemName, Double price, boolean isSellOrder, int volume) {
