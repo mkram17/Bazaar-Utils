@@ -39,8 +39,8 @@ public class BUConfig {
     public static boolean notifyOutdated = true;
     @SerialEntry
     public static boolean buyMaxEnabled = true;
-    @SerialEntry(comment = "This string is amazing")
-    public String myCoolString = "How amazing!";
+    @SerialEntry
+    public static boolean autoOpenBazaar = true;
 
     public static void openGUI() {
         MinecraftClient client = MinecraftClient.getInstance();
