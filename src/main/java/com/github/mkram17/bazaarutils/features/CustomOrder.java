@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.Events.SignOpenEvent;
 import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
+import com.github.mkram17.bazaarutils.Utils.CustomItemButton;
 import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import dev.isxander.yacl3.api.ConfigCategory;
@@ -18,49 +19,34 @@ import net.minecraft.util.Formatting;
 
 import java.util.function.Supplier;
 
-public class CustomOrder {
-    private final Supplier<Boolean> enabled;
-    private final Supplier<Integer> orderAmount;
-    private final Supplier<Integer> replaceSlotNumber;
-    private final Item item;
-    private boolean signClicked = false;
-
-    public boolean isEnabled() {
-        return enabled.get();
-    }
-    public int getOrderAmount() {
-        return orderAmount.get();
-    }
-    public int getReplaceSlotNumber() {
-        return replaceSlotNumber.get();
-    }
-
+public class CustomOrder extends CustomItemButton {
+    private boolean buySignClicked = false;
+    public static ConfigCategory.Builder ordersCategory = ConfigCategory.createBuilder()
+            .name(Text.literal("Buy Orders"));
 
     public CustomOrder(Supplier<Boolean> enabled, Supplier<Integer> orderAmount, Supplier<Integer> replaceSlotNumber, Item item) {
-        this.enabled = enabled;
-        this.orderAmount = orderAmount;
-        this.replaceSlotNumber = replaceSlotNumber;
-        this.item = item;
+        super(enabled, orderAmount, replaceSlotNumber, item);
     }
 
-
+    @Override
     @EventHandler
-    private void onGUI(ReplaceItemEvent event) {
+    public void onGUI(ReplaceItemEvent event) {
         if (!BazaarUtils.gui.inBuyOrderScreen() || !isEnabled())
             return;
 
         if (event.getSlotId() != getReplaceSlotNumber())
             return;
 
-        ItemStack purpleGlassPane = new ItemStack(Items.PURPLE_STAINED_GLASS_PANE, getOrderAmount());
+        ItemStack itemStack = new ItemStack(Items.PURPLE_STAINED_GLASS_PANE, getOrderAmount());
 
 // Set the display name
-        purpleGlassPane.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Buy " + getOrderAmount()).formatted(Formatting.DARK_PURPLE));
-        event.setReplacement(purpleGlassPane);
+        itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Buy " + getOrderAmount()).formatted(Formatting.DARK_PURPLE));
+        event.setReplacement(itemStack);
     }
 
+    @Override
     @EventHandler
-    private void onSlotClicked(SlotClickEvent event) {
+    public void onSlotClicked(SlotClickEvent event) {
         if (!BazaarUtils.gui.inBuyOrderScreen() || !isEnabled())
             return;
 
@@ -72,30 +58,27 @@ public class CustomOrder {
 
     @EventHandler
     private void onSignOpened(SignOpenEvent event) {
-        if (!signClicked) return;
+        if (!buySignClicked) return;
 
         GUIUtils.setSignText(Integer.toString(getOrderAmount()));
 //        GUIUtils.closeGui();
-        signClicked = false;
+        buySignClicked = false;
     }
 
     public void openSign() {
         int signSlotId = getReplaceSlotNumber() - 1;
         GUIUtils.clickSlot(signSlotId, 0);
-        signClicked = true;
+        buySignClicked = true;
     }
 
-    public static ConfigCategory create() {
-        return ConfigCategory.createBuilder()
-                .name(Text.literal("Buy Orders"))
-
-                .option(Option.<Boolean>createBuilder()
-                        .name(Text.literal("Buy Max Enabled"))
-                        .binding(BUConfig.buyMaxEnabled,
-                                () -> BUConfig.buyMaxEnabled,
-                                newVal -> BUConfig.buyMaxEnabled = newVal)
-                        .controller(BUConfig::createBooleanController)
-                        .build())
+    @Override
+    public Option<Boolean> createOption() {
+        return Option.<Boolean>createBuilder()
+                .name(Text.literal(getOrderAmount() == 71680 ? "Buy Max Button" : "Enable " + getOrderAmount() + " Button"))
+                .binding(isEnabled(),
+                        this::isEnabled,
+                        this::setEnabled)
+                .controller(BUConfig::createBooleanController)
                 .build();
     }
 }

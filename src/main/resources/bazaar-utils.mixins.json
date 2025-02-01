@@ -6,7 +6,7 @@
 		"MixinHandledScreen",
 		"AccessorScreen",
 		"AccessorSignEditScreen",
-		"MixinDrawContent",
+		"DrawContentMixin",
 		"MixinSignOpen",
 		"MixinSimpleInventory",
 		"YggdrasilMinecraftSessionServiceMixin",

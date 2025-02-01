@@ -7,14 +7,14 @@ import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.BazaarData;
 import com.github.mkram17.bazaarutils.features.AutoFlipper;
-import com.github.mkram17.bazaarutils.features.CustomOrder;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.minecraft.item.Items;
 
 import java.lang.invoke.MethodHandles;
+
+import static com.github.mkram17.bazaarutils.config.BUConfig.maxBuyOrder;
 
 public class BazaarUtils implements ClientModInitializer {
     public static IEventBus eventBus = new EventBus();
@@ -31,7 +31,6 @@ public class BazaarUtils implements ClientModInitializer {
         eventBus.registerLambdaFactory("com.github.mkram17.bazaarutils", (lookupInMethod, klass) ->
                 (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
-        CustomOrder maxBuyOrder = new CustomOrder(() -> BUConfig.buyMaxEnabled, () -> 71680, () -> 17, Items.PURPLE_STAINED_GLASS_PANE);
         ChestLoadedEvent.subscribe();
         EventHandler.subscribe();
         gui.registerScreenEvent();

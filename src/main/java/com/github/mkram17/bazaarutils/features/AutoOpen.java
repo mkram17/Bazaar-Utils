@@ -9,6 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 
 import java.util.concurrent.CompletableFuture;
 
+//TODO change the message number instead of sending more
 public class AutoOpen {
     @EventHandler
     public void onOutdated(OutdatedItemEvent e){

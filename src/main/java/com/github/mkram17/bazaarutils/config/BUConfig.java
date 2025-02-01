@@ -14,9 +14,14 @@ import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static com.github.mkram17.bazaarutils.features.CustomOrder.ordersCategory;
 
 public class BUConfig {
     public static ConfigClassHandler<BUConfig> HANDLER = ConfigClassHandler.createBuilder(BUConfig.class)
@@ -27,6 +32,9 @@ public class BUConfig {
 
                     .build())
             .build();
+
+    public static CustomOrder maxBuyOrder = new CustomOrder(() -> BUConfig.buyMaxEnabled, () -> 71680, () -> 17, Items.PURPLE_STAINED_GLASS_PANE);
+
     @SerialEntry
     public static ArrayList<ItemData> watchedItems = new ArrayList<>();
     @SerialEntry
@@ -41,6 +49,8 @@ public class BUConfig {
     public static boolean buyMaxEnabled = true;
     @SerialEntry
     public static boolean autoOpenBazaar = true;
+    @SerialEntry
+    public static List<CustomOrder> customOrders = Collections.singletonList(maxBuyOrder);
 
     public static void openGUI() {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -50,9 +60,15 @@ public class BUConfig {
     public static Screen createGUI(Screen parent) {
         return YetAnotherConfigLib.create(HANDLER, (defaults, config, builder) -> {
             builder.title(Text.literal("Bazaar Utils"))
-                    .category(CustomOrder.create())
                     .category(Developer.create());
 
+
+
+            for (CustomOrder order : customOrders) {
+                ordersCategory.option(order.createOption());
+            }
+
+            builder.category(ordersCategory.build());
             return builder;
         }).generateScreen(parent);
     }
