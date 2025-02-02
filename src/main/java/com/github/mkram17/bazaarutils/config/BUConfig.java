@@ -19,7 +19,11 @@ import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import static com.github.mkram17.bazaarutils.config.BUConfig.Developer.allMessages;
+import static com.github.mkram17.bazaarutils.config.BUConfig.Developer.createOptions;
 
 
 public class BUConfig {
@@ -33,6 +37,7 @@ public class BUConfig {
             .build();
 
     public static CustomOrder maxBuyOrder = new CustomOrder(() -> BUConfig.buyMaxEnabled, () -> 71680, () -> 17, Items.PURPLE_STAINED_GLASS_PANE);
+    public static AutoFlipper autoFlipper = new AutoFlipper(() -> BUConfig.autoFlip, () -> 16, Items.CHERRY_SIGN);
 
     @SerialEntry
     public static ArrayList<ItemData> watchedItems = new ArrayList<>();
@@ -61,7 +66,7 @@ public class BUConfig {
             builder.title(Text.literal("Bazaar Utils"));
             builder.category(ConfigCategory.createBuilder()
                     .name(Text.literal("General"))
-                    .option(AutoFlipper.createOption())
+                    .option(autoFlipper.createOption())
                     .build()
             );
             // Create the OptionGroup builder
@@ -77,7 +82,22 @@ public class BUConfig {
             // Build the OptionGroup and add it to the category
 
             builder.category(
-                    Developer.create()
+                    Developer.createBuilder()
+                            .option(Option.<Boolean>createBuilder()
+                                    .name(Text.literal("All Messages"))
+                                    .binding(allMessages,
+                                            () -> allMessages,
+                                            newVal -> allMessages = newVal)
+                                    .controller(BUConfig::createBooleanController)
+                                    .build())
+
+                            .group(
+                                    OptionGroup.createBuilder()
+                                            .name(Text.literal("Message Options"))
+                                            .description(OptionDescription.of(Text.literal("DEVELOPER ONLY")))
+                                            .options(createOptions())
+                                            .build()
+                            )
                             .build());
             return builder;
         }).generateScreen(parent);
@@ -95,61 +115,57 @@ public class BUConfig {
         public static boolean bazaarDataMessages = false;
         public static boolean commandMessages = false;
         public static boolean itemDataMessages = false;
-
-        public static ConfigCategory.Builder create() {
+        public static  ConfigCategory.Builder createBuilder(){
             return ConfigCategory.createBuilder()
-                    .name(Text.literal("Developer"))
+                    .name(Text.literal("Developer"));
+        }
 
-                    .option(Option.<Boolean>createBuilder()
-                            .name(Text.literal("All Messages"))
-                            .binding(allMessages,
-                                    () -> allMessages,
-                                    newVal -> allMessages = newVal)
-                            .controller(BUConfig::createBooleanController)
-                            .build())
 
-                    .option(Option.<Boolean>createBuilder()
+        public static Collection<? extends Option<?>> createOptions() {
+            ArrayList<Option<?>> optionList = new ArrayList<>();
+                    optionList.add(Option.<Boolean>createBuilder()
                             .name(Text.literal("Error Messages"))
                             .binding(errorMessages,
                                     () -> errorMessages,
                                     newVal -> errorMessages = newVal)
                             .controller(BUConfig::createBooleanController)
-                            .build())
-                    .option(Option.<Boolean>createBuilder()
+                            .build());
+            optionList.add(Option.<Boolean>createBuilder()
                             .name(Text.literal("GUI Messages"))
                             .binding(guiMessages,
                                     () -> guiMessages,
                                     newVal -> guiMessages = newVal)
                             .controller(BUConfig::createBooleanController)
-                            .build())
-                    .option(Option.<Boolean>createBuilder()
+                            .build());
+            optionList.add(Option.<Boolean>createBuilder()
                             .name(Text.literal("Feature Messages"))
                             .binding(featureMessages,
                                     () -> featureMessages,
                                     newVal -> featureMessages = newVal)
                             .controller(BUConfig::createBooleanController)
-                            .build())
-                    .option(Option.<Boolean>createBuilder()
+                            .build());
+            optionList.add(Option.<Boolean>createBuilder()
                             .name(Text.literal("Bazaar Data Messages"))
                             .binding(bazaarDataMessages,
                                     () -> bazaarDataMessages,
                                     newVal -> bazaarDataMessages = newVal)
                             .controller(BUConfig::createBooleanController)
-                            .build())
-                    .option(Option.<Boolean>createBuilder()
+                            .build());
+                    optionList.add(Option.<Boolean>createBuilder()
                             .name(Text.literal("Command Messages"))
                             .binding(commandMessages,
                                     () -> commandMessages,
                                     newVal -> commandMessages = newVal)
                             .controller(BUConfig::createBooleanController)
-                            .build())
-                    .option(Option.<Boolean>createBuilder()
+                            .build());
+                    optionList.add(Option.<Boolean>createBuilder()
                             .name(Text.literal("Item Data Messages"))
                             .binding(itemDataMessages,
                                     () -> itemDataMessages,
                                     newVal -> itemDataMessages = newVal)
                             .controller(BUConfig::createBooleanController)
                             .build());
+                    return optionList;
         }
 
         public static boolean isDeveloperVariableEnabled(Util.notificationTypes type) {

@@ -115,6 +115,8 @@ public class ItemData {
     private priceTypes priceType;
     //the sell or buy price of lowest/highest offer
     private double marketPrice;
+    //the price of the opposite type of order
+    private double marketOppositePrice;
     //item price * volume
     private final double fullPrice;
     private statuses status;
@@ -167,6 +169,7 @@ public class ItemData {
         for(ItemData item: watchedItems) {
             double oldPrice = item.marketPrice;
             item.marketPrice = Util.getPrettyNumber(BazaarData.findItemPrice(item.productId, item.priceType));
+            item.marketOppositePrice = Util.getPrettyNumber(BazaarData.findItemPrice(item.productId, item.priceType.getOpposite()));
             if(oldPrice != item.marketPrice)
                 Util.notifyAll(item.getGeneralInfo() + " has new market price: " + item.getMarketPrice(), Util.notificationTypes.BAZAARDATA);
         }
@@ -247,9 +250,9 @@ public class ItemData {
     public double getFlipPrice(){
         updateMarketPrices();
         if (priceType == priceTypes.INSTABUY) {
-            return (marketPrice + .1);
+            return (marketOppositePrice + .1);
         } else {
-            return (marketPrice - .1);
+            return (marketOppositePrice - .1);
         }
     }
 

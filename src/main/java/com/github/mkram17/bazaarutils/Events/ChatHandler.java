@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventHandler {
+public class ChatHandler {
     private enum messageTypes {BUYORDER, SELLORDER, FILLED, CLAIMED}
 
     public static void subscribe() {
@@ -57,10 +57,16 @@ public class EventHandler {
                 String messageText = Util.removeFormatting(message.getString());
                 volume = Integer.parseInt(messageText.substring(messageText.indexOf("for") + 4, messageText.indexOf("x")).replace(",", ""));
                 itemName = messageText.substring(messageText.indexOf("x") + 2, messageText.indexOf("was") - 1);
-                item = ItemData.findItem(itemName, null, volume, ItemData.priceTypes.INSTASELL);
-                assert item != null : "Could not find item";
-                ItemData.setItemFilled(item);
-                Util.notifyAll(item.getName() + "[" + item.getIndex() + "] was filled", Util.notificationTypes.ITEMDATA);
+                if(messageText.contains("Sell Offer"))
+                    item = ItemData.findItem(itemName, null, volume, ItemData.priceTypes.INSTABUY);
+                else
+                    item = ItemData.findItem(itemName, null, volume, ItemData.priceTypes.INSTASELL);
+                if(item == null)
+                    Util.notifyAll("Could not find item to fill with info vol: "+ volume + " name: " + itemName, Util.notificationTypes.ERROR);
+                else {
+                    ItemData.setItemFilled(item);
+                    Util.notifyAll(item.getName() + "[" + item.getIndex() + "] was filled", Util.notificationTypes.ITEMDATA);
+                }
             }
 
             if (messageType == messageTypes.CLAIMED) {

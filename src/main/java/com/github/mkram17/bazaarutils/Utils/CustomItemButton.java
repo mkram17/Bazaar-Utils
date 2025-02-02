@@ -9,14 +9,12 @@ import java.util.function.Supplier;
 
 public abstract class CustomItemButton {
     private Supplier<Boolean> enabled;
-    private final Supplier<Integer> orderAmount;
     private final Supplier<Integer> replaceSlotNumber;
     private final Item item;
     private boolean signClicked = false;
 
-    public CustomItemButton(Supplier<Boolean> enabled, Supplier<Integer> orderAmount, Supplier<Integer> replaceSlotNumber, Item item) {
+    public CustomItemButton(Supplier<Boolean> enabled, Supplier<Integer> replaceSlotNumber, Item item) {
         this.enabled = enabled;
-        this.orderAmount = orderAmount;
         this.replaceSlotNumber = replaceSlotNumber;
         this.item = item;
     }
@@ -27,15 +25,16 @@ public abstract class CustomItemButton {
     public void setEnabled(boolean newValue){
         enabled = () -> newValue;
     }
-    public int getOrderAmount() {
-        return orderAmount.get();
+    protected Item getButtonItem(){
+        return this.item;
     }
+
     public int getReplaceSlotNumber() {
         return replaceSlotNumber.get();
     }
 
+    public abstract void onGUI(ReplaceItemEvent event);
     public abstract void onSlotClicked(SlotClickEvent event);
 
-    public abstract void onGUI(ReplaceItemEvent event);
     public abstract Option<Boolean> createOption();
 }

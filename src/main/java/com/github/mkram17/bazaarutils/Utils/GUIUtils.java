@@ -118,7 +118,7 @@ public class GUIUtils {
             for (int i = 0; i < 4; i++) {
                 String line = i < lines.length ? lines[i] : "";
                 signScreen.setCurrentRow(i); // Set the target row
-                signScreen.setCurrentRowMessage(line); // Update the line
+                signScreen.callSetCurrentRowMessage(line); // Update the line
             }
 
             // Restore original row

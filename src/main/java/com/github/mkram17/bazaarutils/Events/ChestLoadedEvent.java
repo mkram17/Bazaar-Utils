@@ -38,7 +38,7 @@ public class ChestLoadedEvent implements ICancellable {
                         event.itemStacks = returnItemStacks(event.lowerChestInventory);
 
                         // Post to custom event bus
-                        BazaarUtils.eventBus.post(new ChestLoadedEvent());
+                        BazaarUtils.eventBus.post(event);
 //                        Util.notifyAll("Chest Loaded Event posted!");
                     }
                 });

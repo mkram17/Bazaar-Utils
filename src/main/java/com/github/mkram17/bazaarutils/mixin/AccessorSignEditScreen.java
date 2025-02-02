@@ -12,7 +12,7 @@ public interface AccessorSignEditScreen {
 
     // Expose the private setCurrentRowMessage method
     @Invoker("setCurrentRowMessage")
-    public abstract void setCurrentRowMessage(String message);
+    void callSetCurrentRowMessage(String message);
 
     // Accessors for currentRow (private field)
     @Accessor("currentRow")

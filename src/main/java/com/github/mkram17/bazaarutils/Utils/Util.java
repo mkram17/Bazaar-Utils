@@ -66,8 +66,9 @@ public class Util {
         itemName = itemName.toLowerCase();
         if (BazaarData.findProductId(itemName) != null) {
             ItemData.priceTypes type = isSellOrder ? ItemData.priceTypes.INSTABUY : ItemData.priceTypes.INSTASELL;
-            watchedItems.add(new ItemData(itemName, price, type, volume));
-            notifyAll("Added item: § " + itemName);
+            ItemData itemToAdd =new ItemData(itemName, price, type, volume);
+            watchedItems.add(itemToAdd);
+            notifyAll("Added item: § " + itemToAdd.getGeneralInfo());
         } else {
             notifyAll("Could not add item: § " + itemName + " §a (is it spelled correctly?)");
         }

@@ -13,7 +13,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -21,13 +20,17 @@ import java.util.function.Supplier;
 
 public class CustomOrder extends CustomItemButton {
     private boolean buySignClicked = false;
+    private final Supplier<Integer> orderAmount;
     public static ConfigCategory.Builder createOrdersCategory(){
         return ConfigCategory.createBuilder()
                 .name(Text.literal("Buy Orders"));
     }
-
+    public int getOrderAmount() {
+        return orderAmount.get();
+    }
     public CustomOrder(Supplier<Boolean> enabled, Supplier<Integer> orderAmount, Supplier<Integer> replaceSlotNumber, Item item) {
-        super(enabled, orderAmount, replaceSlotNumber, item);
+        super(enabled, replaceSlotNumber, item);
+        this.orderAmount = orderAmount;
     }
 
     @Override
@@ -39,7 +42,7 @@ public class CustomOrder extends CustomItemButton {
         if (event.getSlotId() != getReplaceSlotNumber())
             return;
 
-        ItemStack itemStack = new ItemStack(Items.PURPLE_STAINED_GLASS_PANE, getOrderAmount());
+        ItemStack itemStack = new ItemStack(getButtonItem(), getOrderAmount());
 
 // Set the display name
         itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Buy " + getOrderAmount()).formatted(Formatting.DARK_PURPLE));
