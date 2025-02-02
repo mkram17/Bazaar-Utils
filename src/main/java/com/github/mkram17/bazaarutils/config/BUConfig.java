@@ -2,15 +2,16 @@ package com.github.mkram17.bazaarutils.config;
 
 import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
+import com.github.mkram17.bazaarutils.features.AutoFlipper;
 import com.github.mkram17.bazaarutils.features.CustomOrder;
 import com.google.gson.GsonBuilder;
-import dev.isxander.yacl3.api.ConfigCategory;
-import dev.isxander.yacl3.api.Option;
-import dev.isxander.yacl3.api.YetAnotherConfigLib;
+import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
+import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -18,10 +19,8 @@ import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static com.github.mkram17.bazaarutils.features.CustomOrder.ordersCategory;
 
 public class BUConfig {
     public static ConfigClassHandler<BUConfig> HANDLER = ConfigClassHandler.createBuilder(BUConfig.class)
@@ -39,7 +38,7 @@ public class BUConfig {
     public static ArrayList<ItemData> watchedItems = new ArrayList<>();
     @SerialEntry
     public static double bzTax = 0.01125;
-    @SerialEntry
+    @SerialEntry @Setter @Getter
     public static boolean autoFlip;
     @SerialEntry
     public static int outdatedTiming = 5;
@@ -50,7 +49,7 @@ public class BUConfig {
     @SerialEntry
     public static boolean autoOpenBazaar = true;
     @SerialEntry
-    public static List<CustomOrder> customOrders = Collections.singletonList(maxBuyOrder);
+    public static ArrayList<CustomOrder> customOrders = new ArrayList<>(List.of(maxBuyOrder));
 
     public static void openGUI() {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -59,16 +58,27 @@ public class BUConfig {
 
     public static Screen createGUI(Screen parent) {
         return YetAnotherConfigLib.create(HANDLER, (defaults, config, builder) -> {
-            builder.title(Text.literal("Bazaar Utils"))
-                    .category(Developer.create());
+            builder.title(Text.literal("Bazaar Utils"));
+            builder.category(ConfigCategory.createBuilder()
+                    .name(Text.literal("General"))
+                    .option(AutoFlipper.createOption())
+                    .build()
+            );
+            // Create the OptionGroup builder
+            OptionGroup.Builder customOrdersGroupBuilder = OptionGroup.createBuilder()
+                    .name(Text.literal("Custom Orders"))
+                    .description(OptionDescription.of(Text.literal("Add buttons for custom buy order amounts.")));
 
-
-
+            // Add options to the OptionGroup builder
             for (CustomOrder order : customOrders) {
-                ordersCategory.option(order.createOption());
+                customOrdersGroupBuilder.option(order.createOption());
             }
+            builder.category(CustomOrder.createOrdersCategory().group(customOrdersGroupBuilder.build()).build());
+            // Build the OptionGroup and add it to the category
 
-            builder.category(ordersCategory.build());
+            builder.category(
+                    Developer.create()
+                            .build());
             return builder;
         }).generateScreen(parent);
     }
@@ -86,7 +96,7 @@ public class BUConfig {
         public static boolean commandMessages = false;
         public static boolean itemDataMessages = false;
 
-        public static ConfigCategory create() {
+        public static ConfigCategory.Builder create() {
             return ConfigCategory.createBuilder()
                     .name(Text.literal("Developer"))
 
@@ -97,6 +107,7 @@ public class BUConfig {
                                     newVal -> allMessages = newVal)
                             .controller(BUConfig::createBooleanController)
                             .build())
+
                     .option(Option.<Boolean>createBuilder()
                             .name(Text.literal("Error Messages"))
                             .binding(errorMessages,
@@ -138,8 +149,7 @@ public class BUConfig {
                                     () -> itemDataMessages,
                                     newVal -> itemDataMessages = newVal)
                             .controller(BUConfig::createBooleanController)
-                            .build())
-                    .build();
+                            .build());
         }
 
         public static boolean isDeveloperVariableEnabled(Util.notificationTypes type) {

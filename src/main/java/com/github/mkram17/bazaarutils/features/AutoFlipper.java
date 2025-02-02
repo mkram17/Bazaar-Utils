@@ -8,10 +8,13 @@ import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 
 public class AutoFlipper {
     public static double flipPrice;
@@ -94,6 +97,16 @@ public class AutoFlipper {
         }
         Util.notifyAll("Couldnt find a match", Util.notificationTypes.ITEMDATA);
         return false;
+    }
+    public static Option<Boolean> createOption() {
+        return Option.<Boolean>createBuilder()
+                .name(Text.literal("Enable Auto Flipper"))
+                .description(OptionDescription.of(Text.literal("Button in flip order menu to undercut market prices for items.")))
+                .binding(BUConfig.autoFlip,
+                        BUConfig::isAutoFlip,
+                        BUConfig::setAutoFlip)
+                .controller(BUConfig::createBooleanController)
+                .build();
     }
 
 

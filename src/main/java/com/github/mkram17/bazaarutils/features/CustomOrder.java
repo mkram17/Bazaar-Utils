@@ -21,8 +21,10 @@ import java.util.function.Supplier;
 
 public class CustomOrder extends CustomItemButton {
     private boolean buySignClicked = false;
-    public static ConfigCategory.Builder ordersCategory = ConfigCategory.createBuilder()
-            .name(Text.literal("Buy Orders"));
+    public static ConfigCategory.Builder createOrdersCategory(){
+        return ConfigCategory.createBuilder()
+                .name(Text.literal("Buy Orders"));
+    }
 
     public CustomOrder(Supplier<Boolean> enabled, Supplier<Integer> orderAmount, Supplier<Integer> replaceSlotNumber, Item item) {
         super(enabled, orderAmount, replaceSlotNumber, item);
