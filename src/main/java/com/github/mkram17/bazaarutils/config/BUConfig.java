@@ -2,8 +2,10 @@ package com.github.mkram17.bazaarutils.config;
 
 import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
-import com.github.mkram17.bazaarutils.features.AutoFlipper;
-import com.github.mkram17.bazaarutils.features.CustomOrder;
+import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipper;
+import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipperSettings;
+import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
+import com.github.mkram17.bazaarutils.features.customorder.CustomOrderSettings;
 import com.google.gson.GsonBuilder;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
@@ -36,8 +38,10 @@ public class BUConfig {
                     .build())
             .build();
 
-    public static CustomOrder maxBuyOrder = new CustomOrder(() -> BUConfig.buyMaxEnabled, () -> 71680, () -> 17, Items.PURPLE_STAINED_GLASS_PANE);
-    public static AutoFlipper autoFlipper = new AutoFlipper(() -> BUConfig.autoFlip, () -> 16, Items.CHERRY_SIGN);
+
+
+    public static CustomOrder maxBuyOrder = new CustomOrder(new CustomOrderSettings(BUConfig.buyMaxEnabled, 71680, 17, CustomOrder.COLORMAP.get(0)));
+    public static AutoFlipper autoFlipper = new AutoFlipper(new AutoFlipperSettings(BUConfig.autoFlip, 17, Items.CHERRY_SIGN));
 
     @SerialEntry
     public static ArrayList<ItemData> watchedItems = new ArrayList<>();

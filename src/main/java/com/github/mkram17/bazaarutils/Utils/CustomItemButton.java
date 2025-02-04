@@ -3,34 +3,23 @@ package com.github.mkram17.bazaarutils.Utils;
 import com.github.mkram17.bazaarutils.Events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
 import dev.isxander.yacl3.api.Option;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.item.Item;
 
-import java.util.function.Supplier;
-
 public abstract class CustomItemButton {
-    private Supplier<Boolean> enabled;
-    private final Supplier<Integer> replaceSlotNumber;
+    @Getter @Setter
+    private boolean enabled;
+    @Setter @Getter
+    private int replaceSlotNumber;
+    @Getter
     private final Item item;
     private boolean signClicked = false;
 
-    public CustomItemButton(Supplier<Boolean> enabled, Supplier<Integer> replaceSlotNumber, Item item) {
+    public CustomItemButton(boolean enabled, int replaceSlotNumber, Item item) {
         this.enabled = enabled;
         this.replaceSlotNumber = replaceSlotNumber;
         this.item = item;
-    }
-
-    public boolean isEnabled() {
-        return enabled.get();
-    }
-    public void setEnabled(boolean newValue){
-        enabled = () -> newValue;
-    }
-    protected Item getButtonItem(){
-        return this.item;
-    }
-
-    public int getReplaceSlotNumber() {
-        return replaceSlotNumber.get();
     }
 
     public abstract void onGUI(ReplaceItemEvent event);

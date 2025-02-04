@@ -9,7 +9,8 @@
 	],
 	"contact": {
 		"sources": "https://github.com/mkram17/Bazaar-Utils/tree/1.21.4",
-		"Modrinth": "https://modrinth.com/project/bazaar-utils"
+		"Modrinth": "https://modrinth.com/project/bazaar-utils",
+		"Discord": ""
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/bazaar-utils/icon.png",

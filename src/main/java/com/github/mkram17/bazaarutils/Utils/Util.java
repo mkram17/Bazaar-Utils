@@ -34,6 +34,9 @@ public class Util {
             return BUConfig.Developer.isDeveloperVariableEnabled(this);
         }
     }
+    public static final String HELPMESSAGE = "Commands: /bu or /bazaarutils to open settings gui. \n---------------------------\n " +
+            "/bu customorders to see current Custom Orders. /bu customorder {order amount} {slot number} to make new Custom Order /bu customorder remove {customorder number} to remove Custom Order (find number by using /bu customorders) \n---------------------------\n  " +
+            "For more help go to https://discord.gg/";
 
     public static<T> void notifyAll(T message) {
         String callingName = getCallingClassName();

@@ -1,5 +1,8 @@
 package com.github.mkram17.bazaarutils.Utils;
 
+import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
+import com.github.mkram17.bazaarutils.features.customorder.CustomOrderSettings;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -29,37 +32,64 @@ public class Commands {
 
         // Subcommand: /bazaarutils remove <index>
         dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("remove").then(ClientCommandManager.argument("index", IntegerArgumentType.integer())
+                .then(ClientCommandManager.literal("remove")
+                        .then(ClientCommandManager.argument("index", IntegerArgumentType.integer())
                                 .executes(Commands::executeRemove)
                         )
                 )
         );
+        dispatcher.register(ClientCommandManager.literal("bazaarutils")
+                .then(ClientCommandManager.literal("help")
+                        .executes((context) -> {
+                                    Util.notifyAll(Util.HELPMESSAGE);
+                                    return 1;
+                                }
+                        )
+                ));
 
         // Subcommand: /bazaarutils info <index>
         dispatcher.register(ClientCommandManager.literal("bazaarutils")
                 .then(ClientCommandManager.literal("info")
                         .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
-                                .executes(Commands::executeInfo)
+                                        .executes(Commands::executeInfo)
+                                )
                         )
-                )
-        ));
+                ));
 
         // Also register subcommands for the alias
         dispatcher.register(ClientCommandManager.literal("bu")
                 .then(ClientCommandManager.literal("remove")
                         .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
-                                .executes(Commands::executeRemove)
+                                        .executes(Commands::executeRemove)
+                                )
                         )
-                )
-        ));
+                ));
 
         dispatcher.register(ClientCommandManager.literal("bu")
                 .then(ClientCommandManager.literal("info")
                         .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
-                                .executes(Commands::executeInfo)
+                                        .executes(Commands::executeInfo)
+                                )
+                        )
+                ));
+        dispatcher.register(ClientCommandManager.literal("bu")
+                .then(ClientCommandManager.literal("customorder")
+                        .then((ClientCommandManager.argument("order amount", IntegerArgumentType.integer())
+                                        .then((ClientCommandManager.argument("slot number", IntegerArgumentType.integer())
+                                                .executes((context) -> {
+                                                            BUConfig.customOrders.add(new CustomOrder(new CustomOrderSettings(
+                                                                    true,
+                                                                    IntegerArgumentType.getInteger(context, "order amount"),
+                                                                    IntegerArgumentType.getInteger(context, "slot number"),
+                                                                    CustomOrder.COLORMAP.get(BUConfig.customOrders.size()))));
+                                                            return 1;
+                                                        }
+                                                ))
+                                        )
+                                )
                         )
                 )
-        ));
+        );
     }
     private static int executeRemove(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");

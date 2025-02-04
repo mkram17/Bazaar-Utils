@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.features;
+package com.github.mkram17.bazaarutils.features.autoflipper;
 
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
@@ -13,15 +13,13 @@ import com.github.mkram17.bazaarutils.Utils.Util;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
+import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-
-import java.util.function.Supplier;
 
 public class AutoFlipper extends CustomItemButton {
     public static double flipPrice;
@@ -29,9 +27,12 @@ public class AutoFlipper extends CustomItemButton {
     private static int orderVolumeFilled = -1;
     private static ItemData item;
     private static boolean shouldAddToSign = false;
+    @Getter
+    private AutoFlipperSettings settings;
 
-    public AutoFlipper(Supplier<Boolean> enabled, Supplier<Integer> replaceSlotNumber, Item itemSign) {
-        super(enabled, replaceSlotNumber, itemSign);
+    public AutoFlipper(AutoFlipperSettings settings) {
+        super(settings.isEnabled(), settings.getSlotNumber(), settings.getReplaceItem());
+        this.settings = settings;
     }
 
     @EventHandler
@@ -120,7 +121,8 @@ public class AutoFlipper extends CustomItemButton {
     @Override @EventHandler
     public void onGUI(ReplaceItemEvent event) {
         if(!BazaarUtils.gui.inFlipGui() || !(event.getSlotId() == getReplaceSlotNumber())) return;
-        ItemStack itemStack = new ItemStack(getButtonItem(), 1);
+        ItemStack itemStack = new ItemStack(settings.getReplaceItem(), 1);
+            itemStack.set(BazaarUtils.CLICK_COUNT_COMPONENT, "FLIP");
         if(item != null)
             itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Auto Flip for " + Util.getPrettyNumber(flipPrice) + " coins").formatted(Formatting.DARK_PURPLE));
         else
@@ -140,5 +142,5 @@ public class AutoFlipper extends CustomItemButton {
                 .build();
     }
 
-
 }
+
