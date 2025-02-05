@@ -8,9 +8,9 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 
-import static com.github.mkram17.bazaarutils.config.BUConfig.openGUI;
-import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
+import static com.github.mkram17.bazaarutils.config.BUConfig.*;
 
 public class Commands {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -72,20 +72,60 @@ public class Commands {
                                 )
                         )
                 ));
+
         dispatcher.register(ClientCommandManager.literal("bu")
                 .then(ClientCommandManager.literal("customorder")
-                        .then((ClientCommandManager.argument("order amount", IntegerArgumentType.integer())
-                                        .then((ClientCommandManager.argument("slot number", IntegerArgumentType.integer())
+                        .then(ClientCommandManager.argument("order amount", IntegerArgumentType.integer(1, 71679))
+                                .then(ClientCommandManager.argument("slot number", IntegerArgumentType.integer(0, 35))
+                                        .executes(context -> {
+                                            int orderAmount = IntegerArgumentType.getInteger(context, "order amount");
+                                            int slotNumber = IntegerArgumentType.getInteger(context, "slot number");
+
+                                            if (orderAmount < 1 || orderAmount > 71679) {
+                                                context.getSource().sendError(Text.literal("Order amount must be 1-71,679"));
+                                                return 0;
+                                            }
+
+                                            if (slotNumber < 0 || slotNumber > 35) {
+                                                context.getSource().sendError(Text.literal("Slot number must be 0-35"));
+                                                return 0;
+                                            }
+
+                                            BUConfig.customOrders.add(new CustomOrder(new CustomOrderSettings(
+                                                    true,
+                                                    orderAmount,
+                                                    slotNumber,
+                                                    CustomOrder.COLORMAP.get(BUConfig.customOrders.size())
+                                            )));
+
+                                            return 1;
+                                        })
+                                )
+                        )
+                )
+        );
+        dispatcher.register(ClientCommandManager.literal("bu")
+                .then(ClientCommandManager.literal("customorder")
+                        .then((ClientCommandManager.literal("remove")
+                                        .then((ClientCommandManager.argument("order number", IntegerArgumentType.integer())
                                                 .executes((context) -> {
-                                                            BUConfig.customOrders.add(new CustomOrder(new CustomOrderSettings(
-                                                                    true,
-                                                                    IntegerArgumentType.getInteger(context, "order amount"),
-                                                                    IntegerArgumentType.getInteger(context, "slot number"),
-                                                                    CustomOrder.COLORMAP.get(BUConfig.customOrders.size()))));
+                                                            BUConfig.customOrders.remove(IntegerArgumentType.getInteger(context, "order number"));
+                                                            Util.notifyAll("customOrders is now: " + customOrders);
                                                             return 1;
                                                         }
                                                 ))
                                         )
+                                )
+                        )
+                )
+        );
+        dispatcher.register(ClientCommandManager.literal("bu")
+                .then(ClientCommandManager.literal("customorder")
+                        .then((ClientCommandManager.literal("max")
+                                        .executes((context) -> {
+                                            customOrders.add(maxBuyOrder);
+                                            return 1;
+                                        })
                                 )
                         )
                 )

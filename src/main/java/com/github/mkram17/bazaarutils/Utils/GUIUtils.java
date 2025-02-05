@@ -94,12 +94,7 @@ public class GUIUtils {
     }
 
     public static void closeGui(){
-        CompletableFuture.runAsync(() -> {
-            try{
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        MinecraftClient.getInstance().execute(() -> {
             Util.notifyAll("Closing gui", Util.notificationTypes.GUI);
             MinecraftClient.getInstance().setScreen(null);
         });

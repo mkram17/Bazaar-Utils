@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.Utils.Commands;
 import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.BazaarData;
+import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
 import com.mojang.serialization.Codec;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.IEventBus;
@@ -18,17 +19,17 @@ import net.minecraft.util.Identifier;
 
 import java.lang.invoke.MethodHandles;
 
-import static com.github.mkram17.bazaarutils.config.BUConfig.maxBuyOrder;
-
 public class BazaarUtils implements ClientModInitializer {
     public static IEventBus eventBus = new EventBus();
     public static GUIUtils gui = new GUIUtils();
 
     @Override
     public void onInitializeClient() {
-        BUConfig.HANDLER.load();
-        registerCommands();
         registerEvents();
+        BUConfig.HANDLER.load();
+        loadTransients();
+        registerDeserializedEvents();
+        registerCommands();
         BazaarData.scheduleBazaar();
 
     }
@@ -40,7 +41,6 @@ public class BazaarUtils implements ClientModInitializer {
         ChestLoadedEvent.subscribe();
         ChatHandler.subscribe();
         gui.registerScreenEvent();
-        eventBus.subscribe(maxBuyOrder);
         eventBus.subscribe(new GUIUtils());
         eventBus.subscribe(BUConfig.autoFlipper);
     }
@@ -49,6 +49,20 @@ public class BazaarUtils implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             Commands.register(dispatcher);
         });
+    }
+    //must be run after config load
+    private void loadTransients(){
+        for(CustomOrder order : BUConfig.customOrders) {
+            order.initializeStateManager();
+        }
+        BUConfig.autoFlipper.initializeStateManager();
+    }
+    //must be run after config load
+    private void registerDeserializedEvents(){
+        for(CustomOrder order : BUConfig.customOrders) {
+            eventBus.subscribe(order);
+        }
+        eventBus.subscribe(BUConfig.autoFlipper);
     }
 
     public static final ComponentType<String> CLICK_COUNT_COMPONENT = Registry.register(

@@ -12,8 +12,6 @@ import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
-import lombok.Getter;
-import lombok.Setter;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -22,7 +20,6 @@ import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import static com.github.mkram17.bazaarutils.config.BUConfig.Developer.allMessages;
 import static com.github.mkram17.bazaarutils.config.BUConfig.Developer.createOptions;
@@ -34,21 +31,19 @@ public class BUConfig {
                     .setPath(FabricLoader.getInstance().getConfigDir().resolve("bazaarutils.json"))
                     .appendGsonBuilder(GsonBuilder::setPrettyPrinting) // not needed, pretty print by default
                     .setJson5(true)
-
                     .build())
             .build();
 
 
 
     public static CustomOrder maxBuyOrder = new CustomOrder(new CustomOrderSettings(BUConfig.buyMaxEnabled, 71680, 17, CustomOrder.COLORMAP.get(0)));
-    public static AutoFlipper autoFlipper = new AutoFlipper(new AutoFlipperSettings(BUConfig.autoFlip, 17, Items.CHERRY_SIGN));
+    @SerialEntry
+    public static AutoFlipper autoFlipper = new AutoFlipper(new AutoFlipperSettings(true, 17, Items.CHERRY_SIGN));
 
     @SerialEntry
     public static ArrayList<ItemData> watchedItems = new ArrayList<>();
     @SerialEntry
     public static double bzTax = 0.01125;
-    @SerialEntry @Setter @Getter
-    public static boolean autoFlip;
     @SerialEntry
     public static int outdatedTiming = 5;
     @SerialEntry
@@ -58,7 +53,7 @@ public class BUConfig {
     @SerialEntry
     public static boolean autoOpenBazaar = true;
     @SerialEntry
-    public static ArrayList<CustomOrder> customOrders = new ArrayList<>(List.of(maxBuyOrder));
+    public static ArrayList<CustomOrder> customOrders = new ArrayList<>();
 
     public static void openGUI() {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -80,7 +75,13 @@ public class BUConfig {
 
             // Add options to the OptionGroup builder
             for (CustomOrder order : customOrders) {
+                order.initializeStateManager();
                 customOrdersGroupBuilder.option(order.createOption());
+            }
+            if(customOrders.isEmpty()){
+                customOrders.add(maxBuyOrder);
+                maxBuyOrder.initializeStateManager();
+                customOrdersGroupBuilder.option(maxBuyOrder.createOption());
             }
             builder.category(CustomOrder.createOrdersCategory().group(customOrdersGroupBuilder.build()).build());
             // Build the OptionGroup and add it to the category
