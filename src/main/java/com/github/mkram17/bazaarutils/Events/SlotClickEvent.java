@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.Events;
 
+import lombok.Getter;
+import lombok.Setter;
 import meteordevelopment.orbit.ICancellable;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;
@@ -15,6 +17,8 @@ public class SlotClickEvent implements ICancellable {
     public int clickedButton;
     public SlotActionType clickType;
     public boolean usePickblockInstead = false;
+    @Setter
+    @Getter
     public boolean cancelled = false;
 
     public SlotClickEvent(HandledScreen<?> handledScreen, Slot slot, int slotId, int clickedButton, SlotActionType actionType) {
@@ -29,11 +33,4 @@ public class SlotClickEvent implements ICancellable {
         usePickblockInstead = true;
     }
 
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
-    }
 }

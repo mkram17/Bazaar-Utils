@@ -23,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+//TODO detect in order screen if order isnt full (can use presence of cancel order block)
 public class AutoFlipper extends CustomItemButton {
     public static double flipPrice;
     private static double orderPrice = -1;
@@ -32,6 +33,7 @@ public class AutoFlipper extends CustomItemButton {
     @Getter
     private AutoFlipperSettings settings;
     private transient StateManager<Boolean> enabledStateManager;
+    private static boolean orderNotFilled = false;
 
     public AutoFlipper(AutoFlipperSettings settings) {
         this.settings = settings;
@@ -51,7 +53,7 @@ public class AutoFlipper extends CustomItemButton {
         if(item != null && flipPrice != 0 && BazaarUtils.gui.wasLastChestFlip()) {
             GUIUtils.setSignText(Double.toString(Util.getPrettyNumber(flipPrice)));
             GUIUtils.closeGui();
-            item.setPriceType(ItemData.priceTypes.INSTABUY);
+            item.flipItem(flipPrice);
         }
     }
 
@@ -136,7 +138,7 @@ public class AutoFlipper extends CustomItemButton {
     @Override
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal("Enable Auto Flipper"))
+                .name(Text.literal("Auto Flipper"))
                 .description(OptionDescription.of(Text.literal("Button in flip order menu to undercut market prices for items.")))
                 .binding(enabledStateManager.get(),
                         enabledStateManager::get,

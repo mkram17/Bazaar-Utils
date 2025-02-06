@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.Events;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Utils.Util;
+import lombok.Getter;
 import meteordevelopment.orbit.ICancellable;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -17,8 +18,11 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ChestLoadedEvent implements ICancellable {
+    @Getter
     private Inventory lowerChestInventory;
+    @Getter
     private List<ItemStack> itemStacks = new ArrayList<>();
+    @Getter
     private String containerName;
     public static void subscribe(){
         registerScreenEvent();
@@ -95,18 +99,6 @@ public class ChestLoadedEvent implements ICancellable {
             }
         }
         return false;
-    }
-    // Getters remain the same
-    public Inventory getLowerChestInventory() {
-        return lowerChestInventory;
-    }
-
-    public List<ItemStack> getItemStacks() {
-        return itemStacks;
-    }
-
-    public String getContainerName() {
-        return containerName;
     }
 
     public boolean inFlipMenu() {

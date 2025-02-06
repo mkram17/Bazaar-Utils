@@ -4,6 +4,8 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.OutdatedItemEvent;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.BazaarData;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,74 +17,23 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.github.mkram17.bazaarutils.config.BUConfig.outdatedTiming;
-import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
 
 public class ItemData {
     public static ItemData getItem(int index){
         if(index != -1)
-            return watchedItems.get(index);
+            return BUConfig.get().watchedItems.get(index);
         else return null;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getProductID() {
         return productId;
     }
 
+    @Getter
     private final String name;
     private final String productId;
 
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-    public double getMarketPrice() {
-        return marketPrice;
-    }
-
-    public int getVolume() {
-        return volume;
-    }
-    public priceTypes getPriceType() {
-        return priceType;
-    }
-
-    public void setPriceType(priceTypes priceType) {
-        this.priceType = priceType;
-    }
-
-    public statuses getStatus() {
-        return status;
-    }
-
-    public void setStatus(statuses status) {
-        this.status = status;
-    }
-
-    public int getAmountFilled() {
-        return amountFilled;
-    }
-
-    public void setAmountFilled(int amountFilled) {
-        this.amountFilled = amountFilled;
-    }
-
-    public int getAmountClaimed() {
-        return amountClaimed;
-    }
-
-    public void setAmountClaimed(int amountClaimed) {
-        this.amountClaimed = amountClaimed;
-    }
-
-    public int getIndex(){return watchedItems.indexOf(this);}
+    public int getIndex(){return BUConfig.get().watchedItems.indexOf(this);}
 
     public String getGeneralInfo(){
         String str = "(name: " + name + "[" + getIndex() + "]" + ", price:" + price + ", volume: " + volume;
@@ -95,14 +46,12 @@ public class ItemData {
         return str;
     }
 
+    @Getter
     public enum priceTypes{INSTASELL,INSTABUY;
         private priceTypes opposite;
         static {
             INSTASELL.opposite = INSTABUY;
             INSTABUY.opposite = INSTASELL;
-        }
-        public priceTypes getOpposite(){
-            return opposite;
         }
     }
     public enum statuses{SET,FILLED}
@@ -111,18 +60,30 @@ public class ItemData {
     private static int notifyOutdatedSeconds = 0;
 
     //insta sell and insta buy
+    @Setter
+    @Getter
     private double price;
+    @Setter
+    @Getter
     private priceTypes priceType;
     //the sell or buy price of lowest/highest offer
+    @Getter
     private double marketPrice;
     //the price of the opposite type of order
     private double marketOppositePrice;
     //item price * volume
     private final double fullPrice;
+    @Setter
+    @Getter
     private statuses status;
+    @Getter
     private final int volume;
 
+    @Setter
+    @Getter
     private int amountClaimed = 0;
+    @Setter
+    @Getter
     private int amountFilled = 0;
 
     //lists
@@ -153,7 +114,7 @@ public class ItemData {
 
     public static void scheduleNotifyOutdated(){
         //if its a decimal, it will schedule decimal for every second as ex: .3 = every 3 seconds
-        if(BUConfig.notifyOutdated) {
+        if(BUConfig.get().notifyOutdated) {
             timeExecutor.scheduleAtFixedRate(ItemData::notifyOutdated, 0, 1, TimeUnit.SECONDS);
         }
     }
@@ -166,7 +127,7 @@ public class ItemData {
     }
 
     private static void updateMarketPrices(){
-        for(ItemData item: watchedItems) {
+        for(ItemData item: BUConfig.get().watchedItems) {
             double oldPrice = item.marketPrice;
             item.marketPrice = Util.getPrettyNumber(BazaarData.findItemPrice(item.productId, item.priceType));
             item.marketOppositePrice = Util.getPrettyNumber(BazaarData.findItemPrice(item.productId, item.priceType.getOpposite()));
@@ -175,9 +136,11 @@ public class ItemData {
         }
     }
 
-    public void flipItem(){
+    public void flipItem(double newPrice){
         this.priceType = this.priceType.getOpposite();
-        this.price = this.getFlipPrice();
+        this.price = newPrice;
+        this.amountFilled = 0;
+        this.status = statuses.SET;
     }
 
 
@@ -185,7 +148,7 @@ public class ItemData {
     //run by ex: getVariables((item) -> item.getPrice()) or (chatgpt) ItemData.getVariables(ItemData::getPrice);
     public static <T> ArrayList<T> getVariables(Function<ItemData, T> variable){
         ArrayList<T> variables = new ArrayList<>();
-        for(ItemData item : watchedItems){
+        for(ItemData item : BUConfig.get().watchedItems){
             variables.add(variable.apply(item));
         }
         return variables;
@@ -193,7 +156,7 @@ public class ItemData {
 
     public static ItemData findItem(String name, Double price, Integer volume, priceTypes priceType) {
 //        Util.notifyAll("Called from: " + Util.getCallingClassName(), Util.notificationTypes.ITEMDATA);
-        List<Integer> matchingIndices = IntStream.range(0, watchedItems.size())
+        List<Integer> matchingIndices = IntStream.range(0, BUConfig.get().watchedItems.size())
                 .filter(i -> (price == null || Util.isSimilar(priceList.get(i), price)) &&
                         (volume == null || volumeList.get(i) == volume + amountClaimedList.get(i)) &&
                         (name == null || name.equalsIgnoreCase(nameList.get(i))) &&
@@ -219,7 +182,7 @@ public class ItemData {
 
     //maybe replace with using ItemOutdatedEvent?
     public static void notifyOutdated(){
-        if(notifyOutdatedSeconds % outdatedTiming == 0) {
+        if(notifyOutdatedSeconds % BUConfig.get().outdatedTiming == 0) {
             for (ItemData item : outdated) {
                 Util.notifyAll(item.getGeneralInfo() + " is outdated.");
             }
@@ -228,9 +191,9 @@ public class ItemData {
     }
 
     private static void findOutdated(){
-        List<ItemData> oldOutdated = outdated;
+        List<ItemData> oldOutdated = new ArrayList<>(outdated);
         outdated.clear();
-        for(ItemData item: watchedItems){
+        for(ItemData item: BUConfig.get().watchedItems){
             if(item.isOutdated()) {
                 outdated.add(item);
                 if(!oldOutdated.contains(item))
@@ -262,13 +225,13 @@ public class ItemData {
     }
 
     public static void removeItem(ItemData item){
-        watchedItems.remove(item);
+        BUConfig.get().watchedItems.remove(item);
     }
     public void remove(){
-        watchedItems.remove(this);
+        BUConfig.get().watchedItems.remove(this);
     }
     public static void clearItems(){
-        for(ItemData item: watchedItems)
+        for(ItemData item: BUConfig.get().watchedItems)
             removeItem(item);
     }
 

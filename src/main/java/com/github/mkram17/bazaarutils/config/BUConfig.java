@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.config;
 
 import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
+import com.github.mkram17.bazaarutils.features.AutoOpen;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipperSettings;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
@@ -12,6 +13,8 @@ import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
+import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -26,46 +29,52 @@ import static com.github.mkram17.bazaarutils.config.BUConfig.Developer.createOpt
 
 
 public class BUConfig {
-    public static ConfigClassHandler<BUConfig> HANDLER = ConfigClassHandler.createBuilder(BUConfig.class)
+    public static final ConfigClassHandler<BUConfig> HANDLER = ConfigClassHandler.createBuilder(BUConfig.class)
             .serializer(config -> GsonConfigSerializerBuilder.create(config)
                     .setPath(FabricLoader.getInstance().getConfigDir().resolve("bazaarutils.json"))
                     .appendGsonBuilder(GsonBuilder::setPrettyPrinting) // not needed, pretty print by default
-                    .setJson5(true)
                     .build())
             .build();
 
+    public static BUConfig get() {
+        return HANDLER.instance();
+    }
 
 
-    public static CustomOrder maxBuyOrder = new CustomOrder(new CustomOrderSettings(BUConfig.buyMaxEnabled, 71680, 17, CustomOrder.COLORMAP.get(0)));
     @SerialEntry
-    public static AutoFlipper autoFlipper = new AutoFlipper(new AutoFlipperSettings(true, 17, Items.CHERRY_SIGN));
+    public AutoFlipper autoFlipper = new AutoFlipper(new AutoFlipperSettings(true, 17, Items.CHERRY_SIGN));
 
     @SerialEntry
-    public static ArrayList<ItemData> watchedItems = new ArrayList<>();
+    public ArrayList<ItemData> watchedItems = new ArrayList<>();
     @SerialEntry
-    public static double bzTax = 0.01125;
+    public double bzTax = 0.01125;
     @SerialEntry
-    public static int outdatedTiming = 5;
+    public int outdatedTiming = 5;
     @SerialEntry
-    public static boolean notifyOutdated = true;
+    public boolean notifyOutdated = true;
     @SerialEntry
-    public static boolean buyMaxEnabled = true;
+    public boolean buyMaxEnabled = true;
+    @SerialEntry @Getter @Setter
+    public boolean autoOpenBazaar = true;
     @SerialEntry
-    public static boolean autoOpenBazaar = true;
+    public ArrayList<CustomOrder> customOrders = new ArrayList<>();
     @SerialEntry
-    public static ArrayList<CustomOrder> customOrders = new ArrayList<>();
+    public boolean developerMode = false;
+    
+    public static CustomOrder maxBuyOrder = new CustomOrder(new CustomOrderSettings(true, 71680, 17, CustomOrder.COLORMAP.get(0)));
 
     public static void openGUI() {
         MinecraftClient client = MinecraftClient.getInstance();
-        client.send(() -> client.setScreen(BUConfig.createGUI(null)));
+        client.send(() -> client.setScreen(BUConfig.get().createGUI(null)));
     }
 
-    public static Screen createGUI(Screen parent) {
+    public Screen createGUI(Screen parent) {
         return YetAnotherConfigLib.create(HANDLER, (defaults, config, builder) -> {
             builder.title(Text.literal("Bazaar Utils"));
             builder.category(ConfigCategory.createBuilder()
                     .name(Text.literal("General"))
                     .option(autoFlipper.createOption())
+                            .option(AutoOpen.createOption())
                     .build()
             );
             // Create the OptionGroup builder
@@ -86,24 +95,26 @@ public class BUConfig {
             builder.category(CustomOrder.createOrdersCategory().group(customOrdersGroupBuilder.build()).build());
             // Build the OptionGroup and add it to the category
 
-            builder.category(
-                    Developer.createBuilder()
-                            .option(Option.<Boolean>createBuilder()
-                                    .name(Text.literal("All Messages"))
-                                    .binding(allMessages,
-                                            () -> allMessages,
-                                            newVal -> allMessages = newVal)
-                                    .controller(BUConfig::createBooleanController)
-                                    .build())
+            if(developerMode) {
+                builder.category(
+                        Developer.createBuilder()
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Text.literal("All Messages"))
+                                        .binding(allMessages,
+                                                () -> allMessages,
+                                                newVal -> allMessages = newVal)
+                                        .controller(BUConfig::createBooleanController)
+                                        .build())
 
-                            .group(
-                                    OptionGroup.createBuilder()
-                                            .name(Text.literal("Message Options"))
-                                            .description(OptionDescription.of(Text.literal("DEVELOPER ONLY")))
-                                            .options(createOptions())
-                                            .build()
-                            )
-                            .build());
+                                .group(
+                                        OptionGroup.createBuilder()
+                                                .name(Text.literal("Message Options"))
+                                                .description(OptionDescription.of(Text.literal("DEVELOPER ONLY")))
+                                                .options(createOptions())
+                                                .build()
+                                )
+                                .build());
+            }
             return builder;
         }).generateScreen(parent);
     }
@@ -112,6 +123,7 @@ public class BUConfig {
         return BooleanControllerBuilder.create(opt).onOffFormatter().coloured(true);
     }
 
+    //TODO just add this to BUConfig or maybe make another class for it (perhaps other sections of config could have their own classes as well, maybe make settings do this)
     public static class Developer {
         public static boolean allMessages = false;
         public static boolean errorMessages = false;

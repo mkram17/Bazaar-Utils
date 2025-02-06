@@ -7,10 +7,7 @@ import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.Utils.CustomItemButton;
 import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
-import dev.isxander.yacl3.api.Binding;
-import dev.isxander.yacl3.api.ConfigCategory;
-import dev.isxander.yacl3.api.Option;
-import dev.isxander.yacl3.api.StateManager;
+import dev.isxander.yacl3.api.*;
 import lombok.Getter;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
@@ -25,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CustomOrder extends CustomItemButton {
-    public static final Map<Integer, Item> COLORMAP = new HashMap<>(Map.of(0, Items.PURPLE_STAINED_GLASS_PANE, 1, Items.BLUE_STAINED_GLASS_PANE, 2, Items.ORANGE_STAINED_GLASS, 3, Items.GREEN_STAINED_GLASS_PANE));
+    public static final Map<Integer, Item> COLORMAP = new HashMap<>(Map.of(0, Items.PURPLE_STAINED_GLASS_PANE, 1, Items.BLUE_STAINED_GLASS_PANE, 2, Items.ORANGE_STAINED_GLASS_PANE, 3, Items.GREEN_STAINED_GLASS_PANE));
     private boolean buySignClicked = false;
     @Getter @Setter
     private CustomOrderSettings settings;
@@ -105,10 +102,11 @@ public class CustomOrder extends CustomItemButton {
     @Override
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal(getOrderAmount() == 71680 ? "Buy Max Button" : "Enable " + getOrderAmount() + " Button"))
+                .name(Text.literal(getOrderAmount() == 71680 ? "Buy Max Button" : "Buy " + getOrderAmount() + " Button"))
                 .binding(true,
                         this::isEnabled,
                         this::setEnabled)
+                .description(OptionDescription.of(Text.literal("Buy order button for " + getOrderAmount() + " of an item.")))
                 .controller(BUConfig::createBooleanController)
                 .build();
     }

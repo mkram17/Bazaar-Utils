@@ -44,11 +44,12 @@ public class ChatHandler {
 
             if (messageType == messageTypes.BUYORDER || messageType == messageTypes.SELLORDER) {
                 itemName = Util.removeFormatting(siblings.get(5).getString());
-                volume = Integer.parseInt(siblings.get(3).getString());
+                volume = Integer.parseInt(siblings.get(3).getString().replace(",", ""));
                 price = Util.getPrettyNumber(Double.parseDouble(siblings.get(7).getString().substring(0, siblings.get(7).getString().indexOf(" coin")).replace(",", ""))) / volume;
                 if (messageType == messageTypes.SELLORDER)
-                    price /= (1 - BUConfig.bzTax);
+                    price /= (1 - BUConfig.get().bzTax);
                 price = (Math.round(price * 10)) / 10.0;
+                //for some reason 52800046 for 4 was on hypixel as 13200011.6 but calculates to 13200011.5. current theory is that buy price wasnt fully accurate, and it rounded up. also was .2 off on sell order for it. obviously problems with big prices
                 Util.addWatchedItem(itemName, price, !(messageType == messageTypes.BUYORDER), volume);
                 Util.notifyAll(itemName + " was added with a price of " + price, Util.notificationTypes.ITEMDATA);
             }
@@ -81,20 +82,24 @@ public class ChatHandler {
         Double price = null;
         String itemName = null;
         ItemData item;
+        messageTypes orderType;
+
+        if (siblings.get(6).getString().contains("worth")) orderType = messageTypes.BUYORDER;
+        else orderType = messageTypes.SELLORDER;
 
         try {
-            if (siblings.get(6).getString().contains("worth")) {
-                volumeClaimed = Integer.parseInt(siblings.get(3).getString());
+            if (orderType == messageTypes.BUYORDER) {
+                volumeClaimed = Integer.parseInt(siblings.get(3).getString().replace(",", ""));
                 itemName = siblings.get(5).getString().trim();
                 price = Double.parseDouble(siblings.get(9).getString().trim());
             } else {
                 Util.notifyAll("claimed message, but not worth");
+                volumeClaimed = Integer.parseInt(siblings.get(5).getString().replace(",", ""));
+                itemName = siblings.get(7).getString().trim();
+                price = Double.parseDouble(siblings.get(9).getString().trim());
             }
+             item = ItemData.findItem(itemName, price, volumeClaimed, null);
 
-            if (ItemData.volumeList.contains(volumeClaimed))
-                item = ItemData.findItem(itemName, price, volumeClaimed, null);
-            else
-                item = ItemData.findItem(itemName, price, null, null);
 
             if (item == null) {
                 Util.notifyAll("Could not find claimed item: " + itemName, Util.notificationTypes.ITEMDATA);

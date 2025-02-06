@@ -1,13 +1,19 @@
 package com.github.mkram17.bazaarutils.Events;
 
+import lombok.Getter;
+import lombok.Setter;
 import meteordevelopment.orbit.ICancellable;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 
 public class ReplaceItemEvent implements ICancellable {
+    @Getter
     private final ItemStack original;
+    @Getter
     private final SimpleInventory inventory;
+    @Getter
     private final int slotId;
+    @Setter @Getter
     private ItemStack replacement;
 
     public ReplaceItemEvent(ItemStack original, SimpleInventory inventory, int slotId) {
@@ -16,13 +22,6 @@ public class ReplaceItemEvent implements ICancellable {
         this.slotId = slotId;
         this.replacement = original;
     }
-
-    // Getters and setters
-    public ItemStack getOriginal() { return original; }
-    public SimpleInventory getInventory() { return inventory; }
-    public int getSlotId() { return slotId; }
-    public ItemStack getReplacement() { return replacement; }
-    public void setReplacement(ItemStack replacement) { this.replacement = replacement; }
 
     @Override
     public void setCancelled(boolean b) {

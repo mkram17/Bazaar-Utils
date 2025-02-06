@@ -17,7 +17,7 @@ public class Commands {
         // Main command: /bazaarutils
         dispatcher.register(ClientCommandManager.literal("bazaarutils")
                 .executes(context -> {
-                    openGUI();
+                    BUConfig.get().openGUI();
                     return 1;
                 })
         );
@@ -72,6 +72,13 @@ public class Commands {
                                 )
                         )
                 ));
+        dispatcher.register(ClientCommandManager.literal("bu")
+                .then(ClientCommandManager.literal("developer")
+                        .executes((context) ->{
+                            BUConfig.get().developerMode = !BUConfig.get().developerMode;
+                            return 1;
+                        })
+                ));
 
         dispatcher.register(ClientCommandManager.literal("bu")
                 .then(ClientCommandManager.literal("customorder")
@@ -91,11 +98,11 @@ public class Commands {
                                                 return 0;
                                             }
 
-                                            BUConfig.customOrders.add(new CustomOrder(new CustomOrderSettings(
+                                            BUConfig.get().customOrders.add(new CustomOrder(new CustomOrderSettings(
                                                     true,
                                                     orderAmount,
                                                     slotNumber,
-                                                    CustomOrder.COLORMAP.get(BUConfig.customOrders.size())
+                                                    CustomOrder.COLORMAP.get(BUConfig.get().customOrders.size())
                                             )));
 
                                             return 1;
@@ -106,15 +113,15 @@ public class Commands {
         );
         dispatcher.register(ClientCommandManager.literal("bu")
                 .then(ClientCommandManager.literal("customorder")
-                        .then((ClientCommandManager.literal("remove")
-                                        .then((ClientCommandManager.argument("order number", IntegerArgumentType.integer())
-                                                .executes((context) -> {
-                                                            BUConfig.customOrders.remove(IntegerArgumentType.getInteger(context, "order number"));
-                                                            Util.notifyAll("customOrders is now: " + customOrders);
-                                                            return 1;
-                                                        }
-                                                ))
-                                        )
+                        .then(ClientCommandManager.literal("remove")
+                                .then(ClientCommandManager.argument("order number", IntegerArgumentType.integer())
+                                        .executes(context -> {
+                                            int orderNum = IntegerArgumentType.getInteger(context, "order number");
+                                            Util.notifyAll("Removed Custom Order for " + BUConfig.get().customOrders.get(orderNum).getSettings().getOrderAmount());
+                                            BUConfig.get().customOrders.remove(orderNum);
+                                            HANDLER.save();
+                                            return 1;
+                                        })
                                 )
                         )
                 )
@@ -123,7 +130,8 @@ public class Commands {
                 .then(ClientCommandManager.literal("customorder")
                         .then((ClientCommandManager.literal("max")
                                         .executes((context) -> {
-                                            customOrders.add(maxBuyOrder);
+                                            BUConfig.get().customOrders.add(maxBuyOrder);
+                                            HANDLER.save();
                                             return 1;
                                         })
                                 )
@@ -133,15 +141,15 @@ public class Commands {
     }
     private static int executeRemove(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
-        String itemInfo = watchedItems.get(index).getGeneralInfo();
-        watchedItems.remove(index);  // Changed to directly use watchedItems.remove()
+        String itemInfo = BUConfig.get().watchedItems.get(index).getGeneralInfo();
+        BUConfig.get().watchedItems.remove(index);  // Changed to directly use config.watchedItems.remove()
         Util.notifyAll("Removed " + itemInfo, Util.notificationTypes.COMMAND);
         return 1;
     }
 
     private static int executeInfo(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
-        Util.notifyAll(watchedItems.get(index).getGeneralInfo());
+        Util.notifyAll(BUConfig.get().watchedItems.get(index).getGeneralInfo());
         return 1;
     }
 }

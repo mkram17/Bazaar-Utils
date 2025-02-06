@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.Utils.Commands;
 import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.BazaarData;
+import com.github.mkram17.bazaarutils.features.AutoOpen;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
 import com.mojang.serialization.Codec;
 import meteordevelopment.orbit.EventBus;
@@ -42,7 +43,8 @@ public class BazaarUtils implements ClientModInitializer {
         ChatHandler.subscribe();
         gui.registerScreenEvent();
         eventBus.subscribe(new GUIUtils());
-        eventBus.subscribe(BUConfig.autoFlipper);
+        eventBus.subscribe(new AutoOpen());
+        eventBus.subscribe(BUConfig.get().autoFlipper);
     }
 
     private void registerCommands() {
@@ -52,17 +54,17 @@ public class BazaarUtils implements ClientModInitializer {
     }
     //must be run after config load
     private void loadTransients(){
-        for(CustomOrder order : BUConfig.customOrders) {
+        for(CustomOrder order : BUConfig.get().customOrders) {
             order.initializeStateManager();
         }
-        BUConfig.autoFlipper.initializeStateManager();
+        BUConfig.get().autoFlipper.initializeStateManager();
     }
     //must be run after config load
     private void registerDeserializedEvents(){
-        for(CustomOrder order : BUConfig.customOrders) {
+        for(CustomOrder order : BUConfig.get().customOrders) {
             eventBus.subscribe(order);
         }
-        eventBus.subscribe(BUConfig.autoFlipper);
+        eventBus.subscribe(BUConfig.get().autoFlipper);
     }
 
     public static final ComponentType<String> CLICK_COUNT_COMPONENT = Registry.register(

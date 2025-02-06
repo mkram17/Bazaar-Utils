@@ -15,12 +15,12 @@ import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+//TODO make inBazaar() work
 public class GUIUtils {
 
 
@@ -58,8 +58,9 @@ public class GUIUtils {
         return containerName.contains("How many do you want?");
     }
     public boolean inBazaar(){
-        if(containerName == null) return false;
-        return (containerName.contains("How many do you want?") || containerName.contains("Order options") || containerName.contains("Bazaar"));
+        return false;
+//        if(containerName == null) return false;
+//        return inBuyOrderScreen() || inFlipGui || containerName.contains("Bazaar");
     }
     private GenericContainerScreen chestScreen;
     private String containerName;
@@ -162,8 +163,11 @@ public class GUIUtils {
         });
     }
 
-    public static void openBazaar(){
-        assert MinecraftClient.getInstance().player != null;
-        MinecraftClient.getInstance().player.sendMessage(Text.of("/bz"), false);
+    public static void sendCommand(String command){
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player != null) {
+            client.player.networkHandler.sendChatCommand(command);
+        }
     }
+
 }

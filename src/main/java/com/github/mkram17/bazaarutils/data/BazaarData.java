@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.data;
 
 import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
+import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.google.gson.*;
 
 import java.io.FileReader;
@@ -11,7 +12,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
 
 public class BazaarData {
 
@@ -40,12 +40,12 @@ public class BazaarData {
                         jsonString = getAsPrettyJsonObject(reply);
                         writeJsonToFile(jsonString);
 
-                        if (!watchedItems.isEmpty()) {
+                        if (!BUConfig.get().watchedItems.isEmpty()) {
                             ItemData.update();
                         }
                     }
                 });
-        }, 1, 2, TimeUnit.SECONDS);
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
     private static void writeJsonToFile(String jsonString) {

@@ -3,8 +3,8 @@ package com.github.mkram17.bazaarutils.Utils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.BazaarData;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 
 import java.awt.*;
@@ -13,8 +13,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import static com.github.mkram17.bazaarutils.config.BUConfig.watchedItems;
 
 public class Util {
     public enum notificationTypes {
@@ -70,7 +68,7 @@ public class Util {
         if (BazaarData.findProductId(itemName) != null) {
             ItemData.priceTypes type = isSellOrder ? ItemData.priceTypes.INSTABUY : ItemData.priceTypes.INSTASELL;
             ItemData itemToAdd =new ItemData(itemName, price, type, volume);
-            watchedItems.add(itemToAdd);
+            BUConfig.get().watchedItems.add(itemToAdd);
             notifyAll("Added item: § " + itemToAdd.getGeneralInfo());
         } else {
             notifyAll("Could not add item: § " + itemName + " §a (is it spelled correctly?)");
