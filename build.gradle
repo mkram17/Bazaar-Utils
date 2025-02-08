@@ -1,7 +1,7 @@
 plugins {
-	id 'fabric-loom' version '1.9-SNAPSHOT'
-	id 'maven-publish'
-	id 'org.jetbrains.kotlin.jvm' version '2.0.0'
+    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'maven-publish'
+    id 'org.jetbrains.kotlin.jvm' version '2.0.0'
 //	id 'dev.deftu.gradle.tools' version '2.22.0'
 //	id 'dev.deftu.gradle.tools.resources' version '2.22.0'
 //	id 'dev.deftu.gradle.tools.bloom' version '2.22.0'
@@ -14,119 +14,119 @@ version = project.mod_version
 group = project.maven_group
 
 base {
-	archivesName = project.archives_base_name
+    archivesName = project.archives_base_name
 }
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
-	maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
-	maven {
-		//https://github.com/MeteorDevelopment/orbit
-		name = "meteor-maven"
-		url = "https://maven.meteordev.org/releases"
-	}
-	maven {
-		name = "Hypixel"
-		url = "https://repo.hypixel.net/repository/Hypixel/"
-	}
-	maven {
-		name = "YACL"
-		url = "https://maven.isxander.dev/releases"
-	}
-	maven {
-		name = "Terraformers (for gui)"
-		url = "https://maven.terraformersmc.com/"
-	}
+    // Add repositories to retrieve artifacts from in here.
+    // You should only use this when depending on other mods because
+    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+    // for more information about repositories.
+    maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
+    maven {
+        //https://github.com/MeteorDevelopment/orbit
+        name = "meteor-maven"
+        url = "https://maven.meteordev.org/releases"
+    }
+    maven {
+        name = "Hypixel"
+        url = "https://repo.hypixel.net/repository/Hypixel/"
+    }
+    maven {
+        name = "YACL"
+        url = "https://maven.isxander.dev/releases"
+    }
+    maven {
+        name = "Terraformers (for gui)"
+        url = "https://maven.terraformersmc.com/"
+    }
 }
 dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
-	implementation "meteordevelopment:orbit:0.2.3"
+    // Fabric API. This is technically optional, but you probably want it anyway.
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
+    implementation "meteordevelopment:orbit:0.2.3"
 //	modImplementation "com.ptsmods:devlogin:3.5"
 
-	implementation ("net.hypixel:hypixel-api-transport-apache:4.4")
+    implementation("net.hypixel:hypixel-api-transport-apache:4.4")
 
-	modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 
-	modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
+    modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
 
-	//project lombok
-	compileOnly 'org.projectlombok:lombok:1.18.36'
-	annotationProcessor 'org.projectlombok:lombok:1.18.36'
+    //project lombok
+    compileOnly 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
 
-	testCompileOnly 'org.projectlombok:lombok:1.18.36'
-	testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
+    testCompileOnly 'org.projectlombok:lombok:1.18.36'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
 
 }
 fabricApi {
-	configureDataGeneration {
-		client = true
-	}
+    configureDataGeneration {
+        client = true
+    }
 }
 
 
 loom {
-	runs {
-		removeIf { it.name != "client" }
-		named("client") {
-			property("devauth.enabled", "true")
-			property("fabric.log.level", "info")
-			vmArg("-ea")
-		}
-	}
+    runs {
+        removeIf { it.name != "client" }
+        named("client") {
+            property("devauth.enabled", "true")
+            property("fabric.log.level", "info")
+            vmArg("-ea")
+        }
+    }
 }
 processResources {
-	inputs.property "version", project.version
+    inputs.property "version", project.version
 
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
-	}
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+    it.options.release = 21
 }
 
 java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
-	from("LICENSE") {
-		rename { "${it}_${project.base.archivesName.get()}"}
-	}
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
 }
 
 // configure the maven publication
 publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
-			from components.java
-		}
-	}
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = project.archives_base_name
+            from components.java
+        }
+    }
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
-	}
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+        // Notice: This block does NOT have the same function as the block in the top level.
+        // The repositories here will be used for publishing your artifact, not for
+        // retrieving dependencies.
+    }
 }

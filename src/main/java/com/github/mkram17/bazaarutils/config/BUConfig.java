@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.config;
 import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
 import com.github.mkram17.bazaarutils.features.AutoOpen;
+import com.github.mkram17.bazaarutils.features.StashHelper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipperSettings;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
@@ -13,8 +14,6 @@ import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
-import lombok.Getter;
-import lombok.Setter;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -43,7 +42,6 @@ public class BUConfig {
 
     @SerialEntry
     public AutoFlipper autoFlipper = new AutoFlipper(new AutoFlipperSettings(true, 17, Items.CHERRY_SIGN));
-
     @SerialEntry
     public ArrayList<ItemData> watchedItems = new ArrayList<>();
     @SerialEntry
@@ -54,12 +52,14 @@ public class BUConfig {
     public boolean notifyOutdated = true;
     @SerialEntry
     public boolean buyMaxEnabled = true;
-    @SerialEntry @Getter @Setter
-    public boolean autoOpenBazaar = true;
     @SerialEntry
     public ArrayList<CustomOrder> customOrders = new ArrayList<>();
     @SerialEntry
     public boolean developerMode = false;
+    @SerialEntry
+    public StashHelper stashHelper = new StashHelper();
+    @SerialEntry
+    public AutoOpen autoOpen = new AutoOpen();
     
     public static CustomOrder maxBuyOrder = new CustomOrder(new CustomOrderSettings(true, 71680, 17, CustomOrder.COLORMAP.get(0)));
 
@@ -73,8 +73,9 @@ public class BUConfig {
             builder.title(Text.literal("Bazaar Utils"));
             builder.category(ConfigCategory.createBuilder()
                     .name(Text.literal("General"))
-                    .option(autoFlipper.createOption())
-                            .option(AutoOpen.createOption())
+                            .option(autoFlipper.createOption())
+                            .option(autoOpen.createOption())
+                            .option(stashHelper.createOption())
                     .build()
             );
             // Create the OptionGroup builder

@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
+import com.github.mkram17.bazaarutils.config.BUConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 //used for SlotClickEvent
 @Mixin(HandledScreen.class)
@@ -41,6 +43,13 @@ public abstract class MixinHandledScreen {
 					client.player
 			);
 			ci.cancel();
+		}
+	}
+
+	@Inject(method = "keyPressed", at = @At("HEAD"))
+	public void onkeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+		if(BUConfig.get().stashHelper.stashKeybind.matchesKey(keyCode, scanCode)){
+			BUConfig.get().stashHelper.stashKeybind.setPressed(true);
 		}
 	}
 }

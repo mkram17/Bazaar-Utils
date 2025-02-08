@@ -95,10 +95,17 @@ public class GUIUtils {
     }
 
     public static void closeGui(){
-        MinecraftClient.getInstance().execute(() -> {
-            Util.notifyAll("Closing gui", Util.notificationTypes.GUI);
-            MinecraftClient.getInstance().setScreen(null);
-        });
+        Util.notifyAll("Closing gui", Util.notificationTypes.GUI);
+        if(MinecraftClient.getInstance().player != null) {
+            MinecraftClient.getInstance().player.closeHandledScreen();
+//            if(MinecraftClient.getInstance().currentScreen instanceof HandledScreen){
+//                ((HandledScreen<?>) MinecraftClient.getInstance().currentScreen).close();
+//            }
+        }
+    }
+
+    private static void customClose(){
+        MinecraftClient.getInstance().setScreen(null);
     }
 
     public static void setSignText(String text) {

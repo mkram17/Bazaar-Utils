@@ -44,7 +44,6 @@ public class BazaarUtils implements ClientModInitializer {
         gui.registerScreenEvent();
         eventBus.subscribe(new GUIUtils());
         eventBus.subscribe(new AutoOpen());
-        eventBus.subscribe(BUConfig.get().autoFlipper);
     }
 
     private void registerCommands() {
@@ -65,6 +64,7 @@ public class BazaarUtils implements ClientModInitializer {
             eventBus.subscribe(order);
         }
         eventBus.subscribe(BUConfig.get().autoFlipper);
+        BUConfig.get().stashHelper.registerKeybind();
     }
 
     public static final ComponentType<String> CLICK_COUNT_COMPONENT = Registry.register(
