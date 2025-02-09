@@ -57,10 +57,14 @@ public class GUIUtils {
         if(containerName == null) return false;
         return containerName.contains("How many do you want?");
     }
+    public boolean inInstaBuy(){
+        if(containerName == null) return false;
+        return containerName.contains("Instant Buy");
+    }
     public boolean inBazaar(){
-        return false;
-//        if(containerName == null) return false;
-//        return inBuyOrderScreen() || inFlipGui || containerName.contains("Bazaar");
+//        return false;
+        if(containerName == null) return false;
+        return inBuyOrderScreen() || inFlipGui || inInstaBuy() || containerName.contains("Bazaar");
     }
     private GenericContainerScreen chestScreen;
     private String containerName;

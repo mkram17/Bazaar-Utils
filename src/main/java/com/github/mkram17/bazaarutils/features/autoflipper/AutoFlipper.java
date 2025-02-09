@@ -11,11 +11,10 @@ import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
 import com.github.mkram17.bazaarutils.config.BUConfig;
-import dev.isxander.yacl3.api.Binding;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
-import dev.isxander.yacl3.api.StateManager;
 import lombok.Getter;
+import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
@@ -30,19 +29,19 @@ public class AutoFlipper extends CustomItemButton {
     private static int orderVolumeFilled = -1;
     private static ItemData item;
     private static boolean shouldAddToSign = false;
-    @Getter
+    @Getter @Setter
     private AutoFlipperSettings settings;
-    private transient StateManager<Boolean> enabledStateManager;
+//    private transient StateManager<Boolean> enabledStateManager;
     private static boolean orderNotFilled = false;
 
     public AutoFlipper(AutoFlipperSettings settings) {
         this.settings = settings;
-        initializeStateManager();
+//        initializeStateManager();
     }
 
     @EventHandler
     public void guiChestOpenedEvent(ChestLoadedEvent e) {
-        if(enabledStateManager.get() && BazaarUtils.gui.inFlipGui()) {
+        if(settings.isEnabled() && BazaarUtils.gui.inFlipGui()) {
             item = getFlipItem(e);
 
             flipPrice = item.getFlipPrice();
@@ -110,7 +109,7 @@ public class AutoFlipper extends CustomItemButton {
 
     @Override @EventHandler
     public void onSlotClicked(SlotClickEvent event) {
-        if (!BazaarUtils.gui.inFlipGui() || !enabledStateManager.get() || event.slot.getIndex() != settings.getSlotNumber())
+        if (!BazaarUtils.gui.inFlipGui() || !settings.isEnabled() || event.slot.getIndex() != settings.getSlotNumber())
             return;
         GUIUtils.clickSlot(15,0);
         if (item != null)
@@ -125,7 +124,7 @@ public class AutoFlipper extends CustomItemButton {
 
     @Override @EventHandler
     public void onGUI(ReplaceItemEvent event) {
-        if(!BazaarUtils.gui.inFlipGui() || !(event.getSlotId() == settings.getSlotNumber()) || !enabledStateManager.get()) return;
+        if(!BazaarUtils.gui.inFlipGui() || !(event.getSlotId() == settings.getSlotNumber()) || !settings.isEnabled()) return;
         ItemStack itemStack = new ItemStack(settings.getReplaceItem(), 1);
             itemStack.set(BazaarUtils.CLICK_COUNT_COMPONENT, "FLIP");
         if(item != null)
@@ -140,21 +139,21 @@ public class AutoFlipper extends CustomItemButton {
         return Option.<Boolean>createBuilder()
                 .name(Text.literal("Auto Flipper"))
                 .description(OptionDescription.of(Text.literal("Button in flip order menu to undercut market prices for items.")))
-                .binding(enabledStateManager.get(),
-                        enabledStateManager::get,
-                        enabledStateManager::set)
+                .binding(true,
+                        () -> settings.isEnabled(),
+                        (newVal) -> settings.setEnabled(newVal))
                 .controller(BUConfig::createBooleanController)
                 .build();
     }
 
     public void initializeStateManager(){
-        Binding<Boolean> settingsBinding = Binding.generic(
-                getSettings().isEnabled(),
-                settings::isEnabled,
-                settings::setEnabled
-        );
-        enabledStateManager = StateManager.createSimple(settingsBinding);
-        enabledStateManager.sync();
+//        Binding<Boolean> settingsBinding = Binding.generic(
+//                getSettings().isEnabled(),
+//                settings::isEnabled,
+//                settings::setEnabled
+//        );
+//        enabledStateManager = StateManager.createSimple(settingsBinding);
+//        enabledStateManager.sync();
     }
 
 }

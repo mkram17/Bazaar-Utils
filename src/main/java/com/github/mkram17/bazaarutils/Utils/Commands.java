@@ -3,14 +3,19 @@ package com.github.mkram17.bazaarutils.Utils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrderSettings;
+import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSell;
+import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSellControl;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 
-import static com.github.mkram17.bazaarutils.config.BUConfig.*;
+import static com.github.mkram17.bazaarutils.config.BUConfig.HANDLER;
+import static com.github.mkram17.bazaarutils.config.BUConfig.openGUI;
 
 public class Commands {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -82,7 +87,7 @@ public class Commands {
 
         dispatcher.register(ClientCommandManager.literal("bu")
                 .then(ClientCommandManager.literal("customorder")
-                        .then(ClientCommandManager.argument("order amount", IntegerArgumentType.integer(1, 71679))
+                        .then(ClientCommandManager.argument("order amount", IntegerArgumentType.integer(1, 71680))
                                 .then(ClientCommandManager.argument("slot number", IntegerArgumentType.integer(0, 35))
                                         .executes(context -> {
                                             int orderAmount = IntegerArgumentType.getInteger(context, "order amount");
@@ -112,13 +117,36 @@ public class Commands {
                 )
         );
         dispatcher.register(ClientCommandManager.literal("bu")
-                .then(ClientCommandManager.literal("customorder")
-                        .then(ClientCommandManager.literal("remove")
-                                .then(ClientCommandManager.argument("order number", IntegerArgumentType.integer())
+                .then(ClientCommandManager.literal("restrict")
+                        .then(ClientCommandManager.literal("add")
+                            .then(ClientCommandManager.argument("volume or price?", StringArgumentType.string())
+                                .then(ClientCommandManager.argument("limit", DoubleArgumentType.doubleArg(.1))
                                         .executes(context -> {
-                                            int orderNum = IntegerArgumentType.getInteger(context, "order number");
-                                            Util.notifyAll("Removed Custom Order for " + BUConfig.get().customOrders.get(orderNum).getSettings().getOrderAmount());
-                                            BUConfig.get().customOrders.remove(orderNum);
+                                            String restrictionString = StringArgumentType.getString(context,"volume or price?");
+                                            double limit = DoubleArgumentType.getDouble(context, "limit");
+
+                                            if (!restrictionString.equals("volume") && !restrictionString.equals("price")) {
+                                                context.getSource().sendError(Text.literal("Restriction type must be \"volume\" or \"price\""));
+                                                return 0;
+                                            }
+                                            BUConfig.get().restrictSell.addRestriction(RestrictSell.restrictBy.valueOf(restrictionString.toUpperCase()), limit);
+                                            Util.notifyAll("Added restriction: " + restrictionString.toUpperCase() + ": " + limit);
+                                            return 1;
+                                        })
+                                )
+                        )
+                        )
+                )
+        );
+        dispatcher.register(ClientCommandManager.literal("bu")
+                .then(ClientCommandManager.literal("restrict")
+                        .then(ClientCommandManager.literal("remove")
+                                .then(ClientCommandManager.argument("restriction number", IntegerArgumentType.integer(1))
+                                        .executes(context -> {
+                                            int restrictNum = IntegerArgumentType.getInteger(context, "restriction number")-1;
+                                            RestrictSellControl restriction = BUConfig.get().restrictSell.getControls().get(restrictNum);
+                                            Util.notifyAll("Removed restriction: " + restriction.getRestriction().toString() + ": " + restriction.getAmount());
+                                            BUConfig.get().restrictSell.getControls().remove(restrictNum);
                                             HANDLER.save();
                                             return 1;
                                         })
@@ -128,9 +156,17 @@ public class Commands {
         );
         dispatcher.register(ClientCommandManager.literal("bu")
                 .then(ClientCommandManager.literal("customorder")
-                        .then((ClientCommandManager.literal("max")
-                                        .executes((context) -> {
-                                            BUConfig.get().customOrders.add(maxBuyOrder);
+                        .then(ClientCommandManager.literal("remove")
+                                .then(ClientCommandManager.argument("order number", IntegerArgumentType.integer())
+                                        .executes(context -> {
+                                            int orderNum = IntegerArgumentType.getInteger(context, "order number");
+                                            CustomOrder customOrder = BUConfig.get().customOrders.get(orderNum);
+                                            if(customOrder.getSettings().getOrderAmount() != 71680) {
+                                                Util.notifyAll("Removed Custom Order for " + BUConfig.get().customOrders.get(orderNum).getSettings().getOrderAmount());
+                                                BUConfig.get().customOrders.remove(orderNum);
+                                            } else{
+                                                Util.notifyAll("Cannot remove Max Buy Order.");
+                                            }
                                             HANDLER.save();
                                             return 1;
                                         })

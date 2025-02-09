@@ -41,13 +41,8 @@ public class Util {
         String messageStr = message.toString();
         messageStr = messageStr.toLowerCase().contains("exception") ? "§c" + messageStr : "§a" + messageStr;
 
-            MinecraftClient.getInstance().player.sendMessage(Text.literal("[" + callingName + "] " + messageStr), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.literal("[BazaarUtils] " + messageStr), false);
         LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
-    }
-
-    public static void startExecutors() {
-        BazaarData.scheduleBazaar();
-        ItemData.scheduleNotifyOutdated();
     }
 
     public static<T> void notifyAll(T message, notificationTypes notiType) {
@@ -74,6 +69,11 @@ public class Util {
             notifyAll("Could not add item: § " + itemName + " §a (is it spelled correctly?)");
         }
         ItemData.update();
+    }
+
+    public static void startExecutors() {
+        BazaarData.scheduleBazaar();
+        ItemData.scheduleNotifyOutdated();
     }
 
     public static String getCallingClassName() {

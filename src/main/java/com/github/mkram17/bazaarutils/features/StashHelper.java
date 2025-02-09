@@ -62,7 +62,7 @@ public class StashHelper {
         return Option.<Boolean>createBuilder()
                 .name(Text.literal("Stash Helper"))
                 .description(OptionDescription.of(Text.literal("Ctrl + Shift + V to close bazaar and then run /pickupstash")))
-                .binding(false,
+                .binding(true,
                         this::isEnabled,
                         this::setEnabled)
                 .controller(BUConfig::createBooleanController)

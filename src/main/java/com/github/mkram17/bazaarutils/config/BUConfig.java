@@ -8,6 +8,8 @@ import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipperSettings;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrderSettings;
+import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSell;
+import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSellControl;
 import com.google.gson.GsonBuilder;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
@@ -22,6 +24,7 @@ import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static com.github.mkram17.bazaarutils.config.BUConfig.Developer.allMessages;
 import static com.github.mkram17.bazaarutils.config.BUConfig.Developer.createOptions;
@@ -60,8 +63,8 @@ public class BUConfig {
     public StashHelper stashHelper = new StashHelper();
     @SerialEntry
     public AutoOpen autoOpen = new AutoOpen();
-    
-    public static CustomOrder maxBuyOrder = new CustomOrder(new CustomOrderSettings(true, 71680, 17, CustomOrder.COLORMAP.get(0)));
+    @SerialEntry
+    public RestrictSell restrictSell = new RestrictSell(true, 3, new ArrayList<>(List.of(new RestrictSellControl(RestrictSell.restrictBy.PRICE, 10000.0))));
 
     public static void openGUI() {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -71,28 +74,33 @@ public class BUConfig {
     public Screen createGUI(Screen parent) {
         return YetAnotherConfigLib.create(HANDLER, (defaults, config, builder) -> {
             builder.title(Text.literal("Bazaar Utils"));
+            OptionGroup.Builder restrictSellGroupBuilder = OptionGroup.createBuilder()
+                    .name(Text.literal("Sell Restrictions"))
+                    .description(OptionDescription.of(Text.literal("Blocks insta selling based on restrictions. You can add a new restriction with /bu restriction add {based on volume or price} {amount over which will be restricted} or you can remove it with /bu restriction remove {restriction number}")));
+            for(RestrictSellControl control : restrictSell.getControls()){
+                restrictSellGroupBuilder.option(restrictSell.createRestrictionOption(control));
+            }
             builder.category(ConfigCategory.createBuilder()
                     .name(Text.literal("General"))
                             .option(autoFlipper.createOption())
                             .option(autoOpen.createOption())
                             .option(stashHelper.createOption())
+                            .group(restrictSellGroupBuilder.build())
                     .build()
             );
-            // Create the OptionGroup builder
-            OptionGroup.Builder customOrdersGroupBuilder = OptionGroup.createBuilder()
-                    .name(Text.literal("Custom Orders"))
-                    .description(OptionDescription.of(Text.literal("Add buttons for custom buy order amounts.")));
 
+
+            OptionGroup.Builder customOrdersGroupBuilder = OptionGroup.createBuilder()
+                    .name(Text.literal("Custom Buy Amounts"))
+                    .description(OptionDescription.of(Text.literal("Add buttons for custom buy order/insta buy amounts.")));
+
+            if(customOrders.isEmpty())
+                customOrders.add(new CustomOrder(new CustomOrderSettings(true, 71680, 17, CustomOrder.COLORMAP.get(0))));
             // Add options to the OptionGroup builder
             for (CustomOrder order : customOrders) {
-                order.initializeStateManager();
                 customOrdersGroupBuilder.option(order.createOption());
             }
-            if(customOrders.isEmpty()){
-                customOrders.add(maxBuyOrder);
-                maxBuyOrder.initializeStateManager();
-                customOrdersGroupBuilder.option(maxBuyOrder.createOption());
-            }
+
             builder.category(CustomOrder.createOrdersCategory().group(customOrdersGroupBuilder.build()).build());
             // Build the OptionGroup and add it to the category
 

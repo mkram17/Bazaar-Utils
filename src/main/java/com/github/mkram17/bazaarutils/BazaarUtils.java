@@ -28,7 +28,6 @@ public class BazaarUtils implements ClientModInitializer {
     public void onInitializeClient() {
         registerEvents();
         BUConfig.HANDLER.load();
-        loadTransients();
         registerDeserializedEvents();
         registerCommands();
         BazaarData.scheduleBazaar();
@@ -52,18 +51,12 @@ public class BazaarUtils implements ClientModInitializer {
         });
     }
     //must be run after config load
-    private void loadTransients(){
-        for(CustomOrder order : BUConfig.get().customOrders) {
-            order.initializeStateManager();
-        }
-        BUConfig.get().autoFlipper.initializeStateManager();
-    }
-    //must be run after config load
     private void registerDeserializedEvents(){
         for(CustomOrder order : BUConfig.get().customOrders) {
             eventBus.subscribe(order);
         }
         eventBus.subscribe(BUConfig.get().autoFlipper);
+        eventBus.subscribe(BUConfig.get().restrictSell);
         BUConfig.get().stashHelper.registerKeybind();
     }
 

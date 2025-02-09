@@ -26,31 +26,14 @@ public class CustomOrder extends CustomItemButton {
     private boolean buySignClicked = false;
     @Getter @Setter
     private CustomOrderSettings settings;
-    private transient StateManager<CustomOrderSettings> settingsStateManager;
-
-    public boolean isEnabled(){
-        return this.settingsStateManager.get().isEnabled();
-    }
-    public void setEnabled(boolean newEnabled){
-        this.settingsStateManager.set(new CustomOrderSettings(newEnabled, getOrderAmount(), getReplaceSlotNumber(), getItem()));
-        this.settings.setEnabled(newEnabled);
-        this.settingsStateManager.sync();
-    }
-    public Item getItem(){
-        return settingsStateManager.get().getItem();
-    }
-    public int getReplaceSlotNumber(){
-        return settingsStateManager.get().getSlotNumber();
-    }
 
     public static ConfigCategory.Builder createOrdersCategory(){
         return ConfigCategory.createBuilder()
-                .name(Text.literal("Buy Orders"));
+                .name(Text.literal("Buy Amount Options"));
     }
 
     public CustomOrder(CustomOrderSettings settings){
         this.settings = settings;
-        initializeStateManager();
         BazaarUtils.eventBus.subscribe(this);
     }
 
@@ -59,26 +42,26 @@ public class CustomOrder extends CustomItemButton {
     public void onGUI(ReplaceItemEvent event) {
 //        if(getOrderAmount() != 71680 && event.getSlotId() == 8)
 //            Util.notifyAll(isEnabled());
-        if (!BazaarUtils.gui.inBuyOrderScreen() || !isEnabled())
+        if (!(BazaarUtils.gui.inBuyOrderScreen() || BazaarUtils.gui.inInstaBuy())|| !settings.isEnabled())
             return;
 
-        if (event.getSlotId() != getReplaceSlotNumber())
+        if (event.getSlotId() != settings.getSlotNumber())
             return;
 
-        ItemStack itemStack = new ItemStack(getItem(), getOrderAmount());
+        ItemStack itemStack = new ItemStack(settings.getItem(), settings.getOrderAmount());
 
 // Set the display name
-        itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Buy " + getOrderAmount()).formatted(Formatting.DARK_PURPLE));
+        itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Buy " + settings.getOrderAmount()).formatted(Formatting.DARK_PURPLE));
         event.setReplacement(itemStack);
     }
 
     @Override
     @EventHandler
     public void onSlotClicked(SlotClickEvent event) {
-        if (!BazaarUtils.gui.inBuyOrderScreen() || !isEnabled())
+        if (!(BazaarUtils.gui.inBuyOrderScreen() || BazaarUtils.gui.inInstaBuy()) || !settings.isEnabled())
             return;
 
-        if (event.slot.getIndex() != getReplaceSlotNumber())
+        if (event.slot.getIndex() != settings.getSlotNumber())
             return;
 
         openSign();
@@ -88,7 +71,7 @@ public class CustomOrder extends CustomItemButton {
     private void onSignOpened(SignOpenEvent event) {
         if (!buySignClicked) return;
 
-        GUIUtils.setSignText(Integer.toString(getOrderAmount()));
+        GUIUtils.setSignText(Integer.toString(settings.getOrderAmount()));
         GUIUtils.closeGui();
         buySignClicked = false;
     }
@@ -102,28 +85,12 @@ public class CustomOrder extends CustomItemButton {
     @Override
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal(getOrderAmount() == 71680 ? "Buy Max Button" : "Buy " + getOrderAmount() + " Button"))
+                .name(Text.literal(settings.getOrderAmount() == 71680 ? "Buy Max Button" : "Buy " + settings.getOrderAmount() + " Button"))
                 .binding(true,
-                        this::isEnabled,
-                        this::setEnabled)
-                .description(OptionDescription.of(Text.literal("Buy order button for " + getOrderAmount() + " of an item.")))
+                        () -> settings.isEnabled(),
+                        (newVal) -> settings.setEnabled(newVal))
+                .description(OptionDescription.of(Text.literal("Buy order button for " + settings.getOrderAmount() + " of an item.")))
                 .controller(BUConfig::createBooleanController)
                 .build();
-    }
-    private int getOrderAmount(){
-        return settings.getOrderAmount();
-    }
-
-    public void initializeStateManager(){
-        // Default value
-        // Getter
-        // Setter
-        Binding<CustomOrderSettings> settingsBinding = Binding.generic(
-                getSettings(), // Default value
-                this::getSettings, // Getter
-                this::setSettings // Setter
-        );
-        settingsStateManager = StateManager.createSimple(settingsBinding);
-        settingsStateManager.sync();
     }
 }

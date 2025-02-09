@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
+import com.github.mkram17.bazaarutils.Utils.Util;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -51,5 +52,12 @@ public abstract class MixinHandledScreen {
 		if(BUConfig.get().stashHelper.stashKeybind.matchesKey(keyCode, scanCode)){
 			BUConfig.get().stashHelper.stashKeybind.setPressed(true);
 		}
+	}
+	@Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
+	public void onMouseClickedSlot(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
+		if(BUConfig.get().restrictSell.isSlotLocked(slotId)){
+			Util.notifyAll(BUConfig.get().restrictSell.getMessage());
+			ci.cancel();
+        }
 	}
 }
