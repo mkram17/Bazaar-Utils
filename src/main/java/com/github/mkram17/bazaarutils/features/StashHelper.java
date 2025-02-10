@@ -2,18 +2,21 @@ package com.github.mkram17.bazaarutils.features;
 
 import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import committee.nova.mkb.api.IKeyBinding;
+import committee.nova.mkb.keybinding.KeyConflictContext;
+import committee.nova.mkb.keybinding.KeyModifier;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
+//TODO fix keybind working :////
 public class StashHelper {
     @Getter @Setter
     private boolean enabled;
@@ -21,23 +24,28 @@ public class StashHelper {
     private int ticksBetweenPresses = 0;
     private int taskTicks = 0;
     private boolean shouldSend = false;
-    public KeyBinding stashKeybind;
+    public IKeyBinding stashExtended;
 
     public void registerKeybind() {
-        stashKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        KeyBinding stashKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "Pick Up Stash",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_V,
                 "Bazaar Utils"
         ));
 
+
+        stashExtended = (IKeyBinding) stashKeybind;
+        stashExtended.setKeyModifierAndCode(KeyModifier.ALT, InputUtil.fromKeyCode(GLFW.GLFW_KEY_V, 47));
+        stashExtended.setKeyConflictContext(KeyConflictContext.UNIVERSAL);
+
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(!enabled)
                 return;
-            if((stashKeybind.wasPressed() || stashKeybind.isPressed()) &&
-                    hasCtrlDown() && hasShiftDown() &&
-                    !keybindWasHeld && ticksBetweenPresses>9) {
-
+            if(!stashExtended.getKeyBinding().isPressed() || !stashExtended.getKeyBinding().wasPressed())
+                return;
+            if(!keybindWasHeld && ticksBetweenPresses>9) {
                 GUIUtils.closeGui();
                 GUIUtils.sendCommand("pickupstash");
 
@@ -48,15 +56,6 @@ public class StashHelper {
                 keybindWasHeld = false;
             }
         });
-    }
-    private boolean hasCtrlDown() {
-        long window = MinecraftClient.getInstance().getWindow().getHandle();
-        return InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_LEFT_CONTROL);
-    }
-
-    private boolean hasShiftDown() {
-        long window = MinecraftClient.getInstance().getWindow().getHandle();
-        return InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT);
     }
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()

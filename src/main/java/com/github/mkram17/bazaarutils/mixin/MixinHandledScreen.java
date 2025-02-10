@@ -48,10 +48,11 @@ public abstract class MixinHandledScreen {
 		}
 	}
 
-	@Inject(method = "keyPressed", at = @At("HEAD"))
+	@Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
 	public void onkeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
-		if(BUConfig.get().stashHelper.stashKeybind.matchesKey(keyCode, scanCode)){
-			BUConfig.get().stashHelper.stashKeybind.setPressed(true);
+		if (BUConfig.get().stashHelper.stashExtended.getKeyBinding().isPressed()) {
+			BUConfig.get().stashHelper.stashExtended.press();
+			cir.setReturnValue(false); // Allow the event to propagate
 		}
 	}
 	@Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)

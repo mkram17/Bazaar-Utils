@@ -78,6 +78,16 @@ public class Commands {
                         )
                 ));
         dispatcher.register(ClientCommandManager.literal("bu")
+                .then(ClientCommandManager.literal("tax")
+                        .then((ClientCommandManager.argument("amount", DoubleArgumentType.doubleArg())
+                                        .executes((context) ->{
+                                            BUConfig.get().bzTax = DoubleArgumentType.getDouble(context, "amount");
+                                            return 1;
+                                        })
+                                )
+                        )
+                ));
+        dispatcher.register(ClientCommandManager.literal("bu")
                 .then(ClientCommandManager.literal("developer")
                         .executes((context) ->{
                             BUConfig.get().developerMode = !BUConfig.get().developerMode;

@@ -41,6 +41,17 @@ repositories {
 		name = "Terraformers (for gui)"
 		url = "https://maven.terraformersmc.com/"
 	}
+		exclusiveContent {
+			forRepository {
+				maven {
+					url = "https://cursemaven.com"
+				}
+			}
+			filter {
+				includeGroup "curse.maven"
+			}
+		}
+
 }
 dependencies {
 	// To change the versions see the gradle.properties file
@@ -66,6 +77,9 @@ dependencies {
 
 	testCompileOnly 'org.projectlombok:lombok:1.18.36'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
+
+	//modern keybinding
+	modImplementation("curse.maven:modernkeybinding-695433:6016136")
 
 }
 fabricApi {
