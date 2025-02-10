@@ -4,6 +4,8 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.Events.SignOpenEvent;
 import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
+import lombok.Getter;
+import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -20,35 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-//TODO make inBazaar() work
+//TODO make inBazaar() work all the time
 public class GUIUtils {
-
-
-    public String getContainerName() {
-        return containerName;
-    }
-
-    public void setContainerName(String containerName) {
-        this.containerName = containerName;
-    }
-
-    public guiTypes getGuiType() {
-        return guiType;
-    }
-
-    public void setGuiType(guiTypes guiType) {
-        this.guiType = guiType;
-    }
-
-    public List<ItemStack> getItemStacks() {
-        return itemStacks;
-    }
-
-    public void setItemStacks(List<ItemStack> itemStacks) {
-        this.itemStacks = itemStacks;
-    }
-
-
     public boolean wasLastChestFlip(){
         return inFlipGui;
     }
@@ -67,7 +42,10 @@ public class GUIUtils {
         return inBuyOrderScreen() || inFlipGui || inInstaBuy() || containerName.contains("Bazaar");
     }
     private GenericContainerScreen chestScreen;
+    @Getter
     private String containerName;
+    @Getter
+    @Setter
     private guiTypes guiType;
     private  List<ItemStack> itemStacks = new ArrayList<>();
     public static boolean inFlipGui;

@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-//
+//used to change stack size String
 @Mixin(DrawContext.class)
 public abstract class DrawContentMixin {
     @ModifyVariable(
@@ -19,7 +19,7 @@ public abstract class DrawContentMixin {
     private String modifyStackCountString(String text, TextRenderer textRenderer, ItemStack stack, int x, int y) {
         int size = stack.getCount();
 
-        String customData = stack.get(BazaarUtils.CLICK_COUNT_COMPONENT);
+        String customData = stack.get(BazaarUtils.CUSTOM_SIZE_COMPONENT);
 
         if (customData != null) {
             return customData;

@@ -21,15 +21,24 @@ public class RestrictSell {
     public enum restrictBy{PRICE, VOLUME}
     @Getter @Setter
     private boolean enabled;
-    private int safetyClicks;
+    private int safetyClicksRequired;
     @Getter @Setter
     private ArrayList<RestrictSellControl> controls;
     private static int SELLITEMID = 47;
     private boolean locked = false;
+    @Getter
+    private int safetyClicks = 0;
 
-    public RestrictSell(boolean enabled, int safetyClicks, ArrayList<RestrictSellControl> controls) {
+    public void addSafetyClick(){
+        safetyClicks++;
+    }
+    public void resetSafetyClicks(){
+        safetyClicks = 0;
+    }
+
+    public RestrictSell(boolean enabled, int safetyClicksRequired, ArrayList<RestrictSellControl> controls) {
         this.enabled = enabled;
-        this.safetyClicks = safetyClicks;
+        this.safetyClicksRequired = safetyClicksRequired;
         this.controls = controls;
     }
 
@@ -81,6 +90,7 @@ public class RestrictSell {
                 message += " VOLUME: ";
             message += control.getAmount();
         }
+        message += " (Safety Clicks Left: " + (3-safetyClicks) + ")";
         return message;
     }
 

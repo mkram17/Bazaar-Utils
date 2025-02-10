@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.Utils.Util;
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSell;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-//used for SlotClickEvent
+//used for SlotClickEvent, register keybinds in chests, block slot clicks
 @Mixin(HandledScreen.class)
 public abstract class MixinHandledScreen {
 
@@ -55,9 +56,15 @@ public abstract class MixinHandledScreen {
 	}
 	@Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
 	public void onMouseClickedSlot(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
-		if(BUConfig.get().restrictSell.isSlotLocked(slotId)){
-			Util.notifyAll(BUConfig.get().restrictSell.getMessage());
-			ci.cancel();
+		RestrictSell sell = BUConfig.get().restrictSell;
+		if(sell.isSlotLocked(slotId)){
+			if(sell.getSafetyClicks() < 3) {
+				sell.addSafetyClick();
+				Util.notifyAll(sell.getMessage());
+				ci.cancel();
+			} else{
+				sell.resetSafetyClicks();
+			}
         }
 	}
 }

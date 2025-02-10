@@ -60,7 +60,7 @@ public class BazaarUtils implements ClientModInitializer {
         BUConfig.get().stashHelper.registerKeybind();
     }
 
-    public static final ComponentType<String> CLICK_COUNT_COMPONENT = Registry.register(
+    public static final ComponentType<String> CUSTOM_SIZE_COMPONENT = Registry.register(
             Registries.DATA_COMPONENT_TYPE,
             Identifier.of("bazaarutils", "custom_size"),
             ComponentType.<String>builder().codec(Codec.STRING).build()

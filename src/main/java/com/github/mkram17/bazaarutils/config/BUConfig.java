@@ -26,9 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.github.mkram17.bazaarutils.config.BUConfig.Developer.allMessages;
-import static com.github.mkram17.bazaarutils.config.BUConfig.Developer.createOptions;
-
 
 public class BUConfig {
     public static final ConfigClassHandler<BUConfig> HANDLER = ConfigClassHandler.createBuilder(BUConfig.class)
@@ -65,6 +62,8 @@ public class BUConfig {
     public AutoOpen autoOpen = new AutoOpen();
     @SerialEntry
     public RestrictSell restrictSell = new RestrictSell(true, 3, new ArrayList<>(List.of(new RestrictSellControl(RestrictSell.restrictBy.PRICE, 10000.0))));
+    @SerialEntry
+    public Developer developer = new Developer();
 
     public static void openGUI() {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -106,12 +105,12 @@ public class BUConfig {
 
             if(developerMode) {
                 builder.category(
-                        Developer.createBuilder()
+                        Developer.createDevBuilder()
                                 .option(Option.<Boolean>createBuilder()
                                         .name(Text.literal("All Messages"))
-                                        .binding(allMessages,
-                                                () -> allMessages,
-                                                newVal -> allMessages = newVal)
+                                        .binding(developer.allMessages,
+                                                () -> developer.allMessages,
+                                                newVal -> developer.allMessages = newVal)
                                         .controller(BUConfig::createBooleanController)
                                         .build())
 
@@ -119,7 +118,7 @@ public class BUConfig {
                                         OptionGroup.createBuilder()
                                                 .name(Text.literal("Message Options"))
                                                 .description(OptionDescription.of(Text.literal("DEVELOPER ONLY")))
-                                                .options(createOptions())
+                                                .options(developer.createOptions())
                                                 .build()
                                 )
                                 .build());
@@ -132,22 +131,21 @@ public class BUConfig {
         return BooleanControllerBuilder.create(opt).onOffFormatter().coloured(true);
     }
 
-    //TODO just add this to BUConfig or maybe make another class for it (perhaps other sections of config could have their own classes as well, maybe make settings do this)
     public static class Developer {
-        public static boolean allMessages = false;
-        public static boolean errorMessages = false;
-        public static boolean guiMessages = false;
-        public static boolean featureMessages = false;
-        public static boolean bazaarDataMessages = false;
-        public static boolean commandMessages = false;
-        public static boolean itemDataMessages = false;
-        public static  ConfigCategory.Builder createBuilder(){
+        public boolean allMessages = false;
+        public boolean errorMessages = false;
+        public boolean guiMessages = false;
+        public boolean featureMessages = false;
+        public boolean bazaarDataMessages = false;
+        public boolean commandMessages = false;
+        public boolean itemDataMessages = false;
+        public static  ConfigCategory.Builder createDevBuilder(){
             return ConfigCategory.createBuilder()
                     .name(Text.literal("Developer"));
         }
 
 
-        public static Collection<? extends Option<?>> createOptions() {
+        public Collection<? extends Option<?>> createOptions() {
             ArrayList<Option<?>> optionList = new ArrayList<>();
                     optionList.add(Option.<Boolean>createBuilder()
                             .name(Text.literal("Error Messages"))
@@ -194,7 +192,7 @@ public class BUConfig {
                     return optionList;
         }
 
-        public static boolean isDeveloperVariableEnabled(Util.notificationTypes type) {
+        public boolean isDeveloperVariableEnabled(Util.notificationTypes type) {
             return switch (type) {
                 case ERROR -> errorMessages;
                 case GUI -> guiMessages;
@@ -204,14 +202,6 @@ public class BUConfig {
                 case ITEMDATA -> itemDataMessages;
                 default -> throw new IllegalArgumentException("Unknown type: " + type);
             };
-        }
-
-        public String getText(boolean example) {
-            if (example) return "I'm in Example mode";
-            if (!ItemData.nameList.isEmpty()) {
-                ItemData.updateLists();
-                return String.join(", ", ItemData.nameList);
-            } else return "No watched items";
         }
     }
 }

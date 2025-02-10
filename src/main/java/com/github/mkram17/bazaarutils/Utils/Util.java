@@ -17,19 +17,8 @@ import java.nio.file.Paths;
 public class Util {
     public enum notificationTypes {
         ERROR, GUI, FEATURE, BAZAARDATA, COMMAND, ITEMDATA;
-        private boolean isEnabled;
-
-        static {
-            ERROR.isEnabled = BUConfig.Developer.errorMessages;
-            GUI.isEnabled = BUConfig.Developer.guiMessages;
-            FEATURE.isEnabled = BUConfig.Developer.featureMessages;
-            BAZAARDATA.isEnabled = BUConfig.Developer.bazaarDataMessages;
-            COMMAND.isEnabled = BUConfig.Developer.commandMessages;
-            ITEMDATA.isEnabled = BUConfig.Developer.itemDataMessages;
-        }
-
         public boolean isEnabled() {
-            return BUConfig.Developer.isDeveloperVariableEnabled(this);
+            return BUConfig.get().developer.isDeveloperVariableEnabled(this);
         }
     }
     public static final String HELPMESSAGE = "Commands: /bu or /bazaarutils to open settings gui. \n---------------------------\n " +
@@ -50,7 +39,7 @@ public class Util {
         String simpleCallingName = callingName.substring(callingName.lastIndexOf(".") + 1);
         String messageStr = notiType == notificationTypes.ERROR ? "§c" + message : "§a" + message;
 
-        if (notiType.isEnabled() || BUConfig.Developer.allMessages) {
+        if (notiType.isEnabled() || BUConfig.get().developer.allMessages) {
             if (MinecraftClient.getInstance().player != null) {
                 MinecraftClient.getInstance().player.sendMessage(Text.literal("[" + simpleCallingName + "] " + messageStr), false);
             }

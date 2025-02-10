@@ -126,11 +126,13 @@ public class AutoFlipper extends CustomItemButton {
     public void onGUI(ReplaceItemEvent event) {
         if(!BazaarUtils.gui.inFlipGui() || !(event.getSlotId() == settings.getSlotNumber()) || !settings.isEnabled()) return;
         ItemStack itemStack = new ItemStack(settings.getReplaceItem(), 1);
-            itemStack.set(BazaarUtils.CLICK_COUNT_COMPONENT, "FLIP");
-        if(item != null)
-            itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Auto Flip for " + Util.getPrettyNumber(flipPrice) + " coins").formatted(Formatting.DARK_PURPLE));
-        else
+        if(item == null) {
             itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Could not find order").formatted(Formatting.DARK_PURPLE));
+            itemStack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, "?");
+        }else {
+            itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Auto Flip for " + Util.getPrettyNumber(flipPrice) + " coins").formatted(Formatting.DARK_PURPLE));
+            itemStack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, String.valueOf(Util.getPrettyNumber(flipPrice)));
+        }
         event.setReplacement(itemStack);
     }
 
