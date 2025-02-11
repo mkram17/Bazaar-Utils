@@ -17,6 +17,7 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 //TODO fix keybind working :////
+//TODO fix config for this not saving
 public class StashHelper {
     @Getter @Setter
     private boolean enabled;
@@ -24,10 +25,14 @@ public class StashHelper {
     private int ticksBetweenPresses = 0;
     private int taskTicks = 0;
     private boolean shouldSend = false;
-    public IKeyBinding stashExtended;
+    private KeyBinding stashKeybind;
+
+    public IKeyBinding getStashExtended(){
+        return  (IKeyBinding) stashKeybind;
+    }
 
     public void registerKeybind() {
-        KeyBinding stashKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        stashKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "Pick Up Stash",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_V,
@@ -35,32 +40,29 @@ public class StashHelper {
         ));
 
 
-        stashExtended = (IKeyBinding) stashKeybind;
+        IKeyBinding stashExtended = (IKeyBinding) stashKeybind;
         stashExtended.setKeyModifierAndCode(KeyModifier.ALT, InputUtil.fromKeyCode(GLFW.GLFW_KEY_V, 47));
         stashExtended.setKeyConflictContext(KeyConflictContext.UNIVERSAL);
 
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            ticksBetweenPresses++;
             if(!enabled)
                 return;
             if(!stashExtended.getKeyBinding().isPressed() || !stashExtended.getKeyBinding().wasPressed())
                 return;
-            if(!keybindWasHeld && ticksBetweenPresses>9) {
+            if(ticksBetweenPresses>15) {
                 GUIUtils.closeGui();
                 GUIUtils.sendCommand("pickupstash");
 
-                keybindWasHeld = true;
-                ticksBetweenPresses = 0;
-            } else {
-                ticksBetweenPresses++;
-                keybindWasHeld = false;
+                 ticksBetweenPresses = 0;
             }
         });
     }
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()
                 .name(Text.literal("Stash Helper"))
-                .description(OptionDescription.of(Text.literal("Ctrl + Shift + V to close bazaar and then run /pickupstash")))
+                .description(OptionDescription.of(Text.literal("Ctrl + Shift + V to close bazaar and then pick up stash")))
                 .binding(true,
                         this::isEnabled,
                         this::setEnabled)

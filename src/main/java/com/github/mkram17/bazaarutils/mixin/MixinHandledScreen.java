@@ -6,8 +6,10 @@ import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.Utils.Util;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSell;
+import committee.nova.mkb.api.IKeyBinding;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 //used for SlotClickEvent, register keybinds in chests, block slot clicks
-@Mixin(HandledScreen.class)
+@Mixin(value = HandledScreen.class, priority = 999)
 public abstract class MixinHandledScreen {
 
 	@Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V",at = @At("HEAD"),cancellable = true)
@@ -50,9 +52,11 @@ public abstract class MixinHandledScreen {
 
 	@Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
 	public void onkeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
-		if (BUConfig.get().stashHelper.stashExtended.getKeyBinding().isPressed()) {
-			BUConfig.get().stashHelper.stashExtended.press();
-			cir.setReturnValue(false); // Allow the event to propagate
+		IKeyBinding iKeyBinding = BUConfig.get().stashHelper.getStashExtended();
+		KeyBinding keyBinding = iKeyBinding.getKeyBinding();
+		if (keyBinding.matchesKey(keyCode, scanCode) && iKeyBinding.getKeyModifier().isActive(iKeyBinding.getKeyConflictContext())) {
+			iKeyBinding.press();
+			keyBinding.setPressed(true);
 		}
 	}
 	@Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)

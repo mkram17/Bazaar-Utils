@@ -7,7 +7,6 @@ import com.github.mkram17.bazaarutils.features.StashHelper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipperSettings;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
-import com.github.mkram17.bazaarutils.features.customorder.CustomOrderSettings;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSell;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSellControl;
 import com.google.gson.GsonBuilder;
@@ -76,32 +75,33 @@ public class BUConfig {
             OptionGroup.Builder restrictSellGroupBuilder = OptionGroup.createBuilder()
                     .name(Text.literal("Sell Restrictions"))
                     .description(OptionDescription.of(Text.literal("Blocks insta selling based on restrictions. You can add a new restriction with /bu restriction add {based on volume or price} {amount over which will be restricted} or you can remove it with /bu restriction remove {restriction number}")));
-            for(RestrictSellControl control : restrictSell.getControls()){
-                restrictSellGroupBuilder.option(restrictSell.createRestrictionOption(control));
+            restrictSell.buildOptions(restrictSellGroupBuilder);
+            if(restrictSell.getControls().isEmpty()) {
+                builder.category(ConfigCategory.createBuilder()
+                        .name(Text.literal("General"))
+                        .option(autoFlipper.createOption())
+                        .option(autoOpen.createOption())
+                        .option(stashHelper.createOption())
+                        .build()
+                );
+            } else {
+                builder.category(ConfigCategory.createBuilder()
+                        .name(Text.literal("General"))
+                        .option(autoFlipper.createOption())
+                        .option(autoOpen.createOption())
+                        .option(stashHelper.createOption())
+                        .group(restrictSellGroupBuilder.build())
+                        .build()
+                );
             }
-            builder.category(ConfigCategory.createBuilder()
-                    .name(Text.literal("General"))
-                            .option(autoFlipper.createOption())
-                            .option(autoOpen.createOption())
-                            .option(stashHelper.createOption())
-                            .group(restrictSellGroupBuilder.build())
-                    .build()
-            );
 
 
             OptionGroup.Builder customOrdersGroupBuilder = OptionGroup.createBuilder()
                     .name(Text.literal("Custom Buy Amounts"))
                     .description(OptionDescription.of(Text.literal("Add buttons for custom buy order/insta buy amounts.")));
 
-            if(customOrders.isEmpty())
-                customOrders.add(new CustomOrder(new CustomOrderSettings(true, 71680, 17, CustomOrder.COLORMAP.get(0))));
-            // Add options to the OptionGroup builder
-            for (CustomOrder order : customOrders) {
-                customOrdersGroupBuilder.option(order.createOption());
-            }
-
+            CustomOrder.buildOptions(customOrdersGroupBuilder);
             builder.category(CustomOrder.createOrdersCategory().group(customOrdersGroupBuilder.build()).build());
-            // Build the OptionGroup and add it to the category
 
             if(developerMode) {
                 builder.category(
@@ -130,6 +130,7 @@ public class BUConfig {
     public static BooleanControllerBuilder createBooleanController(Option<Boolean> opt) {
         return BooleanControllerBuilder.create(opt).onOffFormatter().coloured(true);
     }
+
 
     public static class Developer {
         public boolean allMessages = false;

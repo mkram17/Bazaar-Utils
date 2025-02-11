@@ -7,7 +7,10 @@ import com.github.mkram17.bazaarutils.Events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.Utils.CustomItemButton;
 import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
-import dev.isxander.yacl3.api.*;
+import dev.isxander.yacl3.api.ConfigCategory;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.OptionGroup;
 import lombok.Getter;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
@@ -19,6 +22,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CustomOrder extends CustomItemButton {
@@ -92,5 +96,14 @@ public class CustomOrder extends CustomItemButton {
                 .description(OptionDescription.of(Text.literal("Buy order button for " + settings.getOrderAmount() + " of an item.")))
                 .controller(BUConfig::createBooleanController)
                 .build();
+    }
+    public static void buildOptions(OptionGroup.Builder builder){
+        List<CustomOrder> customOrders = BUConfig.get().customOrders;
+        if(customOrders.isEmpty())
+            customOrders.add(new CustomOrder(new CustomOrderSettings(true, 71680, 17, CustomOrder.COLORMAP.get(0))));
+
+        for (CustomOrder order : customOrders) {
+            builder.option(order.createOption());
+        }
     }
 }

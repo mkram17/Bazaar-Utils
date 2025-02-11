@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.Events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.OptionGroup;
 import lombok.Getter;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
@@ -104,5 +105,10 @@ public class RestrictSell {
                 .controller(BUConfig::createBooleanController)
                 .build();
     }
-    
+
+    public void buildOptions(OptionGroup.Builder builder){
+        for(RestrictSellControl control : getControls()){
+            builder.option(createRestrictionOption(control));
+        }
+    }
 }
