@@ -50,13 +50,11 @@ public class BUConfig {
     @SerialEntry
     public boolean notifyOutdated = true;
     @SerialEntry
-    public boolean buyMaxEnabled = true;
-    @SerialEntry
     public ArrayList<CustomOrder> customOrders = new ArrayList<>();
     @SerialEntry
     public boolean developerMode = false;
     @SerialEntry
-    public StashHelper stashHelper = new StashHelper();
+    public StashHelper stashHelper = new StashHelper(true);
     @SerialEntry
     public AutoOpen autoOpen = new AutoOpen();
     @SerialEntry
@@ -201,7 +199,6 @@ public class BUConfig {
                 case BAZAARDATA -> bazaarDataMessages;
                 case COMMAND -> commandMessages;
                 case ITEMDATA -> itemDataMessages;
-                default -> throw new IllegalArgumentException("Unknown type: " + type);
             };
         }
     }

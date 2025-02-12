@@ -21,11 +21,13 @@ import org.lwjgl.glfw.GLFW;
 public class StashHelper {
     @Getter @Setter
     private boolean enabled;
-    private boolean keybindWasHeld = false;
-    private int ticksBetweenPresses = 0;
-    private int taskTicks = 0;
-    private boolean shouldSend = false;
-    private KeyBinding stashKeybind;
+    private int ticksBetweenPresses;
+    private transient KeyBinding stashKeybind;
+
+    public StashHelper(boolean enabled) {
+        this.enabled = enabled;
+        ticksBetweenPresses = 0;
+    }
 
     public IKeyBinding getStashExtended(){
         return  (IKeyBinding) stashKeybind;
