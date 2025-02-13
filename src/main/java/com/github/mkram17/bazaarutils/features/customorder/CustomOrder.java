@@ -44,9 +44,7 @@ public class CustomOrder extends CustomItemButton {
     @Override
     @EventHandler
     public void onGUI(ReplaceItemEvent event) {
-//        if(getOrderAmount() != 71680 && event.getSlotId() == 8)
-//            Util.notifyAll(isEnabled());
-        if (!(BazaarUtils.gui.inBuyOrderScreen() || BazaarUtils.gui.inInstaBuy())|| !settings.isEnabled())
+        if (!(BazaarUtils.gui.inBuyOrderScreen() || BazaarUtils.gui.inInstaBuy()) || !settings.isEnabled())
             return;
 
         if (event.getSlotId() != settings.getSlotNumber())
@@ -54,7 +52,6 @@ public class CustomOrder extends CustomItemButton {
 
         ItemStack itemStack = new ItemStack(settings.getItem(), settings.getOrderAmount());
 
-// Set the display name
         itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Buy " + settings.getOrderAmount()).formatted(Formatting.DARK_PURPLE));
         event.setReplacement(itemStack);
     }
@@ -74,8 +71,8 @@ public class CustomOrder extends CustomItemButton {
     @EventHandler
     private void onSignOpened(SignOpenEvent event) {
         if (!buySignClicked) return;
-
         GUIUtils.setSignText(Integer.toString(settings.getOrderAmount()));
+
         GUIUtils.closeGui();
         buySignClicked = false;
     }

@@ -114,7 +114,7 @@ public class ItemData {
 
     public static void scheduleNotifyOutdated(){
         //if its a decimal, it will schedule decimal for every second as ex: .3 = every 3 seconds
-        if(BUConfig.get().notifyOutdated) {
+        if(BUConfig.get().outdatedItems.isNotifyOutdated()) {
             timeExecutor.scheduleAtFixedRate(ItemData::notifyOutdated, 0, 1, TimeUnit.SECONDS);
         }
     }
@@ -182,7 +182,7 @@ public class ItemData {
 
     //maybe replace with using ItemOutdatedEvent?
     public static void notifyOutdated(){
-        if(notifyOutdatedSeconds % BUConfig.get().outdatedTiming == 0) {
+        if(notifyOutdatedSeconds % BUConfig.get().outdatedItems.getOutdatedTiming() == 0) {
             for (ItemData item : outdated) {
                 Util.notifyAll(item.getGeneralInfo() + " is outdated.");
             }
@@ -234,6 +234,4 @@ public class ItemData {
         for(ItemData item: BUConfig.get().watchedItems)
             removeItem(item);
     }
-
-
 }

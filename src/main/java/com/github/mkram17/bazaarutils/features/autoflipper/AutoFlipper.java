@@ -83,7 +83,7 @@ public class AutoFlipper extends CustomItemButton {
             String orderPrice = lore.lines().get(3).getSiblings().get(1).getString();
             orderPrice = orderPrice.substring(0, orderPrice.indexOf(" coins"));
             AutoFlipper.orderPrice = Double.parseDouble(orderPrice);
-            String orderVolume = lore.lines().get(1).getSiblings().get(1).getString();
+            String orderVolume = lore.lines().get(1).getSiblings().get(1).getString().replace(",","");
             AutoFlipper.orderVolumeFilled = Integer.parseInt(orderVolume);
 
         } catch (Exception ex) {
@@ -125,6 +125,7 @@ public class AutoFlipper extends CustomItemButton {
     @Override @EventHandler
     public void onGUI(ReplaceItemEvent event) {
         if(!BazaarUtils.gui.inFlipGui() || !(event.getSlotId() == settings.getSlotNumber()) || !settings.isEnabled()) return;
+
         ItemStack itemStack = new ItemStack(settings.getReplaceItem(), 1);
         if(item == null) {
             itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Could not find order").formatted(Formatting.DARK_PURPLE));
@@ -146,16 +147,6 @@ public class AutoFlipper extends CustomItemButton {
                         (newVal) -> settings.setEnabled(newVal))
                 .controller(BUConfig::createBooleanController)
                 .build();
-    }
-
-    public void initializeStateManager(){
-//        Binding<Boolean> settingsBinding = Binding.generic(
-//                getSettings().isEnabled(),
-//                settings::isEnabled,
-//                settings::setEnabled
-//        );
-//        enabledStateManager = StateManager.createSimple(settingsBinding);
-//        enabledStateManager.sync();
     }
 
 }

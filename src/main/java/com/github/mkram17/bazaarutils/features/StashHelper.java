@@ -16,8 +16,6 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
-//TODO fix keybind working :////
-//TODO fix config for this not saving
 public class StashHelper {
     @Getter @Setter
     private boolean enabled;

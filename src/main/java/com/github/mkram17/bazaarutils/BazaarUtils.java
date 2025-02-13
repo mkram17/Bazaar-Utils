@@ -6,7 +6,6 @@ import com.github.mkram17.bazaarutils.Utils.Commands;
 import com.github.mkram17.bazaarutils.Utils.GUIUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.BazaarData;
-import com.github.mkram17.bazaarutils.features.AutoOpen;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
 import com.mojang.serialization.Codec;
 import meteordevelopment.orbit.EventBus;
@@ -41,8 +40,7 @@ public class BazaarUtils implements ClientModInitializer {
         ChestLoadedEvent.subscribe();
         ChatHandler.subscribe();
         gui.registerScreenEvent();
-        eventBus.subscribe(new GUIUtils());
-        eventBus.subscribe(new AutoOpen());
+        eventBus.subscribe(gui);
     }
 
     private void registerCommands() {
@@ -57,6 +55,7 @@ public class BazaarUtils implements ClientModInitializer {
         }
         eventBus.subscribe(BUConfig.get().autoFlipper);
         eventBus.subscribe(BUConfig.get().restrictSell);
+        eventBus.subscribe(BUConfig.get().outdatedItems);
         BUConfig.get().stashHelper.registerKeybind();
     }
 

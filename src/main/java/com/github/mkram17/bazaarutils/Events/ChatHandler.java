@@ -93,7 +93,7 @@ public class ChatHandler {
                 itemName = siblings.get(5).getString().trim();
                 price = Double.parseDouble(siblings.get(9).getString().trim());
             } else {
-                Util.notifyAll("claimed message, but not worth");
+//                Util.notifyAll("claimed message, but not worth");
                 volumeClaimed = Integer.parseInt(siblings.get(5).getString().replace(",", ""));
                 itemName = siblings.get(7).getString().trim();
                 price = Double.parseDouble(siblings.get(9).getString().trim());

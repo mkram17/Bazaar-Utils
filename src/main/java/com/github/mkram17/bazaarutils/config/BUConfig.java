@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.config;
 
 import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
-import com.github.mkram17.bazaarutils.features.AutoOpen;
+import com.github.mkram17.bazaarutils.features.OutdatedItems;
 import com.github.mkram17.bazaarutils.features.StashHelper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipperSettings;
@@ -46,17 +46,14 @@ public class BUConfig {
     @SerialEntry
     public double bzTax = 0.01125;
     @SerialEntry
-    public int outdatedTiming = 5;
-    @SerialEntry
-    public boolean notifyOutdated = true;
-    @SerialEntry
     public ArrayList<CustomOrder> customOrders = new ArrayList<>();
     @SerialEntry
     public boolean developerMode = false;
     @SerialEntry
     public StashHelper stashHelper = new StashHelper(true);
     @SerialEntry
-    public AutoOpen autoOpen = new AutoOpen();
+    public OutdatedItems outdatedItems = new OutdatedItems();
+    //TODO make restrict sell able to take empty array list (might need to think about config gui group + options)
     @SerialEntry
     public RestrictSell restrictSell = new RestrictSell(true, 3, new ArrayList<>(List.of(new RestrictSellControl(RestrictSell.restrictBy.PRICE, 10000.0))));
     @SerialEntry
@@ -78,7 +75,7 @@ public class BUConfig {
                 builder.category(ConfigCategory.createBuilder()
                         .name(Text.literal("General"))
                         .option(autoFlipper.createOption())
-                        .option(autoOpen.createOption())
+                        .options(outdatedItems.createOptions())
                         .option(stashHelper.createOption())
                         .build()
                 );
@@ -86,7 +83,7 @@ public class BUConfig {
                 builder.category(ConfigCategory.createBuilder()
                         .name(Text.literal("General"))
                         .option(autoFlipper.createOption())
-                        .option(autoOpen.createOption())
+                        .options(outdatedItems.createOptions())
                         .option(stashHelper.createOption())
                         .group(restrictSellGroupBuilder.build())
                         .build()

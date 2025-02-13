@@ -12,15 +12,24 @@ import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.text.Text;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 //TODO change the message number instead of sending more
-public class AutoOpen {
+public class OutdatedItems {
     @Getter @Setter
-    private boolean enabled;
+    private boolean autoOpenEnabled;
+    @Getter @Setter
+    private boolean notifyOutdated;
+    @Getter @Setter
+    private int outdatedTiming = 5;
+
     @EventHandler
     public void onOutdated(OutdatedItemEvent e){
-        if(!enabled || BazaarUtils.gui.inBazaar())
+        if(notifyOutdated)
+            Util.notifyChatCommand("Your order for " + e.getItem().getVolume() + "x " + e.getItem().getName() + " is now outdated.", "bz");
+        if(BazaarUtils.gui.inBazaar() || !autoOpenEnabled)
             return;
         CompletableFuture.runAsync(() ->{
             for(int i = 3; i >= 1; i--) {
@@ -38,14 +47,24 @@ public class AutoOpen {
             GUIUtils.sendCommand("bz");
         });
     }
-    public Option<Boolean> createOption() {
-        return Option.<Boolean>createBuilder()
+    public Collection<Option<Boolean>> createOptions() {
+        ArrayList<Option<Boolean>> options = new ArrayList<>();
+        options.add(Option.<Boolean>createBuilder()
                 .name(Text.literal("Auto Open Bazaar"))
                 .description(OptionDescription.of(Text.literal("Automatically open the bazaar after a delay when an order becomes outdated.")))
                 .binding(false,
-                        this::isEnabled,
-                        this::setEnabled)
+                        this::isAutoOpenEnabled,
+                        this::setAutoOpenEnabled)
                 .controller(BUConfig::createBooleanController)
-                .build();
+                .build());
+        options.add(Option.<Boolean>createBuilder()
+                .name(Text.literal("Notify on Outdated Orders"))
+                .description(OptionDescription.of(Text.literal("Sends a message in chat when someone has undercut your order.")))
+                .binding(true,
+                        this::isNotifyOutdated,
+                        this::setNotifyOutdated)
+                .controller(BUConfig::createBooleanController)
+                .build());
+        return options;
     }
 }

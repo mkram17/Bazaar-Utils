@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -49,6 +50,8 @@ public class GUIUtils {
     private guiTypes guiType;
     private  List<ItemStack> itemStacks = new ArrayList<>();
     public static boolean inFlipGui;
+    @Getter @Setter
+    private static Inventory lowerChestInventory;
 
     public enum guiTypes {CHEST, SIGN}
     public void register(){
@@ -57,6 +60,7 @@ public class GUIUtils {
     public void registerScreenEvent(){
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
             BazaarUtils.gui = this;
+            lowerChestInventory= null;
             if (screen instanceof GenericContainerScreen genericContainerScreen) {
                 containerName = Util.removeFormatting(genericContainerScreen.getTitle().getString());
                 Util.notifyAll("Container Name: " + containerName, Util.notificationTypes.GUI);
@@ -77,18 +81,20 @@ public class GUIUtils {
     }
 
     public static void closeGui(){
-        Util.notifyAll("Closing gui", Util.notificationTypes.GUI);
-        if(MinecraftClient.getInstance().player != null) {
-            MinecraftClient.getInstance().player.closeHandledScreen();
-//            if(MinecraftClient.getInstance().currentScreen instanceof HandledScreen){
-//                ((HandledScreen<?>) MinecraftClient.getInstance().currentScreen).close();
-//            }
+        try {
+            Util.notifyAll("Closing gui", Util.notificationTypes.GUI);
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client != null && client.player != null) {
+                MinecraftClient.getInstance().player.closeHandledScreen();
+            } else {
+                Util.notifyAll("Error closing gui: something was null", Util.notificationTypes.ERROR);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Util.notifyAll("Error closing gui", Util.notificationTypes.ERROR);
         }
     }
 
-    private static void customClose(){
-        MinecraftClient.getInstance().setScreen(null);
-    }
 
     public static void setSignText(String text) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -110,10 +116,26 @@ public class GUIUtils {
             signScreen.setCurrentRow(originalRow);
         }
     }
+    @EventHandler
+    private static void onLoad(ChestLoadedEvent e){
+        lowerChestInventory = e.getLowerChestInventory();
+    }
 
-    public boolean inFlipGui(){
-        if(containerName == null) return false;
-        return containerName.contains("Order options");
+
+    public boolean inFlipGui() {
+        if (containerName == null || lowerChestInventory == null) {
+            return false;
+        }
+
+        if (!containerName.contains("Order options")) {
+            return false;
+        }
+
+        ItemStack stack = lowerChestInventory.getStack(13);
+
+        // Check if the item name contains "Cancel Order"
+        String customName = stack.getName().getString();
+        return !customName.contains("Cancel Order");
     }
 
     public void updateFlipGui(){

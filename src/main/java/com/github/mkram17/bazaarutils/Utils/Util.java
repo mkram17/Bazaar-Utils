@@ -4,7 +4,10 @@ import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.BazaarData;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 
 import java.awt.*;
@@ -46,6 +49,18 @@ public class Util {
             LogManager.getLogger(callingName).info("[AutoBz] Message [" + message + "]");
         }
     }
+
+    public static void notifyChatCommand(String message, String command){
+        assert MinecraftClient.getInstance().player != null;
+        MinecraftClient.getInstance().player.sendMessage(Text.literal(message)
+                .styled(style -> style
+                        .withBold(true)
+                        .withColor(Formatting.GOLD)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + command))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Run /" + command)))
+                ), false);
+    }
+
 
     public static void addWatchedItem(String itemName, Double price, boolean isSellOrder, int volume) {
         itemName = itemName.toLowerCase();
