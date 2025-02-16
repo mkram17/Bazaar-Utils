@@ -10,6 +10,7 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -80,9 +81,10 @@ public class GUIUtils {
         itemStacks = e.getItemStacks();
     }
 
-    public static void closeGui(){
+    public static void closeHandledScreen(){
         try {
             Util.notifyAll("Closing gui", Util.notificationTypes.GUI);
+//            Thread.sleep(300);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client != null && client.player != null) {
                 MinecraftClient.getInstance().player.closeHandledScreen();
@@ -94,6 +96,24 @@ public class GUIUtils {
             Util.notifyAll("Error closing gui", Util.notificationTypes.ERROR);
         }
     }
+
+    public static void closeSign(){
+        try {
+            Util.notifyAll("Closing sign", Util.notificationTypes.GUI);
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client != null && client.currentScreen instanceof AbstractSignEditScreen signEditScreen) {
+                signEditScreen.close();
+//                signEditScreen.removed();
+//                client.setScreen(null);
+            } else {
+                Util.notifyAll("Error closing sign: client was null or not in a sign", Util.notificationTypes.ERROR);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Util.notifyAll("Unknown error while closing sign", Util.notificationTypes.ERROR);
+        }
+    }
+
 
 
     public static void setSignText(String text) {

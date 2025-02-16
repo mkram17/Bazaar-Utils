@@ -51,7 +51,7 @@ public class AutoFlipper extends CustomItemButton {
     public static void autoAddToSign() {
         if(item != null && flipPrice != 0 && BazaarUtils.gui.wasLastChestFlip()) {
             GUIUtils.setSignText(Double.toString(Util.getPrettyNumber(flipPrice)));
-            GUIUtils.closeGui();
+            GUIUtils.closeHandledScreen();
             item.flipItem(flipPrice);
         }
     }

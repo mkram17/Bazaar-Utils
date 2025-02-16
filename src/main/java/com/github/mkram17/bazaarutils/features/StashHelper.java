@@ -52,7 +52,7 @@ public class StashHelper {
             if(!stashExtended.getKeyBinding().isPressed() || !stashExtended.getKeyBinding().wasPressed())
                 return;
             if(ticksBetweenPresses>15) {
-                GUIUtils.closeGui();
+                GUIUtils.closeHandledScreen();
                 GUIUtils.sendCommand("pickupstash");
 
                  ticksBetweenPresses = 0;

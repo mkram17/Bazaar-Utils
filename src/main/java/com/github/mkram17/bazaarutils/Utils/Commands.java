@@ -116,7 +116,7 @@ public class Commands {
                                             BUConfig.get().customOrders.add(new CustomOrder(new CustomOrderSettings(
                                                     true,
                                                     orderAmount,
-                                                    slotNumber,
+                                                    slotNumber+1,
                                                     CustomOrder.COLORMAP.get(BUConfig.get().customOrders.size())
                                             )));
 

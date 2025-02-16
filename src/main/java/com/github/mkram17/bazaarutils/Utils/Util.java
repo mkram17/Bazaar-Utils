@@ -50,6 +50,15 @@ public class Util {
         }
     }
 
+    public static<T> void executeLater(Runnable runnable, int milliDelay){
+        try {
+            Thread.sleep(milliDelay);
+            MinecraftClient.getInstance().execute(runnable);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void notifyChatCommand(String message, String command){
         assert MinecraftClient.getInstance().player != null;
         MinecraftClient.getInstance().player.sendMessage(Text.literal(message)
