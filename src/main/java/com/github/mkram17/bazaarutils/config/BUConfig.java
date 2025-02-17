@@ -96,7 +96,7 @@ public class BUConfig {
 
             OptionGroup.Builder customOrdersGroupBuilder = OptionGroup.createBuilder()
                     .name(Text.literal("Custom Buy Amounts"))
-                    .description(OptionDescription.of(Text.literal("Add buttons for custom buy order/insta buy amounts. To add more do /bu customorder {order amount} {slot number} (top left slot is slot #1, to the right is #2, etc etc.")));
+                    .description(OptionDescription.of(Text.literal("Add buttons for custom buy order/insta buy amounts. To add more do /bu customorder add {order amount} {slot number} (top left slot is slot #1, to the right is #2, etc etc.")));
 
             CustomOrder.buildOptions(customOrdersGroupBuilder);
             builder.category(CustomOrder.createOrdersCategory().group(customOrdersGroupBuilder.build()).build());
