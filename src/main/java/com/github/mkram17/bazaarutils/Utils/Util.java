@@ -99,22 +99,6 @@ public class Util {
         clipboard.setContents(new StringSelection(clip), null);
     }
 
-    public static<T> void sendFirst(T itemToSend, int howLong, String info) {
-        String output = itemToSend.toString().substring(0, Math.min(howLong, itemToSend.toString().length()));
-        System.out.println(info != null ? info + output : output);
-    }
-
-    public static void copyItem(String itemName, ItemData.priceTypes priceType) {
-        String productID = BazaarData.findProductId(itemName);
-        double price = BazaarData.findItemPrice(productID, priceType);
-        try {
-            String clipValue = String.format("%.2f", price + (priceType == ItemData.priceTypes.INSTABUY ? -0.1 : 0.1));
-            copyToClipboard(clipValue);
-        } catch (Exception e) {
-            Util.notifyAll("Failed to copy updated price to clipboard");
-        }
-    }
-
     public static String removeFormatting(String str) {
         return str.replaceAll("§.", "").replace(",", "").trim();
     }
@@ -137,10 +121,6 @@ public class Util {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    public static boolean isSimilar(double d1, double d2) {
-        return Math.abs(d1 - d2) < 0.01;
     }
 
     public static String capAtMinecraftLength(String input, int limit) {

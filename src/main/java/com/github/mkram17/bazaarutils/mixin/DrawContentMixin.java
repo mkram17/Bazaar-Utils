@@ -22,6 +22,11 @@ public abstract class DrawContentMixin {
         String customData = stack.get(BazaarUtils.CUSTOM_SIZE_COMPONENT);
 
         if (customData != null) {
+            double dataSize = Double.parseDouble(customData);
+            if(dataSize >= 1000000)
+                return (((int) dataSize) / 1000000) + "m";
+            if(dataSize >= 1000)
+                return (((int) dataSize) / 1000) + "k";
             return customData;
         }
 

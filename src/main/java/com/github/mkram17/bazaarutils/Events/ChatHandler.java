@@ -90,12 +90,12 @@ public class ChatHandler {
             if (orderType == messageTypes.BUYORDER) {
                 volumeClaimed = Integer.parseInt(siblings.get(3).getString().replace(",", ""));
                 itemName = siblings.get(5).getString().trim();
-                price = Double.parseDouble(siblings.get(9).getString().trim());
+                price = Double.parseDouble(siblings.get(9).getString().trim().replace(",", ""));
             } else {
 //                Util.notifyAll("claimed message, but not worth");
                 volumeClaimed = Integer.parseInt(siblings.get(5).getString().replace(",", ""));
                 itemName = siblings.get(7).getString().trim();
-                price = Double.parseDouble(siblings.get(9).getString().trim());
+                price = Double.parseDouble(siblings.get(9).getString().trim().replace(",", ""));
             }
              item = ItemData.findItem(itemName, price, volumeClaimed, null);
 

@@ -14,8 +14,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 
 //TODO figure out how to handle rounding with price
@@ -154,6 +152,9 @@ public class ItemData {
         this.status = statuses.SET;
     }
 
+    public boolean isSimilarPrice(double price) {
+        return Math.abs(getPrice() - price) < maximumRounding;
+    }
 
     //untested
     //run by ex: getVariables((item) -> item.getPrice()) or (chatgpt) ItemData.getVariables(ItemData::getPrice);
@@ -165,35 +166,31 @@ public class ItemData {
         return variables;
     }
 
-    public static ItemData findItem(String name, Double price, Integer volume, priceTypes priceType) {
-//        Util.notifyAll("Called from: " + Util.getCallingClassName(), Util.notificationTypes.ITEMDATA);
-        List<Integer> matchingIndices = IntStream.range(0, BUConfig.get().watchedItems.size())
-                .filter(i -> (price == null || Util.isSimilar(priceList.get(i), price)) &&
-                        (volume == null || volumeList.get(i) == volume + amountClaimedList.get(i)) &&
-                        (name == null || name.equalsIgnoreCase(nameList.get(i))) &&
-                        (priceType == null || priceType == priceTypesList.get(i)))
-                .boxed()
-                .collect(Collectors.toList()); // Use Collectors.toList() for older Java versions.
-
-        if (matchingIndices.isEmpty()) {
-            Util.notifyAll("Could not find item with info: [name: " + name + ", price: " + price + ", volume: " + volume + "]", Util.notificationTypes.ITEMDATA);
+    public static ItemData findItem(String name, Double price, Integer volumeLeft, priceTypes priceType) {
+        ArrayList<ItemData> itemList = new ArrayList<>();
+        for(ItemData item : BUConfig.get().watchedItems){
+            if((price == null || item.isSimilarPrice(price)) &&
+                    (volumeLeft == null || item.getVolume() == volumeLeft + item.getAmountClaimed()) &&
+                    (name == null || name.equalsIgnoreCase(item.getName())) &&
+                    (priceType == null || priceType == item.getPriceType())){
+                itemList.add(item);
+            }
+        }
+        if (itemList.isEmpty()) {
+            Util.notifyAll("Could not find item with info: [name: " + name + ", price: " + price + ", volume: " + volumeLeft + "]", Util.notificationTypes.ITEMDATA);
             return null;
         }
-
-        if (matchingIndices.size() > 1) {
-            matchingIndices.forEach(index -> {
-                ItemData duplicate = getItem(index);
+        if (itemList.size() > 1) {
+            itemList.forEach(duplicate -> {
                 Util.notifyAll("Duplicate item: " + duplicate.getGeneralInfo(), Util.notificationTypes.ITEMDATA);
             });
         }
-
-        ItemData item = getItem(matchingIndices.get(0)); // Get the first match.
-        return item;
+        return itemList.getFirst();
     }
 
     //maybe replace with using ItemOutdatedEvent?
     public static void notifyOutdated(){
-        if(notifyOutdatedSeconds % BUConfig.get().outdatedItems.getOutdatedTiming() == 0) {
+        if(notifyOutdatedSeconds % BUConfig.get().outdatedItems.getOutdatedTiming() == 0 && BUConfig.get().outdatedItems.isNotifyOutdated()) {
             for (ItemData item : outdated) {
                 Util.notifyAll(item.getGeneralInfo() + " is outdated.");
             }

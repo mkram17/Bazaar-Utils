@@ -9,7 +9,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
@@ -20,41 +22,31 @@ import static com.github.mkram17.bazaarutils.config.BUConfig.openGUI;
 public class Commands {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         // Main command: /bazaarutils
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .executes(context -> {
-                    openGUI();
-                    return 1;
-                })
-        );
-
+        LiteralArgumentBuilder<FabricClientCommandSource> bazaarutils = ClientCommandManager.literal("bazaarutils").executes(context -> {
+            openGUI();
+            return 1;
+        });
         // Subcommand: /bazaarutils remove <index>
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("remove")
+        bazaarutils.then(ClientCommandManager.literal("remove")
                         .then(ClientCommandManager.argument("index", IntegerArgumentType.integer())
                                 .executes(Commands::executeRemove)
                         )
-                )
         );
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("help")
+        bazaarutils.then(ClientCommandManager.literal("help")
                         .executes((context) -> {
                                     Util.notifyAll(Util.HELPMESSAGE);
                                     return 1;
                                 }
-                        )
-                ));
+                        ));
 
-        // Subcommand: /bazaarutils info <index>
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("info")
+        bazaarutils.then(ClientCommandManager.literal("info")
                         .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
                                         .executes(Commands::executeInfo)
                                 )
                         )
-                ));
+                );
 
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("tax")
+        bazaarutils.then(ClientCommandManager.literal("tax")
                         .then((ClientCommandManager.argument("amount", DoubleArgumentType.doubleArg())
                                         .executes((context) ->{
                                             BUConfig.get().bzTax = DoubleArgumentType.getDouble(context, "amount");
@@ -62,17 +54,15 @@ public class Commands {
                                         })
                                 )
                         )
-                ));
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("developer")
+                );
+        bazaarutils.then(ClientCommandManager.literal("developer")
                         .executes((context) ->{
                             BUConfig.get().developerMode = !BUConfig.get().developerMode;
                             return 1;
                         })
-                ));
+                );
 
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("customorder")
+        bazaarutils.then(ClientCommandManager.literal("customorder")
                         .then(ClientCommandManager.literal("add")
                             .then(ClientCommandManager.argument("order amount", IntegerArgumentType.integer(1, 71680))
                                 .then(ClientCommandManager.argument("slot number", IntegerArgumentType.integer(1, 36))
@@ -104,17 +94,15 @@ public class Commands {
                                 )
                             )
                         )
-                )
         );
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("customorder")
+        bazaarutils.then(ClientCommandManager.literal("customorder")
                         .then(ClientCommandManager.literal("remove")
                                 .then(ClientCommandManager.argument("order number", IntegerArgumentType.integer(1))
                                         .executes(context -> {
                                             int orderNum = IntegerArgumentType.getInteger(context, "order number");
                                             CustomOrder customOrder = BUConfig.get().customOrders.get(orderNum-1);
                                             if(customOrder.getSettings().getOrderAmount() != 71680) {
-                                                Util.notifyAll("Removed Custom Order for " + BUConfig.get().customOrders.get(orderNum).getSettings().getOrderAmount());
+                                                Util.notifyAll("Removed Custom Order for " + BUConfig.get().customOrders.get(orderNum-1).getSettings().getOrderAmount());
                                                 BUConfig.get().customOrders.remove(orderNum);
                                             } else{
                                                 Util.notifyAll("Cannot remove Max Buy Order.");
@@ -124,10 +112,8 @@ public class Commands {
                                         })
                                 )
                         )
-                )
         );
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("rule")
+        bazaarutils.then(ClientCommandManager.literal("rule")
                         .then(ClientCommandManager.literal("add")
                             .then(ClientCommandManager.argument("volume or price?", StringArgumentType.string())
                                 .then(ClientCommandManager.argument("limit", DoubleArgumentType.doubleArg(.1))
@@ -147,10 +133,8 @@ public class Commands {
                                 )
                         )
                         )
-                )
         );
-        dispatcher.register(ClientCommandManager.literal("bazaarutils")
-                .then(ClientCommandManager.literal("rule")
+        bazaarutils.then(ClientCommandManager.literal("rule")
                         .then(ClientCommandManager.literal("remove")
                                 .then(ClientCommandManager.argument("rule number", IntegerArgumentType.integer(1))
                                         .executes(context -> {
@@ -163,9 +147,16 @@ public class Commands {
                                         })
                                 )
                         )
-                )
         );
-
+        CommandNode<FabricClientCommandSource> bazaarutilsNode = dispatcher.register(bazaarutils);
+        dispatcher.register(
+                ClientCommandManager.literal("bu")
+                        .executes(context -> {
+                            // Forward execution to the main command's handler
+                            return bazaarutils.getCommand().run(context);
+                        })
+                        .redirect(bazaarutilsNode) // Inherit subcommands
+        );
     }
     private static int executeRemove(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");

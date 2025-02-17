@@ -24,19 +24,16 @@ import net.minecraft.util.Formatting;
 
 //TODO detect in order screen if order isnt full (can use presence of cancel order block)
 public class AutoFlipper extends CustomItemButton {
-    public static double flipPrice;
-    private static double orderPrice = -1;
-    private static int orderVolumeFilled = -1;
-    private static ItemData item;
-    private static boolean shouldAddToSign = false;
+    public double flipPrice;
+    private double orderPrice = -1;
+    private int orderVolumeFilled = -1;
+    private ItemData item;
+    private boolean shouldAddToSign = false;
     @Getter @Setter
     private AutoFlipperSettings settings;
-//    private transient StateManager<Boolean> enabledStateManager;
-    private static boolean orderNotFilled = false;
 
     public AutoFlipper(AutoFlipperSettings settings) {
         this.settings = settings;
-//        initializeStateManager();
     }
 
     @EventHandler
@@ -48,7 +45,7 @@ public class AutoFlipper extends CustomItemButton {
         }
     }
 
-    public static void autoAddToSign() {
+    public void handleFlip() {
         if(item != null && flipPrice != 0 && BazaarUtils.gui.wasLastChestFlip()) {
             GUIUtils.setSignText(Double.toString(Util.getPrettyNumber(flipPrice)));
             GUIUtils.closeHandledScreen();
@@ -56,7 +53,7 @@ public class AutoFlipper extends CustomItemButton {
         }
     }
 
-    public static ItemData getFlipItem(ChestLoadedEvent e){
+    public ItemData getFlipItem(ChestLoadedEvent e){
 
         for (ItemStack itemStack : e.getItemStacks()) {
 
@@ -77,22 +74,22 @@ public class AutoFlipper extends CustomItemButton {
         return null;
     }
 
-    public static void getItemInfo(LoreComponent lore) {
+    public void getItemInfo(LoreComponent lore) {
         //get order volume and price of item that is being flipped
         try {
             String orderPrice = lore.lines().get(3).getSiblings().get(1).getString();
-            orderPrice = orderPrice.substring(0, orderPrice.indexOf(" coins"));
-            AutoFlipper.orderPrice = Double.parseDouble(orderPrice);
+            orderPrice = orderPrice.substring(0, orderPrice.indexOf(" coins")).replace(",","");
+            this.orderPrice = Double.parseDouble(orderPrice);
             String orderVolume = lore.lines().get(1).getSiblings().get(1).getString().replace(",","");
-            AutoFlipper.orderVolumeFilled = Integer.parseInt(orderVolume);
+            this.orderVolumeFilled = Integer.parseInt(orderVolume);
 
         } catch (Exception ex) {
-            Util.notifyAll("Error while trying to find order price or volume ");
+            Util.notifyAll("Error while trying to find order price or volume in Flip Helper");
             ex.printStackTrace();
         }
     }
 
-    public static boolean matchFound() {
+    public boolean matchFound() {
         item = ItemData.findItem(null, orderPrice, orderVolumeFilled, ItemData.priceTypes.INSTASELL);
         if (item != null) {
             if (item.getStatus() == ItemData.statuses.FILLED) {
@@ -103,7 +100,6 @@ public class AutoFlipper extends CustomItemButton {
                 return true;
             }
         }
-        Util.notifyAll("Couldnt find a match", Util.notificationTypes.ITEMDATA);
         return false;
     }
 
@@ -118,7 +114,7 @@ public class AutoFlipper extends CustomItemButton {
     @EventHandler
     private void onSignOpen(SignOpenEvent e){
         if(!shouldAddToSign) return;
-        autoAddToSign();
+        handleFlip();
         shouldAddToSign = false;
     }
 
@@ -140,7 +136,7 @@ public class AutoFlipper extends CustomItemButton {
     @Override
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal("Auto Flipper"))
+                .name(Text.literal("Flip Helper"))
                 .description(OptionDescription.of(Text.literal("Button in flip order menu to undercut market prices for items.")))
                 .binding(true,
                         () -> settings.isEnabled(),

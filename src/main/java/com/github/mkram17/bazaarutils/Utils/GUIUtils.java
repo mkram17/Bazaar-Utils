@@ -65,9 +65,7 @@ public class GUIUtils {
             if (screen instanceof GenericContainerScreen genericContainerScreen) {
                 containerName = Util.removeFormatting(genericContainerScreen.getTitle().getString());
                 Util.notifyAll("Container Name: " + containerName, Util.notificationTypes.GUI);
-
             }
-            updateFlipGui();
         });
     }
     @EventHandler(priority = EventPriority.HIGH)
@@ -137,8 +135,9 @@ public class GUIUtils {
         }
     }
     @EventHandler(priority = EventPriority.HIGH)
-    private static void onLoad(ChestLoadedEvent e){
+    private void onLoad(ChestLoadedEvent e){
         lowerChestInventory = e.getLowerChestInventory();
+        updateFlipGui();
     }
 
     private boolean inFlipGui() {
