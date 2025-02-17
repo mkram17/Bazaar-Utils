@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.features.StashHelper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipper;
 import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipperSettings;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
+import com.github.mkram17.bazaarutils.features.customorder.CustomOrderSettings;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSell;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSellControl;
 import com.google.gson.GsonBuilder;
@@ -46,7 +47,9 @@ public class BUConfig {
     @SerialEntry
     public double bzTax = 0.01125;
     @SerialEntry
-    public ArrayList<CustomOrder> customOrders = new ArrayList<>();
+    public ArrayList<CustomOrder> customOrders = new ArrayList<>(List.of(
+            new CustomOrder(new CustomOrderSettings(true, 71680, 17, CustomOrder.COLORMAP.get(0)))
+    ));
     @SerialEntry
     public boolean developerMode = false;
     @SerialEntry
@@ -68,8 +71,8 @@ public class BUConfig {
         return YetAnotherConfigLib.create(HANDLER, (defaults, config, builder) -> {
             builder.title(Text.literal("Bazaar Utils"));
             OptionGroup.Builder restrictSellGroupBuilder = OptionGroup.createBuilder()
-                    .name(Text.literal("Sell Restrictions"))
-                    .description(OptionDescription.of(Text.literal("Blocks insta selling based on restrictions. You can add a new restriction with /bu restriction add {based on volume or price} {amount over which will be restricted} or you can remove it with /bu restriction remove {restriction number}")));
+                    .name(Text.literal("Sell rules"))
+                    .description(OptionDescription.of(Text.literal("Blocks insta selling based on rules. You can add a new rule with /bu rule add {based on volume or price} {amount over which will be restricted} or you can remove it with /bu rule remove {rule number}")));
             restrictSell.buildOptions(restrictSellGroupBuilder);
             if(restrictSell.getControls().isEmpty()) {
                 builder.category(ConfigCategory.createBuilder()

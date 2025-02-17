@@ -50,7 +50,7 @@ public class GUIUtils {
     @Setter
     private guiTypes guiType;
     private  List<ItemStack> itemStacks = new ArrayList<>();
-    public static boolean inFlipGui;
+    public boolean inFlipGui;
     @Getter @Setter
     private static Inventory lowerChestInventory;
 
@@ -136,13 +136,12 @@ public class GUIUtils {
             signScreen.setCurrentRow(originalRow);
         }
     }
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     private static void onLoad(ChestLoadedEvent e){
         lowerChestInventory = e.getLowerChestInventory();
     }
 
-
-    public boolean inFlipGui() {
+    private boolean inFlipGui() {
         if (containerName == null || lowerChestInventory == null) {
             return false;
         }

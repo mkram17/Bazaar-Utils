@@ -41,7 +41,7 @@ public class AutoFlipper extends CustomItemButton {
 
     @EventHandler
     public void guiChestOpenedEvent(ChestLoadedEvent e) {
-        if(settings.isEnabled() && BazaarUtils.gui.inFlipGui()) {
+        if(settings.isEnabled() && BazaarUtils.gui.inFlipGui) {
             item = getFlipItem(e);
 
             flipPrice = item.getFlipPrice();
@@ -109,7 +109,7 @@ public class AutoFlipper extends CustomItemButton {
 
     @Override @EventHandler
     public void onSlotClicked(SlotClickEvent event) {
-        if (!BazaarUtils.gui.inFlipGui() || !settings.isEnabled() || event.slot.getIndex() != settings.getSlotNumber())
+        if (!BazaarUtils.gui.inFlipGui || !settings.isEnabled() || event.slot.getIndex() != settings.getSlotNumber())
             return;
         GUIUtils.clickSlot(15,0);
         if (item != null)
@@ -124,7 +124,7 @@ public class AutoFlipper extends CustomItemButton {
 
     @Override @EventHandler
     public void onGUI(ReplaceItemEvent event) {
-        if(!BazaarUtils.gui.inFlipGui() || !(event.getSlotId() == settings.getSlotNumber()) || !settings.isEnabled()) return;
+        if(!BazaarUtils.gui.inFlipGui || !(event.getSlotId() == settings.getSlotNumber()) || !settings.isEnabled()) return;
 
         ItemStack itemStack = new ItemStack(settings.getReplaceItem(), 1);
         if(item == null) {

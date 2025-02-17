@@ -16,6 +16,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
+//TODO add option to block materials stashed away message from hypixel
 public class StashHelper {
     @Getter @Setter
     private boolean enabled;

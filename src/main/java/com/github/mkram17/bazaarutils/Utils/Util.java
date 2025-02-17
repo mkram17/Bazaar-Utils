@@ -75,7 +75,7 @@ public class Util {
         itemName = itemName.toLowerCase();
         if (BazaarData.findProductId(itemName) != null) {
             ItemData.priceTypes type = isSellOrder ? ItemData.priceTypes.INSTABUY : ItemData.priceTypes.INSTASELL;
-            ItemData itemToAdd =new ItemData(itemName, price, type, volume);
+            ItemData itemToAdd = new ItemData(itemName, price, type, volume);
             BUConfig.get().watchedItems.add(itemToAdd);
             notifyAll("Added item: § " + itemToAdd.getGeneralInfo());
         } else {

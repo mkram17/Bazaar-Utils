@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
+//TODO figure out how to handle rounding with price
 public class ItemData {
     public static ItemData getItem(int index){
         if(index != -1)
@@ -85,6 +86,7 @@ public class ItemData {
     @Setter
     @Getter
     private int amountFilled = 0;
+    private double maximumRounding;
 
     //lists
     public static ArrayList<Double> priceList = getVariables(ItemData::getPrice);
@@ -95,14 +97,23 @@ public class ItemData {
 
     private static List<ItemData> outdated = new ArrayList<>(Collections.emptyList());
 
-    public ItemData(String name, Double price, priceTypes priceType, int volume) {
+    public ItemData(String name, Double fullPrice, priceTypes priceType, int volume) {
         this.name = name;
         this.priceType = priceType;
-        this.price = price;
+        this.fullPrice = fullPrice;
         this.productId = BazaarData.findProductId(name);
         this.volume = volume;
-        this.fullPrice = price*volume;
+        this.price = fullPrice/volume;
         this.status = statuses.SET;
+        this.maximumRounding = getMaxRouding(fullPrice, volume);
+    }
+
+    private static double getMaxRouding(double fullPrice, int volume){
+        if(fullPrice < 10000)
+            return 0;
+        else{
+            return (double) (Math.ceil((.9 / volume) * 10))/10;
+        }
     }
 
 

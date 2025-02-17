@@ -70,22 +70,22 @@ public class RestrictSell {
     private boolean isLocked(double price, int volume){
         for(RestrictSellControl control : controls){
             if(control.isEnabled()) {
-                if (control.getRestriction() == restrictBy.PRICE && price > control.getAmount()) {
+                if (control.getRule() == restrictBy.PRICE && price > control.getAmount()) {
                     return true;
-                } else if (control.getRestriction() == restrictBy.VOLUME && volume > control.getAmount())
+                } else if (control.getRule() == restrictBy.VOLUME && volume > control.getAmount())
                     return true;
             }
         }
         return false;
     }
-    public void addRestriction(restrictBy newRestriction, double limit){
-        controls.add(new RestrictSellControl(newRestriction, limit));
+    public void addRule(restrictBy newrule, double limit){
+        controls.add(new RestrictSellControl(newrule, limit));
     }
 
     public String getMessage(){
         String message = "Sell protected by rules:";
         for(RestrictSellControl control : controls) {
-            if (control.getRestriction() == restrictBy.PRICE)
+            if (control.getRule() == restrictBy.PRICE)
                 message += " PRICE: ";
             else
                 message += " VOLUME: ";
@@ -95,10 +95,10 @@ public class RestrictSell {
         return message;
     }
 
-    public Option<Boolean> createRestrictionOption(RestrictSellControl control) {
+    public Option<Boolean> createRuleOption(RestrictSellControl control) {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal((control.getRestriction() == restrictBy.PRICE ? "Price < ": "Restrict volume to below ") + control.getAmount()))
-                .description(OptionDescription.of(Text.literal((control.getRestriction() == restrictBy.PRICE ? "Will not allow you insta sell if the price is greater than " : "Will not allow you insta sell if the volume is greater than ") + control.getAmount())))
+                .name(Text.literal((control.getRule() == restrictBy.PRICE ? "Price < ": "Restrict volume to below ") + control.getAmount()))
+                .description(OptionDescription.of(Text.literal((control.getRule() == restrictBy.PRICE ? "Will not allow you insta sell if the price is greater than " : "Will not allow you insta sell if the volume is greater than ") + control.getAmount())))
                 .binding(false,
                         control::isEnabled,
                         control::setEnabled)
@@ -108,7 +108,7 @@ public class RestrictSell {
 
     public void buildOptions(OptionGroup.Builder builder){
         for(RestrictSellControl control : getControls()){
-            builder.option(createRestrictionOption(control));
+            builder.option(createRuleOption(control));
         }
     }
 }

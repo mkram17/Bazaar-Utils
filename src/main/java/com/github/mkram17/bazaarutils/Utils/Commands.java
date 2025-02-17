@@ -22,14 +22,6 @@ public class Commands {
         // Main command: /bazaarutils
         dispatcher.register(ClientCommandManager.literal("bazaarutils")
                 .executes(context -> {
-                    BUConfig.get().openGUI();
-                    return 1;
-                })
-        );
-
-        // Alias: /bu
-        dispatcher.register(ClientCommandManager.literal("bu")
-                .executes(context -> {
                     openGUI();
                     return 1;
                 })
@@ -61,23 +53,7 @@ public class Commands {
                         )
                 ));
 
-        // Also register subcommands for the alias
-        dispatcher.register(ClientCommandManager.literal("bu")
-                .then(ClientCommandManager.literal("remove")
-                        .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
-                                        .executes(Commands::executeRemove)
-                                )
-                        )
-                ));
-
-        dispatcher.register(ClientCommandManager.literal("bu")
-                .then(ClientCommandManager.literal("info")
-                        .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
-                                        .executes(Commands::executeInfo)
-                                )
-                        )
-                ));
-        dispatcher.register(ClientCommandManager.literal("bu")
+        dispatcher.register(ClientCommandManager.literal("bazaarutils")
                 .then(ClientCommandManager.literal("tax")
                         .then((ClientCommandManager.argument("amount", DoubleArgumentType.doubleArg())
                                         .executes((context) ->{
@@ -87,7 +63,7 @@ public class Commands {
                                 )
                         )
                 ));
-        dispatcher.register(ClientCommandManager.literal("bu")
+        dispatcher.register(ClientCommandManager.literal("bazaarutils")
                 .then(ClientCommandManager.literal("developer")
                         .executes((context) ->{
                             BUConfig.get().developerMode = !BUConfig.get().developerMode;
@@ -95,10 +71,11 @@ public class Commands {
                         })
                 ));
 
-        dispatcher.register(ClientCommandManager.literal("bu")
+        dispatcher.register(ClientCommandManager.literal("bazaarutils")
                 .then(ClientCommandManager.literal("customorder")
-                        .then(ClientCommandManager.argument("order amount", IntegerArgumentType.integer(1, 71680))
-                                .then(ClientCommandManager.argument("slot number", IntegerArgumentType.integer(0, 35))
+                        .then(ClientCommandManager.literal("add")
+                            .then(ClientCommandManager.argument("order amount", IntegerArgumentType.integer(1, 71680))
+                                .then(ClientCommandManager.argument("slot number", IntegerArgumentType.integer(1, 36))
                                         .executes(context -> {
                                             int orderAmount = IntegerArgumentType.getInteger(context, "order amount");
                                             int slotNumber = IntegerArgumentType.getInteger(context, "slot number");
@@ -108,69 +85,34 @@ public class Commands {
                                                 return 0;
                                             }
 
-                                            if (slotNumber < 0 || slotNumber > 35) {
+                                            if (slotNumber < 1 || slotNumber > 36) {
                                                 context.getSource().sendError(Text.literal("Slot number must be 0-35"));
                                                 return 0;
                                             }
-
-                                            BUConfig.get().customOrders.add(new CustomOrder(new CustomOrderSettings(
+                                            CustomOrder orderToAdd = new CustomOrder(new CustomOrderSettings(
                                                     true,
                                                     orderAmount,
-                                                    slotNumber+1,
+                                                    slotNumber - 1,
                                                     CustomOrder.COLORMAP.get(BUConfig.get().customOrders.size())
-                                            )));
+                                            ));
 
-                                            return 1;
-                                        })
-                                )
-                        )
-                )
-        );
-        dispatcher.register(ClientCommandManager.literal("bu")
-                .then(ClientCommandManager.literal("restrict")
-                        .then(ClientCommandManager.literal("add")
-                            .then(ClientCommandManager.argument("volume or price?", StringArgumentType.string())
-                                .then(ClientCommandManager.argument("limit", DoubleArgumentType.doubleArg(.1))
-                                        .executes(context -> {
-                                            String restrictionString = StringArgumentType.getString(context,"volume or price?");
-                                            double limit = DoubleArgumentType.getDouble(context, "limit");
-
-                                            if (!restrictionString.equals("volume") && !restrictionString.equals("price")) {
-                                                context.getSource().sendError(Text.literal("Restriction type must be \"volume\" or \"price\""));
-                                                return 0;
-                                            }
-                                            BUConfig.get().restrictSell.addRestriction(RestrictSell.restrictBy.valueOf(restrictionString.toUpperCase()), limit);
-                                            Util.notifyAll("Added restriction: " + restrictionString.toUpperCase() + ": " + limit);
-                                            return 1;
-                                        })
-                                )
-                        )
-                        )
-                )
-        );
-        dispatcher.register(ClientCommandManager.literal("bu")
-                .then(ClientCommandManager.literal("restrict")
-                        .then(ClientCommandManager.literal("remove")
-                                .then(ClientCommandManager.argument("restriction number", IntegerArgumentType.integer(1))
-                                        .executes(context -> {
-                                            int restrictNum = IntegerArgumentType.getInteger(context, "restriction number")-1;
-                                            RestrictSellControl restriction = BUConfig.get().restrictSell.getControls().get(restrictNum);
-                                            Util.notifyAll("Removed restriction: " + restriction.getRestriction().toString() + ": " + restriction.getAmount());
-                                            BUConfig.get().restrictSell.getControls().remove(restrictNum);
+                                            BUConfig.get().customOrders.add(orderToAdd);
+                                            Util.notifyAll("Added order for " + orderToAdd.getSettings().getOrderAmount() + " in slot number " + slotNumber);
                                             HANDLER.save();
                                             return 1;
                                         })
                                 )
+                            )
                         )
                 )
         );
-        dispatcher.register(ClientCommandManager.literal("bu")
+        dispatcher.register(ClientCommandManager.literal("bazaarutils")
                 .then(ClientCommandManager.literal("customorder")
                         .then(ClientCommandManager.literal("remove")
-                                .then(ClientCommandManager.argument("order number", IntegerArgumentType.integer())
+                                .then(ClientCommandManager.argument("order number", IntegerArgumentType.integer(1))
                                         .executes(context -> {
                                             int orderNum = IntegerArgumentType.getInteger(context, "order number");
-                                            CustomOrder customOrder = BUConfig.get().customOrders.get(orderNum);
+                                            CustomOrder customOrder = BUConfig.get().customOrders.get(orderNum-1);
                                             if(customOrder.getSettings().getOrderAmount() != 71680) {
                                                 Util.notifyAll("Removed Custom Order for " + BUConfig.get().customOrders.get(orderNum).getSettings().getOrderAmount());
                                                 BUConfig.get().customOrders.remove(orderNum);
@@ -184,6 +126,46 @@ public class Commands {
                         )
                 )
         );
+        dispatcher.register(ClientCommandManager.literal("bazaarutils")
+                .then(ClientCommandManager.literal("rule")
+                        .then(ClientCommandManager.literal("add")
+                            .then(ClientCommandManager.argument("volume or price?", StringArgumentType.string())
+                                .then(ClientCommandManager.argument("limit", DoubleArgumentType.doubleArg(.1))
+                                        .executes(context -> {
+                                            String ruleString = StringArgumentType.getString(context,"volume or price?");
+                                            double limit = DoubleArgumentType.getDouble(context, "limit");
+
+                                            if (!ruleString.equals("volume") && !ruleString.equals("price")) {
+                                                context.getSource().sendError(Text.literal("rule type must be \"volume\" or \"price\""));
+                                                return 0;
+                                            }
+                                            BUConfig.get().restrictSell.addRule(RestrictSell.restrictBy.valueOf(ruleString.toUpperCase()), limit);
+                                            HANDLER.save();
+                                            Util.notifyAll("Added rule: " + ruleString.toUpperCase() + ": " + limit);
+                                            return 1;
+                                        })
+                                )
+                        )
+                        )
+                )
+        );
+        dispatcher.register(ClientCommandManager.literal("bazaarutils")
+                .then(ClientCommandManager.literal("rule")
+                        .then(ClientCommandManager.literal("remove")
+                                .then(ClientCommandManager.argument("rule number", IntegerArgumentType.integer(1))
+                                        .executes(context -> {
+                                            int restrictNum = IntegerArgumentType.getInteger(context, "rule number")-1;
+                                            RestrictSellControl rule = BUConfig.get().restrictSell.getControls().get(restrictNum);
+                                            Util.notifyAll("Removed rule: " + rule.getRule().toString() + ": " + rule.getAmount());
+                                            BUConfig.get().restrictSell.getControls().remove(restrictNum);
+                                            HANDLER.save();
+                                            return 1;
+                                        })
+                                )
+                        )
+                )
+        );
+
     }
     private static int executeRemove(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");

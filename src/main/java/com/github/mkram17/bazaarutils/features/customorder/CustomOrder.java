@@ -12,7 +12,9 @@ import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
+import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
@@ -26,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@NoArgsConstructor
 public class CustomOrder extends CustomItemButton {
     public static final Map<Integer, Item> COLORMAP = new HashMap<>(Map.of(0, Items.PURPLE_STAINED_GLASS_PANE, 1, Items.BLUE_STAINED_GLASS_PANE, 2, Items.ORANGE_STAINED_GLASS_PANE, 3, Items.GREEN_STAINED_GLASS_PANE));
     private boolean buySignClicked = false;

@@ -8,12 +8,12 @@ public class RestrictSellControl {
     @Setter
     private boolean enabled = true;
     @Getter @Setter
-    private RestrictSell.restrictBy restriction;
+    private RestrictSell.restrictBy rule;
     @Getter @Setter
     private double amount;
 
-    public RestrictSellControl(RestrictSell.restrictBy restriction, double amount) {
-        this.restriction = restriction;
+    public RestrictSellControl(RestrictSell.restrictBy rule, double amount) {
+        this.rule = rule;
         this.amount = amount;
     }
 }

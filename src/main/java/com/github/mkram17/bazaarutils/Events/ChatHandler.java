@@ -45,10 +45,9 @@ public class ChatHandler {
             if (messageType == messageTypes.BUYORDER || messageType == messageTypes.SELLORDER) {
                 itemName = Util.removeFormatting(siblings.get(5).getString());
                 volume = Integer.parseInt(siblings.get(3).getString().replace(",", ""));
-                price = Util.getPrettyNumber(Double.parseDouble(siblings.get(7).getString().substring(0, siblings.get(7).getString().indexOf(" coin")).replace(",", ""))) / volume;
+                price = Util.getPrettyNumber(Double.parseDouble(siblings.get(7).getString().substring(0, siblings.get(7).getString().indexOf(" coin")).replace(",", "")));
                 if (messageType == messageTypes.SELLORDER)
                     price /= (1 - BUConfig.get().bzTax);
-                price = (Math.round(price * 10)) / 10.0;
                 //for some reason 52800046 for 4 was on hypixel as 13200011.6 but calculates to 13200011.5. current theory is that buy price wasnt fully accurate, and it rounded up. also was .2 off on sell order for it. obviously problems with big prices
                 Util.addWatchedItem(itemName, price, !(messageType == messageTypes.BUYORDER), volume);
                 Util.notifyAll(itemName + " was added with a price of " + price, Util.notificationTypes.ITEMDATA);
