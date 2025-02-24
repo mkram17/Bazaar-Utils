@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 //TODO maybe color chest if it is locked
-//TODO make it work with multiple types of item being sold
+//TODO use custom size for safety clicks left
 public class RestrictSell {
-    public enum restrictBy{PRICE, VOLUME}
+    public enum restrictBy{PRICE, VOLUME, NAME}
     @Getter @Setter
     private boolean enabled;
     private int safetyClicksRequired;
@@ -54,41 +54,79 @@ public class RestrictSell {
                 return;
             ItemStack sellButton = e.getOriginal();
             List<Text> changedComponents = sellButton.getComponentChanges().get(DataComponentTypes.LORE).get().styledLines();
-            String coinsText = changedComponents.get(4).getSiblings().get(5).getString();
-            double price = Double.parseDouble(coinsText.substring(0, coinsText.indexOf(" coins")).replace(",", ""));
-            int volume = Integer.parseInt(changedComponents.get(4).getSiblings().get(1).getString().replace(",", ""));
-            locked = isLocked(price, volume);
+            int numItems = changedComponents.size()-8;
+            ArrayList<SellItem> items = getItems(changedComponents, numItems);
+            String coinsText = changedComponents.get(5 + numItems).getString();
+            double totalPrice = Double.parseDouble(coinsText.substring(coinsText.indexOf(": ") + 2, coinsText.indexOf(" coins")).replace(",", ""));
+
+            locked = isLocked(items, totalPrice);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
+    public ArrayList<SellItem> getItems(List<Text> changedComponents, int numItems){
+        ArrayList<SellItem> items = new ArrayList<>();
 
+        for(int i = 4; i<4+numItems; i++){
+            var component = changedComponents.get(i).getSiblings();
+            int volume = Integer.parseInt(component.get(1).getString().replace(",", ""));
+            String name = component.get(3).getString().trim();
+
+            SellItem newItem = new SellItem(volume, name);
+            items.add(newItem);
+        }
+
+        return items;
+    }
     public boolean isSlotLocked(int slotId){
         return BazaarUtils.gui.inBazaar() && slotId == SELLITEMID && locked;
     }
 
-    private boolean isLocked(double price, int volume){
+    private boolean isLocked(ArrayList<SellItem> items, double totalPrice){
         for(RestrictSellControl control : controls){
             if(control.isEnabled()) {
-                if (control.getRule() == restrictBy.PRICE && price > control.getAmount()) {
+                if (control.getRule() == restrictBy.PRICE && totalPrice > control.getAmount())
                     return true;
-                } else if (control.getRule() == restrictBy.VOLUME && volume > control.getAmount())
+            }
+        }
+        for(SellItem item : items){
+            if(isItemRestricted(item.getVolume(), item.getName()))
+                return true;
+        }
+        return false;
+    }
+    private boolean isItemRestricted(int volume, String name){
+        for(RestrictSellControl control : controls){
+            if(control.isEnabled()) {
+                if (control.getRule() == restrictBy.VOLUME && volume > control.getAmount())
+                    return true;
+                else if (control.getRule() == restrictBy.NAME && name.equalsIgnoreCase(control.getName()))
                     return true;
             }
         }
         return false;
     }
-    public void addRule(restrictBy newrule, double limit){
-        controls.add(new RestrictSellControl(newrule, limit));
+    public void addRule(restrictBy newRule, double limit){
+        controls.add(new RestrictSellControl(newRule, limit));
+    }
+    public void addRule(restrictBy newRule, String name){
+        controls.add(new RestrictSellControl(newRule, name));
     }
 
     public String getMessage(){
         String message = "Sell protected by rules:";
         for(RestrictSellControl control : controls) {
+            if(!control.isEnabled())
+                continue;
             if (control.getRule() == restrictBy.PRICE)
                 message += " PRICE: ";
-            else
+            else if(control.getRule() == restrictBy.VOLUME)
                 message += " VOLUME: ";
+            else {
+                message += " NAME: ";
+                message += control.getName();
+                continue;
+            }
             message += control.getAmount();
         }
         message += " (Safety Clicks Left: " + (3-safetyClicks) + ")";
@@ -96,12 +134,32 @@ public class RestrictSell {
     }
 
     public Option<Boolean> createRuleOption(RestrictSellControl control) {
+        // Determine display text based on rule type
+        Text nameText;
+        Text descriptionText;
+
+        if (control.getRule() == restrictBy.NAME) {
+            String itemName = control.getName(); // Assuming getName() exists for NAME rules
+            nameText = Text.literal("Item: " + itemName);
+            descriptionText = Text.literal("Block insta-sell for item: " + itemName);
+        } else {
+            double amount = control.getAmount();
+            String typeText = control.getRule() == restrictBy.VOLUME ? "Volume < " : "Price < ";
+            nameText = Text.literal(typeText + amount);
+            String desc = control.getRule() == restrictBy.PRICE ?
+                    "Block insta-sell if price exceeds " + amount :
+                    "Block insta-sell if volume exceeds " + amount;
+            descriptionText = Text.literal(desc);
+        }
+
         return Option.<Boolean>createBuilder()
-                .name(Text.literal((control.getRule() == restrictBy.PRICE ? "Price < ": "Restrict volume to below ") + control.getAmount()))
-                .description(OptionDescription.of(Text.literal((control.getRule() == restrictBy.PRICE ? "Will not allow you insta sell if the price is greater than " : "Will not allow you insta sell if the volume is greater than ") + control.getAmount())))
-                .binding(false,
+                .name(nameText)
+                .description(OptionDescription.of(descriptionText))
+                .binding(
+                        false,
                         control::isEnabled,
-                        control::setEnabled)
+                        control::setEnabled
+                )
                 .controller(BUConfig::createBooleanController)
                 .build();
     }

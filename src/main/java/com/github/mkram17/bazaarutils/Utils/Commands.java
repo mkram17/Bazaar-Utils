@@ -27,11 +27,11 @@ public class Commands {
             return 1;
         });
         // Subcommand: /bazaarutils remove <index>
-        bazaarutils.then(ClientCommandManager.literal("remove")
-                        .then(ClientCommandManager.argument("index", IntegerArgumentType.integer())
-                                .executes(Commands::executeRemove)
-                        )
-        );
+//        bazaarutils.then(ClientCommandManager.literal("remove")
+//                        .then(ClientCommandManager.argument("index", IntegerArgumentType.integer())
+//                                .executes(Commands::executeRemove)
+//                        )
+//        );
         bazaarutils.then(ClientCommandManager.literal("help")
                         .executes((context) -> {
                                     Util.notifyAll(Util.HELPMESSAGE);
@@ -39,12 +39,12 @@ public class Commands {
                                 }
                         ));
 
-        bazaarutils.then(ClientCommandManager.literal("info")
-                        .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
-                                        .executes(Commands::executeInfo)
-                                )
-                        )
-                );
+//        bazaarutils.then(ClientCommandManager.literal("info")
+//                        .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
+//                                        .executes(Commands::executeInfo)
+//                                )
+//                        )
+//                );
 
         bazaarutils.then(ClientCommandManager.literal("tax")
                         .then((ClientCommandManager.argument("amount", DoubleArgumentType.doubleArg())
@@ -76,14 +76,14 @@ public class Commands {
                                             }
 
                                             if (slotNumber < 1 || slotNumber > 36) {
-                                                context.getSource().sendError(Text.literal("Slot number must be 0-35"));
+                                                context.getSource().sendError(Text.literal("Slot number must be 1-36"));
                                                 return 0;
                                             }
                                             CustomOrder orderToAdd = new CustomOrder(new CustomOrderSettings(
                                                     true,
                                                     orderAmount,
                                                     slotNumber - 1,
-                                                    CustomOrder.COLORMAP.get(BUConfig.get().customOrders.size())
+                                                    CustomOrder.getNextColoredPane()
                                             ));
 
                                             BUConfig.get().customOrders.add(orderToAdd);
@@ -114,25 +114,44 @@ public class Commands {
                         )
         );
         bazaarutils.then(ClientCommandManager.literal("rule")
-                        .then(ClientCommandManager.literal("add")
-                            .then(ClientCommandManager.argument("volume or price?", StringArgumentType.string())
-                                .then(ClientCommandManager.argument("limit", DoubleArgumentType.doubleArg(.1))
+                .then(ClientCommandManager.literal("add")
+                        // Volume branch
+                        .then(ClientCommandManager.literal("volume")
+                                .then(ClientCommandManager.argument("limit", DoubleArgumentType.doubleArg(0.1))
                                         .executes(context -> {
-                                            String ruleString = StringArgumentType.getString(context,"volume or price?");
                                             double limit = DoubleArgumentType.getDouble(context, "limit");
-
-                                            if (!ruleString.equals("volume") && !ruleString.equals("price")) {
-                                                context.getSource().sendError(Text.literal("rule type must be \"volume\" or \"price\""));
-                                                return 0;
-                                            }
-                                            BUConfig.get().restrictSell.addRule(RestrictSell.restrictBy.valueOf(ruleString.toUpperCase()), limit);
+                                            BUConfig.get().restrictSell.addRule(RestrictSell.restrictBy.VOLUME, limit);
                                             HANDLER.save();
-                                            Util.notifyAll("Added rule: " + ruleString.toUpperCase() + ": " + limit);
+                                            Util.notifyAll("Added rule: VOLUME" + ": " + limit);
                                             return 1;
                                         })
                                 )
                         )
+                        // Price branch
+                        .then(ClientCommandManager.literal("price")
+                                .then(ClientCommandManager.argument("limit", DoubleArgumentType.doubleArg(0.1))
+                                        .executes(context -> {
+                                            double limit = DoubleArgumentType.getDouble(context, "limit");
+                                            BUConfig.get().restrictSell.addRule(RestrictSell.restrictBy.PRICE, limit);
+                                            HANDLER.save();
+                                            Util.notifyAll("Added rule: PRICE" + ": " + limit);
+                                            return 1;
+                                        })
+                                )
                         )
+                        // Name branch
+                        .then(ClientCommandManager.literal("name")
+                                .then(ClientCommandManager.argument("itemName", StringArgumentType.string())
+                                        .executes(context -> {
+                                            String name = StringArgumentType.getString(context, "itemName");
+                                            BUConfig.get().restrictSell.addRule(RestrictSell.restrictBy.NAME, name);
+                                            HANDLER.save();
+                                            Util.notifyAll("Added rule: NAME" + ": " + name);
+                                            return 1;
+                                        })
+                                )
+                        )
+                )
         );
         bazaarutils.then(ClientCommandManager.literal("rule")
                         .then(ClientCommandManager.literal("remove")
@@ -140,7 +159,10 @@ public class Commands {
                                         .executes(context -> {
                                             int restrictNum = IntegerArgumentType.getInteger(context, "rule number")-1;
                                             RestrictSellControl rule = BUConfig.get().restrictSell.getControls().get(restrictNum);
-                                            Util.notifyAll("Removed rule: " + rule.getRule().toString() + ": " + rule.getAmount());
+                                            if(rule == null)
+                                                context.getSource().sendError(Text.literal("Invalid rule number. Check the order in /bu"));
+                                            if(rule.getRule() != null)
+                                                Util.notifyAll("Removed rule: " + rule.getRule() + ": " + rule.getAmount());
                                             BUConfig.get().restrictSell.getControls().remove(restrictNum);
                                             HANDLER.save();
                                             return 1;

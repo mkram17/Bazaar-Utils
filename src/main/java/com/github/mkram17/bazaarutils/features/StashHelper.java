@@ -63,7 +63,7 @@ public class StashHelper {
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()
                 .name(Text.literal("Stash Helper"))
-                .description(OptionDescription.of(Text.literal("Ctrl + Shift + V to close bazaar and then pick up stash")))
+                .description(OptionDescription.of(Text.literal("Alt + V to close bazaar (if it's open) and then pick up stash")))
                 .binding(true,
                         this::isEnabled,
                         this::setEnabled)

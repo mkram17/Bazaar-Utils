@@ -55,7 +55,7 @@ public class BUConfig {
     @SerialEntry
     public StashHelper stashHelper = new StashHelper(true);
     @SerialEntry
-    public OutdatedItems outdatedItems = new OutdatedItems();
+    public OutdatedItems outdatedItems = new OutdatedItems(false, true, 60);
     //TODO make restrict sell able to take empty array list (might need to think about config gui group + options)
     @SerialEntry
     public RestrictSell restrictSell = new RestrictSell(true, 3, new ArrayList<>(List.of(new RestrictSellControl(RestrictSell.restrictBy.PRICE, 10000.0))));
@@ -73,25 +73,19 @@ public class BUConfig {
             OptionGroup.Builder restrictSellGroupBuilder = OptionGroup.createBuilder()
                     .name(Text.literal("Sell rules"))
                     .description(OptionDescription.of(Text.literal("Blocks insta selling based on rules. You can add a new rule with /bu rule add {based on volume or price} {amount over which will be restricted} or you can remove it with /bu rule remove {rule number}")));
-            restrictSell.buildOptions(restrictSellGroupBuilder);
-            if(restrictSell.getControls().isEmpty()) {
-                builder.category(ConfigCategory.createBuilder()
-                        .name(Text.literal("General"))
-                        .option(autoFlipper.createOption())
-                        .options(outdatedItems.createOptions())
-                        .option(stashHelper.createOption())
-                        .build()
-                );
-            } else {
-                builder.category(ConfigCategory.createBuilder()
-                        .name(Text.literal("General"))
-                        .option(autoFlipper.createOption())
-                        .options(outdatedItems.createOptions())
-                        .option(stashHelper.createOption())
-                        .group(restrictSellGroupBuilder.build())
-                        .build()
-                );
+            if (restrictSell.getControls().isEmpty()) {
+                restrictSell.addRule(RestrictSell.restrictBy.PRICE, 1000000);
             }
+            restrictSell.buildOptions(restrictSellGroupBuilder);
+
+            builder.category(ConfigCategory.createBuilder()
+                    .name(Text.literal("General"))
+                    .option(autoFlipper.createOption())
+                    .options(outdatedItems.createOptions())
+                    .option(stashHelper.createOption())
+                    .group(restrictSellGroupBuilder.build())
+                    .build()
+            );
 
 
             OptionGroup.Builder customOrdersGroupBuilder = OptionGroup.createBuilder()

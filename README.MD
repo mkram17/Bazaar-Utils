@@ -2,6 +2,7 @@
 
 Forum Thread
 ![Discord](https://img.shields.io/discord/1337164726802579597?label=Discord)
+![GitHub License](https://img.shields.io/github/license/mkram17/Bazaar-Utils?style=flat)
 Modrinth
 Github Releases
 
@@ -15,11 +16,12 @@ Github Releases
 
 ## Using Bazaar Utils
 
+REMEMBER -- if your bazaar flipper account upgrade is not level two, change your bazaar tax with /bazaarutils tax or the mod wont work right
 ##### To open the mod config use `/bazaarutils` or `/bu`.
 Other commands:
 - customorder add {order amount} {slot number} _(top left slot is slot #1, to the right is #2, etc etc)_
 - customorder remove {order number} _(the order it is shown in config)_
-- rule add {based on volume or price} {amount over which will be restricted}
+- rule add {based on volume, price or item name} {amount over which will be restricted}
 - rule remove {rule number}
 - developer _(to enable developer settings, you probably wont use this)_
 

@@ -12,7 +12,6 @@ import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
-import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +33,11 @@ public class CustomOrder extends CustomItemButton {
     private boolean buySignClicked = false;
     @Getter @Setter
     private CustomOrderSettings settings;
+
+    public static Item getNextColoredPane(){
+        int size = BUConfig.get().customOrders.size();
+        return size < 4 ? CustomOrder.COLORMAP.get(size) : Items.BLACK_STAINED_GLASS_PANE;
+    }
 
     public static ConfigCategory.Builder createOrdersCategory(){
         return ConfigCategory.createBuilder()

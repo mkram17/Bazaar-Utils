@@ -11,9 +11,15 @@ public class RestrictSellControl {
     private RestrictSell.restrictBy rule;
     @Getter @Setter
     private double amount;
+    @Getter @Setter
+    private String name;
 
     public RestrictSellControl(RestrictSell.restrictBy rule, double amount) {
         this.rule = rule;
         this.amount = amount;
+    }
+    public RestrictSellControl(RestrictSell.restrictBy rule, String name) {
+        this.rule = rule;
+        this.name = name;
     }
 }

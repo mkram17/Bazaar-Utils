@@ -26,7 +26,7 @@ public class Util {
     }
     public static final String HELPMESSAGE = "Commands: /bu or /bazaarutils to open settings gui. \n---------------------------\n " +
             "/bu customorders to see current Custom Orders. /bu customorder {order amount} {slot number} to make new Custom Order /bu customorder remove {customorder number} to remove Custom Order (find number by using /bu customorders) \n---------------------------\n  " +
-            "For more help go to https://discord.gg/";
+            "For more help go to https://discord.gg/xDKjvm5hQd";
 
     public static<T> void notifyAll(T message) {
         String callingName = getCallingClassName();
@@ -77,9 +77,9 @@ public class Util {
             ItemData.priceTypes type = isSellOrder ? ItemData.priceTypes.INSTABUY : ItemData.priceTypes.INSTASELL;
             ItemData itemToAdd = new ItemData(itemName, price, type, volume);
             BUConfig.get().watchedItems.add(itemToAdd);
-            notifyAll("Added item: § " + itemToAdd.getGeneralInfo());
+            notifyAll("Added item: § " + itemToAdd.getGeneralInfo(), notificationTypes.ITEMDATA);
         } else {
-            notifyAll("Could not add item: § " + itemName + " §a (is it spelled correctly?)");
+            notifyAll("Could not add item: § " + itemName + " §a (is it spelled correctly?)", notificationTypes.ERROR);
         }
         ItemData.update();
     }

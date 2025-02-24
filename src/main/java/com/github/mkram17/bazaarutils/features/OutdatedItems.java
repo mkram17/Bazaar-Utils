@@ -23,7 +23,13 @@ public class OutdatedItems {
     @Getter @Setter
     private boolean notifyOutdated;
     @Getter @Setter
-    private int outdatedTiming = 5;
+    private int outdatedTiming;
+
+    public OutdatedItems(boolean autoOpenEnabled, boolean notifyOutdated, int outdatedTiming) {
+        this.autoOpenEnabled = autoOpenEnabled;
+        this.notifyOutdated = notifyOutdated;
+        this.outdatedTiming = outdatedTiming;
+    }
 
     @EventHandler
     public void onOutdated(OutdatedItemEvent e){
@@ -50,7 +56,7 @@ public class OutdatedItems {
     public Collection<Option<Boolean>> createOptions() {
         ArrayList<Option<Boolean>> options = new ArrayList<>();
         options.add(Option.<Boolean>createBuilder()
-                .name(Text.literal("Auto Open Bazaar"))
+                .name(Text.literal("Open Bazaar on Outdated Orders"))
                 .description(OptionDescription.of(Text.literal("Automatically open the bazaar after a delay when an order becomes outdated.")))
                 .binding(false,
                         this::isAutoOpenEnabled,

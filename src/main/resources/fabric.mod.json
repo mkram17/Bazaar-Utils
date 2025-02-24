@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "bazaarutils",
-	"version": "0.0.1",
+	"version": "0.0.1-beta",
 	"name": "Bazaar Utils",
 	"description": "A mod for Hypixel Skyblock that adds useful features for the bazaar for Minecraft 1.21 AND 1.8.9.",
 	"authors": [

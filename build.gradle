@@ -1,13 +1,7 @@
 plugins {
 	id 'fabric-loom' version '1.9-SNAPSHOT'
 	id 'maven-publish'
-	id 'org.jetbrains.kotlin.jvm' version '2.0.0'
-//	id 'dev.deftu.gradle.tools' version '2.22.0'
-//	id 'dev.deftu.gradle.tools.resources' version '2.22.0'
-//	id 'dev.deftu.gradle.tools.bloom' version '2.22.0'
-//	id 'dev.deftu.gradle.tools.shadow' version '2.22.0'
-//	id 'dev.deftu.gradle.tools.minecraft.loom' version '2.22.0'
-//	id 'dev.deftu.gradle.tools.minecraft.releases' version '2.22.0'
+//	id 'org.jetbrains.kotlin.jvm' version '2.0.0'
 }
 
 version = project.mod_version
@@ -18,11 +12,6 @@ base {
 }
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
 	maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
 	maven {
 		//https://github.com/MeteorDevelopment/orbit
@@ -41,16 +30,16 @@ repositories {
 		name = "Terraformers (for gui)"
 		url = "https://maven.terraformersmc.com/"
 	}
-		exclusiveContent {
-			forRepository {
-				maven {
-					url = "https://cursemaven.com"
-				}
-			}
-			filter {
-				includeGroup "curse.maven"
+	exclusiveContent {
+		forRepository {
+			maven {
+				url = "https://cursemaven.com"
 			}
 		}
+		filter {
+			includeGroup "curse.maven"
+		}
+	}
 
 }
 dependencies {
@@ -62,7 +51,8 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
-	implementation "meteordevelopment:orbit:0.2.3"
+	modImplementation("meteordevelopment:orbit:0.2.3")
+	include "meteordevelopment:orbit:0.2.3"
 //	modImplementation "com.ptsmods:devlogin:3.5"
 
 	implementation ("net.hypixel:hypixel-api-transport-apache:4.4")
@@ -80,6 +70,7 @@ dependencies {
 
 	//modern keybinding
 	modImplementation("curse.maven:modernkeybinding-695433:6016136")
+	include("curse.maven:modernkeybinding-695433:6016136")
 
 }
 fabricApi {
@@ -136,11 +127,4 @@ publishing {
 		}
 	}
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
-	}
 }
