@@ -88,13 +88,6 @@ public class ItemData {
     private int amountFilled = 0;
     private double maximumRounding;
 
-    //lists
-    public static ArrayList<Double> priceList = getVariables(ItemData::getPrice);
-    public static ArrayList<Integer> volumeList = getVariables(ItemData::getVolume);
-    public static ArrayList<String> nameList = getVariables(ItemData::getName);
-    public static ArrayList<Integer> amountClaimedList = getVariables(ItemData::getAmountClaimed);
-    public static ArrayList<priceTypes> priceTypesList = getVariables(ItemData::getPriceType);
-
     private static List<ItemData> outdated = new ArrayList<>(Collections.emptyList());
 
     public ItemData(String name, Double fullPrice, priceTypes priceType, int volume) {
@@ -119,7 +112,6 @@ public class ItemData {
 
     public static void update(){
         updateMarketPrices();
-        updateLists();
         findOutdated();
     }
 
@@ -128,13 +120,6 @@ public class ItemData {
         if(BUConfig.get().outdatedItems.isNotifyOutdated()) {
             timeExecutor.scheduleAtFixedRate(ItemData::notifyOutdated, 0, 1, TimeUnit.SECONDS);
         }
-    }
-    public static void updateLists(){
-        priceList = getVariables(ItemData::getPrice);
-        volumeList = getVariables(ItemData::getVolume);
-        nameList = getVariables(ItemData::getName);
-        amountClaimedList = getVariables(ItemData::getAmountClaimed);
-        priceTypesList = getVariables(ItemData::getPriceType);
     }
 
     private static void updateMarketPrices(){

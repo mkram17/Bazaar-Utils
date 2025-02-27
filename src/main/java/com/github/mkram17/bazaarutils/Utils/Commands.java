@@ -167,8 +167,9 @@ public class Commands {
                                             RestrictSellControl rule = BUConfig.get().restrictSell.getControls().get(restrictNum);
                                             if(rule == null)
                                                 context.getSource().sendError(Text.literal("Invalid rule number. Check the order in /bu"));
-                                            if(rule.getRule() != null)
-                                                Util.notifyAll("Removed rule: " + rule.getRule() + ": " + rule.getAmount());
+                                            if(rule.getRule() != null) {
+                                                Util.notifyAll(rule.getRule() == RestrictSell.restrictBy.NAME ? "Removed rule: NAME: " + rule.getName() : "Removed rule: " + rule.getRule() + ": " + rule.getAmount());
+                                            }
                                             BUConfig.get().restrictSell.getControls().remove(restrictNum);
                                             HANDLER.save();
                                             return 1;

@@ -28,6 +28,7 @@ public class FlipHelper extends CustomItemButton {
     private int orderVolumeFilled = -1;
     private ItemData item;
     private boolean shouldAddToSign = false;
+    private boolean inCancelOrderScreen = false;
     @Getter @Setter
     private FlipHelperSettings settings;
 
@@ -39,6 +40,11 @@ public class FlipHelper extends CustomItemButton {
     public void guiChestOpenedEvent(ChestLoadedEvent e) {
         if(settings.isEnabled() && BazaarUtils.gui.inFlipGui) {
             item = getFlipItem(e);
+
+            inCancelOrderScreen = false;
+            ItemStack cancelItem = e.getItemStacks().get(11);
+            if(cancelItem.getCustomName().getString().contains("Cancel"))
+                inCancelOrderScreen = true;
 
             flipPrice = item.getFlipPrice();
         }
@@ -119,7 +125,7 @@ public class FlipHelper extends CustomItemButton {
 
     @Override @EventHandler
     public void onGUI(ReplaceItemEvent event) {
-        if(!BazaarUtils.gui.inFlipGui || !(event.getSlotId() == settings.getSlotNumber()) || !settings.isEnabled()) return;
+        if(!BazaarUtils.gui.inFlipGui || !(event.getSlotId() == settings.getSlotNumber()) || !settings.isEnabled() || inCancelOrderScreen) return;
 
         ItemStack itemStack = new ItemStack(settings.getReplaceItem(), 1);
         if(item == null) {
