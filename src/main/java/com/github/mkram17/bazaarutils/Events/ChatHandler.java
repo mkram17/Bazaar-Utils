@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatHandler {
-    private enum messageTypes {BUYORDER, SELLORDER, FILLED, CLAIMED}
+    private enum messageTypes {BUYORDER, SELLORDER, FILLED, CLAIMED, CANCELLED}
 
     public static void subscribe() {
         registerBazaarChat();
@@ -41,6 +41,7 @@ public class ChatHandler {
             if (siblings.size() >= 3 && siblings.get(2).getString().contains("Sell Offer Setup!"))
                 messageType = messageTypes.SELLORDER;
             if(siblings.size() >= 3 && siblings.get(2).getString().contains("Claimed")) messageType = messageTypes.CLAIMED;
+            if(siblings.size() >= 5 && siblings.get(2).getString().contains("Cancelled")) messageType = messageTypes.CANCELLED;
 
             if (messageType == messageTypes.BUYORDER || messageType == messageTypes.SELLORDER) {
                 itemName = Util.removeFormatting(siblings.get(5).getString());
@@ -71,10 +72,24 @@ public class ChatHandler {
 
             if (messageType == messageTypes.CLAIMED) {
                 handleClaimed(siblings);
+            }if (messageType == messageTypes.CANCELLED) {
+                handleCancelled(siblings);
             }
         });
     }
 
+    public static void handleCancelled(ArrayList<Text> siblings) {
+        double totalPrice;
+        String priceString = siblings.get(4).getString();
+        totalPrice = Double.parseDouble(priceString.substring(0, priceString.indexOf(" coins")).replace(",", ""));
+        ItemData item = ItemData.findItemTotalPrice(totalPrice);
+        if(item != null){
+            item.remove();
+        } else{
+            Util.notifyAll("Error finding cancelled item.", Util.notificationTypes.ERROR);
+
+        }
+    }
 
     public static void handleClaimed(ArrayList<Text> siblings) {
         Integer volumeClaimed = null;
@@ -90,14 +105,21 @@ public class ChatHandler {
             if (orderType == messageTypes.BUYORDER) {
                 volumeClaimed = Integer.parseInt(siblings.get(3).getString().replace(",", ""));
                 itemName = siblings.get(5).getString().trim();
-                price = Double.parseDouble(siblings.get(9).getString().trim().replace(",", ""));
+                String priceString = siblings.get(7).getString();
+                price = Double.parseDouble(priceString.substring(0, priceString.indexOf(" coins")).replace(",", ""))/volumeClaimed;
+                if(ItemData.getVariables(ItemData::getVolume).contains(volumeClaimed))
+                    item = ItemData.findItem(itemName, price, volumeClaimed, ItemData.priceTypes.INSTASELL);
+                else
+                    item = ItemData.findItem(itemName, price, null, ItemData.priceTypes.INSTASELL);
             } else {
 //                Util.notifyAll("claimed message, but not worth");
                 volumeClaimed = Integer.parseInt(siblings.get(5).getString().replace(",", ""));
                 itemName = siblings.get(7).getString().trim();
-                price = Double.parseDouble(siblings.get(9).getString().trim().replace(",", ""));
+                String priceString = siblings.get(7).getString();
+                price = Double.parseDouble(priceString.substring(0, priceString.indexOf(" coins")).replace(",", ""))/volumeClaimed;
+                item = ItemData.findItem(itemName, price, volumeClaimed, ItemData.priceTypes.INSTABUY);
             }
-             item = ItemData.findItem(itemName, price, volumeClaimed, null);
+
 
 
             if (item == null) {

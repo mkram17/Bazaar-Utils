@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.features.autoflipper;
+package com.github.mkram17.bazaarutils.features.fliphelper;
 
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
@@ -22,17 +22,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-//TODO detect in order screen if order isnt full (can use presence of cancel order block)
-public class AutoFlipper extends CustomItemButton {
+public class FlipHelper extends CustomItemButton {
     public double flipPrice;
     private double orderPrice = -1;
     private int orderVolumeFilled = -1;
     private ItemData item;
     private boolean shouldAddToSign = false;
     @Getter @Setter
-    private AutoFlipperSettings settings;
+    private FlipHelperSettings settings;
 
-    public AutoFlipper(AutoFlipperSettings settings) {
+    public FlipHelper(FlipHelperSettings settings) {
         this.settings = settings;
     }
 
@@ -125,9 +124,9 @@ public class AutoFlipper extends CustomItemButton {
         ItemStack itemStack = new ItemStack(settings.getReplaceItem(), 1);
         if(item == null) {
             itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Could not find order").formatted(Formatting.DARK_PURPLE));
-            itemStack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, "?");
+            itemStack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, "???");
         }else {
-            itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Auto Flip for " + Util.getPrettyNumber(flipPrice) + " coins").formatted(Formatting.DARK_PURPLE));
+            itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Flip order for " + Util.getPrettyNumber(flipPrice) + " coins").formatted(Formatting.DARK_PURPLE));
             itemStack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, String.valueOf(Util.getPrettyNumber(flipPrice)));
         }
         event.setReplacement(itemStack);

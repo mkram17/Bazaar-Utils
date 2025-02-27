@@ -25,7 +25,22 @@ Other commands:
 - rule remove {rule number}
 - developer _(to enable developer settings, you probably wont use this)_
 
+## Dependencies
+
+### Must Have in Mods Folder
+
+- Fabric API (you probably already have this https://modrinth.com/mod/fabric-api/versions?g=1.21.4)
+- Mod Menu (https://modrinth.com/mod/modmenu/versions?g=1.21.4&l=fabric)
+- Yet Another Config Library (https://modrinth.com/mod/yacl/versions?g=1.21.4&l=fabric )
+
+### Included in Mod Already
+
+- Orbit Event System (helps in mod development)
+- Modern Keybinding (enables you to add keybinds with modifiers ALT, CTRL, SHIFT)
+
 ### Future Features
 
 - Option to disable pick up stash messages/control frequency of them
+- Option to change how often you are notified about outdated orders
+- Automatically add items from before mod was downloaded
 

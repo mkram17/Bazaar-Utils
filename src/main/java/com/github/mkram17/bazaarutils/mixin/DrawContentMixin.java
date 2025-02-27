@@ -17,23 +17,22 @@ public abstract class DrawContentMixin {
             ordinal = 0
     )
     private String modifyStackCountString(String text, TextRenderer textRenderer, ItemStack stack, int x, int y) {
-        int size = stack.getCount();
-
         String customData = stack.get(BazaarUtils.CUSTOM_SIZE_COMPONENT);
-
+        double dataSize;
         if (customData != null) {
-            double dataSize = Double.parseDouble(customData);
+            boolean hasNumber = customData.matches(".*\\d.*");
+
+            if(hasNumber)
+                dataSize = Double.parseDouble(customData);
+            else
+                return customData;
+
             if(dataSize >= 1000000)
                 return (((int) dataSize) / 1000000) + "m";
             if(dataSize >= 1000)
                 return (((int) dataSize) / 1000) + "k";
             return customData;
         }
-
-        if (size == 71680)
-            return "MAX";
-        if (size >= 1000)
-            return (size / 1000) + "k";
 
         return text;
     }

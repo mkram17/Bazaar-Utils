@@ -58,6 +58,7 @@ public class Commands {
         bazaarutils.then(ClientCommandManager.literal("developer")
                         .executes((context) ->{
                             BUConfig.get().developerMode = !BUConfig.get().developerMode;
+                            Util.notifyAll(BUConfig.get().developerMode ? "Developer mode enabled. You must restart for some changes to take effect." : "Developer mode disabled. You must restart for some changes to take effect.");
                             return 1;
                         })
                 );
@@ -100,12 +101,17 @@ public class Commands {
                                 .then(ClientCommandManager.argument("order number", IntegerArgumentType.integer(1))
                                         .executes(context -> {
                                             int orderNum = IntegerArgumentType.getInteger(context, "order number");
+                                            if(BUConfig.get().customOrders.size() < orderNum){
+                                                Util.notifyAll("There is no Custom Order #" + orderNum + ". The Custom Order # is based on the order they are displayed in the config.");
+                                                return 0;
+                                            }
                                             CustomOrder customOrder = BUConfig.get().customOrders.get(orderNum-1);
                                             if(customOrder.getSettings().getOrderAmount() != 71680) {
                                                 Util.notifyAll("Removed Custom Order for " + BUConfig.get().customOrders.get(orderNum-1).getSettings().getOrderAmount());
                                                 BUConfig.get().customOrders.remove(orderNum);
                                             } else{
                                                 Util.notifyAll("Cannot remove Max Buy Order.");
+                                                return 0;
                                             }
                                             HANDLER.save();
                                             return 1;
@@ -170,6 +176,20 @@ public class Commands {
                                 )
                         )
         );
+        if(BUConfig.get().developerMode){
+            bazaarutils.then(ClientCommandManager.literal("remove")
+                            .then(ClientCommandManager.argument("index", IntegerArgumentType.integer())
+                                    .executes(Commands::executeRemove)
+                            )
+            );
+            bazaarutils.then(ClientCommandManager.literal("info")
+                            .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
+                                            .executes(Commands::executeInfo)
+                                    )
+                            )
+                    );
+        }
+//
         CommandNode<FabricClientCommandSource> bazaarutilsNode = dispatcher.register(bazaarutils);
         dispatcher.register(
                 ClientCommandManager.literal("bu")

@@ -40,6 +40,7 @@ public class BazaarUtils implements ClientModInitializer {
         ChatHandler.subscribe();
         gui.registerScreenEvent();
         eventBus.subscribe(gui);
+
     }
 
     private void registerCommands() {
@@ -52,10 +53,11 @@ public class BazaarUtils implements ClientModInitializer {
         for(CustomOrder order : BUConfig.get().customOrders) {
             eventBus.subscribe(order);
         }
-        eventBus.subscribe(BUConfig.get().autoFlipper);
+        eventBus.subscribe(BUConfig.get().flipHelper);
         eventBus.subscribe(BUConfig.get().restrictSell);
         eventBus.subscribe(BUConfig.get().outdatedItems);
         BUConfig.get().stashHelper.registerKeybind();
+        BUConfig.get().restrictSell.registerScreenEvent();
     }
 
     public static final ComponentType<String> CUSTOM_SIZE_COMPONENT = Registry.register(

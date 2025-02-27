@@ -9,6 +9,7 @@ import dev.isxander.yacl3.api.OptionGroup;
 import lombok.Getter;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -42,6 +43,11 @@ public class RestrictSell {
         this.safetyClicksRequired = safetyClicksRequired;
         this.controls = controls;
     }
+    public void registerScreenEvent() {
+        ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
+            safetyClicks = 0;
+        });
+    }
 
     @EventHandler
     private void onGUI(ReplaceItemEvent e){
@@ -52,14 +58,21 @@ public class RestrictSell {
                 return;
             if (e.getOriginal().getComponentChanges().get(DataComponentTypes.LORE).get().styledLines().size() < 6 || e.getOriginal().getComponentChanges().get(DataComponentTypes.LORE).get().styledLines().get(4).getString().contains("Loading"))
                 return;
-            ItemStack sellButton = e.getOriginal();
+            ItemStack sellButton = e.getOriginal().copy();
             List<Text> changedComponents = sellButton.getComponentChanges().get(DataComponentTypes.LORE).get().styledLines();
             int numItems = changedComponents.size()-8;
             ArrayList<SellItem> items = getItems(changedComponents, numItems);
             String coinsText = changedComponents.get(5 + numItems).getString();
             double totalPrice = Double.parseDouble(coinsText.substring(coinsText.indexOf(": ") + 2, coinsText.indexOf(" coins")).replace(",", ""));
 
+
             locked = isLocked(items, totalPrice);
+            if(locked){
+                sellButton = e.getOriginal().copy();
+                if(safetyClicksRequired != safetyClicks)
+                    sellButton.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, String.valueOf(safetyClicksRequired-safetyClicks));
+                }
+            e.setReplacement(sellButton);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

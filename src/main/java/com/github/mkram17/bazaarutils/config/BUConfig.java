@@ -4,8 +4,8 @@ import com.github.mkram17.bazaarutils.Utils.ItemData;
 import com.github.mkram17.bazaarutils.Utils.Util;
 import com.github.mkram17.bazaarutils.features.OutdatedItems;
 import com.github.mkram17.bazaarutils.features.StashHelper;
-import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipper;
-import com.github.mkram17.bazaarutils.features.autoflipper.AutoFlipperSettings;
+import com.github.mkram17.bazaarutils.features.fliphelper.FlipHelper;
+import com.github.mkram17.bazaarutils.features.fliphelper.FlipHelperSettings;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrder;
 import com.github.mkram17.bazaarutils.features.customorder.CustomOrderSettings;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSell;
@@ -41,7 +41,7 @@ public class BUConfig {
 
 
     @SerialEntry
-    public AutoFlipper autoFlipper = new AutoFlipper(new AutoFlipperSettings(true, 17, Items.CHERRY_SIGN));
+    public FlipHelper flipHelper = new FlipHelper(new FlipHelperSettings(true, 17, Items.CHERRY_SIGN));
     @SerialEntry
     public ArrayList<ItemData> watchedItems = new ArrayList<>();
     @SerialEntry
@@ -58,7 +58,7 @@ public class BUConfig {
     public OutdatedItems outdatedItems = new OutdatedItems(false, true, 60);
     //TODO make restrict sell able to take empty array list (might need to think about config gui group + options)
     @SerialEntry
-    public RestrictSell restrictSell = new RestrictSell(true, 3, new ArrayList<>(List.of(new RestrictSellControl(RestrictSell.restrictBy.PRICE, 10000.0))));
+    public RestrictSell restrictSell = new RestrictSell(true, 3, new ArrayList<>(List.of(new RestrictSellControl(RestrictSell.restrictBy.PRICE, 1000000))));
     @SerialEntry
     public Developer developer = new Developer();
 
@@ -80,7 +80,7 @@ public class BUConfig {
 
             builder.category(ConfigCategory.createBuilder()
                     .name(Text.literal("General"))
-                    .option(autoFlipper.createOption())
+                    .option(flipHelper.createOption())
                     .options(outdatedItems.createOptions())
                     .option(stashHelper.createOption())
                     .group(restrictSellGroupBuilder.build())

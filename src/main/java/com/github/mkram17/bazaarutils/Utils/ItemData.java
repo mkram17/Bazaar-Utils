@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.BazaarData;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.function.Function;
 
 
 //TODO figure out how to handle rounding with price
+@Slf4j
 public class ItemData {
     public static ItemData getItem(int index){
         if(index != -1)
@@ -110,7 +112,7 @@ public class ItemData {
         if(fullPrice < 10000)
             return 0;
         else{
-            return (double) (Math.ceil((.9 / volume) * 10))/10;
+            return (Math.ceil((.9 / volume) * 10))/10;
         }
     }
 
@@ -152,8 +154,9 @@ public class ItemData {
         this.status = statuses.SET;
     }
 
+    //TODO some error with maximum rounding or finding the price. either finding price can round down by .1 accidentally or maximum rounding calculation is wrong
     public boolean isSimilarPrice(double price) {
-        return Math.abs(getPrice() - price) < maximumRounding;
+        return Math.abs(getPrice() - price) <= maximumRounding;
     }
 
     //untested
@@ -187,6 +190,25 @@ public class ItemData {
         }
         return itemList.getFirst();
     }
+    public static ItemData findItemTotalPrice(double totalPrice) {
+        ArrayList<ItemData> itemList = new ArrayList<>();
+        for(ItemData item : BUConfig.get().watchedItems){
+            if(totalPrice == item.fullPrice){
+                itemList.add(item);
+            }
+        }
+        if (itemList.isEmpty()) {
+            Util.notifyAll("Could not find item with total price: " + totalPrice, Util.notificationTypes.ITEMDATA);
+            return null;
+        }
+        if (itemList.size() > 1) {
+            itemList.forEach(duplicate -> {
+                Util.notifyAll("Duplicate totalprice item: " + duplicate.getGeneralInfo(), Util.notificationTypes.ITEMDATA);
+            });
+            return null;
+        }
+        return itemList.getFirst();
+    }
 
     //maybe replace with using ItemOutdatedEvent?
     public static void notifyOutdated(){
@@ -211,10 +233,12 @@ public class ItemData {
     }
 
     private boolean isOutdated(){
+        if(status == statuses.FILLED)
+            return false;
         if (priceType == priceTypes.INSTABUY) {
-            return this.price > this.marketPrice;
+            return this.price-maximumRounding > this.marketPrice;
         } else {
-            return this.price < this.marketPrice;
+            return this.price+maximumRounding < this.marketPrice;
         }
     }
 

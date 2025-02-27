@@ -51,8 +51,8 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
-	modImplementation("meteordevelopment:orbit:0.2.3")
-	include "meteordevelopment:orbit:0.2.3"
+	modImplementation("meteordevelopment:orbit:0.2.4")
+	include "meteordevelopment:orbit:0.2.4"
 //	modImplementation "com.ptsmods:devlogin:3.5"
 
 	implementation ("net.hypixel:hypixel-api-transport-apache:4.4")
@@ -87,6 +87,10 @@ loom {
 //			property("devauth.enabled", "true")
 //			property("fabric.log.level", "info")
 //			vmArg("-ea")
+		}
+		configureEach {property("mixin.debug.export", "true")
+			property("mixin.debug.verbose", "true")
+			programArg("--disableOpt")
 		}
 	}
 }

@@ -58,7 +58,8 @@ public class CustomOrder extends CustomItemButton {
         if (event.getSlotId() != settings.getSlotNumber())
             return;
 
-        ItemStack itemStack = new ItemStack(settings.getItem(), settings.getOrderAmount());
+        ItemStack itemStack = new ItemStack(settings.getItem(), 1);
+        itemStack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, String.valueOf(settings.getOrderAmount()));
 
         itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Buy " + settings.getOrderAmount()).formatted(Formatting.DARK_PURPLE));
         event.setReplacement(itemStack);
