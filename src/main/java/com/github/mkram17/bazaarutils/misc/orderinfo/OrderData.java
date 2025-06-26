@@ -246,10 +246,16 @@ public class OrderData {
                         .append(amount)
                         .append(itemName)
                         .append(Text.literal( " is no longer outdated.").formatted(Formatting.WHITE));
-                if(MinecraftClient.getInstance().player != null)
+                if(MinecraftClient.getInstance().player != null) {
                     MinecraftClient.getInstance().player.sendMessage(message, false);
-                else
-                    Util.notifyError("Could not send no longer outdated notif because player is null.", null);
+                } else {
+                    // Queue the message to be sent when player is available
+                    Util.tickExecuteLater(20, () -> {
+                        if (MinecraftClient.getInstance().player != null) {
+                            MinecraftClient.getInstance().player.sendMessage(message, false);
+                        }
+                    });
+                }
             }
         }
 
