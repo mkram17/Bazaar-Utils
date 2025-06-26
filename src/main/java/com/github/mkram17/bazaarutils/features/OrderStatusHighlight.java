@@ -25,6 +25,8 @@ import java.util.List;
 public class OrderStatusHighlight implements BUListener {
     @Getter @Setter
     private boolean enabled = true;
+    @Getter @Setter
+    private boolean filledHighlightEnabled = true;
     private static final HashMap<Integer, OrderData> highlightedOrders = new HashMap<>();
     public static final Identifier IDENTIFIER = Identifier.tryParse("bazaarutils", "orderstatushighlight/background_test");
     public static final float BACKGROUND_TRANSPARENCY = 0.8f;
@@ -33,12 +35,25 @@ public class OrderStatusHighlight implements BUListener {
         this.enabled = enabled;
     }
 
-    public static OrderData.statuses getHighlightType(int slotIndex) {
-        OrderData orderData = highlightedOrders.get(slotIndex);
-        if (orderData == null || orderData.getOutdatedStatus() == null) {
-            return null; // No highlight for this slot
+    public OrderStatusHighlight(boolean enabled, boolean filledHighlightEnabled){
+        this.enabled = enabled;
+        this.filledHighlightEnabled = filledHighlightEnabled;
+    }
+
+    private OrderData.statuses getEffectiveStatus(OrderData orderData) {
+        if (orderData == null) {
+            return null;
         }
+        // Check if order is filled first (priority) and if filled highlighting is enabled
+        if (filledHighlightEnabled && orderData.getFillStatus() == OrderData.statuses.FILLED) {
+            return OrderData.statuses.FILLED;
+        }
+        // Otherwise return outdated status
         return orderData.getOutdatedStatus();
+    }
+
+    public static OrderData.statuses getHighlightType(int slotIndex) {
+        return BUConfig.get().orderStatusHighlight.getEffectiveStatus(highlightedOrders.get(slotIndex));
     }
     public static void addHighlightedOrder(int slotIndex, OrderData orderData) {
         highlightedOrders.put(slotIndex, orderData);
@@ -65,10 +80,21 @@ public class OrderStatusHighlight implements BUListener {
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()
                 .name(Text.literal("Order Status Highlight"))
-                .description(OptionDescription.of(Text.literal("Puts a red border around orders that are outdated and a green border around orders that are not outdated.")))
+                .description(OptionDescription.of(Text.literal("Adds a colored text in the tooltip of orders that are competitive, matched or outdated.")))
                 .binding(false,
                         this::isEnabled,
                         this::setEnabled)
+                .controller(BUConfig::createBooleanController)
+                .build();
+    }
+
+    public Option<Boolean> createFilledHighlightOption() {
+        return Option.<Boolean>createBuilder()
+                .name(Text.literal("Highlight Filled Orders"))
+                .description(OptionDescription.of(Text.literal("Adds a colored text in the tooltip of orders that are filled")))
+                .binding(true,
+                        this::isFilledHighlightEnabled,
+                        this::setFilledHighlightEnabled)
                 .controller(BUConfig::createBooleanController)
                 .build();
     }
@@ -88,7 +114,7 @@ public class OrderStatusHighlight implements BUListener {
             for (Slot slot : handledScreen.getScreenHandler().slots) {
                 if (!(slot.hasStack() && slot.getStack() == stack))
                     continue;
-                index = slot.id;
+                index = slot.getIndex();
             }
             if(index == -1)
                 return;
@@ -99,17 +125,25 @@ public class OrderStatusHighlight implements BUListener {
                 return;
             }
 
-            switch (order.getOutdatedStatus()) {
-                case OUTDATED:
-                    lines.add(1, Text.literal("OUTDATED").formatted(Formatting.RED, Formatting.BOLD));
-                    lines.add(2, Text.literal("Market Price: " + order.getPriceInfo().getPrettyString(order.getPriceInfo().getMarketPrice())).formatted(Formatting.RED));
-                    break;
-                case COMPETITIVE:
-                    lines.add(1, Text.literal("COMPETITIVE").formatted(Formatting.GREEN, Formatting.BOLD));
-                    break;
-                case MATCHED:
-                    lines.add(1, Text.literal("MATCHED").formatted(Formatting.YELLOW, Formatting.BOLD));
-                    break;
+            OrderData.statuses effectiveStatus = this.getEffectiveStatus(order);
+            if (effectiveStatus != null) {
+                switch (effectiveStatus) {
+                    case FILLED:
+                        if (filledHighlightEnabled) {
+                            lines.add(1, Text.literal("FILLED").formatted(Formatting.GREEN, Formatting.BOLD));
+                        }
+                        break;
+                    case OUTDATED:
+                        lines.add(1, Text.literal("OUTDATED").formatted(Formatting.RED, Formatting.BOLD));
+                        lines.add(2, Text.literal("Market Price: " + order.getPriceInfo().getPrettyString(order.getPriceInfo().getMarketPrice())).formatted(Formatting.RED));
+                        break;
+                    case COMPETITIVE:
+                        lines.add(1, Text.literal("COMPETITIVE").formatted(Formatting.GREEN, Formatting.BOLD));
+                        break;
+                    case MATCHED:
+                        lines.add(1, Text.literal("MATCHED").formatted(Formatting.YELLOW, Formatting.BOLD));
+                        break;
+                }
             }
         });
     }

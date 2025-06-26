@@ -106,13 +106,10 @@ public class ItemUpdater implements BUListener {
             foundItems.add(tempItem);
             Util.addWatchedItem(updateWithItem(tempItem));
 
-            //if item is filled, dont give it an order status highlight
-            if(tempItem.getFillStatus() == OrderData.statuses.FILLED)
-                continue;
-
             if(tempItem.getOutdatedStatus() == OrderData.statuses.OUTDATED ||
                tempItem.getOutdatedStatus() == OrderData.statuses.COMPETITIVE ||
-               tempItem.getOutdatedStatus() == OrderData.statuses.MATCHED) {
+               tempItem.getOutdatedStatus() == OrderData.statuses.MATCHED ||
+               tempItem.getFillStatus() == OrderData.statuses.FILLED) {
                 OrderStatusHighlight.addHighlightedOrder(mapScreenIndexToInventoryIndex(stack), tempItem);
             }
 

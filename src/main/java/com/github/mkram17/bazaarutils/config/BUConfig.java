@@ -117,6 +117,7 @@ public class BUConfig {
                     .option(stashMessages.createOption())
                     .option(priceCharts.createOption())
                     .option(orderStatusHighlight.createOption())
+                    .option(orderStatusHighlight.createFilledHighlightOption())
                     .option(createDisableErrorNotifsOption());
             if(!BUCompatibilityHelper.isAmecsReborn())
                 generalBuilder.option(createAmecsDownloadButton());
