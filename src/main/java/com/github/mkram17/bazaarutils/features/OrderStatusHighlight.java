@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.misc.orderinfo.OrderData;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -26,10 +27,32 @@ import java.util.concurrent.TimeUnit;
 
 //drawing done in MixinHandledScreen
 public class OrderStatusHighlight implements BUListener {
+    public enum OutdatedDisplayMode {
+        MARKET_PRICE("Market Price"),
+        OUTBID_BY("Outbid By");
+        
+        private final String displayName;
+        
+        OutdatedDisplayMode(String displayName) {
+            this.displayName = displayName;
+        }
+        
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+    
     @Getter @Setter
     private boolean enabled = true;
     @Getter @Setter
     private boolean filledHighlightEnabled = true;
+    @Setter
+    private OutdatedDisplayMode outdatedDisplayMode = OutdatedDisplayMode.MARKET_PRICE;
+    
+    public OutdatedDisplayMode getOutdatedDisplayMode() {
+        return outdatedDisplayMode != null ? outdatedDisplayMode : OutdatedDisplayMode.MARKET_PRICE;
+    }
     private static final HashMap<Integer, OrderData> highlightedOrders = new HashMap<>();
     public static final Identifier IDENTIFIER = Identifier.tryParse("bazaarutils", "orderstatushighlight/background_test");
     public static final float BACKGROUND_TRANSPARENCY = 0.8f;
@@ -48,11 +71,19 @@ public class OrderStatusHighlight implements BUListener {
 
     public OrderStatusHighlight(boolean enabled){
         this.enabled = enabled;
+        this.outdatedDisplayMode = OutdatedDisplayMode.MARKET_PRICE;
     }
 
     public OrderStatusHighlight(boolean enabled, boolean filledHighlightEnabled){
         this.enabled = enabled;
         this.filledHighlightEnabled = filledHighlightEnabled;
+        this.outdatedDisplayMode = OutdatedDisplayMode.MARKET_PRICE;
+    }
+
+    public OrderStatusHighlight(boolean enabled, boolean filledHighlightEnabled, OutdatedDisplayMode outdatedDisplayMode){
+        this.enabled = enabled;
+        this.filledHighlightEnabled = filledHighlightEnabled;
+        this.outdatedDisplayMode = outdatedDisplayMode;
     }
 
     private OrderData.statuses getEffectiveStatus(OrderData orderData) {
@@ -198,6 +229,17 @@ public class OrderStatusHighlight implements BUListener {
                 .build();
     }
 
+    public Option<OutdatedDisplayMode> createOutdatedDisplayModeOption() {
+        return Option.<OutdatedDisplayMode>createBuilder()
+                .name(Text.literal("Outdated Display Mode"))
+                .description(OptionDescription.of(Text.literal("Select the display mode for outdated orders")))
+                .binding(OutdatedDisplayMode.MARKET_PRICE,
+                        this::getOutdatedDisplayMode,
+                        this::setOutdatedDisplayMode)
+                .controller(opt -> EnumControllerBuilder.create(opt).enumClass(OutdatedDisplayMode.class))
+                .build();
+    }
+
     private void registerTooltipListener() {
         registerTooltipListenerInternal();
     }
@@ -273,7 +315,12 @@ public class OrderStatusHighlight implements BUListener {
                     break;
                 case OUTDATED:
                     lines.add(1, Text.literal("OUTDATED").formatted(Formatting.RED, Formatting.BOLD));
-                    lines.add(2, Text.literal("Market Price: " + order.getPriceInfo().getPrettyString(order.getPriceInfo().getMarketPrice())).formatted(Formatting.RED));
+                    if (currentInstance.outdatedDisplayMode == OutdatedDisplayMode.MARKET_PRICE) {
+                        lines.add(2, Text.literal("Market Price: " + order.getPriceInfo().getPrettyString(order.getPriceInfo().getMarketPrice())).formatted(Formatting.RED));
+                    } else {
+                        double difference = Math.abs(order.getPriceInfo().getMarketPrice() - order.getPriceInfo().getPrice());
+                        lines.add(2, Text.literal("Outbid by: " + order.getPriceInfo().getPrettyString(difference)).formatted(Formatting.RED));
+                    }
                     break;
                 case COMPETITIVE:
                     lines.add(1, Text.literal("COMPETITIVE").formatted(Formatting.GREEN, Formatting.BOLD));

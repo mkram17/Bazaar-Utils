@@ -122,6 +122,7 @@ public class BUConfig {
                     .option(priceCharts.createOption())
                     .option(orderStatusHighlight.createOption())
                     .option(orderStatusHighlight.createFilledHighlightOption())
+                    .option(orderStatusHighlight.createOutdatedDisplayModeOption())
                     .option(createDisableErrorNotifsOption());
             if(!BUCompatibilityHelper.isAmecsReborn())
                 generalBuilder.option(createAmecsDownloadButton());
