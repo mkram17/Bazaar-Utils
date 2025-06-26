@@ -138,11 +138,11 @@ public class Util implements BUListener {
         String simpleCallingName = callingName.substring(callingName.lastIndexOf(".") + 1);
         var messageText = Text.literal("[" + simpleCallingName + "] ").formatted(Formatting.GOLD).append(Text.literal(message).formatted(Formatting.DARK_GREEN));
 
-        if(!notiType.isEnabled() && !BUConfig.get().developer.allMessages) {
-            if (BUConfig.get().developerMode)
+        if (!BUConfig.get().developerMode || (!notiType.isEnabled() && !BUConfig.get().developer.allMessages)) {
+            if (BUConfig.get().developerMode) {
                 logMessage(message);
-            else
-                return;
+            }
+            return;
         }
 
 //            LogManager.getLogger(callingName).info("[Bazaar Utils] watchedItems state: " + BUConfig.get().watchedItems);
@@ -156,7 +156,7 @@ public class Util implements BUListener {
 
     public static void notifyChatCommand(MutableText message, String command){
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client != null && client.player != null) { // Add this check
+        if (client != null && client.player != null) {
             client.player.sendMessage(message
                     .styled(style -> style
                                     //? if > 1.21.4 {
@@ -168,8 +168,12 @@ public class Util implements BUListener {
                         *///?}
                     ), false);
         } else {
-            // Optionally log that the message couldn't be sent because the player was null
-            notifyError("Could not send chat command notification because player is null. Message: " + message.getString(), null);
+            // Queue the notification to be sent when player is available
+            tickExecuteLater(20, () -> {
+                if (MinecraftClient.getInstance().player != null) {
+                    notifyChatCommand(message, command);
+                }
+            });
         }
     }
 

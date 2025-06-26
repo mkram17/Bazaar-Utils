@@ -120,6 +120,8 @@ public abstract class MixinHandledScreen<T extends ScreenHandler> extends Screen
 			draw(context, slot.x, slot.y, OrderData.statuses.OUTDATED);
 		} else if (orderStatus == OrderData.statuses.MATCHED) {
 			draw(context, slot.x, slot.y, OrderData.statuses.MATCHED);
+		} else if (orderStatus == OrderData.statuses.FILLED) {
+			draw(context, slot.x, slot.y, OrderData.statuses.FILLED);
 		}
 	}
 
@@ -142,6 +144,14 @@ public abstract class MixinHandledScreen<T extends ScreenHandler> extends Screen
 							.getSprite(OrderStatusHighlight.IDENTIFIER)
 					, x, y, 16, 16,
 					ColorHelper.fromFloats(OrderStatusHighlight.BACKGROUND_TRANSPARENCY, 1.0f, 0.0f, 0.0f)
+			);
+		} else if (orderStatus == OrderData.statuses.FILLED) {
+			context.drawSpriteStretched(RenderPipelines.GUI_TEXTURED,
+					MinecraftClient.getInstance()
+							.getGuiAtlasManager()
+							.getSprite(OrderStatusHighlight.IDENTIFIER)
+					, x, y, 16, 16,
+					ColorHelper.fromFloats(OrderStatusHighlight.BACKGROUND_TRANSPARENCY, 0.0f, 1.0f, 0.0f)
 			);
 		} else {
 			context.drawSpriteStretched(RenderPipelines.GUI_TEXTURED,

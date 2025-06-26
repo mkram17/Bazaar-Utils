@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.features.Bookmark;
+import com.github.mkram17.bazaarutils.features.OrderStatusHighlight;
 import com.github.mkram17.bazaarutils.features.StashHelper;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
 import com.github.mkram17.bazaarutils.utils.Commands;
@@ -52,6 +53,11 @@ public class BazaarUtils implements ClientModInitializer {
         registerCommands();
         registerKeybinds();
         setDefaultValues();
+        
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("[BazaarUtils] Shutting down mod components");
+            OrderStatusHighlight.shutdown();
+        }, "BazaarUtils-Shutdown"));
     }
 
     private void registerEventBus() {

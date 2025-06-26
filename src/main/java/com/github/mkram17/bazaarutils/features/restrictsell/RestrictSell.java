@@ -97,19 +97,30 @@ public class RestrictSell implements BUListener {
 
         try {
             for (int i = 4; i < 4 + numItems; i++) {
+                if (i >= changedComponents.size()) {
+                    Util.notifyError("Component index " + i + " out of bounds. Total components: " + changedComponents.size(), new Throwable("Restrict Sell Error"));
+                    break;
+                }
+                
                 var components = changedComponents.get(i).getSiblings();
+                
+                if (components.size() < 2) {
+                    Util.notifyError("Not enough components to find item volume. Size: " + components.size() + " at index " + i, new Throwable("Restrict Sell Error"));
+                    continue;
+                }
+                
                 int volume = Integer.parseInt(components.get(1).getString().replace(",", ""));
 
-                if (components.size() > 2) {
+                if (components.size() > 3) {
                     String name = components.get(3).getString().trim();
                     SellItem newItem = new SellItem(volume, name);
                     items.add(newItem);
                 } else {
-                    Util.notifyError("Not enough components to find item name. Size: " + components.size(), new Throwable("Restrict Sell Error"));
+                    Util.notifyError("Not enough components to find item name. Size: " + components.size() + " at index " + i, new Throwable("Restrict Sell Error"));
                 }
             }
         } catch (Exception e) {
-            Util.notifyError("Error parsing sell item components", e);
+            Util.notifyError("Error parsing sell item components. NumItems: " + numItems + ", Components size: " + changedComponents.size(), e);
         }
         return items;
     }

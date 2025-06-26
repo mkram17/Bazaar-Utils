@@ -6,9 +6,10 @@ import com.github.mkram17.bazaarutils.features.*;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSell;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSellControl;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
-import com.github.mkram17.bazaarutils.misc.orderinfo.OrderData;
+import com.github.mkram17.bazaarutils.misc.CustomItemButton;
 import com.github.mkram17.bazaarutils.misc.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.misc.ItemStackCodecGsonAdapter;
+import com.github.mkram17.bazaarutils.misc.orderinfo.OrderData;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
@@ -91,6 +92,8 @@ public class BUConfig {
     public boolean disableErrorNotifications = false;
     @SerialEntry @Getter @Setter
     public boolean orderFilledSound = true;
+    @SerialEntry
+    public OrderPriceCapture orderPriceCapture = new OrderPriceCapture(true);
 
 
     public static void openGUI() {
@@ -111,12 +114,15 @@ public class BUConfig {
 
             ConfigCategory.Builder generalBuilder = ConfigCategory.createBuilder();
             generalBuilder.name(Text.literal("General"))
+                    .option(orderPriceCapture.createOption())
                     .option(flipHelper.createOption())
                     .options(outdatedItems.createOptions())
                     .option(ChatHandler.createDisableOrderFilledSound())
                     .option(stashMessages.createOption())
                     .option(priceCharts.createOption())
                     .option(orderStatusHighlight.createOption())
+                    .option(orderStatusHighlight.createFilledHighlightOption())
+                    .option(orderStatusHighlight.createOutdatedDisplayModeOption())
                     .option(createDisableErrorNotifsOption());
             if(!BUCompatibilityHelper.isAmecsReborn())
                 generalBuilder.option(createAmecsDownloadButton());
@@ -132,26 +138,41 @@ public class BUConfig {
             CustomOrder.buildOptions(customOrdersGroupBuilder);
             builder.category(CustomOrder.createOrdersCategory().group(customOrdersGroupBuilder.build()).build());
 
-            if(developerMode) {
-                builder.category(
-                        Developer.createDevBuilder()
-                                .option(Option.<Boolean>createBuilder()
-                                        .name(Text.literal("All Messages"))
-                                        .binding(developer.allMessages,
-                                                () -> developer.allMessages,
-                                                newVal -> developer.allMessages = newVal)
-                                        .controller(BUConfig::createBooleanController)
-                                        .build())
 
-                                .group(
-                                        OptionGroup.createBuilder()
-                                                .name(Text.literal("Message Options"))
-                                                .description(OptionDescription.of(Text.literal("DEVELOPER ONLY")))
-                                                .options(developer.createOptions())
-                                                .build()
-                                )
-                                .build());
+            ConfigCategory.Builder developerBuilder = Developer.createDevBuilder();
+            
+            if (developerMode) {
+                developerBuilder.option(Option.<Boolean>createBuilder()
+                        .name(Text.literal("All Messages"))
+                        .binding(developer.allMessages,
+                                () -> developer.allMessages,
+                                newVal -> developer.allMessages = newVal)
+                        .controller(BUConfig::createBooleanController)
+                        .build())
+                        .group(
+                                OptionGroup.createBuilder()
+                                        .name(Text.literal("Message Options"))
+                                        .description(OptionDescription.of(Text.literal("Configure which developer messages to show")))
+                                        .options(developer.createOptions())
+                                        .build()
+                        );
+            } else {
+                developerBuilder.option(
+                        ButtonOption.createBuilder()
+                                .name(Text.literal("Enable Developer Mode"))
+                                .description(OptionDescription.of(Text.literal("Developer mode is currently disabled. Use '/bu developer' command to enable it and access developer settings.")))
+                                .text(Text.literal("Run '/bu developer'"))
+                                .action((yaclScreen, buttonOption) -> {
+                                    // Close the config screen and run the command
+                                    MinecraftClient.getInstance().setScreen(null);
+                                    MinecraftClient.getInstance().player.networkHandler.sendChatCommand("bu developer");
+                                })
+                                .build()
+                );
             }
+            
+            builder.category(developerBuilder.build());
+
             return builder;
         }).generateScreen(parent);
     }

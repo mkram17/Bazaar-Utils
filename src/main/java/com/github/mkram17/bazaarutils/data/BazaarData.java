@@ -48,7 +48,7 @@ public class BazaarData implements BUListener {
                 return;
             }
 
-            APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
+            APIUtils.getSkyBlockBazaarWithRetry().whenComplete((reply, throwable) -> {
                 bazaarCalls++;
                 if (bazaarCalls % 10 == 0 || bazaarCalls < 5)
                     skipNextCall = true;
