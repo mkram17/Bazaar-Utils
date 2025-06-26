@@ -47,7 +47,7 @@ public class GUIUtils implements BUListener {
     }
     public static boolean inOrderScreen(){
         if(getContainerName() == null) return false;
-        return getContainerName().contains("Co-op Bazaar Orders");
+        return getContainerName().contains("Bazaar Orders");
     }
 
     public static boolean inBazaar(){

@@ -138,11 +138,11 @@ public class Util implements BUListener {
         String simpleCallingName = callingName.substring(callingName.lastIndexOf(".") + 1);
         var messageText = Text.literal("[" + simpleCallingName + "] ").formatted(Formatting.GOLD).append(Text.literal(message).formatted(Formatting.DARK_GREEN));
 
-        if(!notiType.isEnabled() && !BUConfig.get().developer.allMessages) {
-            if (BUConfig.get().developerMode)
+        if (!BUConfig.get().developerMode || (!notiType.isEnabled() && !BUConfig.get().developer.allMessages)) {
+            if (BUConfig.get().developerMode) {
                 logMessage(message);
-            else
-                return;
+            }
+            return;
         }
 
 //            LogManager.getLogger(callingName).info("[Bazaar Utils] watchedItems state: " + BUConfig.get().watchedItems);

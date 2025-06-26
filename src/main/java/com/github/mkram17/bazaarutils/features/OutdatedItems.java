@@ -31,7 +31,8 @@ public class OutdatedItems implements BUListener {
     private boolean notifyOutdated;
     @Getter @Setter
     private boolean notificationSound;
-
+    
+    private static boolean eventHandlerRegistered = false;
 
     public OutdatedItems(boolean autoOpenEnabled, boolean notifyOutdated) {
         this.autoOpenEnabled = autoOpenEnabled;
@@ -41,7 +42,9 @@ public class OutdatedItems implements BUListener {
 
     @EventHandler
     public void onOutdated(OutdatedItemEvent e){
-        if(notifyOutdated) {
+        OutdatedItems currentInstance = BUConfig.get().outdatedItems;
+        
+        if(currentInstance.notifyOutdated) {
             Text amount = Text.literal(e.getItem().getVolume() + "x ").formatted(Formatting.BOLD).formatted(Formatting.DARK_PURPLE);
             Text itemName = Text.literal(e.getItem().getName().formatted(Formatting.BOLD).formatted(Formatting.GOLD));
             MutableText message = Text.literal("[Bazaar Utils] ").formatted(Formatting.GOLD)
@@ -59,10 +62,10 @@ public class OutdatedItems implements BUListener {
                 } else
                     Util.notifyChatCommand(message, "bz");
             });
-            if(notificationSound)
+            if(currentInstance.notificationSound)
                 SoundUtil.notifyMultipleTimes(3);
         }
-        if(GUIUtils.inBazaar() || !autoOpenEnabled)
+        if(GUIUtils.inBazaar() || !currentInstance.autoOpenEnabled)
             return;
         CompletableFuture.runAsync(() ->{
             for(int i = 3; i >= 1; i--) {
@@ -111,6 +114,9 @@ public class OutdatedItems implements BUListener {
 
     @Override
     public void subscribe() {
-        eventBus.subscribe(this);
+        if (!eventHandlerRegistered) {
+            eventBus.subscribe(this);
+            eventHandlerRegistered = true;
+        }
     }
 }

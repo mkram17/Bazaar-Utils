@@ -82,7 +82,7 @@ public class Commands {
                 .executes((context) -> {
                     BUConfig.get().developerMode = !BUConfig.get().developerMode;
                     HANDLER.save();
-                    Util.notifyAll(BUConfig.get().developerMode ? "Developer mode enabled. You must restart for some changes to take effect." : "Developer mode disabled. You must restart for some changes to take effect.");
+                    Util.notifyAll(BUConfig.get().developerMode ? "Developer mode enabled. Developer commands are now available!" : "Developer mode disabled. Developer commands are now restricted.");
                     return 1;
                 })
         );
@@ -201,35 +201,41 @@ public class Commands {
                         )
                 )
         );
-        if (BUConfig.get().developerMode) {
-            bazaarutils.then(ClientCommandManager.literal("remove")
-                    .then(ClientCommandManager.argument("index", IntegerArgumentType.integer())
-                            .executes(Commands::executeRemove)
-                    )
-            );
-            bazaarutils.then(ClientCommandManager.literal("info")
-                    .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
-                                    .executes(Commands::executeInfo)
-                            )
-                    )
-            );
-            bazaarutils.then(ClientCommandManager.literal("outdated")
-                    .executes((source) -> {
-                        for (OrderData item : OrderData.getOutdatedItems()) {
-                            Util.notifyAll(item.getName() + " is outdated. Market Price: " + item.getPriceInfo().getMarketPrice() + " Order Price: " + item.getPriceInfo().getPrice());
-                        }
-                        return 1;
-                    })
-            );
-            bazaarutils.then(ClientCommandManager.literal("list")
-                    .executes(context -> {
-                                Util.notifyAll(OrderData.getVariables(OrderData::getName).toString());
-                                return 1;
-                            }
-                    )
-            );
-        }
-//
+        
+        bazaarutils.then(ClientCommandManager.literal("remove")
+                .then(ClientCommandManager.argument("index", IntegerArgumentType.integer())
+                        .executes(Commands::executeRemove)
+                )
+        );
+        bazaarutils.then(ClientCommandManager.literal("info")
+                .then((ClientCommandManager.argument("index", IntegerArgumentType.integer())
+                                .executes(Commands::executeInfo)
+                        )
+                )
+        );
+        bazaarutils.then(ClientCommandManager.literal("outdated")
+                .executes((source) -> {
+                    if (!BUConfig.get().developerMode) {
+                        source.getSource().sendError(Text.literal("This is a developer command. Enable developer mode with '/bu developer' to use it."));
+                        return 0;
+                    }
+                    for (OrderData item : OrderData.getOutdatedItems()) {
+                        Util.notifyAll(item.getName() + " is outdated. Market Price: " + item.getPriceInfo().getMarketPrice() + " Order Price: " + item.getPriceInfo().getPrice());
+                    }
+                    return 1;
+                })
+        );
+        bazaarutils.then(ClientCommandManager.literal("list")
+                .executes(context -> {
+                    if (!BUConfig.get().developerMode) {
+                        context.getSource().sendError(Text.literal("This is a developer command. Enable developer mode with '/bu developer' to use it."));
+                        return 0;
+                    }
+                    Util.notifyAll(OrderData.getVariables(OrderData::getName).toString());
+                    return 1;
+                })
+        );
+
         CommandNode<FabricClientCommandSource> bazaarutilsNode = dispatcher.register(bazaarutils);
         dispatcher.register(
                 ClientCommandManager.literal("bu")
@@ -242,6 +248,10 @@ public class Commands {
     }
 
     private static int executeRemove(CommandContext<FabricClientCommandSource> context) {
+        if (!BUConfig.get().developerMode) {
+            context.getSource().sendError(Text.literal("This is a developer command. Enable developer mode with '/bu developer' to use it."));
+            return 0;
+        }
         int index = IntegerArgumentType.getInteger(context, "index");
         String itemInfo = BUConfig.get().watchedOrders.get(index).getGeneralInfo();
         BUConfig.get().watchedOrders.remove(index);  // Changed to directly use config.watchedItems.remove()
@@ -250,6 +260,10 @@ public class Commands {
     }
 
     private static int executeInfo(CommandContext<FabricClientCommandSource> context) {
+        if (!BUConfig.get().developerMode) {
+            context.getSource().sendError(Text.literal("This is a developer command. Enable developer mode with '/bu developer' to use it."));
+            return 0;
+        }
         int index = IntegerArgumentType.getInteger(context, "index");
         Util.notifyAll(BUConfig.get().watchedOrders.get(index).getGeneralInfo());
         return 1;

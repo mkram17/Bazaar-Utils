@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.misc.orderinfo.OrderPriceInfo;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.features.OrderPriceCapture;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import lombok.Getter;
@@ -64,20 +65,31 @@ public class ChatHandler implements BUListener{
             if (messageType == messageTypes.BUYORDER || messageType == messageTypes.SELLORDER) {
                 itemName = Util.removeFormatting(siblings.get(5).getString());
                 volume = Integer.parseInt(siblings.get(3).getString().replace(",", ""));
+                
+                OrderPriceInfo.priceTypes orderType = messageType == messageTypes.SELLORDER ? 
+                    OrderPriceInfo.priceTypes.INSTABUY : OrderPriceInfo.priceTypes.INSTASELL;
+                    
+                OrderPriceCapture.ConfirmationData cachedData = OrderPriceCapture.getCachedConfirmation(itemName, volume, orderType);
+                
+                OrderData itemToAdd;
+                if (cachedData != null) {
+                    itemToAdd = new OrderData(itemName, volume, new OrderPriceInfo(cachedData.pricePerUnit, orderType));
+                    Util.notifyAll(itemName + " was added with EXACT price from confirmation: " + cachedData.pricePerUnit, Util.notificationTypes.ITEMDATA);
+                } else {
                 String totalPriceString = siblings.get(Util.findComponentIndex(siblings, "for")+1).getString().replace(",", "");
                 totalPriceString = siblings.get(Util.findComponentIndex(siblings, "for")+1).getString().replace(",", "").substring(0, totalPriceString.indexOf(" "));
                 price = Double.parseDouble(totalPriceString)/volume;
-                OrderData itemToAdd;
                 if (messageType == messageTypes.SELLORDER) {
-                    //the price calculated before is ignoring tax, so must be added to find the actual price (which is used in tooltips etc.)
                     price /= ((100 - BUConfig.get().bzTax)/100);
                     itemToAdd = new OrderData(itemName, price*volume, OrderPriceInfo.priceTypes.INSTABUY, volume);
-                } else
+                        Util.notifyAll(itemName + " was added with ESTIMATED price (no confirmation data): " + price, Util.notificationTypes.ITEMDATA);
+                    } else {
                     itemToAdd = new OrderData(itemName, price*volume, OrderPriceInfo.priceTypes.INSTASELL, volume);
+                        Util.notifyAll(itemName + " was added with exact price from buy order: " + price, Util.notificationTypes.ITEMDATA);
+                    }
+                }
 
-                //for some reason 52800046 for 4 was on hypixel as 13200011.6 but calculates to 13200011.5. current theory is that buy price wasnt fully accurate, and it rounded up. also was .2 off on sell order for it. obviously problems with big prices
                 Util.addWatchedItem(itemToAdd);
-                Util.notifyAll(itemName + " was added with a price of " + itemToAdd.getPriceInfo().getPrice(), Util.notificationTypes.ITEMDATA);
             }
 
             if (messageType == messageTypes.FILLED) {
