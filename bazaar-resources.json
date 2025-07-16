@@ -1,6 +1,6 @@
 {
 	"bazaarConversions": {
-		"test 3": "test 3",
+		"TEST:4": "Test 4",
 		"ENCHANTED_RAW_CHICKEN": "Enchanted Raw Chicken",
 		"INK_SACK:3": "Cocoa Beans",
 		"BROWN_MUSHROOM": "Brown Mushroom",
@@ -1692,6 +1692,5 @@
 		"SHARD_HIDEONRING": "Hideonring",
 		"SHARD_LEVIATHAN": "Leviathan",
 		"TENDER_WOOD": "Tender Wood"
-	},
-			"test 3": "test 3"
+	}
 }
