@@ -1,0 +1,55 @@
+# This workflow updates the SkyBlock item product id to name conversions using a TypeScript script.
+
+name: Update Bazaar Conversions
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  update-item-map:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          # Cache npm packages for faster subsequent runs
+          cache: 'npm'
+          # Point cache to the correct package-lock.json
+          cache-dependency-path: conversionupdating/package-lock.json
+
+      - name: Install dependencies
+        # Run npm install in the subdirectory
+        run: npm install
+        working-directory: ./conversionupdating
+
+      - name: Fetch and Process Item Data
+        # Run the script from the subdirectory
+        run: npx ts-node scripts/ConversionGrabber.ts
+        working-directory: ./conversionupdating
+
+      - name: Create Pull Request with Item Map
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "feat: update skyblock resource conversions"
+          committer: "GitHub Actions <actions@github.com>"
+          author: "GitHub Actions <actions@github.com>"
+          branch: "auto-update/skyblock-items"
+          delete-branch: true
+          title: "feat: Update Skyblock Resource Conversions"
+          body: |
+            This PR updates the `bazaar-conversions.json` file with the latest item ID-to-name conversions from the Hypixel API.
+
+            This was generated automatically by the workflow.
+          labels: "automated-update,data,skyblock"

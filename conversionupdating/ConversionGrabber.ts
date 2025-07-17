@@ -3,7 +3,8 @@ import * as path from 'path';
 
 const API_URL = 'https://api.hypixel.net/v2/resources/skyblock/items';
 const OUTPUT_FILE_NAME = 'bazaar-conversions.json';
-const OUTPUT_PATH = path.join(process.cwd(), OUTPUT_FILE_NAME);
+// Go up one directory from the script's location to the project root
+const OUTPUT_PATH = path.join(process.cwd(), '..', OUTPUT_FILE_NAME);
 
 interface SkyBlockItem {
     id: string;
@@ -43,7 +44,7 @@ async function generateItemMap() {
             throw new Error(`Network request failed with status ${response.status}: ${response.statusText}`);
         }
 
-        const data: SkyBlockItemsApiResponse | ApiErrorResponse = await response.json();
+        const data = await response.json();
 
         if (!isSuccessResponse(data)) {
             const cause = (data as ApiErrorResponse).cause || 'Unknown API error';

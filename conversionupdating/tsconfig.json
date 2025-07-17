@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "ts-node": {
+    // This tells ts-node to register the CommonJS loader, which resolves the error.
+    "transpileOnly": true
+  },
+  "include": ["./**/*.ts"]
+}
