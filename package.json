@@ -1,0 +1,14 @@
+{
+  "name": "hypixel-api-updater",
+  "version": "0.1.0",
+  "description": "A script to fetch data from the Hypixel API.",
+  "private": true,
+  "scripts": {
+    "update-items": "ts-node scripts/fetch-skyblock-items.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
