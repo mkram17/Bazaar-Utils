@@ -1,5 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { startCase, toLower } from 'lodash';
+import romans from 'romans';
 
 const API_URL = 'https://api.hypixel.net/v2/resources/skyblock/items';
 const OUTPUT_FILE_NAME = 'bazaar-conversions.json';
@@ -22,6 +24,53 @@ interface ApiErrorResponse {
     success: false;
     cause: string;
 }
+
+
+//thanks @fw4853 from skyblock.finance!
+const ENDS_WITH_NUMBER = /\d$/;
+
+/**
+ * Converts a Skyblock Item ID to a Human-Readable Name
+ *
+ * @deprecated prefer formatItemName
+ */
+export const idToName = (id: string): string => {
+    const nameWithoutRoman = startCase(toLower(id.replace(/^ENCHANTMENT_/, '')));
+
+    if (!ENDS_WITH_NUMBER.test(nameWithoutRoman)) return nameWithoutRoman;
+
+    const [n, ...strings] = nameWithoutRoman.split(' ').reverse() as [
+        string,
+        ...string[],
+    ];
+
+    const decimal = Number.parseInt(n, 10);
+
+    const romanNumeral = decimal <= 0 ? decimal : romans.romanize(decimal);
+
+    return [romanNumeral, ...strings].reverse().join(' ');
+};
+
+export const formatItemName = ({name, skyblockItemId,}: {
+    name: string | null
+    skyblockItemId: string
+}): string => {
+    if (name) {
+        const cleanedName = name
+            .replace(/§[0-9a-zA-Z]/g, '')
+            .replace(/%%\w+%%/g, '');
+
+        const possiblyFraggedCleanedName = skyblockItemId.startsWith('STARRED_')
+            ? `⚚ ${cleanedName}`
+            : cleanedName;
+
+        return possiblyFraggedCleanedName;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    return idToName(skyblockItemId);
+};
+
 
 /**
  * A type guard to check if the response is successful.
@@ -55,7 +104,7 @@ async function generateItemMap() {
         console.log(`Processing ${data.items.length} items...`);
 
         const itemMap = data.items.reduce((map, item) => {
-            map[item.id] = item.name;
+            map[item.id] = formatItemName({ name: item.name, skyblockItemId: item.id });
             return map;
         }, {} as Record<string, string>);
 

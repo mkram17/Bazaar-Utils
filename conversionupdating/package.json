@@ -7,8 +7,13 @@
     "update-items": "ts-node scripts/fetch-skyblock-items.ts"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.20",
     "@types/node": "^24.0.14",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "romans": "^3.1.0"
   }
 }
