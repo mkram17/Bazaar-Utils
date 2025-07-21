@@ -1,6 +1,6 @@
 {
 	"bazaarConversions": {
-		"TEST:4": "Test 4",
+		"FINAL_TEST": "Test 5",
 		"ENCHANTED_RAW_CHICKEN": "Enchanted Raw Chicken",
 		"INK_SACK:3": "Cocoa Beans",
 		"BROWN_MUSHROOM": "Brown Mushroom",
@@ -365,7 +365,7 @@
 		"AMALGAMATED_CRIMSONITE_NEW": "Amalgamated Crimsonite",
 		"AMALGAMATED_CRIMSONITE": "Amalgamated Crimsonite (Old)",
 		"TOIL_LOG": "Toil Log",
-		"SALMON_OPAL": "Salmon Opal",
+		"SALMON_OPAL": "Kaleidoscopic Mineral",
 		"AOTE_STONE": "Warped Stone",
 		"GOLDEN_BALL": "Golden Ball",
 		"MAGMA_FISH": "Magmafish",
@@ -1135,7 +1135,7 @@
 		"FTX_3070": "FTX 3070",
 		"PET_ITEM_VAMPIRE_FANG": "Vampire Fang",
 		"GREAT_CARROT_CANDY": "Great Carrot Candy",
-		"GIANT_FRAGMENT_BIGFOOT": "Bigfoot's Lasso",
+		"GIANT_FRAGMENT_BIGFOOT": "Bigfoot's Bola",
 		"MAGIC_MUSHROOM_SOUP": "Magical Mushroom Soup",
 		"SUPER_MAGIC_MUSHROOM_SOUP": "Mystical Mushroom Soup",
 		"LESSER_SOULFLOW_ENGINE": "Lesser Soulflow Engine",
