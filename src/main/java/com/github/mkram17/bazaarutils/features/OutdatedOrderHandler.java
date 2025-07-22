@@ -98,7 +98,10 @@ public class OutdatedOrderHandler implements BUListener {
                 message.append(Text.literal(". Market Price: " + order.getPriceInfo().getMarketPrice() + " Order Price: " + order.getPriceInfo().getPrice()));
             }
             Util.tickExecuteLater(2, () -> {
-                    PlayerActionUtil.notifyChatCommand(message, "managebazaarorders");
+                // A lot of the times seing order change can mean that its just 1 item posted, so usually you want to check what changed instead of canceling your order,
+                // can maybe add shift click handle for this so it will open all orders / current oredr?
+                // Its will be very useful if you have a very volatile and competitive market to not run out of 15B bazar limit quick.
+                    PlayerActionUtil.notifyChatCommand(message, "/bz" + order.getName());
             });
 
             if (notificationSound) {
