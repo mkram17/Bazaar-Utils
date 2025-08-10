@@ -7,7 +7,7 @@ const ITEMS_API_URL = 'https://api.hypixel.net/v2/resources/skyblock/items';
 const BAZAAR_API_URL = 'https://api.hypixel.net/v2/skyblock/bazaar';
 
 const OUTPUT_FILE_NAME = 'bazaar-conversions.json';
-const OUTPUT_PATH = path.join(process.cwd(), '..', OUTPUT_FILE_NAME);
+const OUTPUT_PATH = path.join(process.cwd(), OUTPUT_FILE_NAME);
 
 interface SkyBlockItem {
     id: string;
