@@ -1,0 +1,23 @@
+# Gradle
+.gradle/
+build/
+buildSrc/build/
+buildSrc/.gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
