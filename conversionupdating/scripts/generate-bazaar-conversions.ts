@@ -35,8 +35,75 @@ const PLACEHOLDER_PATTERN = /%%\w+%%/g;
 
 // Manual overrides for awkward IDs whose official item name might be null or undesirable
 const NAME_OVERRIDES: Record<string, string> = {
-    // "ENCHANTMENT_COMPACT_1": "Compact I",
-    // Add more as needed
+    // Gemstones (Rough)
+    ROUGH_AMBER_GEM: "⸕ Rough Amber Gemstone",
+    ROUGH_AMETHYST_GEM: "❈ Rough Amethyst Gemstone",
+    ROUGH_AQUAMARINE_GEM: "α Rough Aquamarine Gemstone",
+    ROUGH_CITRINE_GEM: "☘ Rough Citrine Gemstone",
+    ROUGH_JADE_GEM: "☘ Rough Jade Gemstone",
+    ROUGH_JASPER_GEM: "❁ Rough Jasper Gemstone",
+    ROUGH_ONYX_GEM: "☣ Rough Onyx Gemstone",
+    ROUGH_OPAL_GEM: "❂ Rough Opal Gemstone",
+    ROUGH_PERIDOT_GEM: "\u2618Rough Peridot Gemstone",
+    ROUGH_RUBY_GEM: "❤ Rough Ruby Gemstone",
+    ROUGH_SAPPHIRE_GEM: "✎ Rough Sapphire Gemstone",
+    ROUGH_TOPAZ_GEM: "✧ Rough Topaz Gemstone",
+
+    // Gemstones (Flawed)
+    FLAWED_AMBER_GEM: "⸕ Flawed Amber Gemstone",
+    FLAWED_AMETHYST_GEM: "❈ Flawed Amethyst Gemstone",
+    FLAWED_AQUAMARINE_GEM: "α Flawed Aquamarine Gemstone",
+    FLAWED_CITRINE_GEM: "☘ Flawed Citrine Gemstone",
+    FLAWED_JADE_GEM: "☘ Flawed Jade Gemstone",
+    FLAWED_JASPER_GEM: "❁ Flawed Jasper Gemstone",
+    FLAWED_ONYX_GEM: "☣ Flawed Onyx Gemstone",
+    FLAWED_OPAL_GEM: "❂ Flawed Opal Gemstone",
+    FLAWED_PERIDOT_GEM: "\u2618 Flawed Peridot Gemstone",
+    FLAWED_RUBY_GEM: "❤ Flawed Ruby Gemstone",
+    FLAWED_SAPPHIRE_GEM: "✎ Flawed Sapphire Gemstone",
+    FLAWED_TOPAZ_GEM: "✧ Flawed Topaz Gemstone",
+
+    // Gemstones (Fine)
+    FINE_AMBER_GEM: "⸕ Fine Amber Gemstone",
+    FINE_AMETHYST_GEM: "❈ Fine Amethyst Gemstone",
+    FINE_AQUAMARINE_GEM: "α Fine Aquamarine Gemstone",
+    FINE_CITRINE_GEM: "☘ Fine Citrine Gemstone",
+    FINE_JADE_GEM: "☘ Fine Jade Gemstone",
+    FINE_JASPER_GEM: "❁ Fine Jasper Gemstone",
+    FINE_ONYX_GEM: "☣ Fine Onyx Gemstone",
+    FINE_OPAL_GEM: "❂ Fine Opal Gemstone",
+    FINE_PERIDOT_GEM: "\u2618 Fine Peridot Gemstone",
+    FINE_RUBY_GEM: "❤ Fine Ruby Gemstone",
+    FINE_SAPPHIRE_GEM: "✎ Fine Sapphire Gemstone",
+    FINE_TOPAZ_GEM: "✧ Fine Topaz Gemstone",
+
+    // Gemstones (Flawless)
+    FLAWLESS_AMBER_GEM: "⸕ Flawless Amber Gemstone",
+    FLAWLESS_AMETHYST_GEM: "❈ Flawless Amethyst Gemstone",
+    FLAWLESS_AQUAMARINE_GEM: "α Flawless Aquamarine Gemstone",
+    FLAWLESS_CITRINE_GEM: "☘ Flawless Citrine Gemstone",
+    FLAWLESS_JADE_GEM: "☘ Flawless Jade Gemstone",
+    FLAWLESS_JASPER_GEM: "❁ Flawless Jasper Gemstone",
+    FLAWLESS_ONYX_GEM: "☣ Flawless Onyx Gemstone",
+    FLAWLESS_OPAL_GEM: "❂ Flawless Opal Gemstone",
+    FLAWLESS_PERIDOT_GEM: "\u2618 Flawless Peridot Gemstone",
+    FLAWLESS_RUBY_GEM: "❤ Flawless Ruby Gemstone",
+    FLAWLESS_SAPPHIRE_GEM: "✎ Flawless Sapphire Gemstone",
+    FLAWLESS_TOPAZ_GEM: "✧ Flawless Topaz Gemstone",
+
+    // Gemstones (Perfect)
+    PERFECT_AMBER_GEM: "⸕ Perfect Amber Gemstone",
+    PERFECT_AMETHYST_GEM: "❈ Perfect Amethyst Gemstone",
+    PERFECT_AQUAMARINE_GEM: "α Perfect Aquamarine Gemstone",
+    PERFECT_CITRINE_GEM: "☘ Perfect Citrine Gemstone",
+    PERFECT_JADE_GEM: "☘ Perfect Jade Gemstone",
+    PERFECT_JASPER_GEM: "❁ Perfect Jasper Gemstone",
+    PERFECT_ONYX_GEM: "☣ Perfect Onyx Gemstone",
+    PERFECT_OPAL_GEM: "❂ Perfect Opal Gemstone",
+    PERFECT_PERIDOT_GEM: "\u2618 Perfect Peridot Gemstone",
+    PERFECT_RUBY_GEM: "❤ Perfect Ruby Gemstone",
+    PERFECT_SAPPHIRE_GEM: "✎ Perfect Sapphire Gemstone",
+    PERFECT_TOPAZ_GEM: "✧ Perfect Topaz Gemstone",
 };
 
 /**
