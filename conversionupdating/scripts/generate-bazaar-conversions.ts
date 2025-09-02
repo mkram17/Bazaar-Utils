@@ -35,6 +35,10 @@ const PLACEHOLDER_PATTERN = /%%\w+%%/g;
 
 // Manual overrides for awkward IDs whose official item name might be null or undesirable
 const NAME_OVERRIDES: Record<string, string> = {
+    // Ingots
+    ENCHANTED_IRON: "Enchanted Iron Ingot",
+    ENCHANTED_GOLD: "Enchanted Gold Ingot",
+    
     // Gemstones (Rough)
     ROUGH_AMBER_GEM: "⸕ Rough Amber Gemstone",
     ROUGH_AMETHYST_GEM: "❈ Rough Amethyst Gemstone",
