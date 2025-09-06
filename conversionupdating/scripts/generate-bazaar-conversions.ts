@@ -35,6 +35,19 @@ const PLACEHOLDER_PATTERN = /%%\w+%%/g;
 
 // Manual overrides for awkward IDs whose official item name might be null or undesirable
 const NAME_OVERRIDES: Record<string, string> = {
+    // Ultimate Enchants that still have "Ultimate" in the name
+    ENCHANTMENT_ULTIMATE_WISE_1: "Ultimate Wise I",
+    ENCHANTMENT_ULTIMATE_WISE_2: "Ultimate Wise II",
+    ENCHANTMENT_ULTIMATE_WISE_3: "Ultimate Wise III",
+    ENCHANTMENT_ULTIMATE_WISE_4: "Ultimate Wise IV",
+    ENCHANTMENT_ULTIMATE_WISE_5: "Ultimate Wise V",
+    
+    ENCHANTMENT_ULTIMATE_JERRY_1: "Ultimate Jerry I",
+    ENCHANTMENT_ULTIMATE_JERRY_2: "Ultimate Jerry II",
+    ENCHANTMENT_ULTIMATE_JERRY_3: "Ultimate Jerry III",
+    ENCHANTMENT_ULTIMATE_JERRY_4: "Ultimate Jerry IV",
+    ENCHANTMENT_ULTIMATE_JERRY_5: "Ultimate Jerry V",
+    
     // Ingots
     ENCHANTED_IRON: "Enchanted Iron Ingot",
     ENCHANTED_GOLD: "Enchanted Gold Ingot",
