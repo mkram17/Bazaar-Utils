@@ -159,6 +159,12 @@ export const formatItemName = ({
             .replace(PLACEHOLDER_PATTERN, '')
             .trim();
 
+        // Handle shard items: convert "Shard [Name]" to "[Name] Shard"
+        if (skyblockItemId.startsWith('SHARD_') && cleaned.startsWith('Shard ')) {
+            const shardName = cleaned.substring(6); // Remove "Shard " prefix
+            return `${shardName} Shard`;
+        }
+
         // Keep your STARRED_ handling (fragged items)
         if (skyblockItemId.startsWith('STARRED_')) {
             return `⚚ ${cleaned}`;
