@@ -125,9 +125,17 @@ const NAME_OVERRIDES: Record<string, string> = {
 
 /**
  * Legacy fallback prettifier (kept from original).
+ * Modified to remove "ULTIMATE_" prefix for enchantments not in NAME_OVERRIDES.
  */
 export const idToName = (id: string): string => {
-    const nameWithoutRoman = startCase(toLower(id.replace(/^ENCHANTMENT_/, '')));
+    // For enchantments, remove both ENCHANTMENT_ and ULTIMATE_ prefixes
+    // unless they have manual overrides (like Ultimate Wise and Ultimate Jerry)
+    let cleanId = id.replace(/^ENCHANTMENT_/, '');
+    if (cleanId.startsWith('ULTIMATE_') && !NAME_OVERRIDES[id]) {
+        cleanId = cleanId.replace(/^ULTIMATE_/, '');
+    }
+    
+    const nameWithoutRoman = startCase(toLower(cleanId));
     if (!ENDS_WITH_NUMBER.test(nameWithoutRoman)) return nameWithoutRoman;
 
     const [n, ...strings] = nameWithoutRoman.split(' ').reverse() as [string, ...string[]];
