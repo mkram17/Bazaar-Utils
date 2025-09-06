@@ -41,17 +41,17 @@ const NAME_OVERRIDES: Record<string, string> = {
     ENCHANTMENT_ULTIMATE_WISE_3: "Ultimate Wise III",
     ENCHANTMENT_ULTIMATE_WISE_4: "Ultimate Wise IV",
     ENCHANTMENT_ULTIMATE_WISE_5: "Ultimate Wise V",
-    
+
     ENCHANTMENT_ULTIMATE_JERRY_1: "Ultimate Jerry I",
     ENCHANTMENT_ULTIMATE_JERRY_2: "Ultimate Jerry II",
     ENCHANTMENT_ULTIMATE_JERRY_3: "Ultimate Jerry III",
     ENCHANTMENT_ULTIMATE_JERRY_4: "Ultimate Jerry IV",
     ENCHANTMENT_ULTIMATE_JERRY_5: "Ultimate Jerry V",
-    
+
     // Ingots
     ENCHANTED_IRON: "Enchanted Iron Ingot",
     ENCHANTED_GOLD: "Enchanted Gold Ingot",
-    
+
     // Gemstones (Rough)
     ROUGH_AMBER_GEM: "⸕ Rough Amber Gemstone",
     ROUGH_AMETHYST_GEM: "❈ Rough Amethyst Gemstone",
@@ -134,7 +134,7 @@ export const idToName = (id: string): string => {
     if (cleanId.startsWith('ULTIMATE_') && !NAME_OVERRIDES[id]) {
         cleanId = cleanId.replace(/^ULTIMATE_/, '');
     }
-    
+
     const nameWithoutRoman = startCase(toLower(cleanId));
     if (!ENDS_WITH_NUMBER.test(nameWithoutRoman)) return nameWithoutRoman;
 
@@ -165,8 +165,15 @@ export const formatItemName = ({
         }
         return cleaned;
     }
+
+    const itemName = idToName(skyblockItemId);
+    // Handle shard items: convert "Shard [Name]" to "[Name] Shard"
+    if (skyblockItemId.startsWith('SHARD_')  && itemName.startsWith('Shard ')) {
+        const shardName = itemName.substring(6); // Remove "Shard " prefix
+        return `${shardName} Shard`;
+    }
     // Fallback
-    return idToName(skyblockItemId);
+    return itemName;
 };
 
 function assertSuccess<T extends { success: boolean }>(resp: any, guard: (r: any) => r is T, label: string): T {
