@@ -128,22 +128,10 @@ const NAME_OVERRIDES: Record<string, string> = {
  * Modified to remove "ULTIMATE_" prefix for enchantments not in NAME_OVERRIDES.
  */
 export const idToName = (id: string): string => {
-    // Check if this item has a manual override - if so, we should not apply the transformation
-    if (NAME_OVERRIDES[id]) {
-        // This will be handled by formatItemName, so we shouldn't modify it here
-        const nameWithoutRoman = startCase(toLower(id.replace(/^ENCHANTMENT_/, '')));
-        if (!ENDS_WITH_NUMBER.test(nameWithoutRoman)) return nameWithoutRoman;
-
-        const [n, ...strings] = nameWithoutRoman.split(' ').reverse() as [string, ...string[]];
-        const decimal = Number.parseInt(n, 10);
-        const romanNumeral = decimal <= 0 ? decimal : romans.romanize(decimal);
-        return [romanNumeral, ...strings].reverse().join(' ');
-    }
-
     // For enchantments, remove both ENCHANTMENT_ and ULTIMATE_ prefixes
     // unless they have manual overrides (like Ultimate Wise and Ultimate Jerry)
     let cleanId = id.replace(/^ENCHANTMENT_/, '');
-    if (cleanId.startsWith('ULTIMATE_')) {
+    if (cleanId.startsWith('ULTIMATE_') && !NAME_OVERRIDES[id]) {
         cleanId = cleanId.replace(/^ULTIMATE_/, '');
     }
     
