@@ -77,7 +77,9 @@ public class InstaSellHighlight implements BUListener {
 
     private List<ItemStack> getInventoryStacks(List<String> names){
         List<ItemStack> inventoryStacks = new ArrayList<>();
-        var inventory = getInventory().get();
+        var inventoryOpt = getInventory();
+        if (inventoryOpt.isEmpty()) return Collections.emptyList();
+        var inventory = inventoryOpt.get();
         var stacks = inventory.getMainStacks();
 
         stacks.forEach(itemStack -> {
@@ -101,7 +103,7 @@ public class InstaSellHighlight implements BUListener {
         EVENT_BUS.subscribe(this);
     }
     public OptionalInt getColorFromIndex(int slotIndex) {
-        if(highlightedSlotIndexes.stream().noneMatch(i -> i.equals(slotIndex)))
+        if (!highlightedSlotIndexes.contains(slotIndex))
             return OptionalInt.empty();
 
         float transparency = 0.7f;

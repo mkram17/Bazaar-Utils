@@ -43,7 +43,7 @@ public class OrderStatusHighlight implements BUListener {
 
     public static BazaarOrder getHighlightedOrder(int slotIndex) {
         var order = OrderInfoUtil.getUserOrderFromIndex(slotIndex);
-        return order.filter(bazaarOrder -> bazaarOrder.getFillStatus() == BazaarOrder.Statuses.SET).orElse(null);
+        return order.filter(bazaarOrder -> bazaarOrder.getFillStatus() != null && bazaarOrder.getFillStatus() == BazaarOrder.Statuses.SET).orElse(null);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class OrderStatusHighlight implements BUListener {
 
             int index = -1;
             for (Slot slot : handledScreen.getScreenHandler().slots) {
-                if (!slot.hasStack() || !(slot.getStack() == stack))
+                if (!slot.hasStack() || !slot.getStack().equals(stack))
                     continue;
                 index = slot.getIndex();
             }
@@ -106,7 +106,7 @@ public class OrderStatusHighlight implements BUListener {
 
             int index = -1;
             for (Slot slot : handledScreen.getScreenHandler().slots) {
-                if (!slot.hasStack() || !(slot.getStack() == stack))
+                if (!slot.hasStack() || !(slot.getStack().equals(stack)))
                     continue;
                 index = slot.getIndex();
             }

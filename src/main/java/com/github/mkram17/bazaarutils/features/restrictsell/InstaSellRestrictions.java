@@ -62,7 +62,7 @@ public class InstaSellRestrictions implements BUListener {
 
     @EventHandler
     private void onClick(SlotClickEvent clickEvent){
-        if(!enabled || blockClicks || clickEvent.slot.getIndex() != INSTA_SELL_SLOT_INDEX)
+        if(!enabled || !blockClicks || clickEvent.slot.getIndex() != INSTA_SELL_SLOT_INDEX)
             return;
         if (safetyClicks < safetyClicksRequired) {
             safetyClicks++;
