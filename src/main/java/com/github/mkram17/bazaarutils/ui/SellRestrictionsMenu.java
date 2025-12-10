@@ -38,12 +38,13 @@ public class SellRestrictionsMenu extends BaseOwoScreen<FlowLayout> {
         grid.horizontalAlignment(HorizontalAlignment.CENTER);
         grid.padding(Insets.of(15));
         // Top-left: New Order (absolute)
-        grid.child(
+        var newOrderWrapper = Containers.horizontalFlow(Sizing.fill(100), Sizing.content());
+        newOrderWrapper.horizontalAlignment(HorizontalAlignment.CENTER);
+        newOrderWrapper.child(
                 generateNewOrderParent()
-                        .verticalAlignment(VerticalAlignment.CENTER),
-                0,
-                0
+                        .verticalAlignment(VerticalAlignment.CENTER)
         );
+        grid.child(newOrderWrapper, 0, 0);
 
         // Center: Orders (wrap in full-size container that centers its child)
         FlowLayout centered = Containers.verticalFlow(Sizing.content(), Sizing.content());
