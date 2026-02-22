@@ -116,6 +116,18 @@ val buildtimeInjectionTask = tasks.register<com.github.mkram17.bazaarutils.build
     classesDir.set(tasks.compileJava.get().destinationDirectory)
 }
 
+val generateModuleRegistry = tasks.register<com.github.mkram17.bazaarutils.build.ModuleRegistryGeneratingTask>("generateModuleRegistry") {
+    group = "build"
+    sourcesDir.set(rootProject.file("src/main/java"))
+    outputDir.set(layout.buildDirectory.dir("generated/modules"))
+}
+
+sourceSets {
+    main {
+        java.srcDir(generateModuleRegistry.flatMap { it.outputDir })
+    }
+}
+
 tasks {
     classes {
         dependsOn(buildtimeInjectionTask)

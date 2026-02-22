@@ -22,6 +22,10 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
+
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,6 +53,8 @@ public class BazaarUtils implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        BazaarUtilsPreInitModules.init();
+
         registerDataComponents();
 
         BUCompatibilityHelper.initializePatches();
@@ -56,7 +62,12 @@ public class BazaarUtils implements ClientModInitializer {
         getModProperties();
         registerEventBus();
         registerCommands();
+
+        BazaarUtilsModules.init();
+
         subscribeEvents();
+
+        BazaarUtilsLateInitModules.init();
     }
 
     private static void registerDataComponents() {
