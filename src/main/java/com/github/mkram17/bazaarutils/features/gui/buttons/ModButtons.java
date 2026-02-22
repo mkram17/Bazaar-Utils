@@ -92,7 +92,7 @@ public class ModButtons {
         ButtonsConfig.WidgetButton config = ButtonsConfig.OPEN_ORDERS_BUTTON;
 
         int buttonX = dimensions.x() - config.size - config.spacing;
-        int currentButtonY = dimensions.y() + config.spacing + (ButtonsConfig.OPEN_SETTINGS_BUTTON.size + config.spacing);
+        int currentButtonY = dimensions.y() + config.spacing + ((ButtonsConfig.OPEN_SETTINGS_BUTTON.enabled ? ButtonsConfig.OPEN_SETTINGS_BUTTON.size : 0) + config.spacing);
 
         return new ItemSlotButtonWidget(
                 buttonX,
