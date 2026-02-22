@@ -28,18 +28,18 @@
   "bazaarutils.config.chat.category.value": "Chat",
   "bazaarutils.config.chat.category.description": "Configurations for the chat features of the mod",
 
+  "bazaarutils.config.chat.separator.useless_bazaar_notifications_remover.value": "Useless Bazaar Notifications",
+
   "bazaarutils.config.chat.useless_bazaar_notifications_remover.value": "Useless Bazaar Notifications",
   "bazaarutils.config.chat.useless_bazaar_notifications_remover.description": "Enables to remove some of the transient messages sent to the chat by the Bazaar when interacting with it.",
 
-  "bazaarutils.config.chat.useless_bazaar_notifications_remover.enabled.value": "Enabled",
+  "bazaarutils.config.chat.useless_bazaar_notifications_remover:excluded_notifications.value": "Excluded Notifications",
+  "bazaarutils.config.chat.useless_bazaar_notifications_remover:excluded_notifications.description": "The list of transient messages/notifications to be excluded/unallowed from the chat",
 
-  "bazaarutils.config.chat.useless_bazaar_notifications_remover.excluded_notifications.value": "Excluded Notifications",
-  "bazaarutils.config.chat.useless_bazaar_notifications_remover.excluded_notifications.description": "The list of transient messages/notifications to be excluded/unallowed from the chat",
+  "bazaarutils.config.chat.separator.stash_messages_remover.value": "Stash Messages",
 
   "bazaarutils.config.chat.stash_messages_remover.value": "Stash Messages",
   "bazaarutils.config.chat.stash_messages_remover.description": "Enables to remove the messages sent to the chat remembering to pick up your stash.",
-
-  "bazaarutils.config.chat.stash_messages_remover.enabled.value": "Enabled",
 
   "bazaarutils.config.buttons.category.value": "Buttons",
   "bazaarutils.config.buttons.category.description": "Configurations for the buttons to be injected/handled by the mod",

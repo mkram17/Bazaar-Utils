@@ -1,14 +1,12 @@
 package com.github.mkram17.bazaarutils.features.chat;
 
+import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.features.util.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.teamresourceful.resourcefulconfig.api.types.info.TooltipProvider;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -16,7 +14,7 @@ import net.minecraft.text.Text;
 
 import java.util.Arrays;
 
-@ConfigObject
+@Module
 public class UselessBazaarNotificationsRemover extends BUListener implements BUToggleableFeature {
     public enum TransientBazaarMessages implements TooltipProvider {
         CANCELLING_ORDER("[Bazaar] Cancelling order..."),
@@ -41,53 +39,31 @@ public class UselessBazaarNotificationsRemover extends BUListener implements BUT
         }
     }
 
-    @Getter
-    @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.chat.useless_bazaar_notifications_remover.enabled.value"
-    )
-    public boolean enabled;
+    public boolean isEnabled() {
+        return ChatConfig.USELESS_BAZAAR_NOTIFICATIONS_REMOVER_TOGGLE;
+    }
 
-    @ConfigEntry(id = "first_time_removed")
-    @ConfigOption.Hidden
+    public TransientBazaarMessages[] getExcludedNotifications() {
+        return ChatConfig.USELESS_BAZAAR_NOTIFICATIONS_REMOVER_EXCLUDED_NOTIFICATIONS;
+    }
+
+    //    We need to consider whether we store this to a DataStorage interface or just keep it to a per-boot level
     public boolean firstTimeRemoved = true;
 
-    @ConfigEntry(
-            id = "excluded_notifications",
-            translation = "bazaarutils.config.chat.useless_bazaar_notifications_remover.excluded_notifications.value"
-    )
-    @Comment(
-            value = "The list of transient messages/notifications to be excluded/unallowed from the chat",
-            translation = "bazaarutils.config.chat.useless_bazaar_notifications_remover.excluded_notifications.description"
-    )
-    @ConfigOption.Draggable()
-    public static TransientBazaarMessages[] excludedNotifications = new TransientBazaarMessages[]{
-            TransientBazaarMessages.CANCELLING_ORDER,
-            TransientBazaarMessages.PUTTING_GOODS_IN_ESCROW,
-            TransientBazaarMessages.SUBMITTING_BUY_ORDER,
-            TransientBazaarMessages.CLAIMING_ORDER,
-            TransientBazaarMessages.SUBMITTING_SELL_OFFER,
-            TransientBazaarMessages.EXECUTING_INSTANT_SELL,
-            TransientBazaarMessages.EXECUTING_INSTANT_BUY,
-            TransientBazaarMessages.CLAIMING_ORDERS,
-    };
-
-    public UselessBazaarNotificationsRemover(boolean enabled) {
-        this.enabled = enabled;
-    }
+    public UselessBazaarNotificationsRemover() {}
 
     private void registerUselessNotificationDetector(){
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
-            if (!enabled) {
+            if (!isEnabled()) {
                 return true;
             }
 
             if (isNotificationUseless(message.getString())) {
                 if (firstTimeRemoved) {
                     firstTimeRemoved = false;
+
                     Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyAll("TIP - Useless Bazaar notifications such as \"Putting goods in escrow...\" are removed by default! " +
                             "To disable this feature, uncheck the \"Remove Useless Bazaar Notifications\" option in the Bazaar Utils settings."));
-                    ConfigUtil.scheduleConfigSave();
                 }
 
                 return false;
@@ -97,8 +73,8 @@ public class UselessBazaarNotificationsRemover extends BUListener implements BUT
         });
     }
 
-    private static boolean isNotificationUseless(String message) {
-        return Arrays.stream(excludedNotifications).anyMatch(n -> message.contains(n.getMessage()));
+    private boolean isNotificationUseless(String message) {
+        return Arrays.stream(getExcludedNotifications()).anyMatch(n -> message.contains(n.getMessage()));
     }
 
     @Override

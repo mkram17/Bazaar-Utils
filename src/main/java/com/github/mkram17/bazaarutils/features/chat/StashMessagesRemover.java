@@ -1,12 +1,13 @@
 package com.github.mkram17.bazaarutils.features.chat;
 
+import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.features.util.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -14,22 +15,8 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import java.util.ArrayList;
 import java.util.Map;
 
-@ConfigObject
+@Module
 public class StashMessagesRemover extends BUListener implements BUToggleableFeature {
-    @Getter
-    @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.chat.stash_messages_remover.enabled.value"
-    )
-    public boolean enabled;
-
-    @Getter
-    @ConfigEntry(id = "stash_previously_claimed")
-    @ConfigOption.Hidden
-    public boolean stashPreviouslyClaimed = false;
-
-    private transient ArrayList<String> pastMessages = new ArrayList<>();
-
     private static final Map<String, Integer> REMOVE_MAP = Map.of(
             "materials stashed away", 0,
             "types of materials stashed", 1,
@@ -38,9 +25,16 @@ public class StashMessagesRemover extends BUListener implements BUToggleableFeat
 
     private static final int SEQUENCE_LENGTH = REMOVE_MAP.size();
 
-    public StashMessagesRemover(boolean enabled) {
-        this.enabled = enabled;
+    public boolean isEnabled() {
+        return ChatConfig.STASH_MESSAGES_REMOVER_TOGGLE;
     }
+
+//    We need to consider whether we store this to a DataStorage interface or just keep it to a per-boot level
+    public boolean stashPreviouslyClaimed = false;
+
+    private transient ArrayList<String> pastMessages = new ArrayList<>();
+
+    public StashMessagesRemover() {}
 
     private void registerStashClaimDetector() {
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
@@ -52,7 +46,6 @@ public class StashMessagesRemover extends BUListener implements BUToggleableFeat
                         "TIP - To claim stash more easily and quickly, use the Stash Helper keybind, " +
                                 "which closes the bazaar and claims your stash! To disable stash messages, " +
                                 "enable the \"Disable Stash Messages\" option in the Bazaar Utils config."));
-                ConfigUtil.scheduleConfigSave();
             }
         });
     }
