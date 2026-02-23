@@ -9,17 +9,8 @@
     "second line!"
   ],
 
-  "bazaarutils.config.general.category.value": "General Config",
-  "bazaarutils.config.general.category.description": "Definitions for general data of the mod",
-
-  "bazaarutils.config.general.user_bazaar_tax.value": "Bazaar Tax (%)",
-  "bazaarutils.config.general.user_bazaar_tax.description": "The bazaar tax percentage of your current profile considering all possible upgrades.",
-
-  "bazaarutils.config.general.reset_bookmarks.value": "Saved Bookmarks",
-  "bazaarutils.config.general.reset_bookmarks.runnable": "Reset",
-
-  "bazaarutils.config.general.reset_limits.value": "Daily Order Limits",
-  "bazaarutils.config.general.reset_limits.runnable": "Reset",
+  "bazaarutils.config.user_bazaar_tax.value": "Bazaar Tax (%)",
+  "bazaarutils.config.user_bazaar_tax.description": "The bazaar tax percentage of your current profile considering all possible upgrades.",
 
   "bazaarutils.config.meta.mod_version.value": "Mod Version",
   "bazaarutils.config.meta.resources_sha.value": "Resources SHA",
@@ -83,6 +74,9 @@
 
   "bazaarutils.config.buttons.bookmarks.toggle_bookmark.value": "Bookmark Item",
   "bazaarutils.config.buttons.bookmarks.toggle_bookmark.description": "Adds a button to an items' page to toggle a quick access button to search the same item on the Bazaar.",
+
+  "bazaarutils.config.buttons.bookmarks.reset_bookmarks.value": "Saved Bookmarks",
+  "bazaarutils.config.buttons.bookmarks.reset_bookmarks.runnable": "Reset",
 
   "bazaarutils.config.buttons.button:container.enabled.value": "Enabled",
   "bazaarutils.config.buttons.button:container.enabled.description": "Whether the button will be registered or not",
@@ -193,6 +187,9 @@
     "\n \n",
     "The Bazaar limits each profile to order/offer tradeables for up to 15,000,000,000.00 coins each day."
   ],
+  
+  "bazaarutils.config.overlays.bazaar_limits_visualizer:reset_limits.value": "Daily Order Limits",
+  "bazaarutils.config.overlays.bazaar_limits_visualizer:reset_limits.runnable": "Reset",
 
   "bazaarutils.config.overlays.bazaar_limits_visualizer.enabled.value": "Enabled",
 

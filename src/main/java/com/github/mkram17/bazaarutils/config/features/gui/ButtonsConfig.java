@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.config.features.gui;
 
+import com.github.mkram17.bazaarutils.features.gui.buttons.Bookmarks;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import lombok.Getter;
 
@@ -93,6 +94,15 @@ public final class ButtonsConfig {
                 translation = "bazaarutils.config.buttons.bookmarks.toggle_bookmark.description"
         )
         public static final SmallContainerButton TOGGLE_BOOKMARK_BUTTON = new SmallContainerButton(true, 0);
+
+        @ConfigButton(
+                text = "bazaarutils.config.buttons.bookmarks.reset_bookmarks.runnable",
+                title = "bazaarutils.config.buttons.bookmarks.reset_bookmarks.value"
+        )
+        public static final Runnable RESET_BOOKMARKS_BUTTON = () -> {
+            Bookmarks.bookmarks().clear();
+            Bookmarks.saveBookmarks();
+        };
     }
 
     @ConfigObject

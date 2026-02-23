@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.events.handler;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
-import com.github.mkram17.bazaarutils.config.data.GeneralDataConfig;
 import com.github.mkram17.bazaarutils.events.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
@@ -258,7 +257,7 @@ public class ChatHandler {
 
         if (isSellOrder) {
             //the price calculated before is ignoring tax, so must be added to find the actual price (which is used in tooltips etc.)
-            price /= ((100 - GeneralDataConfig.userBazaarTax) / 100);
+            price /= ((100 - BUConfig.userBazaarTax) / 100);
         }
 
         OrderType orderType = isSellOrder ? OrderType.SELL : OrderType.BUY;

@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.config.data;
+package com.github.mkram17.bazaarutils.config.hidden;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.Category;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;

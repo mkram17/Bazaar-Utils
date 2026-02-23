@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.utils;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
-import com.github.mkram17.bazaarutils.config.data.GeneralDataConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
@@ -89,7 +88,7 @@ public class BUCommands {
         bazaarutils.then(ClientCommandManager.literal("tax")
                 .then((ClientCommandManager.argument("amount", DoubleArgumentType.doubleArg(1, 1.25))
                                 .executes((context) -> {
-                                    GeneralDataConfig.userBazaarTax = DoubleArgumentType.getDouble(context, "amount") / 100;
+                                    BUConfig.userBazaarTax = DoubleArgumentType.getDouble(context, "amount") / 100;
                                     return 1;
                                 })
                         )
