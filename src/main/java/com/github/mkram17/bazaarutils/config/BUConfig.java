@@ -12,6 +12,8 @@ import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
+import com.github.mkram17.bazaarutils.features.gui.buttons.Bookmarks;
+import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
 import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.JsonObject;
@@ -35,7 +37,8 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
                 OverlaysConfig.class,
                 NotificationsConfig.class,
                 DeveloperConfig.class
-        }
+        },
+        version = BUConfig.VERSION
 )
 @ConfigInfo(
         title = "Bazaar Utils",
