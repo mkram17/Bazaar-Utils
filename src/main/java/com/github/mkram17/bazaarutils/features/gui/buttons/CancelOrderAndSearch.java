@@ -1,57 +1,25 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons;
 
+import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.ui.CustomItemButton;
-import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import lombok.Getter;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 @ConfigObject
 public class CancelOrderAndSearch extends BUListener implements CustomItemButton {
-    @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.buttons.button.enabled.value"
-    )
-    @Comment(
-            value = "Whether the button will be registered or not",
-            translation = "bazaarutils.config.buttons.button.enabled.description"
-    )
-    public boolean enabled;
-
-    @Getter
-    @ConfigEntry(
-            id = "slot_number",
-            translation = "bazaarutils.config.buttons.button.slot_number.value"
-    )
-    @Comment(
-            value = "The container slot where the button will be registered at",
-            translation = "bazaarutils.config.buttons.button.slot_number.description"
-    )
-    @ConfigOption.Range(min = 0, max = 35)
-    public int slotNumber;
-
-    @ConfigEntry(
-            id = "item_id",
-            translation = "bazaarutils.config.buttons.button.item_id.value"
-    )
-    @Comment(
-            value = "The item id which will be used as a reference to construct the button (make sure it is valid)",
-            translation = "bazaarutils.config.buttons.button.item_id.description"
-    )
-    public String itemId;
+    @Override
+    public int getSlotNumber() {
+        return ButtonsConfig.CANCEL_ORDER_AND_SEARCH.slotNumber;
+    }
 
     @Getter
     private transient ItemStack replacementItem;
 
-    public CancelOrderAndSearch(boolean enabled, int slotNumber, String itemId) {
-        this.enabled = enabled;
-        this.slotNumber = slotNumber;
-        this.itemId = itemId;
+    public CancelOrderAndSearch() {
         this.replacementItem = Items.BLUE_TERRACOTTA.getDefaultStack();
     }
 

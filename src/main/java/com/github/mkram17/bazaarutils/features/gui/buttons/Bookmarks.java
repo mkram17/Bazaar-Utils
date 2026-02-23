@@ -13,13 +13,10 @@ import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
 import com.github.mkram17.bazaarutils.ui.CustomItemButton;
 import com.github.mkram17.bazaarutils.ui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.*;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
-import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import meteordevelopment.orbit.EventHandler;
@@ -39,7 +36,7 @@ import net.minecraft.util.Identifier;
 import java.util.*;
 
 @Slf4j
-@ConfigObject
+@Module
 public class Bookmarks extends BUListener implements CustomItemButton {
     public record Bookmark(
             String name,
@@ -80,47 +77,25 @@ public class Bookmarks extends BUListener implements CustomItemButton {
                 .findAny();
     }
 
+    public static boolean isRegistryEnabled() {
+        return ButtonsConfig.BookmarksConfig.TOGGLE_BOOKMARK_BUTTON.enabled;
+    }
+
+    public static boolean isButtonEnabled() {
+        return ButtonsConfig.BookmarksConfig.OPEN_BOOKMARK_BUTTON.enabled;
+    }
+
+    @Override
+    public int getSlotNumber() {
+        return ButtonsConfig.BookmarksConfig.TOGGLE_BOOKMARK_BUTTON.slotNumber;
+    }
+
     @Getter
     private transient ItemStack replacementItem;
 
-    @Getter
-    @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.buttons.button.enabled.value"
-    )
-    public boolean enabled;
 
-    @ConfigEntry(
-            id = "size",
-            translation = "bazaarutils.config.buttons.button.size.value"
-    )
-    public int size;
-
-    @ConfigEntry(
-            id = "spacing",
-            translation = "bazaarutils.config.buttons.button.spacing.value"
-    )
-    public int spacing;
-
-    @Getter
-    @ConfigEntry(
-            id = "slot_number",
-            translation = "bazaarutils.config.buttons.button.slot_number.value"
-    )
-    @Comment(
-            value = "The container slot where the button will be registered at",
-            translation = "bazaarutils.config.buttons.button.slot_number.description"
-    )
-    @ConfigOption.Range(min = 0, max = 35)
-    public int slotNumber;
-
-    public Bookmarks(boolean enabled, int slotNumber, ItemStack replacementItem, int size, int spacing) {
+    public Bookmarks() {
         super();
-        this.enabled = enabled;
-        this.size = size;
-        this.spacing = spacing;
-        this.slotNumber = slotNumber;
-        this.replacementItem = replacementItem;
     }
 
     private boolean inCorrectScreen() {
@@ -129,7 +104,7 @@ public class Bookmarks extends BUListener implements CustomItemButton {
 
     @EventHandler
     private void onReplaceItemEvent(ReplaceItemEvent event) {
-        if (!enabled || !shouldReplaceItem(event) || !inCorrectScreen()) {
+        if (!isRegistryEnabled() || !shouldReplaceItem(event) || !inCorrectScreen()) {
             return;
         }
 
@@ -143,7 +118,7 @@ public class Bookmarks extends BUListener implements CustomItemButton {
 
     @EventHandler
     private void onClick(SlotClickEvent event) {
-        if (!enabled || !wasButtonSlotClicked(event) || !inCorrectScreen()) {
+        if (!isRegistryEnabled() || !wasButtonSlotClicked(event) || !inCorrectScreen()) {
             return;
         }
 
@@ -156,7 +131,7 @@ public class Bookmarks extends BUListener implements CustomItemButton {
         boolean bookmarked = current.isPresent();
 
         this.replacementItem = new ItemStack(
-                bookmarked ? Items.GREEN_STAINED_GLASS_PANE : Items.RED_STAINED_GLASS_PANE
+                bookmarked ? Items.RED_STAINED_GLASS_PANE : Items.GREEN_STAINED_GLASS_PANE
         );
 
         replacementItem.set(
@@ -217,7 +192,7 @@ public class Bookmarks extends BUListener implements CustomItemButton {
 
     @RegisterWidget
     public static List<ItemSlotButtonWidget> getWidgets() {
-        if (!ButtonsConfig.BOOKMARKS.enabled) {
+        if (!isButtonEnabled()) {
             return Collections.emptyList();
         }
 
@@ -232,8 +207,8 @@ public class Bookmarks extends BUListener implements CustomItemButton {
 
         ItemSlotButtonWidget.ScreenWidgetDimensions dimensions = ItemSlotButtonWidget.getSafeScreenDimensions(screen, screenInfo.getScreenName());
 
-        int buttonSize = ButtonsConfig.BOOKMARKS.size;
-        int spacing = ButtonsConfig.BOOKMARKS.spacing;
+        int buttonSize = ButtonsConfig.BookmarksConfig.OPEN_BOOKMARK_BUTTON.size;
+        int spacing = ButtonsConfig.BookmarksConfig.OPEN_BOOKMARK_BUTTON.spacing;
         int buttonX = dimensions.x() + dimensions.backgroundWidth() + spacing;
         int currentButtonY = dimensions.y() + spacing;
 

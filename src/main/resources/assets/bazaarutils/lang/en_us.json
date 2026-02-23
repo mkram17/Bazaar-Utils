@@ -62,23 +62,32 @@
     " effect active in order to function."
   ],
 
-  "bazaarutils.config.buttons.button.slot_number.value": "Slot Number",
-  "bazaarutils.config.buttons.button.slot_number.description": "The container slot where the button will be registered at",
-  "bazaarutils.config.buttons.button.item_id.value": "Item Id",
-  "bazaarutils.config.buttons.button.item_id.description": "The item id which will be used as a reference to construct the button",
   "bazaarutils.config.buttons.button:widget.enabled.value": "Enabled",
   "bazaarutils.config.buttons.button:widget.enabled.description": "Whether the button will be registered or not",
   "bazaarutils.config.buttons.button:widget.size.value": "Button Size",
   "bazaarutils.config.buttons.button:widget.spacing.value": "Spacing",
 
-  "bazaarutils.config.buttons.separator.market_buttons_separator.value": "Market Buttons",
-  "bazaarutils.config.buttons.separator.market_buttons_separator.description": "asdjasdhgasfhga write this shit",
+  "bazaarutils.config.buttons.separator.container_buttons.value": "Container Buttons",
+  "bazaarutils.config.buttons.separator.container_buttons.description": "Register buttons in selected containers to act as helpers relevant to the screen.",
 
-  "bazaarutils.config.buttons.market_buttons:cancel_order_and_search.value": "Cancel & Search Button",
-  "bazaarutils.config.buttons.market_buttons:cancel_order_and_search.description": "Adds a button to an unfilled orders' (or offer) settings page to cancel it and search once again the item.",
+  "bazaarutils.config.buttons.cancel_order_and_search.value": "Cancel & Search Button",
+  "bazaarutils.config.buttons.cancel_order_and_search.description": "Adds a button to an unfilled orders' (or offer) settings page to cancel it and search once again the item.",
 
-  "bazaarutils.config.buttons.market_buttons:bookmarks.value": "Bookmark Item Button",
-  "bazaarutils.config.buttons.market_buttons:bookmarks.description": "Adds a button to an items' page to toggle a quick access button to search the same item on the Bazaar.",
+  "bazaarutils.config.buttons.bookmarks.category.value": "Bookmarks",
+
+  "bazaarutils.config.buttons.bookmarks.separator.introductory.value": "Item Bookmarks",
+  "bazaarutils.config.buttons.bookmarks.separator.introductory.description": "Item Bookmarks are a feature which allows to quick search selected items onto the Bazaar.",
+
+  "bazaarutils.config.buttons.bookmarks.open_bookmark.value": "Open Bookmark",
+  "bazaarutils.config.buttons.bookmarks.open_bookmark.description": "Configures the button that appears on selected menus/screen to quick search the relevant bookmark.",
+
+  "bazaarutils.config.buttons.bookmarks.toggle_bookmark.value": "Bookmark Item",
+  "bazaarutils.config.buttons.bookmarks.toggle_bookmark.description": "Adds a button to an items' page to toggle a quick access button to search the same item on the Bazaar.",
+
+  "bazaarutils.config.buttons.button:container.enabled.value": "Enabled",
+  "bazaarutils.config.buttons.button:container.enabled.description": "Whether the button will be registered or not",
+  "bazaarutils.config.buttons.button:container.slot_number.value": "Slot Number",
+  "bazaarutils.config.buttons.button:container.slot_number.description": "The container slot where the button will be registered at",
 
   "bazaarutils.config.inventory.category.value": "Inventory",
   "bazaarutils.config.inventory.category.description": "Configurations for the inventory features of the mod",
