@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.overlays;
 
+import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
@@ -28,36 +30,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@ConfigObject
+@Module
 public class PriceCharts extends BUListener implements ItemTooltipCallback, BUToggleableFeature {
-    @Getter
-    @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.overlays.price_charts.enabled.value"
-    )
-    public boolean enabled;
-
-    @ConfigEntry(
-            id = "showOutsideBazaar",
-            translation = "bazaarutils.config.overlays.price_charts.show_outside_bazaar.value"
-    )
-    @Comment(
-            value = "Whether to render the charts on items when outside of a Bazaar screen",
-            translation = "bazaarutils.config.overlays.price_charts.show_outside_bazaar.description"
-    )
-    public boolean showOutsideBazaar;
-
-    public PriceCharts(boolean enabled, boolean showOutsideBazaar) {
-        this.enabled = enabled;
-        this.showOutsideBazaar = showOutsideBazaar;
-    }
-
     // Cache: sanitized item name -> should show tooltip
     private static final Map<String, Boolean> SHOW_CACHE = new ConcurrentHashMap<>();
 
+    public boolean isEnabled() {
+        return OverlaysConfig.PRICE_CHARTS_TOGGLE;
+    }
+
+    public PriceCharts() {}
+
     @Override
     public void getTooltip(ItemStack stack, Item.TooltipContext ctx, TooltipType type, List<Text> lines) {
-        if (!enabled || stack == null || stack.isEmpty() || !shouldShow()) return;
+        if (!isEnabled() || stack == null || stack.isEmpty() || !shouldShow()) return;
         if (stack.getItem().getName().getString().contains("GLASS_PANE")) return;
 
         String key = sanitizeName(stack.getName().getString());
@@ -79,7 +65,7 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, BUTo
 
     @EventHandler
     private void onClick(SlotClickEvent e){
-        if (!enabled || !shouldShow() || e.isCancelled()) {
+        if (!isEnabled() || !shouldShow() || e.isCancelled()) {
             return;
         }
 
@@ -120,7 +106,7 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, BUTo
     private boolean shouldShow() {
         ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
 
-        return (screenInfo.inBazaar() || showOutsideBazaar) && !screenInfo.inMenu(ScreenInfo.BazaarMenuType.BAZAAR_MAIN_PAGE);
+        return (screenInfo.inBazaar() || OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR) && !screenInfo.inMenu(ScreenInfo.BazaarMenuType.BAZAAR_MAIN_PAGE);
     }
 
     private static String sanitizeName(String raw){

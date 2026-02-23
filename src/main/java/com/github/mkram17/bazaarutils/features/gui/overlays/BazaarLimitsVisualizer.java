@@ -18,6 +18,7 @@ import com.github.mkram17.bazaarutils.ui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.ui.widgets.TextDisplayWidget;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.TimeUtil;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import lombok.Getter;
@@ -26,16 +27,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-@ConfigObject
+@Module
 public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFeature {
     private static final double COIN_LIMIT = 15_000_000_000d;
 
-    public record OrderLimitEntry(double price, ZonedDateTime time) {
-        public OrderLimitEntry(double price, ZonedDateTime time) {
-            this.price = price;
-            this.time = time;
-        }
-    }
+    public record OrderLimitEntry(double price, ZonedDateTime time) {}
 
     public static void saveLimits() {
         BazaarLimitsStorage.INSTANCE.save();
@@ -45,15 +41,11 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         return BazaarLimitsStorage.INSTANCE.get();
     }
 
-    @Getter
-    @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.overlays.bazaar_limits_visualizer.enabled.value"
-    )
-    public boolean enabled;
+    public static boolean isEnabled() {
+        return OverlaysConfig.BAZAAR_LIMITS_VISUALIZER_TOGGLE;
+    }
 
-    public BazaarLimitsVisualizer(boolean enabled) {
-        this.enabled = enabled;
+    public BazaarLimitsVisualizer() {
     }
 
     @RunOnInit
@@ -65,7 +57,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
                 return;
             }
 
-            OverlaysConfig.BAZAAR_LIMITS_VISUALIZER.removeOldEntries();
+            BazaarLimitsVisualizer.removeOldEntries();
         });
     }
 
@@ -84,7 +76,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         return String.format("%.2f", value) + prefix;
     }
 
-    public void addOrderToLimit(double price) {
+    public static void addOrderToLimit(double price) {
         if (price > Integer.MAX_VALUE){
             price = Integer.MAX_VALUE; // hypixel doesnt count coins over the integer limit
         }
@@ -94,7 +86,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         saveLimits();
     }
 
-    public void removeOldEntries() {
+    public static void removeOldEntries() {
         limits()
                 .stream()
                 .filter((entry) -> entry.time().isBefore(TimeUtil.LAST_BAZAAR_LIMIT_RESET_TIME))
@@ -104,7 +96,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         saveLimits();
     }
 
-    private double getTotalOrderedCoins() {
+    private static double getTotalOrderedCoins() {
         return limits()
                 .stream()
                 .mapToDouble(OrderLimitEntry::price)
@@ -118,7 +110,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
 
     @RegisterWidget
     public static List<TextDisplayWidget> getWidget() {
-        if (!OverlaysConfig.BAZAAR_LIMITS_VISUALIZER.enabled) {
+        if (!isEnabled()) {
             return Collections.emptyList();
         }
 
@@ -135,9 +127,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
     }
 
     private static TextDisplayWidget createLimitWidget(ItemSlotButtonWidget.ScreenWidgetDimensions dimensions) {
-        BazaarLimitsVisualizer instance = OverlaysConfig.BAZAAR_LIMITS_VISUALIZER;
-
-        double ordered = instance.getTotalOrderedCoins();
+        double ordered = BazaarLimitsVisualizer.getTotalOrderedCoins();
         String current = formatNumberWithPrefix(ordered);
         String max = formatNumberWithPrefix(BazaarLimitsVisualizer.COIN_LIMIT);
 

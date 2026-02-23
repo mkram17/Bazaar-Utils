@@ -175,13 +175,15 @@
   "bazaarutils.config.overlays.category.value": "Overlays",
   "bazaarutils.config.overlays.category.description": "Configurations for the overlays to be created by the mod",
 
+  "bazaarutils.config.overlays.separator.price_charts.value": "Price Charts",
+
   "bazaarutils.config.overlays.price_charts.value": "Price Charts",
   "bazaarutils.config.overlays.price_charts.description": "Injects a link to every Bazaar Items' tooltip to quick access relevant market charts.",
 
-  "bazaarutils.config.overlays.price_charts.enabled.value": "Enabled",
+  "bazaarutils.config.overlays.price_charts:show_outside_bazaar.value": "Show Outside of Bazaar",
+  "bazaarutils.config.overlays.price_charts:show_outside_bazaar.description": "Whether to render the charts on tooltips when outside of a Bazaar screen.",
 
-  "bazaarutils.config.overlays.price_charts.show_outside_bazaar.value": "Show Outside of Bazaar",
-  "bazaarutils.config.overlays.price_charts.show_outside_bazaar.description": "Whether to render the charts on tooltips when outside of a Bazaar screen",
+  "bazaarutils.config.overlays.separator.bazaar_limits_visualizer.value": "Bazaar Limits",
 
   "bazaarutils.config.overlays.bazaar_limits_visualizer.value": "Bazaar Limits",
   "bazaarutils.config.overlays.bazaar_limits_visualizer.description": [
@@ -192,8 +194,6 @@
   
   "bazaarutils.config.overlays.bazaar_limits_visualizer:reset_limits.value": "Daily Order Limits",
   "bazaarutils.config.overlays.bazaar_limits_visualizer:reset_limits.runnable": "Reset",
-
-  "bazaarutils.config.overlays.bazaar_limits_visualizer.enabled.value": "Enabled",
 
   "bazaarutils.config.notifications.category.value": "Notifications",
   "bazaarutils.config.notifications.category.description": "Configurations for the notifications to be pushed by the mod",
