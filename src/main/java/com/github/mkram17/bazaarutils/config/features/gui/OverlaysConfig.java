@@ -48,8 +48,6 @@ public class OverlaysConfig {
     )
     @ConfigOption.Separator(value = "bazaarutils.config.overlays.separator.bazaar_limits_visualizer.value")
     public static boolean BAZAAR_LIMITS_VISUALIZER_TOGGLE = true;
-    @ConfigOption.Separator(value = "bazaarutils.config.overlays.separator.bazaar_limits_visualizer.value")
-    public static boolean BAZAAR_LIMITS_VISUALIZER_TOGGLE = true;
 
     @ConfigButton(
             text = "bazaarutils.config.overlays.bazaar_limits_visualizer:reset_limits.runnable",
