@@ -1,6 +1,8 @@
 package com.github.mkram17.bazaarutils.features.notification;
 
+import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.features.util.ConfigurableFeature;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
@@ -15,35 +17,30 @@ import net.minecraft.util.Formatting;
 
 import java.util.List;
 
-//TODO change the message number instead of sending more
-@ConfigObject
+@Module
 public class OutbidOrderHandler implements ConfigurableFeature {
-    @Getter @Setter @ConfigEntry(id = "autoOpenBazaarOnOutbid")
-    private boolean autoOpenBazaarOnOutbid;
-    @Getter @Setter @ConfigEntry(id = "notifyOutbid")
-    private boolean notifyOutbid;
-    @Getter @Setter @ConfigEntry(id = "notificationSound")
-    private boolean notificationSound;
-
-    public OutbidOrderHandler(boolean autoOpenBazaarOnOutbid, boolean notifyOutbid, boolean notificationSound) {
-        this.autoOpenBazaarOnOutbid = autoOpenBazaarOnOutbid;
-        this.notifyOutbid = notifyOutbid;
-        this.notificationSound = notificationSound;
+    public static boolean isEnabled() {
+        return NotificationsConfig.ORDER_NOTIFICATIONS_OUTBID.isEnabled();
     }
+
+    public OutbidOrderHandler() {}
 
     public static MutableText getOutbidMessage(Order order) {
         return createYourOrderForText(order)
                 .append(Text.literal(" is now outdated.").formatted(Formatting.WHITE))
                 .append(Text.literal(" Click to open bazaar orders").formatted(Formatting.GOLD));
     }
+
     public static MutableText getCompetitiveMessage(Order order) {
         return createYourOrderForText(order)
                 .append(Text.literal(" is no longer outdated.").formatted(Formatting.DARK_PURPLE));
     }
+
     public static MutableText getMatchedMessage(Order order) {
         return createYourOrderForText(order)
                 .append(Text.literal(" has been matched.").formatted(Formatting.YELLOW));
     }
+
     private static MutableText createYourOrderForText(Order order) {
         return Text.literal("Your " + order.getOrderType().getString().toLowerCase() + " order for ").formatted(Formatting.WHITE)
                 .append(Text.literal(order.getVolume().toString() + " ").formatted(Formatting.DARK_PURPLE))

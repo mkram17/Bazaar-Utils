@@ -198,6 +198,23 @@
   "bazaarutils.config.notifications.category.value": "Notifications",
   "bazaarutils.config.notifications.category.description": "Configurations for the notifications to be pushed by the mod",
 
+  "bazaarutils.config.notifications.separator.order_notifications.value": "Order Notifications",
+
+  "bazaarutils.config.notifications.order_notifications.value": "Order Notifications",
+  "bazaarutils.config.notifications.order_notifications.description": "Enables functions to produce different types of notifications, related to the status of your orders.",
+
+  "bazaarutils.config.notifications.order_notifications:outbid.value": "Order Outbidded",
+  "bazaarutils.config.notifications.order_notifications:outbid.description": "Configure the notification to be produced when an order/offer of yours is outbidded.",
+
+  "bazaarutils.config.notifications.order_notifications:filled.value": "Order Filled",
+  "bazaarutils.config.notifications.order_notifications:filled.description": "Configure the notification to be produced when an order/offer of yours is filled.",
+
+  "bazaarutils.config.notifications.notification:enabled.value": "Enabled",
+  "bazaarutils.config.notifications.notification:enabled.description": "Whether the notification will be produced or not",
+  "bazaarutils.config.notifications.notification:auto_open_bazaar.value": "Auto Open Bazaar",
+  "bazaarutils.config.notifications.notification:emit_chat_message.value": "Emit Chat Message",
+  "bazaarutils.config.notifications.notification:emit_client_sound.value": "Emit Client Sound",
+
   "bazaarutils.config.developer.category.value": "Developer Config",
   "bazaarutils.config.developer.category.description": "Developer configurations & toggleable tools of the mod",
 

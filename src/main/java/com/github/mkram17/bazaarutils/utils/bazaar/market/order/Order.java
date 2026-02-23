@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.config.hidden.GeneralDataConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
@@ -100,9 +101,11 @@ public class Order extends OrderInfo {
     }
 
     private void onOutbid(boolean isOutbid) {
-        boolean shouldNotifyUser = BUConfig.get().feature.outbidOrderHandler.isNotifyOutbid();
-        boolean shouldPlayNotificationSound = BUConfig.get().feature.outbidOrderHandler.isNotificationSound();
-        boolean shouldAutoOpenBazaar = BUConfig.get().feature.outbidOrderHandler.isAutoOpenBazaarOnOutbid();
+        NotificationsConfig.NotificationSettings settings = NotificationsConfig.ORDER_NOTIFICATIONS_OUTBID;
+
+        boolean shouldNotifyUser = settings.isEnabled() && settings.emitChatMessage;
+        boolean shouldPlayNotificationSound = settings.isEnabled() && settings.emitClientSound;
+        boolean shouldAutoOpenBazaar = settings.isEnabled() && settings.emitClientSound;
 
         if (!shouldNotifyUser || !BUConfig.get().general.userOrders.contains(this)) {
             return;

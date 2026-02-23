@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.events.handler;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
+import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.events.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
@@ -119,7 +120,9 @@ public class BazaarChatEventHandler {
             return;
         }
 
-        if (BUConfig.get().feature.orderFilledNotificationSound.isEnabled()) {
+        NotificationsConfig.NotificationSettings settings = NotificationsConfig.ORDER_NOTIFICATIONS_FILLED;
+
+        if (settings.isEnabled()) {
             SoundUtil.notifyMultipleTimes(ORDER_FILLED_NOTIFICATIONS);
         }
 
