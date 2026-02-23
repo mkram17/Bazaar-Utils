@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.features.util.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.misc.SlotHighlightCache;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
@@ -27,61 +28,21 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 
 import java.util.List;
+import java.util.Optional;
 
 //drawing done in MixinHandledScreen
-@ConfigObject
+@Module
 public class OrderStatusHighlight extends BUListener implements BUToggleableFeature {
     public static final Identifier IDENTIFIER = Identifier.tryParse("bazaarutils", "orderstatushighlight/background");
 
-    @Getter
-    @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.inventory.order_status_highlight.enabled.value"
-    )
-    public boolean enabled;
-
-    @ConfigEntry(
-            id = "competitive_color",
-            translation = "bazaarutils.config.inventory.order_status_highlight.competitive_color.value"
-    )
-    @Comment(
-            value = "The color to highlight orders which are the best offer to the market",
-            translation = "bazaarutils.config.inventory.order_status_highlight.competitive_color.description"
-    )
-    @ConfigOption.Color(alpha = true)
-    public int competitiveColor;
-
-    @ConfigEntry(
-            id = "matched_color",
-            translation = "bazaarutils.config.inventory.order_status_highlight.matched_color.value"
-    )
-    @Comment(
-            value = "The color to highlight orders which match the market price",
-            translation = "bazaarutils.config.inventory.order_status_highlight.matched_color.description"
-    )
-    @ConfigOption.Color(alpha = true)
-    public int matchedColor;
-
-    @ConfigEntry(
-            id = "outbid_color",
-            translation = "bazaarutils.config.inventory.order_status_highlight.outbid_color.value"
-    )
-    @Comment(
-            value = "The color to highlight orders which are below the market price",
-            translation = "bazaarutils.config.inventory.order_status_highlight.outbid_color.description"
-    )
-    @ConfigOption.Color(alpha = true)
-    public int outbidColor;
-
-    public OrderStatusHighlight(boolean enabled, int competitiveColor, int matchedColor, int outbidColor) {
-        this.enabled = enabled;
-        this.competitiveColor = competitiveColor;
-        this.matchedColor = matchedColor;
-        this.outbidColor = outbidColor;
+    public static boolean isEnabled() {
+        return InventoryConfig.ORDER_STATUS_HIGHLIGHT_TOGGLE;
     }
 
-    public Order getHighlightedOrder(int slotIndex) {
-        var order = OrderInfoUtil.getUserOrderFromIndex(slotIndex);
+    public OrderStatusHighlight() {}
+
+    public static Order getHighlightedOrder(int slotIndex) {
+        Optional<Order> order = OrderInfoUtil.getUserOrderFromIndex(slotIndex);
 
         return order.filter(
                 bazaarOrder -> bazaarOrder.getStatus() != null && bazaarOrder.getStatus() == OrderStatus.SET)
@@ -94,8 +55,8 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
         registerTooltipListener();
     }
 
-    public void updateHighlightCache(List<ItemStack> itemStacks) {
-        if (!enabled) {
+    public static void updateHighlightCache(List<ItemStack> itemStacks) {
+        if (!isEnabled()) {
             return;
         }
 
@@ -120,11 +81,11 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
                 continue;
             }
 
-            SlotHighlightCache.orderStatusHighlightCache.computeIfAbsent(index, this::getHighlightColorFromIndex);
+            SlotHighlightCache.orderStatusHighlightCache.computeIfAbsent(index, OrderStatusHighlight::getHighlightColorFromIndex);
         }
     }
 
-    private Integer getHighlightColorFromIndex(int index) {
+    private static Integer getHighlightColorFromIndex(int index) {
         Order order = getHighlightedOrder(index);
 
         if (order == null) {
@@ -143,7 +104,7 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
     //maybe could be split into separate methods, but this is fine for now
     private void registerTooltipListener() {
         ItemTooltipCallback.EVENT.register((ItemStack stack, net.minecraft.item.Item.TooltipContext context, TooltipType type, List<Text> lines) -> {
-            if (!enabled) {
+            if (!isEnabled()) {
                 return;
             }
 
@@ -183,27 +144,27 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
                 case COMPETITIVE:
                     lines.add(1, Text.literal("COMPETITIVE")
                             .setStyle(Style.EMPTY
-                                    .withColor(TextColor.fromRgb(competitiveColor))
+                                    .withColor(TextColor.fromRgb(InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR))
                                     .withBold(true)));
                     break;
 
                 case MATCHED:
                     lines.add(1, Text.literal("MATCHED")
                             .setStyle(Style.EMPTY
-                                    .withColor(TextColor.fromRgb(matchedColor))
+                                    .withColor(TextColor.fromRgb(InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR))
                                     .withBold(true)));
                     break;
 
                 case OUTBID:
                     lines.add(1, Text.literal("OUTBID")
                             .setStyle(Style.EMPTY
-                                    .withColor(TextColor.fromRgb(outbidColor))
+                                    .withColor(TextColor.fromRgb(InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR))
                                     .withBold(true)));
 
                     lines.add(2, Text.literal("Market Price: " +
                                     Util.getPrettyString(order.getMarketPrice(order.getOrderType())))
                             .setStyle(Style.EMPTY
-                                    .withColor(TextColor.fromRgb(outbidColor))));
+                                    .withColor(TextColor.fromRgb(InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR))));
                     break;
             }
             if (DeveloperConfig.enabled) {
@@ -216,11 +177,11 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
         });
     }
 
-    private int getArgbFromOutbidStatus(PricingPosition pricingPosition) {
+    private static int getArgbFromOutbidStatus(PricingPosition pricingPosition) {
         return switch (pricingPosition) {
-            case COMPETITIVE -> competitiveColor;
-            case MATCHED -> matchedColor;
-            case OUTBID -> outbidColor;
+            case COMPETITIVE -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR;
+            case MATCHED -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR;
+            case OUTBID -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR;
         };
     }
 }

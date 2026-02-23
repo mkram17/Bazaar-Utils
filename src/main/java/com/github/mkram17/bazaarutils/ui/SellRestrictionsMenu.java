@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.ui;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.InstantSellRestrictions;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.NumericRestrictBy;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.StringRestrictBy;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.controls.SellRestrictionControl;
@@ -118,7 +119,7 @@ public class SellRestrictionsMenu<T extends Enum<T>> extends BaseOwoScreen<FlowL
                             PlayerActionUtil.notifyAll("Please enter a restriction type and amount/name.");
 
                             SellRestrictionControl newControl = new StringSellRestrictionControl(true, "Example Restriction");
-                            InventoryConfig.INSTANT_SELL_RESTRICTIONS.addRule(newControl);
+                            InstantSellRestrictions.addRule(newControl);
                             MinecraftClient.getInstance().setScreen(new SellRestrictionsMenu());
                             ConfigUtil.scheduleConfigSave();
                         })

@@ -86,18 +86,19 @@
   "bazaarutils.config.inventory.category.value": "Inventory",
   "bazaarutils.config.inventory.category.description": "Configurations for the inventory features of the mod",
 
+  "bazaarutils.config.inventory.separator.instant_sell_restrictions.value": "Instant Sell Restrictions",
+
   "bazaarutils.config.inventory.instant_sell_restrictions.value": "Instant Sell Restrictions",
   "bazaarutils.config.inventory.instant_sell_restrictions.description": [
-    "Manages a locking functionality over the Bazaars'",
+    "Enables a locking functionality over the Bazaars'",
     " ",
     { "text": "Instant Sell", "color": "green" },
     " ",
     "button, with inventory as well as action restriction."
   ],
 
-  "bazaarutils.config.inventory.instant_sell_restrictions.enabled.value": "Enabled",
-  "bazaarutils.config.inventory.instant_sell_restrictions.clicks_required.value": "Clicks Required",
-  "bazaarutils.config.inventory.instant_sell_restrictions.clicks_required.description": [
+  "bazaarutils.config.inventory.instant_sell_restrictions:clicks_required.value": "Clicks Required",
+  "bazaarutils.config.inventory.instant_sell_restrictions:clicks_required.description": [
     "The amount of clicks required to be pressed on the",
     " ",
     { "text": "Instant Sell", "color": "green" },
@@ -146,6 +147,8 @@
   "bazaarutils.config.inventory.instant_sell_restrictions.rules.fourth_string_restriction.value": "#4 Name Predicate",
   "bazaarutils.config.inventory.instant_sell_restrictions.rules.fifth_string_restriction.value": "#5 Name Predicate",
 
+  "bazaarutils.config.inventory.separator.instant_sell_highlight.value": "Instant Sell Highlight",
+
   "bazaarutils.config.inventory.instant_sell_highlight.value": "Instant Sell Highlight",
   "bazaarutils.config.inventory.instant_sell_highlight.description": [
     "Highlights the items on your inventory that would be sold by the Bazaars'",
@@ -155,20 +158,19 @@
     "button."
   ],
 
-  "bazaarutils.config.inventory.instant_sell_highlight.enabled.value": "Enabled",
-  "bazaarutils.config.inventory.instant_sell_highlight.color.value": "Highlight Color",
+  "bazaarutils.config.inventory.instant_sell_highlight:color.value": "Highlight Color",
+
+  "bazaarutils.config.inventory.separator.order_status_highlight.value": "Order Status Highlight",
 
   "bazaarutils.config.inventory.order_status_highlight.value": "Order Status Highlight",
   "bazaarutils.config.inventory.order_status_highlight.description": "Highlights the status of your Bazaar Orders by colouring their item of a representative color.",
 
-  "bazaarutils.config.inventory.order_status_highlight.enabled.value": "Enabled",
-
-  "bazaarutils.config.inventory.order_status_highlight.competitive_color.value": "Competitive Color",
-  "bazaarutils.config.inventory.order_status_highlight.competitive_color.description": "The color to highlight orders which are the best offer to the market",
-  "bazaarutils.config.inventory.order_status_highlight.matched_color.value": "Matched Color",
-  "bazaarutils.config.inventory.order_status_highlight.matched_color.description": "The color to highlight orders which match the market price",
-  "bazaarutils.config.inventory.order_status_highlight.outbid_color.value": "Outbid Color",
-  "bazaarutils.config.inventory.order_status_highlight.outbid_color.description": "The color to highlight orders which are below the market price",
+  "bazaarutils.config.inventory.order_status_highlight:competitive_color.value": "Competitive Color",
+  "bazaarutils.config.inventory.order_status_highlight:competitive_color.description": "The color to highlight orders which are the best offer to the market.",
+  "bazaarutils.config.inventory.order_status_highlight:matched_color.value": "Matched Color",
+  "bazaarutils.config.inventory.order_status_highlight:matched_color.description": "The color to highlight orders which match the market price.",
+  "bazaarutils.config.inventory.order_status_highlight:outbid_color.value": "Outbid Color",
+  "bazaarutils.config.inventory.order_status_highlight:outbid_color.description": "The color to highlight orders which are below the market price.",
 
   "bazaarutils.config.overlays.category.value": "Overlays",
   "bazaarutils.config.overlays.category.description": "Configurations for the overlays to be created by the mod",

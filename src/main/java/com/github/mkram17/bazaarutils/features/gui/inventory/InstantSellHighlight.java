@@ -1,8 +1,10 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory;
 
+import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.misc.SlotHighlightCache;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.GUIUtils;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -21,48 +23,21 @@ import net.minecraft.util.math.ColorHelper;
 
 import java.util.*;
 
-@ConfigObject
+@Module
 public class InstantSellHighlight extends BUListener {
-    @Getter
-    @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.inventory.instant_sell_highlight.enabled.value"
-    )
-    public boolean enabled;
+    private static transient final List<Integer> highlightedSlotIndexes = new ArrayList<>();
 
-    @ConfigEntry(
-            id = "color",
-            translation = "bazaarutils.config.inventory.instant_sell_highlight.color.value"
-    )
-    @ConfigOption.Color(
-            alpha = true,
-            presets = {
-                    0xB2FF5555,
-                    0xB2FF55FF,
-                    0xB2FFFF55,
-                    0xB2FFFFFF,
-                    0xB2FF0000,
-                    0xB2AA0000,
-                    0xB255FF55,
-                    0xB2AAAAAA,
-                    0xB2FFAA00,
-                    0xB2FFFF00
-            }
-    )
-    public int color;
-
-    private transient final List<Integer> highlightedSlotIndexes = new ArrayList<>();
-
-    public InstantSellHighlight(boolean enabled, int color) {
-        this.enabled = enabled;
-        this.color = color;
+    public static boolean isEnabled() {
+        return InventoryConfig.INSTANT_SELL_HIGHLIGHT_TOGGLE;
     }
+
+    public InstantSellHighlight() {}
 
     @EventHandler
     private void onScreenLoad(ChestLoadedEvent e) {
         highlightedSlotIndexes.clear();
 
-        if (!enabled || !ScreenInfo.getCurrentScreenInfo().inMenu(ScreenInfo.BazaarMenuType.BAZAAR_MAIN_PAGE)) {
+        if (!isEnabled() || !ScreenInfo.getCurrentScreenInfo().inMenu(ScreenInfo.BazaarMenuType.BAZAAR_MAIN_PAGE)) {
             return;
         }
 
@@ -118,18 +93,22 @@ public class InstantSellHighlight extends BUListener {
         });
         return inventoryStacks;
     }
-    public void updateHighlightCache(){
-        if (!enabled) return;
-        for(Integer index : highlightedSlotIndexes) {
+
+    public static void updateHighlightCache() {
+        if (!isEnabled()) {
+            return;
+        }
+
+        for (Integer index : highlightedSlotIndexes) {
             getColorFromIndex(index).ifPresent(instaSellHighlightColor -> SlotHighlightCache.instaSellHighlightCache.computeIfAbsent(index, (k) -> instaSellHighlightColor));
         }
     }
 
-    public OptionalInt getColorFromIndex(int slotIndex) {
+    public static OptionalInt getColorFromIndex(int slotIndex) {
         if (highlightedSlotIndexes.stream().noneMatch(i -> i.equals(slotIndex))) {
             return OptionalInt.empty();
         }
 
-        return OptionalInt.of(color);
+        return OptionalInt.of(InventoryConfig.INSTANT_SELL_HIGHLIGHT_COLOR);
     }
 }

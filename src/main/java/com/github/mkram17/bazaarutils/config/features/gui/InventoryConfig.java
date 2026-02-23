@@ -2,7 +2,6 @@ package com.github.mkram17.bazaarutils.config.features.gui;
 
 import com.github.mkram17.bazaarutils.features.gui.inventory.InstantSellHighlight;
 import com.github.mkram17.bazaarutils.features.gui.inventory.OrderStatusHighlight;
-import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.InstantSellRestrictions;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.NumericRestrictBy;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.controls.DoubleSellRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.controls.SellRestrictionControl;
@@ -32,10 +31,21 @@ public final class InventoryConfig {
             translation = "bazaarutils.config.inventory.instant_sell_restrictions.value"
     )
     @Comment(
-            value = "Manages a locking functionality over the Bazaars' §aInstant Sell§r button, with inventory state as well as action restriction.",
+            value = "Enables a locking functionality over the Bazaars' §aInstant Sell§r button, with inventory state as well as action restriction.",
             translation = "bazaarutils.config.inventory.instant_sell_restrictions.description"
     )
-    public static final InstantSellRestrictions INSTANT_SELL_RESTRICTIONS = new InstantSellRestrictions(true, 3);
+    @ConfigOption.Separator(value = "bazaarutils.config.inventory.separator.instant_sell_restrictions.value")
+    public static boolean INSTANT_SELL_RESTRICTIONS_TOGGLE = true;
+
+    @ConfigEntry(
+            id = "instant_sell_restrictions:clicks_required",
+            translation = "bazaarutils.config.inventory.instant_sell_restrictions:clicks_required.value"
+    )
+    @Comment(
+            value = "The amount of clicks required to be pressed on the §aInstant Sell§r item to allow the action.",
+            translation = "bazaarutils.config.inventory.instant_sell_restrictions:clicks_required.description"
+    )
+    public static int INSTANT_SELL_RESTRICTIONS_CLICKS_OVERRIDE = 3;
 
     @ConfigEntry(
             id = "instant_sell_highlight",
@@ -45,7 +55,29 @@ public final class InventoryConfig {
             value = "Highlights the items on your inventory that would be sold by the Bazaars' §aInstant Sell§r button.",
             translation = "bazaarutils.config.inventory.instant_sell_highlight.description"
     )
-    public static final InstantSellHighlight INSTANT_SELL_HIGHLIGHT = new InstantSellHighlight(true, 0xB2FFFF00);
+    @ConfigOption.Separator(value = "bazaarutils.config.inventory.separator.instant_sell_highlight.value")
+    public static boolean INSTANT_SELL_HIGHLIGHT_TOGGLE = true;
+
+    @ConfigEntry(
+            id = "instant_sell_highlight:color",
+            translation = "bazaarutils.config.inventory.instant_sell_highlight:color.value"
+    )
+    @ConfigOption.Color(
+            alpha = true,
+            presets = {
+                    0xB2FF5555,
+                    0xB2FF55FF,
+                    0xB2FFFF55,
+                    0xB2FFFFFF,
+                    0xB2FF0000,
+                    0xB2AA0000,
+                    0xB255FF55,
+                    0xB2AAAAAA,
+                    0xB2FFAA00,
+                    0xB2FFFF00
+            }
+    )
+    public static int INSTANT_SELL_HIGHLIGHT_COLOR = 0xB2FFFF00;
 
     @ConfigEntry(
             id = "order_status_highlight",
@@ -55,7 +87,41 @@ public final class InventoryConfig {
             value = "Highlights the status of your Bazaar Orders by colouring their item of a representative color.",
             translation = "bazaarutils.config.inventory.order_status_highlight.description"
     )
-    public static final OrderStatusHighlight ORDER_STATUS_HIGHLIGHT = new OrderStatusHighlight(true, 0xFF55FF55, 0xFFFFFF55, 0xFFFF5555);
+    @ConfigOption.Separator(value = "bazaarutils.config.inventory.separator.order_status_highlight.value")
+    public static boolean ORDER_STATUS_HIGHLIGHT_TOGGLE = true;
+
+    @ConfigEntry(
+            id = "order_status_highlight:competitive_color",
+            translation = "bazaarutils.config.inventory.order_status_highlight:competitive_color.value"
+    )
+    @Comment(
+            value = "The color to highlight orders which are the best offer to the market.",
+            translation = "bazaarutils.config.inventory.order_status_highlight:competitive_color.description"
+    )
+    @ConfigOption.Color(alpha = true)
+    public static int ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR = 0xFF55FF55;
+
+    @ConfigEntry(
+            id = "order_status_highlight:matched_color",
+            translation = "bazaarutils.config.inventory.order_status_highlight:matched_color.value"
+    )
+    @Comment(
+            value = "The color to highlight orders which match the market price.",
+            translation = "bazaarutils.config.inventory.order_status_highlight:matched_color.description"
+    )
+    @ConfigOption.Color(alpha = true)
+    public static int ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR = 0xFFFFFF55;
+
+    @ConfigEntry(
+            id = "order_status_highlight:outbid_color",
+            translation = "bazaarutils.config.inventory.order_status_highlight:outbid_color.value"
+    )
+    @Comment(
+            value = "The color to highlight orders which are below the market price.",
+            translation = "bazaarutils.config.inventory.order_status_highlight:outbid_color.description"
+    )
+    @ConfigOption.Color(alpha = true)
+    public static int ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR = 0xFFFF5555;
 
     @Category(value = "instant_sell_rules")
     @ConfigInfo(

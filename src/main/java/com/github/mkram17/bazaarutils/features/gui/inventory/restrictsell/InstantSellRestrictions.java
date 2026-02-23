@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.contro
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.controls.SellRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.controls.StringSellRestrictionControl;
 import com.github.mkram17.bazaarutils.features.util.ConfigurableFeature;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.InstaSellUtil;
@@ -22,30 +23,15 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import java.util.List;
 
 //TODO maybe color chest if it is locked
-@ConfigObject
+@Module
 public class InstantSellRestrictions extends BUListener implements ConfigurableFeature {
     private static final int INSTA_SELL_SLOT_INDEX = 47;
 
-    @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.inventory.instant_sell_restrictions.enabled.value"
-    )
-    public boolean enabled;
-
-    @ConfigEntry(
-            id = "clicksRequired",
-            translation = "bazaarutils.config.inventory.instant_sell_restrictions.clicks_required.value"
-    )
-    @Comment(
-            value = "The amount of clicks required to be pressed on the §aInstant Sell§r item to allow the action.",
-            translation = "bazaarutils.config.inventory.instant_sell_restrictions.clicks_required.description"
-    )
-    public int clicksRequired;
-
-    public InstantSellRestrictions(boolean enabled, int clicksRequired) {
-        this.enabled = enabled;
-        this.clicksRequired = clicksRequired;
+    public static boolean isEnabled() {
+        return InventoryConfig.INSTANT_SELL_RESTRICTIONS_TOGGLE;
     }
+
+    public InstantSellRestrictions() {}
 
     @Getter
     private transient int clicks = 0;
@@ -66,7 +52,7 @@ public class InstantSellRestrictions extends BUListener implements ConfigurableF
 
     @EventHandler
     private void onChestLoaded(ChestLoadedEvent e) {
-        if (!enabled || !ScreenInfo.getCurrentScreenInfo().inMenu(ScreenInfo.BazaarMenuType.BAZAAR_MAIN_PAGE)) {
+        if (!isEnabled() || !ScreenInfo.getCurrentScreenInfo().inMenu(ScreenInfo.BazaarMenuType.BAZAAR_MAIN_PAGE)) {
             return;
         }
 
@@ -76,9 +62,11 @@ public class InstantSellRestrictions extends BUListener implements ConfigurableF
 
     @EventHandler
     private void onClick(SlotClickEvent clickEvent){
-        if(!enabled || clickEvent.slot.getIndex() != INSTA_SELL_SLOT_INDEX)
+        if (!isEnabled() || clickEvent.slot.getIndex() != INSTA_SELL_SLOT_INDEX) {
             return;
-        if (isInstantSellRestricted && clicks < clicksRequired) {
+        }
+
+        if (isInstantSellRestricted && clicks < InventoryConfig.INSTANT_SELL_RESTRICTIONS_CLICKS_OVERRIDE) {
             clicks++;
             PlayerActionUtil.notifyAll(getMessage());
             clickEvent.cancel();
@@ -89,7 +77,7 @@ public class InstantSellRestrictions extends BUListener implements ConfigurableF
         return items.stream().anyMatch(this::isItemRestricted);
     }
 
-    public void addRule(SellRestrictionControl<?> control){
+    public static void addRule(SellRestrictionControl<?> control){
 //        TODO: deprecate this
 //        controls.add(control);
     }
@@ -132,7 +120,7 @@ public class InstantSellRestrictions extends BUListener implements ConfigurableF
 
         message.append(" (")
                 .append("Safety Clicks Left: ")
-                .append(clicksRequired - clicks)
+                .append(InventoryConfig.INSTANT_SELL_RESTRICTIONS_CLICKS_OVERRIDE - clicks)
                 .append(")");
 
         return message.toString();
