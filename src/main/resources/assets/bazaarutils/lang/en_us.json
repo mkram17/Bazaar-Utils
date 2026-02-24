@@ -2,6 +2,10 @@
   "mod.bazaarutils": "Bazaar Utils",
   "key.category.minecraft.bazaarutils": "Bazaar Utils",
 
+  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.not_upgraded.value": "Not Upgraded",
+  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.first_tier.value": "Bazaar Flipper I",
+  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.second_tier.value": "Bazaar Flipper II",
+
   "bazaarutils.rconfig.ui.constant.manage_list": "Manage List",
   "bazaarutils.rconfig.ui.constant.add_entry": "Add Entry",
   "bazaarutils.rconfig.ui.constant.done": "Done",
@@ -32,9 +36,20 @@
     "second line!"
   ],
 
-  "bazaarutils.config.user_bazaar_tax.value": "Bazaar Tax (%)",
-  "bazaarutils.config.user_bazaar_tax.description": "The bazaar tax percentage of your current profile considering all possible upgrades.",
-
+  "bazaarutils.config.bazaar_flipper_account_upgrade.value": "Bazaar Flipper Account Upgrade",
+  "bazaarutils.config.bazaar_flipper_account_upgrade.description": [
+    "The tier of your ",
+    { "text": "Bazaar Flipper", "color": "gold" },
+    " Account Upgrade, which is factored in on tax calculation and current order limits.",
+    "\n \n",
+    "Your Bazaar Flipper level can be upgraded by talking to ",
+    { "text": "Elizabeth", "color": "light_purple" },
+    ", at the ",
+    { "text": "Community Center", "color": "aqua" },
+    ", in the ",
+    { "text": "SkyBlock Hub", "color": "aqua" },
+    "."
+  ],
 
   "bazaarutils.config.chat.category.value": "Chat",
   "bazaarutils.config.chat.category.description": "Configurations for the chat features of the mod",

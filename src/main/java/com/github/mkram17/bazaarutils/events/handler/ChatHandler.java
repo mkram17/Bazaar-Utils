@@ -257,7 +257,7 @@ public class ChatHandler {
 
         if (isSellOrder) {
             //the price calculated before is ignoring tax, so must be added to find the actual price (which is used in tooltips etc.)
-            price /= ((100 - BUConfig.userBazaarTax) / 100);
+            price /= ((100 - BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE.userBazaarTax) / 100);
         }
 
         OrderType orderType = isSellOrder ? OrderType.SELL : OrderType.BUY;

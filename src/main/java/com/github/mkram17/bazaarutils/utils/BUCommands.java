@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -84,16 +85,6 @@ public class BUCommands {
                             return 1;
                         }
                 ));
-
-        bazaarutils.then(ClientCommandManager.literal("tax")
-                .then((ClientCommandManager.argument("amount", DoubleArgumentType.doubleArg(1, 1.25))
-                                .executes((context) -> {
-                                    BUConfig.userBazaarTax = DoubleArgumentType.getDouble(context, "amount") / 100;
-                                    return 1;
-                                })
-                        )
-                )
-        );
         bazaarutils.then(ClientCommandManager.literal("discord")
                 .executes((context) -> {
                     MinecraftClient client = MinecraftClient.getInstance();

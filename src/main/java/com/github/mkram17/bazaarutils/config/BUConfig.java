@@ -5,7 +5,6 @@ import com.github.mkram17.bazaarutils.config.hidden.GeneralDataConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.FeatureConfig;
-import com.github.mkram17.bazaarutils.config.features.KeybindConfig;
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
@@ -15,6 +14,7 @@ import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
 import com.github.mkram17.bazaarutils.config.util.api.SerializableListElement;
 import com.github.mkram17.bazaarutils.config.util.client.SerializableListRenderer;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.google.gson.JsonObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigUI;
@@ -70,14 +70,18 @@ public final class BUConfig {
     public static boolean INTRODUCTORY_INFORMATION_SEPARATOR = true;
 
     @ConfigEntry(
-            id = "user_bazaar_tax",
-            translation = "bazaarutils.config.user_bazaar_tax.value"
+            id = "bazaar_flipper_account_upgrade",
+            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.value"
     )
     @Comment(
-            value = "The bazaar tax percentage of your current profile considering all possible upgrades.",
-            translation = "bazaarutils.config.user_bazaar_tax.description"
+            value = """
+                    The tier of your §6Bazaar Flipper§r Account Upgrade, which is factored in on tax calculation and current order limits.
+                    
+                    Your Bazaar Flipper level can be upgraded by talking to §dElizabeth§r, at the §bCommunity Center§r, in the §bSkyBlock Hub§r.
+                    """,
+            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.description"
     )
-    public static double userBazaarTax = 1.125;
+    public static PlayerAccountUpgrades.BazaarFlipper USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE = PlayerAccountUpgrades.BazaarFlipper.NOT_UPGRADED;
 
     public GeneralDataConfig general = new GeneralDataConfig();
     public FeatureConfig feature = new FeatureConfig();
