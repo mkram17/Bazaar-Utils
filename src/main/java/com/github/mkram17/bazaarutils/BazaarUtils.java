@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.listener.ListenerManager;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
@@ -106,17 +107,18 @@ public class BazaarUtils implements ClientModInitializer {
             if (updateNotesValue != null)
                 updateNotes = updateNotesValue.getAsString();
 
-            var oldVersion = BUConfig.get().metadata.MOD_VERSION;
+            var oldVersion = MetadataConfig.MOD_VERSION;
             var currentVersion = metadata.getVersion().getFriendlyString();
 
             var oldVersionMajor = oldVersion.substring(oldVersion.indexOf(".")+1);
             var currentVersionMajor = currentVersion.substring(currentVersion.indexOf(".")+1);
 
-            BUConfig.get().metadata.MOD_VERSION = currentVersion;
+            MetadataConfig.MOD_VERSION = currentVersion;
             ConfigUtil.scheduleConfigSave();
 
-            if(!oldVersionMajor.equals(currentVersionMajor))
+            if (!oldVersionMajor.equals(currentVersionMajor)) {
                 updatedMajorVersion = true;
+            }
         });
     }
 }

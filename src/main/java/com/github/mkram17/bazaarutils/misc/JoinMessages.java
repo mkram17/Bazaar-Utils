@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.misc;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.util.EventPriorities;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
@@ -34,7 +34,7 @@ public class JoinMessages {
     @RunOnInit
     public static void registerWelcomeMessageSender() {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            if (BUConfig.get().metadata.isFirstLoad) {
+            if (MetadataConfig.IS_FIRST_LOAD) {
                 sendFirstLoadMessages();
             } else if (BazaarUtils.updatedMajorVersion) {
                 sendMajorUpdateMessages();
@@ -50,7 +50,7 @@ public class JoinMessages {
                 Util.tickExecuteLater(40, () -> PlayerActionUtil.notifyAll(discordMessage));
             });
         });
-        BUConfig.get().metadata.isFirstLoad = false;
+        MetadataConfig.IS_FIRST_LOAD = false;
         ConfigUtil.scheduleConfigSave();
     }
 

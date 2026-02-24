@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.utils;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
@@ -59,7 +60,7 @@ public class ResourceManager {
             try (InputStream inputStream = resourceOptional.get().getInputStream()) {
                 Files.copy(inputStream, LOCAL_RESOURCES_PATH);
                 // don't know the SHA of the bundled file, so stays null to force an update check.
-                BUConfig.get().metadata.RESOURCES_SHA = "";
+                MetadataConfig.RESOURCES_SHA = "";
                 ConfigUtil.scheduleConfigSave();
             }
         } else {
@@ -88,18 +89,22 @@ public class ResourceManager {
                     String latestSha = jsonObject.get("sha").getAsString();
                     String downloadUrl = jsonObject.get("download_url").getAsString();
 
-                    if (!latestSha.equals(BUConfig.get().metadata.RESOURCES_SHA)) {
-                        if (manual)
+                    if (!latestSha.equals(MetadataConfig.RESOURCES_SHA)) {
+                        if (manual) {
                             PlayerActionUtil.notifyAll("New resources found, downloading...");
+                        }
                         downloadLatestResources(downloadUrl, latestSha);
                     } else {
-                        if (manual)
+                        if (manual) {
                             PlayerActionUtil.notifyAll("Resources are already up-to-date.");
+                        }
                     }
                 }
             } catch (Exception e) {
-                if (manual)
+                if (manual) {
                     Util.notifyError("An error occurred while checking for updates.", new Exception());
+                }
+
                 Util.notifyError("Failed to check for resource updates", e);
             }
         });
@@ -111,7 +116,7 @@ public class ResourceManager {
             Files.copy(in, tempPath, StandardCopyOption.REPLACE_EXISTING);
             Files.move(tempPath, LOCAL_RESOURCES_PATH, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 
-            BUConfig.get().metadata.RESOURCES_SHA = latestSha;
+            MetadataConfig.RESOURCES_SHA = latestSha;
             ConfigUtil.scheduleConfigSave();
             BazaarDataManager.setConversionsLoaded(false);
             PlayerActionUtil.notifyAll("Successfully updated Bazaar resources!");

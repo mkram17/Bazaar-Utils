@@ -22,13 +22,13 @@ public final class DeveloperConfig {
             value = "Global toggle for all developer related functionalities/utilities.",
             translation = "bazaarutils.config.developer.enabled.description"
     )
-    public static boolean enabled = false;
+    public static boolean DEVELOPER_MODE_TOGGLE = false;
 
     @ConfigEntry(
             id = "disable_error_notifications",
             translation = "bazaarutils.config.developer.disable_error_notifications.value"
     )
-    public static boolean disableErrorNotifications = false;
+    public static boolean DEVELOPER_MODE_DISABLE_ERROR_NOTIFICATIONS = false;
 
     @ConfigEntry(
             id = "debug_messages",
@@ -39,9 +39,9 @@ public final class DeveloperConfig {
             translation = "bazaarutils.config.developer.debug_messages.description"
     )
     @ConfigOption.Draggable
-    public static NotificationType[] debugMessages = new NotificationType[]{};
+    public static NotificationType[] DEVELOPER_MODE_DEBUG_MESSAGES = new NotificationType[]{};
 
     public static boolean isDeveloperVariableEnabled(NotificationType type) {
-        return Arrays.asList(debugMessages).contains(type);
+        return Arrays.asList(DEVELOPER_MODE_DEBUG_MESSAGES).contains(type);
     }
 }

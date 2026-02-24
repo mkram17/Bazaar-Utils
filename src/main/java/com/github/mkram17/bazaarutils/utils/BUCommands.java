@@ -112,12 +112,12 @@ public class BUCommands {
         );
         bazaarutils.then(ClientCommandManager.literal("developer")
                 .executes((context) -> {
-                    DeveloperConfig.enabled = !DeveloperConfig.enabled;
+                    DeveloperConfig.DEVELOPER_MODE_TOGGLE = !DeveloperConfig.DEVELOPER_MODE_TOGGLE;
                     ConfigUtil.scheduleConfigSave();
                     //TODO register new commands so they can be used without restarting
-                    PlayerActionUtil.notifyAll(DeveloperConfig.enabled ? "Developer mode enabled." : "Developer mode disabled. Restart for all changes to take effect");
+                    PlayerActionUtil.notifyAll(DeveloperConfig.DEVELOPER_MODE_TOGGLE ? "Developer mode enabled." : "Developer mode disabled. Restart for all changes to take effect");
 
-                    if(DeveloperConfig.enabled) {
+                    if(DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
                         registerDeveloperCommands(dispatcher);
                     }
                     return 1;
@@ -146,7 +146,7 @@ public class BUCommands {
         );
 
 
-        if (DeveloperConfig.enabled) {
+        if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
             registerDeveloperCommands(dispatcher);
         }
 

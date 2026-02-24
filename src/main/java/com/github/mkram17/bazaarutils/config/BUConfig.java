@@ -80,10 +80,7 @@ public final class BUConfig {
     public static double userBazaarTax = 1.125;
 
     public GeneralDataConfig general = new GeneralDataConfig();
-    public MetadataConfig metadata = new MetadataConfig();
-    public DeveloperConfig developer = new DeveloperConfig();
     public FeatureConfig feature = new FeatureConfig();
-    public KeybindConfig keybind = new KeybindConfig();
 
     public static final Map<Integer, UnaryOperator<JsonObject>> PATCHES = ConfigPatches.loadPatches();
     public static final int VERSION = 1;

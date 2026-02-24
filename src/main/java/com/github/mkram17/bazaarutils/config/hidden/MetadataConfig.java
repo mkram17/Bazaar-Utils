@@ -7,24 +7,15 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 @Category("metadata_config")
 @ConfigOption.Hidden
 public final class MetadataConfig {
-    @ConfigEntry(
-            id = "mod_version",
-            translation = "bazaarutils.config.meta.mod_version.value"
-    )
+    @ConfigEntry(id = "mod_version")
     @ConfigOption.Hidden
     public static String MOD_VERSION = "";
 
-    @ConfigEntry(
-            id = "resources_sha",
-            translation = "bazaarutils.config.meta.resource_sha.name"
-    )
+    @ConfigEntry(id = "resources_sha")
     @ConfigOption.Hidden
     public static String RESOURCES_SHA = "";
 
-    @ConfigEntry(
-            id = "is_first_load",
-            translation = "bazaarutils.config.meta.is_first_load.name"
-    )
+    @ConfigEntry(id = "is_first_load")
     @ConfigOption.Hidden
-    public static boolean isFirstLoad = true;
+    public static boolean IS_FIRST_LOAD = true;
 }

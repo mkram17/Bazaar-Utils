@@ -120,7 +120,7 @@ public class Order extends OrderInfo {
         if (isOutbid) {
             message = OutbidOrderHandler.getOutbidMessage(this);
 
-            if (DeveloperConfig.enabled) {
+            if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
                 message.append(Text.literal(". Market Price: " + this.getMarketPrice(this.getOrderType()) + " Order Price: " + this.getPricePerItem()));
             }
 

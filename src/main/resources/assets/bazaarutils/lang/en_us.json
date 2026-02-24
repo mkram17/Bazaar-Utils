@@ -35,9 +35,6 @@
   "bazaarutils.config.user_bazaar_tax.value": "Bazaar Tax (%)",
   "bazaarutils.config.user_bazaar_tax.description": "The bazaar tax percentage of your current profile considering all possible upgrades.",
 
-  "bazaarutils.config.meta.mod_version.value": "Mod Version",
-  "bazaarutils.config.meta.resources_sha.value": "Resources SHA",
-  "bazaarutils.config.meta.is_first_load.value": "First Load?",
 
   "bazaarutils.config.chat.category.value": "Chat",
   "bazaarutils.config.chat.category.description": "Configurations for the chat features of the mod",
