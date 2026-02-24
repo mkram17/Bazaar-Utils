@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.features.DisableErrorNotifications;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
@@ -101,10 +102,10 @@ public class Util {
         if(item == null)
             return;
         assert item.getProductID() != null;
-        BUConfig.get().general.userOrders.add(item);
+        UserOrdersStorage.INSTANCE.get().add(item);
         PlayerActionUtil.notifyAll("Added item: § " + item, NotificationType.ORDERDATA);
         EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.ADD, item));
-        ConfigUtil.scheduleConfigSave();
+        UserOrdersStorage.INSTANCE.save();
     }
 
     @RunOnInit

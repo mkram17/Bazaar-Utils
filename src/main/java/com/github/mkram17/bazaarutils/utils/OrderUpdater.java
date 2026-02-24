@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -63,7 +64,7 @@ public class OrderUpdater {
     }
 
     private static void updateOrders(List<OrderInfo> parsedOrders) {
-        List<Order> userOrdersCopy = new ArrayList<>(BUConfig.get().general.userOrders);
+        List<Order> userOrdersCopy = new ArrayList<>(UserOrdersStorage.INSTANCE.get());
 
         parsedOrders.iterator().forEachRemaining(order -> {
             Optional<Order> matchedOrder = order.findOrderInList(userOrdersCopy);

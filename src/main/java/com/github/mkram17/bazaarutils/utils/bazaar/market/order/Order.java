@@ -1,10 +1,8 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
-import com.github.mkram17.bazaarutils.config.hidden.GeneralDataConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
-import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
@@ -107,7 +105,7 @@ public class Order extends OrderInfo {
         boolean shouldPlayNotificationSound = settings.isEnabled() && settings.emitClientSound;
         boolean shouldAutoOpenBazaar = settings.isEnabled() && settings.emitClientSound;
 
-        if (!shouldNotifyUser || !BUConfig.get().general.userOrders.contains(this)) {
+        if (!shouldNotifyUser || !UserOrdersStorage.INSTANCE.get().contains(this)) {
             return;
         }
 
@@ -180,7 +178,7 @@ public class Order extends OrderInfo {
      * @return index of this order within the persisted user order list.
      */
     public int getIndex() {
-        return GeneralDataConfig.userOrders.indexOf(this);
+        return UserOrdersStorage.INSTANCE.get().indexOf(this);
     }
 
     @Override
@@ -272,12 +270,12 @@ public class Order extends OrderInfo {
      * Removes this order from the tracked watched items list and notifies listeners.
      */
     public void removeFromWatchedItems() {
-        if (!BUConfig.get().general.userOrders.remove(this)) {
+        if (!UserOrdersStorage.INSTANCE.get().remove(this)) {
             PlayerActionUtil.notifyAll("Error removing " + name + " from watched items. Item couldn't be found.");
         }
 
         EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.REMOVE, this));
 
-        ConfigUtil.scheduleConfigSave();
+        UserOrdersStorage.INSTANCE.save();
     }
 }

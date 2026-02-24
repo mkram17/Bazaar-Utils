@@ -1,8 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.config.BUConfig;
-import com.github.mkram17.bazaarutils.config.hidden.GeneralDataConfig;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.listener.AbstractListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.utils.bazaar.ItemInfo;
@@ -303,14 +302,15 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
     /**
      * Projects each stored user order to a single variable, such as volume or price. For example,
      * {@code getVariables(BazaarOrder::getPricePerItem)} extracts all prices from user orders in
-     * {@link GeneralDataConfig#userOrders}.
+     * {@link UserOrdersStorage}.
      *
      * @param <T>      type of value extracted from each order
      * @param variable accessor used to extract a value from each order
      * @return immutable list of extracted values
      */
     public static <T> List<T> getVariables(Function<Order, T> variable) {
-        return BUConfig.get().general.userOrders.stream()
+        return UserOrdersStorage.INSTANCE.get()
+                .stream()
                 .map(variable)
                 .toList();
     }

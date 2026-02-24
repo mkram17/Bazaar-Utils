@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.features.notification;
 
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.features.util.ConfigurableFeature;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -48,7 +49,8 @@ public class OutbidOrderHandler implements ConfigurableFeature {
     }
 
     public static List<Order> getOutbidOrders() {
-        return BUConfig.get().general.userOrders.stream()
+        return UserOrdersStorage.INSTANCE.get()
+                .stream()
                 .filter(order -> order.getPricingPosition() == PricingPosition.OUTBID && order.getStatus() != OrderStatus.FILLED)
                 .toList();
     }

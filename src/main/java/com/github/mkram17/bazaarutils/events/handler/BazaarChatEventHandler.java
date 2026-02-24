@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.events.handler;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
@@ -127,7 +128,7 @@ public class BazaarChatEventHandler {
 
         OrderInfo order = event.order();
 
-        Optional<Order> orderMatch = order.findOrderInList(BUConfig.get().general.userOrders);
+        Optional<Order> orderMatch = order.findOrderInList(UserOrdersStorage.INSTANCE.get());
 
         if (orderMatch.isPresent()) {
             orderMatch.get().setFilled();

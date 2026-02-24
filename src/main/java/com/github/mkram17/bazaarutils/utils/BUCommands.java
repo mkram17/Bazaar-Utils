@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.utils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
@@ -161,7 +162,7 @@ public class BUCommands {
 
     private static int executeRemove(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
-        Order order = BUConfig.get().general.userOrders.get(index);
+        Order order = UserOrdersStorage.INSTANCE.get().get(index);
         order.removeFromWatchedItems();
         PlayerActionUtil.notifyAll("Removed " + order, NotificationType.COMMAND);
         return 1;
@@ -169,7 +170,7 @@ public class BUCommands {
 
     private static int executeInfo(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
-        PlayerActionUtil.notifyAll(BUConfig.get().general.userOrders.get(index).toString());
+        PlayerActionUtil.notifyAll(UserOrdersStorage.INSTANCE.get().get(index).toString());
         return 1;
     }
 }

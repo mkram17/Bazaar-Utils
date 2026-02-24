@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.*;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.features.util.ConfigurableFeature;
@@ -243,7 +244,7 @@ public class FlipHelper extends BUListener implements ConfigurableFeature, Custo
             PriceInfo priceInfo = priceInfoOpt.get();
             OrderInfo tempOrder = new OrderInfo(null, priceInfo.getOrderType(), null, orderVolumeFilledOpt.get(), priceInfo.getPricePerItem(), null);
 
-            return tempOrder.findOrderInList(BUConfig.get().general.userOrders);
+            return tempOrder.findOrderInList(UserOrdersStorage.INSTANCE.get());
         }
         return Optional.empty();
     }
