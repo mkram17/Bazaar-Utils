@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.config;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.config.features.SerializableListTestConfig;
 import com.github.mkram17.bazaarutils.config.hidden.GeneralDataConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
@@ -12,14 +12,15 @@ import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
-import com.github.mkram17.bazaarutils.features.gui.buttons.Bookmarks;
-import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
-import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
+import com.github.mkram17.bazaarutils.config.util.api.SerializableListElement;
+import com.github.mkram17.bazaarutils.config.util.client.SerializableListRenderer;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.JsonObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigUI;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
+import net.minecraft.util.Identifier;
 
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -29,6 +30,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
 @Config(
         value =  MOD_ID + "/config",
         categories = {
+                SerializableListTestConfig.class,
                 GeneralDataConfig.class,
                 MetadataConfig.class,
                 ChatConfig.class,
@@ -105,6 +107,16 @@ public final class BUConfig {
                 )
         );
 
-        return configurator.getConfig(BUConfig.class);
+        ResourcefulConfig config = configurator.getConfig(BUConfig.class);
+
+        ResourcefulConfigUI.registerElementRenderer(
+                Identifier.of("serializablelist"),
+                element -> {
+                    SerializableListElement sle = SerializableListElement.wrap(element, config);
+                    return sle != null ? new SerializableListRenderer(sle) : null;
+                }
+        );
+
+        return config;
     }
 }

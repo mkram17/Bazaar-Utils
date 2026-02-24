@@ -2,6 +2,29 @@
   "mod.bazaarutils": "Bazaar Utils",
   "key.category.minecraft.bazaarutils": "Bazaar Utils",
 
+  "bazaarutils.rconfig.ui.constant.manage_list": "Manage List",
+  "bazaarutils.rconfig.ui.constant.add_entry": "Add Entry",
+  "bazaarutils.rconfig.ui.constant.done": "Done",
+  "bazaarutils.rconfig.ui.constant.remove": "Remove",
+
+  "bazaarutils.config.test.category.value": "Test Config",
+  "bazaarutils.config.test.category.description": "A Test Configuration for the case of this PR",
+
+  "bazaarutils.config.test.basic.value": "Basic List",
+
+  "bazaarutils.config.test.commented.value": "Commented List",
+  "bazaarutils.config.test.commented.description": "This is a description comment",
+
+  "bazaarutils.config.test:entry.value": "%1$s Test Object",
+  "bazaarutils.config.test:entry.description": "This Test Object is %1$s",
+
+  "bazaarutils.config.test:entry.enabled.value": "Enabled",
+
+  "bazaarutils.config.test:entry.foo.value": "Foo String",
+
+  "bazaarutils.config.test:entry.bar.value": "Bar String",
+  "bazaarutils.config.test:entry.bar.description":  "This is a description comment of the objects' property",
+
   "bazaarutils.config.separator.introductory.value": "Welcome to Bazaar Utils!",
   "bazaarutils.config.separator.introductory.description": [
     "first line!",
