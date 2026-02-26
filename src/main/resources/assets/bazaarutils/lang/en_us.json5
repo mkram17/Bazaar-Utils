@@ -1,0 +1,378 @@
+{
+  "owo:extended_lang": true,
+
+  "bazaarutils.ref.{}": {
+    "instant_sell": [{
+      "text": "Instant Sell",
+      "color": "green"
+    }],
+
+    "booster_cookie": [{
+      "text": "Booster Cookie",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Booster Cookie\n", "color": "light_purple", "bold": true },
+          { "text": "Grants access to the Bazaar order API\nand other SkyBlock perks.\n\n", "color": "gray" },
+          { "text": "↗ Click to open wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Booster_Cookie"
+      }
+    }],
+
+    "bazaar_flipper": [{
+      "text": "Bazaar Flipper",
+      "color": "gold",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Bazaar Flipper\n", "color": "gold", "bold": true },
+          { "text": "An Account Upgrade that reduces tax\nand increases your active order limit.\n\n", "color": "gray" },
+          { "text": "↗ Click to open wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Bazaar_Flipper"
+      }
+    }],
+
+    "elizabeth": [{
+      "text": "Elizabeth",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Elizabeth\n", "color": "light_purple", "bold": true },
+          { "text": "NPC at the ", "color": "gray" },
+          { "text": "Community Center", "color": "gray" },
+          { "text": " in the SkyBlock Hub.\n", "color": "gray" },
+          { "text": "Sells Account Upgrades using Gems.\n\n", "color": "gray" },
+          { "text": "↗ Click to open wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Elizabeth"
+      }
+    }],
+
+    "community_center": [{ "text": "Community Center", "color": "aqua" }],
+    "skyblock_hub": [{ "text": "SkyBlock Hub", "color": "aqua" }]
+  },
+
+  "mod.bazaarutils": "Bazaar Utils",
+  "key.category.minecraft.bazaarutils": "Bazaar Utils",
+
+  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
+    "not_upgraded.label": "Not Upgraded",
+    "first_tier.label": "Bazaar Flipper I",
+    "second_tier.label": "Bazaar Flipper II"
+  },
+
+  "bazaarutils.config.{}": {
+
+    "separator.introductory.label": "Welcome to Bazaar Utils!",
+    "separator.introductory.hint": "first line!\nsecond line!",
+
+    "bazaar_flipper_account_upgrade.{}": {
+      "label": "Bazaar Flipper Account Upgrade",
+      "hint": [
+        "The tier of your ", { "translate": "bazaarutils.ref.bazaar_flipper" },
+        " Account Upgrade, which is factored in on tax calculation and current order limits.",
+        "\nYour Bazaar Flipper level can be upgraded by talking to ",
+        { "translate": "bazaarutils.ref.elizabeth" }, ", at the ",
+        { "translate": "bazaarutils.ref.community_center" }, ", in the ",
+        { "translate": "bazaarutils.ref.skyblock_hub" }, "."
+      ]
+    },
+
+    "chat.{}": {
+      "category.label": "Chat",
+      "category.hint": "Configurations for the chat features of the mod",
+
+      "separator.useless_bazaar_notifications_remover.label": "Useless Bazaar Notifications",
+      "useless_bazaar_notifications_remover.{}": {
+        "label": "Useless Bazaar Notifications",
+        "hint": "Enables to remove the transient messages sent to the chat by the Bazaar when interacting with it.",
+        "excluded_notifications.{}": {
+          "label": "Excluded Notifications",
+          "hint": "The list of transient messages/notifications to be excluded/unallowed from the chat"
+        }
+      },
+
+      "separator.stash_messages_remover.label": "Stash Messages",
+      "stash_messages_remover.{}": {
+        "label": "Stash Messages",
+        "hint": "Enables to remove the messages sent to the chat remembering to pick up your stash."
+      }
+    },
+
+    "buttons.{}": {
+      "category.label": "Buttons",
+      "category.hint": "Configurations for the buttons to be injected/handled by the mod",
+
+      "separator.mod_buttons.{}": {
+        "label": "Mod Buttons",
+        "hint": "Register buttons to inventory screens to quick access/manage features."
+      },
+
+      "open_settings.{}": {
+        "label": "Mod Settings Button",
+        "hint": "Adds a button to selected menus/screen to quick access the mods' settings."
+      },
+
+      "open_orders.{}": {
+        "label": "Orders Page Button",
+        "hint": [
+          "Adds a button to selected menus/screen to quick access your orders page.",
+          "\nRequires a ", { "translate": "bazaarutils.ref.booster_cookie" },
+          " effect active in order to function."
+        ]
+      },
+
+      "separator.container_buttons.{}": {
+        "label": "Container Buttons",
+        "hint": "Register buttons in selected containers to act as helpers relevant to the screen."
+      },
+
+      "cancel_order_and_search.{}": {
+        "label": "Cancel & Search Button",
+        "hint": "Adds a button to an unfilled orders' (or offer) settings page to cancel it and search once again the item."
+      },
+
+      "button.{}": {
+        "widget.{}": {
+          "enabled.{}": {
+            "label": "Enabled",
+            "hint": "Whether the button will be registered or not"
+          },
+          "size.label": "Button Size",
+          "spacing.label": "Spacing"
+        },
+        "container.{}": {
+          "enabled.{}": {
+            "label": "Enabled",
+            "hint": "Whether the button will be registered or not"
+          },
+          "slot_number.{}": {
+            "label": "Slot Number",
+            "hint": "The container slot where the button will be registered at"
+          }
+        }
+      },
+
+      "bookmarks.{}": {
+        "category.label": "Bookmarks",
+
+        "separator.introductory.{}": {
+          "label": "Item Bookmarks",
+          "hint": "Item Bookmarks are a feature which allows to quick search selected items onto the Bazaar."
+        },
+
+        "open_bookmark.{}": {
+          "label": "Open Bookmark",
+          "hint": "Configures the button that appears on selected menus/screen to quick search the relevant bookmark."
+        },
+
+        "toggle_bookmark.{}": {
+          "label": "Bookmark Item",
+          "hint": "Adds a button to every item's page to toggle a quick access button to search the same item on the Bazaar."
+        },
+
+        "reset_bookmarks.label": "Saved Bookmarks",
+        "reset_bookmarks.runnable": "Reset"
+      }
+    },
+
+    "inventory.{}": {
+      "category.label": "Inventory",
+      "category.hint": "Configurations for the inventory features of the mod",
+
+      "separator.instant_sell_restrictions.label": "Instant Sell Restrictions",
+      "instant_sell_restrictions.{}": {
+        "label": "Instant Sell Restrictions",
+        "hint": [
+          "Enables a locking functionality over the Bazaars' ",
+          { "translate": "bazaarutils.ref.instant_sell" },
+          " button, with inventory as well as action restriction."
+        ],
+
+        "clicks_required.{}": {
+          "label": "Clicks Required",
+          "hint": [
+            "The amount of clicks required to be pressed on the ",
+            { "translate": "bazaarutils.ref.instant_sell" }, " item to allow the action."
+          ]
+        },
+
+        "rules.{}": {
+          "category.label": "Instant Sell Rules",
+          "category.hint": "Manage the rules to be checked by the Instant Sell Restrictions feature",
+
+          "separator.numeric_restrictions.{}": {
+            "label": "Number predicates/restrictions",
+            "hint": [
+              "These rules check for specific numeric conditions, such as the total number of items or coins, to restrict the ",
+              { "translate": "bazaarutils.ref.instant_sell" }, " action."
+            ]
+          },
+
+          "numeric_restriction.{}.label": [
+            "#1 Number Predicate",
+            "#2 Number Predicate",
+            "#3 Number Predicate",
+            "#4 Number Predicate",
+            "#5 Number Predicate"
+          ],
+
+          "separator.string_restrictions.{}": {
+            "label": "String predicates/restrictions",
+            "hint": [
+              "These rules check for specific item names or types to determine if ",
+              { "translate": "bazaarutils.ref.instant_sell" }, " the action should be restricted."
+            ]
+          },
+
+          "string_restriction.{}.label": [
+            "#1 Name Predicate",
+            "#2 Name Predicate",
+            "#3 Name Predicate",
+            "#4 Name Predicate",
+            "#5 Name Predicate"
+          ],
+
+          "restriction.{}": {
+            "enabled.label": "Enabled",
+            "numeric.{}": {
+              "label": "Restriction Type",
+              "hint": "Whether the restriction will be on total coins worth or items held"
+            },
+            "amount.{}": {
+              "label": "Amount",
+              "hint": "The amount of coins or items held to lock upon"
+            },
+            "name.{}": {
+              "label": "Item Name",
+              "hint": "The items' name which if held will lock"
+            }
+          }
+        }
+      },
+
+      "separator.instant_sell_highlight.label": "Instant Sell Highlight",
+      "instant_sell_highlight.{}": {
+        "label": "Instant Sell Highlight",
+        "hint": [
+          "Highlights the items on your inventory that would be sold by the Bazaars' ",
+          { "translate": "bazaarutils.ref.instant_sell" }, " button."
+        ],
+        "color.label": "Highlight Color"
+      },
+
+      "separator.order_status_highlight.label": "Order Status Highlight",
+      "order_status_highlight.{}": {
+        "label": "Order Status Highlight",
+        "hint": "Highlights the status of your Bazaar Orders by colouring their item of a representative color.",
+        "competitive_color.{}": {
+          "label": "Competitive Color",
+          "hint": "The color to highlight orders which are the best offer to the market."
+        },
+        "matched_color.{}": {
+          "label": "Matched Color",
+          "hint": "The color to highlight orders which match the market price."
+        },
+        "outbid_color.{}": {
+          "label": "Outbid Color",
+          "hint": "The color to highlight orders which are below the market price."
+        }
+      }
+    },
+
+    "overlays.{}": {
+      "category.label": "Overlays",
+      "category.hint": "Configurations for the overlays to be created by the mod",
+
+      "separator.price_charts.label": "Price Charts",
+      "price_charts.{}": {
+        "label": "Price Charts",
+        "hint": "Injects a link to every Bazaar Items' tooltip to quick access relevant market charts.",
+        "show_outside_bazaar.{}": {
+          "label": "Show Outside of Bazaar",
+          "hint": "Whether to render the charts on items when outside of a Bazaar screen."
+        }
+      },
+
+      "separator.bazaar_limits_visualizer.label": "Bazaar Limits",
+      "bazaar_limits_visualizer.{}": {
+        "label": "Bazaar Limits",
+        "hint": [
+          "Adds informational text to Bazaar Screens about the status of your daily Bazaar Limits.",
+          "\nThe Bazaar limits each profile to order/offer tradeables for up to ",
+          {
+            "text": "15,000,000,000.00 coins",
+            "color": "gold",
+            "hover_event": {
+              "action": "show_text",
+              "value": [
+                { "text": "Daily Bazaar Limit\n", "color": "gold", "bold": true },
+                { "text": "Resets at midnight UTC.\n", "color": "gray" },
+                { "text": "Applies per-profile, not per-account.", "color": "dark_gray", "italic": true }
+              ]
+            }
+          },
+          " each day."
+        ],
+        "reset_limits.label": "Daily Order Limits",
+        "reset_limits.runnable": "Reset"
+      }
+    },
+
+    "notifications.{}": {
+      "category.label": "Notifications",
+      "category.hint": "Configurations for the notifications to be pushed by the mod",
+
+      "separator.order_notifications.label": "Order Notifications",
+      "order_notifications.{}": {
+        "label": "Order Notifications",
+        "hint": "Enables functions to produce different types of notifications, related to the status of your orders.",
+        "outbid.{}": {
+          "label": "Order Outbidded",
+          "hint": "Configure the notification to be produced when an order/offer of yours is outbidded."
+        },
+        "filled.{}": {
+          "label": "Order Filled",
+          "hint": "Configure the notification to be produced when an order/offer of yours is filled."
+        }
+      },
+
+      "notification.{}": {
+        "enabled.{}": {
+          "label": "Enabled",
+          "hint": "Whether the notification will be produced or not"
+        },
+        "auto_open_bazaar.label": "Auto Open Bazaar",
+        "emit_chat_message.label": "Emit Chat Message",
+        "emit_client_sound.label": "Emit Client Sound"
+      }
+    },
+
+    "developer.{}": {
+      "category.label": "Developer Config",
+      "category.hint": "Developer configurations & toggleable tools of the mod",
+      "enabled.{}": {
+        "label": "Enabled",
+        "hint": "Global toggle for all developer related functionalities/utilities."
+      },
+      "disable_error_notifications.label": "Disable Error Notifications",
+      "debug_messages.{}": {
+        "label": "Debug Messages",
+        "hint": "Configure the messages or notifications pushed to the chat about routines & the state of the mod"
+      }
+    }
+  }
+}

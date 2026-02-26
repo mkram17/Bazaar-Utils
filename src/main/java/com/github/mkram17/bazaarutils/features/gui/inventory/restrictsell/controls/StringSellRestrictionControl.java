@@ -12,19 +12,20 @@ import lombok.Setter;
 @Setter
 @ConfigObject
 public final class StringSellRestrictionControl implements SellRestrictionControl<StringRestrictBy> {
+
     @ConfigEntry(
             id = "enabled",
-            translation = "bazaarutils.config.inventory.instant_sell_restrictions.rules.restriction.enabled.value"
+            translation = "bazaarutils.config.inventory.instant_sell_restrictions.rules.restriction.enabled.label"
     )
     public boolean enabled;
 
     @ConfigEntry(
             id = "name",
-            translation = "bazaarutils.config.inventory.instant_sell_restrictions.rules.restriction.name.value"
+            translation = "bazaarutils.config.inventory.instant_sell_restrictions.rules.restriction.name.label"
     )
     @Comment(
             value = "The items' name which if held will lock",
-            translation = "bazaarutils.config.inventory.instant_sell_restrictions.rules.restriction.name.description"
+            translation = "bazaarutils.config.inventory.instant_sell_restrictions.rules.restriction.name.hint"
     )
     public String name;
 

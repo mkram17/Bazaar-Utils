@@ -8,14 +8,15 @@ import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
-import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
+import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
 
 @Config(
-        value =  MOD_ID + "/config",
+        value = MOD_ID + "/config",
         categories = {
                 MetadataConfig.class,
                 ChatConfig.class,

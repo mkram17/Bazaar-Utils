@@ -26,92 +26,90 @@ import java.util.stream.Collectors;
 )
 @ConfigInfo(
         title = "Buttons Config",
-        titleTranslation = "bazaarutils.config.buttons.category.value",
+        titleTranslation = "bazaarutils.config.buttons.category.label",
         description = "Configurations for the buttons to be injected/handled by the mod",
-        descriptionTranslation = "bazaarutils.config.buttons.category.description",
+        descriptionTranslation = "bazaarutils.config.buttons.category.hint",
         icon = "pointer"
 )
 public final class ButtonsConfig {
+
     @ConfigEntry(
             id = "open_settings",
-            translation = "bazaarutils.config.buttons.open_settings.value"
+            translation = "bazaarutils.config.buttons.open_settings.label"
     )
     @Comment(
             value = "Adds a button to selected menus/screen to quick access the mods' settings.",
-            translation = "bazaarutils.config.buttons.open_settings.description"
+            translation = "bazaarutils.config.buttons.open_settings.hint"
     )
     public static final WidgetButton OPEN_SETTINGS_BUTTON = new WidgetButton(true);
 
     @ConfigEntry(
             id = "open_orders",
-            translation = "bazaarutils.config.buttons.open_orders.value"
+            translation = "bazaarutils.config.buttons.open_orders.label"
     )
     @Comment(
-            value = """
-            Adds a button to selected menus/screen to quick access your orders page.
-            
-            Requires a §dBooster Cookie§r effect active in order to function.
-            """,
-            translation = "bazaarutils.config.buttons.open_orders.description"
+            value = "Adds a button to selected menus/screen to quick access your orders page.\n\nRequires a Booster Cookie effect active in order to function.",
+            translation = "bazaarutils.config.buttons.open_orders.hint"
     )
     public static final WidgetButton OPEN_ORDERS_BUTTON = new WidgetButton(true);
 
     @ConfigEntry(id = "container_buttons_separator")
     @ConfigOption.Hidden
     @ConfigOption.Separator(
-            value = "bazaarutils.config.buttons.separator.container_buttons.value",
-            description = "bazaarutils.config.buttons.separator.container_buttons.description"
+            value = "bazaarutils.config.buttons.separator.container_buttons.label",
+            description = "bazaarutils.config.buttons.separator.container_buttons.hint"
     )
     public static boolean CONTAINER_BUTTONS_SEPARATOR = true;
 
     @ConfigEntry(
             id = "cancel_order_and_search",
-            translation = "bazaarutils.config.buttons.cancel_order_and_search.value"
+            translation = "bazaarutils.config.buttons.cancel_order_and_search.label"
     )
     @Comment(
             value = "Adds a button to an unfilled orders' (or offer) settings page to cancel it and search once again the item.",
-            translation = "bazaarutils.config.buttons.cancel_order_and_search.description"
+            translation = "bazaarutils.config.buttons.cancel_order_and_search.hint"
     )
     public static final SmallContainerButton CANCEL_ORDER_AND_SEARCH = new SmallContainerButton(false, 25);
 
     @Category(value = "bookmarks")
     @ConfigInfo(
             title = "Bookmarks",
-            titleTranslation = "bazaarutils.config.buttons.bookmarks.category.value",
+            titleTranslation = "bazaarutils.config.buttons.bookmarks.category.label",
             icon = "bookmark"
     )
     public static final class BookmarksConfig {
+
         @ConfigEntry(id = "introductory_separator")
         @ConfigOption.Hidden
         @ConfigOption.Separator(
-                value = "bazaarutils.config.buttons.bookmarks.separator.introductory.value",
-                description = "bazaarutils.config.buttons.bookmarks.separator.introductory.description"
+                value = "bazaarutils.config.buttons.bookmarks.separator.introductory.label",
+                description = "bazaarutils.config.buttons.bookmarks.separator.introductory.hint"
         )
         public static boolean BOOKMARKS_INTRODUCTORY_SEPARATOR = true;
 
         @ConfigEntry(
                 id = "open_bookmark",
-                translation = "bazaarutils.config.buttons.bookmarks.open_bookmark.value"
+                translation = "bazaarutils.config.buttons.bookmarks.open_bookmark.label"
         )
         @Comment(
                 value = "Configures the button that appears on selected menus/screen to quick search the relevant bookmark.",
-                translation = "bazaarutils.config.buttons.bookmarks.open_bookmark.description"
+                translation = "bazaarutils.config.buttons.bookmarks.open_bookmark.hint"
         )
         public static final WidgetButton OPEN_BOOKMARK_BUTTON = new WidgetButton(true);
 
         @ConfigEntry(
                 id = "toggle_bookmark",
-                translation = "bazaarutils.config.buttons.bookmarks.toggle_bookmark.value"
+                translation = "bazaarutils.config.buttons.bookmarks.toggle_bookmark.label"
         )
         @Comment(
                 value = "Adds a button to every item's page to toggle a quick access button to search the same item on the Bazaar.",
-                translation = "bazaarutils.config.buttons.bookmarks.toggle_bookmark.description"
+                translation = "bazaarutils.config.buttons.bookmarks.toggle_bookmark.hint"
         )
         public static final SmallContainerButton TOGGLE_BOOKMARK_BUTTON = new SmallContainerButton(true, 0);
 
         @ConfigButton(
                 text = "bazaarutils.config.buttons.bookmarks.reset_bookmarks.runnable",
-                title = "bazaarutils.config.buttons.bookmarks.reset_bookmarks.value"
+                title = "bazaarutils.config.buttons.bookmarks.reset_bookmarks.label"
         )
         public static final Runnable RESET_BOOKMARKS_BUTTON = () -> {
             Bookmarks.bookmarks().clear();
@@ -337,23 +335,23 @@ public final class ButtonsConfig {
         @Getter
         @ConfigEntry(
                 id = "enabled",
-                translation = "bazaarutils.config.buttons.button:widget.enabled.value"
+                translation = "bazaarutils.config.buttons.button.widget.enabled.label"
         )
         @Comment(
                 value = "Whether the button will be registered or not",
-                translation = "bazaarutils.config.buttons.button:widget.enabled.description"
+                translation = "bazaarutils.config.buttons.button.widget.enabled.hint"
         )
         public boolean enabled;
 
         @ConfigEntry(
                 id = "size",
-                translation = "bazaarutils.config.buttons.button:widget.size.value"
+                translation = "bazaarutils.config.buttons.button.widget.size.label"
         )
         public int size = 18;
 
         @ConfigEntry(
                 id = "spacing",
-                translation = "bazaarutils.config.buttons.button:widget.spacing.value"
+                translation = "bazaarutils.config.buttons.button.widget.spacing.label"
         )
         public int spacing = 4;
 
@@ -367,22 +365,22 @@ public final class ButtonsConfig {
         @Getter
         @ConfigEntry(
                 id = "enabled",
-                translation = "bazaarutils.config.buttons.button:container.enabled.value"
+                translation = "bazaarutils.config.buttons.button.container.enabled.label"
         )
         @Comment(
                 value = "Whether the button will be registered or not",
-                translation = "bazaarutils.config.buttons.button:container.enabled.description"
+                translation = "bazaarutils.config.buttons.button.container.enabled.hint"
         )
         public boolean enabled;
 
         @Getter
         @ConfigEntry(
                 id = "slot_number",
-                translation = "bazaarutils.config.buttons.button:container.slot_number.value"
+                translation = "bazaarutils.config.buttons.button.container.slot_number.label"
         )
         @Comment(
                 value = "The container slot where the button will be registered at",
-                translation = "bazaarutils.config.buttons.button:container.slot_number.description"
+                translation = "bazaarutils.config.buttons.button.container.slot_number.hint"
         )
         @ConfigOption.Range(min = 0, max = 35)
         public int slotNumber;

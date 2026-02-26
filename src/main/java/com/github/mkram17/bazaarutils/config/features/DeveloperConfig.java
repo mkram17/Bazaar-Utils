@@ -8,35 +8,36 @@ import java.util.Arrays;
 @Category(value = "developer_config")
 @ConfigInfo(
         title = "Developer Config",
-        titleTranslation = "bazaarutils.config.developer.category.value",
+        titleTranslation = "bazaarutils.config.developer.category.label",
         description = "Developer configurations & toggleable tools of the mod",
-        descriptionTranslation = "bazaarutils.config.developer.category.description",
+        descriptionTranslation = "bazaarutils.config.developer.category.hint",
         icon = "code-2"
 )
 public final class DeveloperConfig {
+
     @ConfigEntry(
             id = "enabled",
-            translation = "bazaarutils.config.developer.enabled.value"
+            translation = "bazaarutils.config.developer.enabled.label"
     )
     @Comment(
             value = "Global toggle for all developer related functionalities/utilities.",
-            translation = "bazaarutils.config.developer.enabled.description"
+            translation = "bazaarutils.config.developer.enabled.hint"
     )
     public static boolean DEVELOPER_MODE_TOGGLE = false;
 
     @ConfigEntry(
             id = "disable_error_notifications",
-            translation = "bazaarutils.config.developer.disable_error_notifications.value"
+            translation = "bazaarutils.config.developer.disable_error_notifications.label"
     )
     public static boolean DEVELOPER_MODE_DISABLE_ERROR_NOTIFICATIONS = false;
 
     @ConfigEntry(
             id = "debug_messages",
-            translation = "bazaarutils.config.developer.debug_messages.value"
+            translation = "bazaarutils.config.developer.debug_messages.label"
     )
     @Comment(
-            value = "Global toggle for all developer related functionalities/utilities.",
-            translation = "bazaarutils.config.developer.debug_messages.description"
+            value = "Configure the messages or notifications pushed to the chat about routines & the state of the mod",
+            translation = "bazaarutils.config.developer.debug_messages.hint"
     )
     @ConfigOption.Draggable
     public static NotificationType[] DEVELOPER_MODE_DEBUG_MESSAGES = new NotificationType[]{};
