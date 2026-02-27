@@ -176,13 +176,13 @@ java {
 publishMods {
     file = tasks.remapJar.get().archiveFile
     additionalFiles.from(tasks.remapSourcesJar.get().archiveFile)
-    version = versionNumber
+    version = project.version.toString()
 
     type = if(releaseChannel == "alpha") ALPHA else STABLE
     modLoaders.add("fabric")
     changelog = rootProject.file("UPDATES.MD").readText()
-    displayName = "Bazaar Utils v$versionNumber for $mcVersion"
-//    dryRun = true
+    displayName = "Bazaar Utils v$versionNumber-$releaseChannel for $mcVersion"
+    dryRun = true
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
