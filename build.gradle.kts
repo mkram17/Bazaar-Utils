@@ -182,7 +182,7 @@ publishMods {
     modLoaders.add("fabric")
     changelog = rootProject.file("UPDATES.MD").readText()
     displayName = "Bazaar Utils v$versionNumber for $mcVersion"
-    dryRun = true
+//    dryRun = true
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -196,7 +196,7 @@ publishMods {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "mkram17/Bazaar-Utils"
         commitish = "modern"
-        tagName = project.version.toString()
+        tagName = "v" + project.version.toString()
         type = STABLE
     }
     curseforge {
