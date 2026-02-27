@@ -158,11 +158,12 @@ java {
 publishMods {
     file = tasks.remapJar.get().archiveFile
     additionalFiles.from(tasks.remapSourcesJar.get().archiveFile)
-    type = if(releaseChannel == "alpha") ALPHA else STABLE
     version = versionNumber
+
+    type = if(releaseChannel == "alpha") ALPHA else STABLE
     modLoaders.add("fabric")
     changelog = rootProject.file("UPDATES.MD").readText()
-    displayName = "Bazaar Utils v$version for $mcVersion"
+    displayName = "Bazaar Utils v$versionNumber for $mcVersion"
     dryRun = true
 
     modrinth {
@@ -177,6 +178,7 @@ publishMods {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "mkram17/Bazaar-Utils"
         commitish = "modern"
+        tagName = project.version.toString()
         type = STABLE
     }
     curseforge {
