@@ -6,9 +6,6 @@ plugins {
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
 
-group = property("maven_group")!!
-version = "v" + property("mod_version") as String + "+mc" + property("deps.core.mcVersion") as String
-
 base {
     archivesName.set(property("mod.id").toString())
 }
@@ -65,6 +62,10 @@ class ModDependencies {
 val deps = ModDependencies()
 val mcVersion = stonecutter.current.version
 val maxMcVersion = deps["core.maxMcVersion"]
+group = property("maven_group")!!
+val versionNumber = property("mod_version") as String
+val releaseChannel = property("mod_release_channel") as String
+version = "$versionNumber-$releaseChannel+mc$mcVersion"
 
 dependencies {
     minecraft("com.mojang:minecraft:${mcVersion}")
@@ -175,18 +176,17 @@ java {
 publishMods {
     file = tasks.remapJar.get().archiveFile
     additionalFiles.from(tasks.remapSourcesJar.get().archiveFile)
-    changelog = "Changelog"
-    type = if(version.toString().contains("alpha")) ALPHA else STABLE
+    version = versionNumber
+
+    type = if(releaseChannel == "alpha") ALPHA else STABLE
     modLoaders.add("fabric")
     changelog = rootProject.file("UPDATES.MD").readText()
-    version = "v" + property("mod_version").toString()
-    displayName = "Bazaar Utils v${property("mod_version")} for $mcVersion"
-//    dryRun = true
+    displayName = "Bazaar Utils v$versionNumber for $mcVersion"
+    dryRun = true
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = "c4u7nzUZ"
-        version = property("mod_version") as String + "+mc" + property("deps.core.mcVersion") as String
         minecraftVersions.add(mcVersion)
 
         requires("fabric-api", "resourcefulconfig")
@@ -196,6 +196,7 @@ publishMods {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "mkram17/Bazaar-Utils"
         commitish = "modern"
+        tagName = project.version.toString()
         type = STABLE
     }
     curseforge {
