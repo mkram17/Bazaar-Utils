@@ -1,2 +1,3 @@
  - Fix maximum Custom Order amount being 71679 instead of 71680
+ - Fix unnecessary logs when Skyblocker is not installed
  - Internal code changes
