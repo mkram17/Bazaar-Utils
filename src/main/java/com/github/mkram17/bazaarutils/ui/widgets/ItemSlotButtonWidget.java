@@ -9,30 +9,31 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
+import net.minecraft.screen.ScreenTexts;
 
 public class ItemSlotButtonWidget extends TexturedButtonWidget {
     private final ItemStack itemStack;
     public record ScreenWidgetDimensions(int x, int y, int backgroundWidth) {}
 
     public ItemSlotButtonWidget(int x, int y, int width, int height, ButtonTextures textures, PressAction onPress, ItemStack itemStack, MutableText tooltip) {
-        super(x, y, width, height, textures, onPress, net.minecraft.text.Text.empty());
+        super(x, y, width, height, textures, onPress, ScreenTexts.EMPTY);
         this.itemStack = itemStack;
         this.setTooltip(Tooltip.of(tooltip));
     }
 
     @Override
-    //? if > 1.21.10 {
-    public void drawIcon(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.drawIcon(context, mouseX, mouseY, delta);
-    //? } else {
-    /*public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+//? if 1.21.11 {
+/*public void drawIcon(DrawContext context, int mouseX, int mouseY, float delta) {
+    super.drawIcon(context, mouseX, mouseY, delta);
+    int itemX = this.getX() + (this.width - 16) / 2;
+    int itemY = this.getY() + (this.height - 16) / 2;
+*///? } else {
+    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         super.renderWidget(context, mouseX, mouseY, delta);
-    *///? }
-
+        int itemX = this.getX() + (this.width - 16) / 2;
+        int itemY = this.getY() + (this.height - 16) / 2;
+//? }
         if (this.itemStack != null && !this.itemStack.isEmpty()) {
-            int itemX = this.getX() + (this.width - 16) / 2;
-            int itemY = this.getY() + (this.height - 16) / 2;
-
             context.drawItem(this.itemStack, itemX, itemY);
         }
     }
