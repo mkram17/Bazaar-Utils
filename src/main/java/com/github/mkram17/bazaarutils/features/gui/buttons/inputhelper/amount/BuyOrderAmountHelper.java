@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.MarketPrices;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
@@ -91,7 +92,7 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
     }
 
     @Override
-    protected int computeFixedValue(TransactionState state, PriceInfo price) {
+    protected int computeFixedValue(TransactionState state, MarketPrices price) {
         return getFixedAmount();
     }
 

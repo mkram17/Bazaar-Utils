@@ -9,6 +9,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.MarketPrices;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -238,20 +239,19 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 return new ResolvedInput.Value(0);
             }
 
-            PriceInfo priceInfo = new PriceInfo(price.getAsDouble(), resolvedType);
-            priceInfo.updateMarketPrice(state.productId());
+            MarketPrices marketPrices = new MarketPrices(state.productId);
 
             int amount = switch (getAmountStrategy()) {
-                case MAX -> computeMaxValue(state, priceInfo);
-                case FIXED -> computeFixedValue(state, priceInfo);
+                case MAX -> computeMaxValue(state, marketPrices);
+                case FIXED -> computeFixedValue(state, marketPrices);
             };
 
             return new ResolvedInput.Value(amount);
         }
 
-        protected abstract int computeFixedValue(TransactionState state, PriceInfo price);
+        protected abstract int computeFixedValue(TransactionState state, MarketPrices price);
 
-        protected int computeMaxValue(TransactionState state, PriceInfo price) {
+        protected int computeMaxValue(TransactionState state, MarketPrices prices) {
             return switch (getMarketType()) {
                 case INSTANT -> switch (getOrderType()) {
                     case BUY -> Optional.of(state.containerScreen())
@@ -272,7 +272,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 };
                 case ORDER -> switch (getOrderType()) {
                     case BUY -> {
-                        int amountCanAfford = (int) (state.purse() / price.getPriceForPosition(PricingPosition.COMPETITIVE, getMarketType().withIntention(getOrderType())));
+                        int amountCanAfford = (int) (state.purse() / prices.getPriceForPosition(PricingPosition.COMPETITIVE, getMarketType().withIntention(getOrderType())));
 
                         yield BazaarScreens.findBuyOrderAmountLimit(state.inputSign().itemStack())
                                 .map(limit -> Math.min(amountCanAfford, limit))
@@ -368,10 +368,9 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 return new ResolvedInput.Value(0);
             }
 
-            PriceInfo priceInfo = new PriceInfo(price.getAsDouble(), resolvedType);
-            priceInfo.updateMarketPrice(state.productId());
+            MarketPrices marketPrices = new MarketPrices(state.productId);
 
-            return new ResolvedInput.Value(priceInfo.getPriceForPosition(getPricingPosition(), getOrderType()));
+            return new ResolvedInput.Value(marketPrices.getPriceForPosition(getPricingPosition(), getOrderType()));
         }
     }
 
