@@ -3,6 +3,8 @@ package com.github.mkram17.bazaarutils.config.util;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
+import com.github.mkram17.bazaarutils.config.util.client.ItemRendererProvider;
+import com.github.mkram17.bazaarutils.config.util.client.SlotRendererProvider;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.JsonObject;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen;
@@ -62,6 +64,9 @@ public class ConfigUtil {
                             "— expected VERSION = " + (PATCHES.size() + 1)
             );
         }
+        
+        ItemRendererProvider.register();
+        SlotRendererProvider.register();
 
         configurator.register(BUConfig.class, event ->
                 PATCHES.forEach((version, patch) ->
