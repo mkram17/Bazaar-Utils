@@ -1,19 +1,14 @@
 package com.github.mkram17.bazaarutils.utils;
 
-import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
-import com.github.mkram17.bazaarutils.ui.CustomOrdersMenu;
-import com.github.mkram17.bazaarutils.ui.SellRestrictionsMenu;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -117,15 +112,21 @@ public class BUCommands {
         );
         bazaarutils.then(ClientCommandManager.literal("customorders")
                 .executes(context -> {
-                    var client = MinecraftClient.getInstance();
-                    client.send(() -> client.setScreen(new CustomOrdersMenu()));
+                    PlayerActionUtil.notifyAll("""
+                                    This command has been deprecated as of version 1.0.0.
+                                    To access the system replacing this feature, take a look at the "Input Helpers" category in the "Buttons" Mod Config.
+                                    """);
+
                     return 1;
                 })
         );
         bazaarutils.then(ClientCommandManager.literal("sellrestrictions")
                 .executes(context -> {
-                    var client = MinecraftClient.getInstance();
-                    client.send(() -> client.setScreen(new SellRestrictionsMenu()));
+                    PlayerActionUtil.notifyAll("""
+                                    This command has been deprecated as of version 1.0.0.
+                                    To access the system replacing this feature, take a look at the "Instant Sell Rules" category in the "Inventory" Mod Config.
+                                    """);
+
                     return 1;
                 })
         );
