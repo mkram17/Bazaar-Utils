@@ -49,14 +49,14 @@ public final class BUConfig {
     @ConfigEntry(id = "introductory_separator")
     @ConfigOption.Hidden
     @ConfigOption.Separator(
-            value = "bazaarutils.config.separator.introductory.value",
-            description = "bazaarutils.config.separator.introductory.description"
+            value = "bazaarutils.config.separator.introductory.label",
+            description = "bazaarutils.config.separator.introductory.hint"
     )
     public static boolean INTRODUCTORY_INFORMATION_SEPARATOR = true;
 
     @ConfigEntry(
             id = "bazaar_flipper_account_upgrade",
-            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.value"
+            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.label"
     )
     @Comment(
             value = """
@@ -64,7 +64,7 @@ public final class BUConfig {
                     
                     Your Bazaar Flipper level can be upgraded by talking to §dElizabeth§r, at the §bCommunity Center§r, in the §bSkyBlock Hub§r.
                     """,
-            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.description"
+            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.hint"
     )
     public static PlayerAccountUpgrades.BazaarFlipper USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE = PlayerAccountUpgrades.BazaarFlipper.NOT_UPGRADED;
 }
