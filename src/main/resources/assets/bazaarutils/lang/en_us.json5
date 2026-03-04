@@ -161,6 +161,18 @@
           "slot_number.{}": {
             "label": "Slot Number",
             "hint": "The container slot where the button will be placed."
+          },
+          "amount_strategy.{}": {
+            "label": "Amount Strategy",
+            "hint": "The strategy with which to calculate the amount value.\n\nMAX: Will order the maximum amount you may order considering the action (instant, order).\nFIXED: Will order whatever amount you've configured below."
+          },
+          "pricing_position.{}": {
+            "label": "Pricing Position",
+            "hint": "The strategy with which to calculate the price to bid per item\n\nCOMPETITIVE: The bid will be +0.1 the current best offer on the market\nMATCHED: The bid will be equal to that of the current best offer on the market\nOUTBID: The bid will be -0.1 the current best offer on the market"
+          },
+          "fixed_amount.{}": {
+            "label": "Fixed Amount",
+            "hint": "The amount which will be used if FIXED is set as the amount strategy."
           }
         }
       },
@@ -185,6 +197,8 @@
 
         "reset_bookmarks.label": "Saved Bookmarks",
         "reset_bookmarks.runnable": "Reset"
+      },
+
       }
     },
 
