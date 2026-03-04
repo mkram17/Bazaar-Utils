@@ -53,7 +53,7 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
     @Getter @Setter @ConfigEntry(id = "itemInfo") //TODO fix config serialization for this
     private ItemInfo itemInfo;
 
-    private MarketPrices marketPrices;
+    protected final MarketPrices marketPrices;
 
     /**
      * Creates a container that tracks market data for a specific Bazaar product.
