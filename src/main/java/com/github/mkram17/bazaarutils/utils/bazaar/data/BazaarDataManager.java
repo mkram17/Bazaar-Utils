@@ -10,6 +10,7 @@ import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
 import lombok.Getter;
 import lombok.Setter;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
@@ -23,25 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public final class BazaarDataManager {
-    @Getter
-    public enum PriceType {
-        INSTABUY,
-        INSTASELL;
-
-        public String getString() {
-            return switch (this) {
-                case INSTASELL -> "Buy";
-                case INSTABUY -> "Sell";
-            };
-        }
-
-        private PriceType opposite;
-
-        static {
-            INSTASELL.opposite = INSTABUY;
-            INSTABUY.opposite = INSTASELL;
-        }
-    }
 
     private static final long BASE_INTERVAL_MS = 20_000;
     private static final long POST_OFFSET_MS = 500;

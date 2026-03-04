@@ -220,7 +220,7 @@ public class Order extends OrderInfo {
     public double getMarketPrice(OrderType orderType) {
         updateMarketPrice();
 
-        return this.getPriceForPosition(PricingPosition.MATCHED, orderType);
+        return marketPrices.getPriceForPosition(PricingPosition.MATCHED, orderType);
     }
 
     /**
@@ -231,7 +231,7 @@ public class Order extends OrderInfo {
     public double getUndercutPrice(OrderType orderType) {
         updateMarketPrice();
 
-        return this.getPriceForPosition(PricingPosition.COMPETITIVE, orderType);
+        return marketPrices.getPriceForPosition(PricingPosition.COMPETITIVE, orderType);
     }
 
     /**
@@ -242,7 +242,7 @@ public class Order extends OrderInfo {
     public double getOutbidPrice(OrderType orderType) {
         updateMarketPrice();
 
-        return this.getPriceForPosition(PricingPosition.OUTBID, orderType);
+        return marketPrices.getPriceForPosition(PricingPosition.OUTBID, orderType);
     }
 
     /**

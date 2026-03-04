@@ -7,19 +7,19 @@ import lombok.Getter;
 public enum OrderType {
     BUY {
         @Override
-        public BazaarDataManager.PriceType asPriceType() {
-            return BazaarDataManager.PriceType.INSTASELL;
+        public PriceType asPriceType() {
+            return PriceType.INSTASELL;
         }
     },
 
     SELL {
         @Override
-        public BazaarDataManager.PriceType asPriceType() {
-            return BazaarDataManager.PriceType.INSTABUY;
+        public PriceType asPriceType() {
+            return PriceType.INSTABUY;
         }
     };
 
-    public abstract BazaarDataManager.PriceType asPriceType();
+    public abstract PriceType asPriceType();
 
     public String getString() {
         return switch (this) {
