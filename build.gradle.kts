@@ -189,7 +189,7 @@ publishMods {
         version = property("mod_version") as String + "+mc" + property("deps.core.mcVersion") as String
         minecraftVersions.add(mcVersion)
 
-        requires("fabric-api", "yacl")
+        requires("fabric-api", "resourcefulconfig")
         optional("modmenu")
     }
     github {
