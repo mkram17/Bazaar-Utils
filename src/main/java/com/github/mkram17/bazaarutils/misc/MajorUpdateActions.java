@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.misc;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.features.gui.buttons.Bookmarks;
+import com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks.BookmarkUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 
 public class MajorUpdateActions {
@@ -10,6 +10,6 @@ public class MajorUpdateActions {
     public static void runIfUpdated(){
         if(!BazaarUtils.updatedMajorVersion) return;
         // TODO: With the new storage api we can come with patches to serialized structures. Consider refactoring this.
-        Bookmarks.bookmarks().clear();
+        BookmarkUtil.getBookmarks().clear();
     }
 }
