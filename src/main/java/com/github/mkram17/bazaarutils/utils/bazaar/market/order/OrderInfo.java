@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.listener.AbstractListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.MarketPrices;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
@@ -52,6 +53,8 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
     @Getter @Setter @ConfigEntry(id = "itemInfo") //TODO fix config serialization for this
     private ItemInfo itemInfo;
 
+    private MarketPrices marketPrices;
+
     /**
      * Creates a container that tracks market data for a specific Bazaar product.
      *
@@ -74,6 +77,8 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         validateProduct();
         BazaarDataManager.findProductIdOptional(name).ifPresent(productId -> this.productID = productId);
         findPricingPosition().ifPresent(pricingPosition -> this.pricingPosition = pricingPosition);
+
+        this.marketPrices = new MarketPrices(productID);
     }
 
     private double calculateTolerance() {
@@ -105,7 +110,7 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
      * Refreshes cached market price data for this product.
      */
     public void updateMarketPrice() {
-        updateMarketPrice(productID);
+        marketPrices.updateMarketPrices();
     }
 
     private void validateProduct() {
@@ -164,7 +169,7 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
 
         updateMarketPrice();
 
-        double marketPrice = getPriceForPosition(PricingPosition.MATCHED, getOrderType());
+        double marketPrice = marketPrices.getPriceForPosition(PricingPosition.MATCHED, getOrderType());
 
         var orderCountOpt = BazaarDataManager.getOrderCountOptional(productID, getOrderType(), getPricePerItem());
 

@@ -25,11 +25,6 @@ public class PriceInfo {
     @Setter @Getter @ConfigEntry(id = "pricePerItem")
     protected Double pricePerItem;
 
-    @Setter
-    private Double marketBuyPrice;
-
-    @Setter
-    private Double marketSellPrice;
 
     public PriceInfo(Double pricePerItem, OrderType orderType) {
         this.orderType = orderType;
@@ -48,28 +43,5 @@ public class PriceInfo {
     public void flipPrices(double newPrice) {
         this.orderType = this.orderType.getOpposite();
         this.pricePerItem = newPrice;
-    }
-
-    public void updateMarketPrice(String productId) {
-        var buyPriceOpt = BazaarDataManager.findItemPriceOptional(productId, OrderType.BUY);
-        var sellPriceOpt = BazaarDataManager.findItemPriceOptional(productId, OrderType.SELL);
-
-        buyPriceOpt.ifPresent(price -> marketBuyPrice = Util.truncateNum(price));
-        sellPriceOpt.ifPresent(price -> marketSellPrice = Util.truncateNum(price));
-    }
-
-    public Double getPriceForPosition(PricingPosition pricingPosition, OrderType orderType) {
-        return switch (orderType) {
-            case SELL -> switch (pricingPosition) {
-                case COMPETITIVE -> marketSellPrice - 0.1;
-                case MATCHED -> marketSellPrice;
-                case OUTBID -> marketSellPrice + 0.1;
-            };
-            case BUY -> switch (pricingPosition) {
-                case COMPETITIVE -> marketBuyPrice + 0.1;
-                case MATCHED -> marketBuyPrice;
-                case OUTBID -> marketBuyPrice - 0.1;
-            };
-        };
     }
 }
