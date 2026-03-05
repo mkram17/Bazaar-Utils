@@ -22,14 +22,7 @@ public class ItemStringOptionWidget extends StringOptionWidget implements Reseta
     @Override
     public void updateIfFocused() {
         if (!isFocused()) {
-            Identifier id = Identifier.tryParse(getter.get());
-
-            Item resolved = id != null
-                    ? ResourcefulConfigItems.getItems().stream()
-                    .filter(item -> Registries.ITEM.getId(item).equals(id))
-                    .findFirst()
-                    .orElse(null)
-                    : null;
+            Item resolved = ResourcefulConfigItems.resolve(getter.get());
 
             setValue(resolved != null ? resolved.getName(new ItemStack(resolved)).getString() : getter.get());
             setCursorPosition(0);

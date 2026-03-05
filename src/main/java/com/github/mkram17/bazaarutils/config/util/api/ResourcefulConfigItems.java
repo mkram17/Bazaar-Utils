@@ -5,26 +5,48 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public final class ResourcefulConfigItems {
+    private static final Map<String, Item> RESOLVED_CACHE = new HashMap<>();
+
+    public static @Nullable Item resolve(String rawId) {
+        if (rawId == null || rawId.isEmpty()) return null;
+
+        return RESOLVED_CACHE.computeIfAbsent(rawId, id -> {
+            Identifier identifier = Identifier.tryParse(id);
+
+            if (identifier == null) return null;
+
+            return source.get().stream()
+                    .filter(item -> Registries.ITEM.getId(item).equals(identifier))
+                    .findFirst()
+                    .orElse(null);
+        });
+    }
+
+
     private static Supplier<List<Item>> source = () -> Registries.ITEM.stream().toList();
-
-    private static Predicate<Item> globalFilter = item -> true;
-
-    private ResourcefulConfigItems() {}
 
     public static void setSource(Supplier<List<Item>> source) {
         ResourcefulConfigItems.source = source;
     }
 
+    private static Predicate<Item> globalFilter = item -> true;
+
     public static void addGlobalFilter(Predicate<Item> filter) {
         Predicate<Item> existing = ResourcefulConfigItems.globalFilter;
         ResourcefulConfigItems.globalFilter = item -> existing.test(item) && filter.test(item);
     }
+
+
+    private ResourcefulConfigItems() {}
 
     public static List<Item> getItems(String tag) {
         List<Item> base = source.get().stream().filter(globalFilter).toList();

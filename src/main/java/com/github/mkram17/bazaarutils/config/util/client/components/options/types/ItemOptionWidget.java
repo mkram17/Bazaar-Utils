@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.config.util.client.components.options.types;
 
+import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
 import com.github.mkram17.bazaarutils.config.util.client.components.options.AbstractSelectorOverlay;
 import com.github.mkram17.bazaarutils.config.util.client.components.options.SelectorOptionWidget;
 import com.github.mkram17.bazaarutils.config.util.client.components.options.types.selector.ContainerCell;
@@ -41,22 +42,11 @@ public class ItemOptionWidget extends SelectorOptionWidget {
         this.setter = setter;
     }
 
-    private @Nullable Item resolveItem() {
-        Identifier id = Identifier.tryParse(getter.get());
-
-        if (id == null) return null;
-
-        return items.stream()
-                .filter(item -> Registries.ITEM.getId(item).equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
     @Override
     protected void drawIcon(DrawContext context, int mouseX, int mouseY, float delta) {
         super.drawIcon(context, mouseX, mouseY, delta);
 
-        Item item = resolveItem();
+        Item item = ResourcefulConfigItems.resolve(getter.get());
 
         if (item != null) {
             context.drawItem(new ItemStack(item), getX(), getY());

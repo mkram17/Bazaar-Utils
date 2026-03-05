@@ -37,9 +37,10 @@ public record ItemRenderer(ItemElement element) implements ResourcefulConfigElem
         ItemStringOptionWidget stringWidget = new ItemStringOptionWidget(
                 entry::getString,
                 s -> {
-                    Identifier id = Identifier.tryParse(s);
-                    if (id == null) return false;
-                    if (items.stream().noneMatch(item -> Registries.ITEM.getId(item).equals(id))) return false;
+                    Item resolved = ResourcefulConfigItems.resolve(s);
+
+                    if (resolved == null || !items.contains(resolved)) return false;
+
                     entry.setString(s);
                     return true;
                 }
