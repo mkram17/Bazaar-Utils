@@ -17,7 +17,13 @@ public interface ItemButton {
     int getSlotIndex();
 
 
-    ItemStack getReplacementItem();
+    default ItemStack getReplacementItem(int size) {
+        return new ItemStack(resolveItem(), size);
+    }
+
+    default ItemStack getReplacementItem() {
+        return getReplacementItem(1);
+    }
 
     default boolean shouldReplaceItem(ReplaceItemEvent event) {
         return event.getSlotId() == getSlotIndex();

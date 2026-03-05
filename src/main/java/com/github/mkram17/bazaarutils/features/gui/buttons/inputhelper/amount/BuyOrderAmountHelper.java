@@ -71,10 +71,6 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
     public Item getButtonItem() {
         return Items.GREEN_STAINED_GLASS_PANE;
     }
-
-    @Override
-    public ItemStack getReplacementItem() {
-        return new ItemStack(this::getButtonItem, 1);
     }
 
     @Override

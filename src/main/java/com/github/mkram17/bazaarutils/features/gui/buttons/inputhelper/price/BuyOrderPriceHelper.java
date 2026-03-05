@@ -66,10 +66,6 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost {
             case OUTBID -> Items.ORANGE_STAINED_GLASS_PANE;
         };
     }
-
-    @Override
-    public ItemStack getReplacementItem() {
-        return new ItemStack(this::getButtonItem, 1);
     }
 
     @Override

@@ -67,9 +67,6 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip {
         };
     }
 
-    @Override
-    public ItemStack getReplacementItem() {
-        return new ItemStack(this::getButtonItem, 1);
     }
 
     @Override
