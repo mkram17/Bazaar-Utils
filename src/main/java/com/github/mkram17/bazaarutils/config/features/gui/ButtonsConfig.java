@@ -385,6 +385,7 @@ public final class ButtonsConfig {
                 translation = "bazaarutils.config.buttons.button.container.slot_index.hint"
         )
         @ConfigOption.Range(min = 0, max = 35)
+        @ConfigOption.Renderer("bazaarutils:slot")
         public int slotIndex;
 
         public SmallContainerButton(boolean enabled, int slotIndex) {

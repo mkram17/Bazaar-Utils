@@ -46,7 +46,9 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount {
             value = "The container slot where the button will be placed.",
             translation = "bazaarutils.config.buttons.button.container.slot_index.hint"
     )
+    @ContainerSlot(rows = 4, cols = 9, provider = "bazaar:instant_buy_amount")
     @ConfigOption.Range(min = 0, max = 35)
+    @ConfigOption.Renderer("bazaarutils:slot")
     public int slotIndex;
 
     @ConfigEntry(
