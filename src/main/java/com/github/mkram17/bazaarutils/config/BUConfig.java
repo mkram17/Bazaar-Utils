@@ -2,7 +2,6 @@ package com.github.mkram17.bazaarutils.config;
 
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
-import com.github.mkram17.bazaarutils.config.features.FeatureConfig;
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
@@ -68,7 +67,4 @@ public final class BUConfig {
             translation = "bazaarutils.config.bazaar_flipper_account_upgrade.description"
     )
     public static PlayerAccountUpgrades.BazaarFlipper USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE = PlayerAccountUpgrades.BazaarFlipper.NOT_UPGRADED;
-
-    public FeatureConfig feature = new FeatureConfig();
-
 }
