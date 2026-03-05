@@ -365,6 +365,18 @@ public final class ButtonsConfig {
 
         @Getter
         @ConfigEntry(
+                id = "item_id",
+                translation = "bazaarutils.config.buttons.button.container.item_id.label"
+        )
+        @Comment(
+                value = "The item that will be placed as the button.",
+                translation = "bazaarutils.config.buttons.button.container.item_id.hint"
+        )
+        @ConfigOption.Renderer("bazaarutils:item")
+        public String itemId = "minecraft:green_stained_glass_pane";
+
+        @Getter
+        @ConfigEntry(
                 id = "slot_index",
                 translation = "bazaarutils.config.buttons.button.container.slot_index.label"
         )

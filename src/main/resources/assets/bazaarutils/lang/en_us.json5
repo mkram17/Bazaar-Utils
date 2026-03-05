@@ -165,6 +165,10 @@
             "label": "Enabled",
             "hint": "Whether the button will be enabled."
           },
+          "item_id.{}": {
+            "label": "Item",
+            "hint": "The item that will be placed as the button."
+          },
           "slot_index.{}": {
             "label": "Slot Number",
             "hint": "The container slot where the button will be placed."
