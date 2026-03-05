@@ -161,6 +161,18 @@
           "slot_number.{}": {
             "label": "Slot Number",
             "hint": "The container slot where the button will be placed."
+          },
+          "amount_strategy.{}": {
+            "label": "Amount Strategy",
+            "hint": "The strategy with which to calculate the amount value.\n\nMAX: Will order the maximum amount you may order considering the action (instant, order).\nFIXED: Will order whatever amount you've configured below."
+          },
+          "pricing_position.{}": {
+            "label": "Pricing Position",
+            "hint": "The strategy with which to calculate the price to bid per item\n\nCOMPETITIVE: The bid will be +0.1 the current best offer on the market\nMATCHED: The bid will be equal to that of the current best offer on the market\nOUTBID: The bid will be -0.1 the current best offer on the market"
+          },
+          "fixed_amount.{}": {
+            "label": "Fixed Amount",
+            "hint": "The amount which will be used if FIXED is set as the amount strategy."
           }
         }
       },
@@ -185,6 +197,52 @@
 
         "reset_bookmarks.label": "Saved Bookmarks",
         "reset_bookmarks.runnable": "Reset"
+      },
+
+      "helpers.{}": {
+        "category.label": "Input Helpers",
+
+        "buy_order_amount.{}": {
+          "separator.label": "Buy Order Amount",
+          "label": "Buy Order Amount",
+          "hint": "Places an item at the desired slot, which when clicked will input as the amount for this order the computed, configurable, value.",
+          "{}.label": ["First Button", "Second Button", "Third Button"]
+        },
+
+        "instant_buy_amount.{}": {
+          "separator.label": "Instant Buy Amount",
+          "label": "Instant Buy Amount",
+          "hint": "Places an item at the desired slot, which when clicked will input as the amount for this purchase the computed, configurable, value.",
+          "{}.label": ["First Button", "Second Button", "Third Button"]
+        },
+
+        "sell_offer_amount.{}": {
+          "separator.label": "Sell Offer Amount",
+          "label": "Sell Offer Amount",
+          "hint": "Places an item at the desired slot, which when clicked will input as the amount for this offer the computed, configurable, value.",
+          "{}.label": ["First Button", "Second Button", "Third Button"]
+        },
+
+        "buy_order_price.{}": {
+          "separator.label": "Buy Order Price",
+          "label": "Buy Order Price",
+          "hint": "Places an item at the desired slot, which when clicked will input as the price for this order the computed, configurable, value.",
+          "{}.label": ["First Button", "Second Button", "Third Button"]
+        },
+
+        "sell_offer_price.{}": {
+          "separator.label": "Sell Offer Price",
+          "label": "Sell Offer Price",
+          "hint": "Places an item at the desired slot, which when clicked will input as the price for this offer the computed, configurable, value.",
+          "{}.label": ["First Button", "Second Button", "Third Button"]
+        },
+
+        "flip_order_price.{}": {
+          "separator.label": "Flip Order Price",
+          "label": "Flip Order Price",
+          "hint": "Places an item at the desired slot, which when clicked will input as the price for this flip the computed, configurable, value.",
+          "{}.label": ["First Button", "Second Button", "Third Button"]
+        }
       }
     },
 

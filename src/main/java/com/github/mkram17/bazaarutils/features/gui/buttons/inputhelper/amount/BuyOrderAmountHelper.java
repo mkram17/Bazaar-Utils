@@ -19,30 +19,31 @@ import net.minecraft.text.Text;
 @Getter
 @ConfigObject
 public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
+
     @ConfigEntry(
             id = "enabled",
-            translation = "bazaarutils.config.buttons.button:container.enabled.value"
+            translation = "bazaarutils.config.buttons.button.container.enabled.label"
     )
     @Comment(
             value = "Whether the button will be registered or not",
-            translation = "bazaarutils.config.buttons.button:container.enabled.description"
+            translation = "bazaarutils.config.buttons.button.container.enabled.hint"
     )
     public boolean enabled;
 
     @ConfigEntry(
             id = "slot_number",
-            translation = "bazaarutils.config.buttons.button:container.slot_number.value"
+            translation = "bazaarutils.config.buttons.button.container.slot_number.label"
     )
     @Comment(
             value = "The container slot where the button will be registered at",
-            translation = "bazaarutils.config.buttons.button:container.slot_number.description"
+            translation = "bazaarutils.config.buttons.button.container.slot_number.hint"
     )
     @ConfigOption.Range(min = 0, max = 35)
     public int slotNumber;
 
     @ConfigEntry(
             id = "amount_strategy",
-            translation = "bazaarutils.config.buttons.button:container.amount_strategy.value"
+            translation = "bazaarutils.config.buttons.button.container.amount_strategy.label"
     )
     @Comment(
             value = """
@@ -51,22 +52,21 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
                     MAX: Will order the maximum amount you may order considering the action (instant, order).
                     FIXED: Will order whatever amount you've configured below.
                     """,
-            translation = "bazaarutils.config.buttons.button:container.amount_strategy.description"
+            translation = "bazaarutils.config.buttons.button.container.amount_strategy.hint"
     )
     public AmountStrategy amountStrategy = AmountStrategy.MAX;
 
     @ConfigEntry(
             id = "fixed_amount",
-            translation = "bazaarutils.config.buttons.button:container.fixed_amount.value"
+            translation = "bazaarutils.config.buttons.button.container.fixed_amount.label"
     )
     @Comment(
             value = "Amount used for FIXED input strategy.",
-            translation = "bazaarutils.config.buttons.button:container.fixed_amount.description"
+            translation = "bazaarutils.config.buttons.button.container.fixed_amount.hint"
     )
     public int fixedAmount = 1;
 
     public OrderType orderType = OrderType.BUY;
-
     public MarketType marketType = MarketType.ORDER;
 
     @Override

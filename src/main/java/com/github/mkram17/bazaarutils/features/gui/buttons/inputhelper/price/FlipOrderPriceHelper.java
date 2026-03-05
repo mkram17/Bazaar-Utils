@@ -21,28 +21,28 @@ import net.minecraft.text.Text;
 public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip {
     @ConfigEntry(
             id = "enabled",
-            translation = "bazaarutils.config.buttons.button:container.enabled.value"
+            translation = "bazaarutils.config.buttons.button.container.enabled.label"
     )
     @Comment(
             value = "Whether the button will be registered or not",
-            translation = "bazaarutils.config.buttons.button:container.enabled.description"
+            translation = "bazaarutils.config.buttons.button.container.enabled.hint"
     )
     public boolean enabled;
 
     @ConfigEntry(
             id = "slot_number",
-            translation = "bazaarutils.config.buttons.button:container.slot_number.value"
+            translation = "bazaarutils.config.buttons.button.container.slot_number.label"
     )
     @Comment(
             value = "The container slot where the button will be registered at",
-            translation = "bazaarutils.config.buttons.button:container.slot_number.description"
+            translation = "bazaarutils.config.buttons.button.container.slot_number.hint"
     )
     @ConfigOption.Range(min = 0, max = 35)
     public int slotNumber;
 
     @ConfigEntry(
             id = "pricing_position",
-            translation = "bazaarutils.config.buttons.button:container.pricing_position.value"
+            translation = "bazaarutils.config.buttons.button.container.pricing_position.label"
     )
     @Comment(
             value = """
@@ -52,7 +52,7 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip {
                     MATCHED: The bid will be equal to that of the current best offer on the market
                     OUTBID: The bid will be -0.1 the current best offer on the market
                     """,
-            translation = "bazaarutils.config.buttons.button:container.pricing_position.description"
+            translation = "bazaarutils.config.buttons.button.container.pricing_position.hint"
     )
     public PricingPosition pricingPosition;
 
