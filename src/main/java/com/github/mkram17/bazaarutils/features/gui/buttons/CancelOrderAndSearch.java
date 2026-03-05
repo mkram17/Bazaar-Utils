@@ -12,8 +12,8 @@ import net.minecraft.item.Items;
 @ConfigObject
 public class CancelOrderAndSearch extends BUListener implements ItemButton {
     @Override
-    public int getSlotNumber() {
-        return ButtonsConfig.CANCEL_ORDER_AND_SEARCH.slotNumber;
+    public int getSlotIndex() {
+        return ButtonsConfig.CANCEL_ORDER_AND_SEARCH.slotIndex;
     }
 
     @Getter

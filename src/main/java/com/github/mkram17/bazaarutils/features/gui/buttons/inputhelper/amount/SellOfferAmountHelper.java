@@ -30,15 +30,15 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount {
     public boolean enabled;
 
     @ConfigEntry(
-            id = "slot_number",
-            translation = "bazaarutils.config.buttons.button.container.slot_number.label"
+            id = "slot_index",
+            translation = "bazaarutils.config.buttons.button.container.slot_index.label"
     )
     @Comment(
             value = "The container slot where the button will be registered at",
-            translation = "bazaarutils.config.buttons.button.container.slot_number.hint"
+            translation = "bazaarutils.config.buttons.button.container.slot_index.hint"
     )
     @ConfigOption.Range(min = 0, max = 35)
-    public int slotNumber;
+    public int slotIndex;
 
     @ConfigEntry(
             id = "amount_strategy",
@@ -82,10 +82,10 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount {
         return ScreenManager.getInstance().isCurrent(BazaarScreens.SELL_ORDER_AMOUNT);
     }
 
-    public SellOfferAmountHelper(boolean enabled, int slotNumber) {
+    public SellOfferAmountHelper(boolean enabled, int slotIndex) {
         super("Sell Offer Amount Helper", BazaarSlots.SELL_OFFER.INPUT_CUSTOM_AMOUNT.slot);
         this.enabled = enabled;
-        this.slotNumber = slotNumber;
+        this.slotIndex = slotIndex;
     }
 
     @Override

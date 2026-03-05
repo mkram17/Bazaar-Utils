@@ -165,7 +165,7 @@
             "label": "Enabled",
             "hint": "Whether the button will be enabled."
           },
-          "slot_number.{}": {
+          "slot_index.{}": {
             "label": "Slot Number",
             "hint": "The container slot where the button will be placed."
           },

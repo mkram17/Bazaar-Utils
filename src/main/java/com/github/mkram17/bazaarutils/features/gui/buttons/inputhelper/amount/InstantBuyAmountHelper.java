@@ -27,18 +27,18 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount {
             value = "Whether the button will be registered or not",
             translation = "bazaarutils.config.buttons.button.container.enabled.hint"
     )
-    public boolean enabled;
+    public boolean enabled = false;
 
     @ConfigEntry(
-            id = "slot_number",
-            translation = "bazaarutils.config.buttons.button.container.slot_number.label"
+            id = "slot_index",
+            translation = "bazaarutils.config.buttons.button.container.slot_index.label"
     )
     @Comment(
-            value = "The container slot where the button will be registered at",
-            translation = "bazaarutils.config.buttons.button.container.slot_number.hint"
+            value = "The container slot where the button will be placed.",
+            translation = "bazaarutils.config.buttons.button.container.slot_index.hint"
     )
     @ConfigOption.Range(min = 0, max = 35)
-    public int slotNumber;
+    public int slotIndex;
 
     @ConfigEntry(
             id = "amount_strategy",
@@ -82,10 +82,10 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount {
         return ScreenManager.getInstance().isCurrent(BazaarScreens.INSTANT_BUY);
     }
 
-    public InstantBuyAmountHelper(boolean enabled, int slotNumber) {
+    public InstantBuyAmountHelper(boolean enabled, int slotIndex) {
         super("Instant Buy Amount Helper", BazaarSlots.INSTANT_BUY.INPUT_CUSTOM_AMOUNT.slot);
         this.enabled = enabled;
-        this.slotNumber = slotNumber;
+        this.slotIndex = slotIndex;
     }
 
     @Override

@@ -14,16 +14,16 @@ import net.minecraft.sound.SoundEvents;
 public interface ItemButton {
     RegistryEntry<SoundEvent> BUTTON_SOUND = SoundEvents.UI_BUTTON_CLICK;
     float BUTTON_VOLUME = 0.2f;
+    int getSlotIndex();
 
-    int getSlotNumber();
 
     ItemStack getReplacementItem();
 
     default boolean shouldReplaceItem(ReplaceItemEvent event) {
-        return event.getSlotId() == getSlotNumber();
+        return event.getSlotId() == getSlotIndex();
     }
 
     default boolean wasButtonSlotClicked(SlotClickEvent event) {
-        return event.getSlotId() == getSlotNumber();
+        return event.getSlotId() == getSlotIndex();
     }
 }

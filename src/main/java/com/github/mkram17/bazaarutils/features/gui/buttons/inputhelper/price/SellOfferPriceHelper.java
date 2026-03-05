@@ -30,15 +30,15 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost {
     public boolean enabled;
 
     @ConfigEntry(
-            id = "slot_number",
-            translation = "bazaarutils.config.buttons.button.container.slot_number.label"
+            id = "slot_index",
+            translation = "bazaarutils.config.buttons.button.container.slot_index.label"
     )
     @Comment(
             value = "The container slot where the button will be registered at",
-            translation = "bazaarutils.config.buttons.button.container.slot_number.hint"
+            translation = "bazaarutils.config.buttons.button.container.slot_index.hint"
     )
     @ConfigOption.Range(min = 0, max = 35)
-    public int slotNumber;
+    public int slotIndex;
 
     @ConfigEntry(
             id = "pricing_position",
@@ -77,10 +77,10 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost {
         return ScreenManager.getInstance().isCurrent(BazaarScreens.SELL_ORDER_PRICE);
     }
 
-    public SellOfferPriceHelper(boolean enabled, int slotNumber, PricingPosition pricingPosition) {
+    public SellOfferPriceHelper(boolean enabled, int slotIndex, PricingPosition pricingPosition) {
         super("Sell Offer Price Helper", BazaarSlots.SELL_OFFER.INPUT_CUSTOM_PRICE.slot);
         this.enabled = enabled;
-        this.slotNumber = slotNumber;
+        this.slotIndex = slotIndex;
         this.pricingPosition = pricingPosition;
     }
 

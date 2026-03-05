@@ -365,19 +365,19 @@ public final class ButtonsConfig {
 
         @Getter
         @ConfigEntry(
-                id = "slot_number",
-                translation = "bazaarutils.config.buttons.button.container.slot_number.label"
+                id = "slot_index",
+                translation = "bazaarutils.config.buttons.button.container.slot_index.label"
         )
         @Comment(
                 value = "The container slot where the button will be registered at",
-                translation = "bazaarutils.config.buttons.button.container.slot_number.hint"
+                translation = "bazaarutils.config.buttons.button.container.slot_index.hint"
         )
         @ConfigOption.Range(min = 0, max = 35)
-        public int slotNumber;
+        public int slotIndex;
 
-        public SmallContainerButton(boolean enabled, int slotNumber) {
+        public SmallContainerButton(boolean enabled, int slotIndex) {
             this.enabled = enabled;
-            this.slotNumber = slotNumber;
+            this.slotIndex = slotIndex;
         }
     }
 }
