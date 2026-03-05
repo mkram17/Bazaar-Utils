@@ -22,13 +22,10 @@ public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton 
     @Getter
     protected String name;
 
-    protected abstract Item getButtonItem();
-
     /**
      * The market action which this helper is operating on (to buy, to sell; instant, order).
      */
     protected abstract TransactionType getTransactionType();
-
 
 //    Event cycle routines stuff
 

@@ -1,24 +1,22 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import lombok.Getter;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 
 @Getter
 @ConfigObject
 public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount {
-
     @ConfigEntry(
             id = "enabled",
             translation = "bazaarutils.config.buttons.button.container.enabled.label"
@@ -79,10 +77,8 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount {
     public TransactionType transactionType = TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT);
 
     @Override
-    public Item getButtonItem() {
-        return Items.GREEN_STAINED_GLASS_PANE;
-    }
-
+    public ItemRef getItemRef() {
+        return ItemRef.of(this::getItemId);
     }
 
     @Override
