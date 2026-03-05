@@ -75,7 +75,7 @@ public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton 
     public void onSlotClicked(SlotClickEvent event) {
         if (!(isEnabled()
                 && inCorrectScreen()
-                && wasButtonSlotClicked(event))) {
+                && wasButtonClicked(event))) {
             return;
         }
 

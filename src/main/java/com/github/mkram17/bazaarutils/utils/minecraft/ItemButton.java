@@ -29,7 +29,7 @@ public interface ItemButton {
         return event.getSlotId() == getSlotIndex();
     }
 
-    default boolean wasButtonSlotClicked(SlotClickEvent event) {
+    default boolean wasButtonClicked(SlotClickEvent event) {
         return event.getSlotId() == getSlotIndex();
     }
 }
