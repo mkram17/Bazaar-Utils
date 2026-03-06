@@ -1,6 +1,8 @@
 package com.github.mkram17.bazaarutils.config.util.api;
 
-import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
+import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
+import it.unimi.dsi.fastutil.objects.ReferenceSortedSets;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.item.Item;
@@ -25,22 +27,53 @@ public final class SlotProviders {
         return REGISTRY.getOrDefault(key, slot -> ItemStack.EMPTY);
     }
 
-    public static ItemStack named(Item item, Text name) {
-        return named(item, 1, name);
+    public static SlotStack stack(Item item) {
+        return new SlotStack(item, 1);
     }
 
-    public static ItemStack named(Item item, int count, Text name) {
-        ItemStack stack = new ItemStack(item, count);
-        stack.set(DataComponentTypes.CUSTOM_NAME, name);
-
-        return stack;
+    public static SlotStack stack(Item item, int count) {
+        return new SlotStack(item, count);
     }
 
-    public static ItemStack hiddenTooltip(Item item, int count) {
-        ItemStack stack = new ItemStack(item, count);
+    public static final class SlotStack {
 
-        stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(true, new ReferenceLinkedOpenHashSet<>()));
+        private final ItemStack stack;
 
-        return stack;
+        private SlotStack(Item item, int count) {
+            this.stack = new ItemStack(item, count);
+        }
+
+        public SlotStack named(Text name) {
+            stack.set(DataComponentTypes.CUSTOM_NAME, name);
+            return this;
+        }
+
+        public SlotStack named(String name) {
+            return named(Text.literal(name));
+        }
+
+        public SlotStack locked() {
+            stack.set(CustomDataComponents.SLOT_SELECTOR_LOCKED, true);
+            return this;
+        }
+
+        public SlotStack hideTooltip() {
+            stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(true, ReferenceSortedSets.emptySet()));
+            return this;
+        }
+
+//      we hide attributes by default
+//        public SlotStack hideAttributes() {
+//            TooltipDisplayComponent current = stack.getOrDefault(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT);
+//            stack.set(DataComponentTypes.TOOLTIP_DISPLAY, current.with(DataComponentTypes.ATTRIBUTE_MODIFIERS, true));
+//            return this;
+//        }
+
+        public ItemStack build() {
+            TooltipDisplayComponent current = stack.getOrDefault(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT);
+            stack.set(DataComponentTypes.TOOLTIP_DISPLAY, current.with(DataComponentTypes.ATTRIBUTE_MODIFIERS, true));
+
+            return stack;
+        }
     }
 }
