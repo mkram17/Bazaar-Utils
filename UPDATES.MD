@@ -1,3 +1,2 @@
- - Fix maximum Custom Order amount being 71679 instead of 71680
- - Fix unnecessary logs when Skyblocker is not installed
- - Internal code changes
+ - Fix "failed to parse order data from chat" error
+ - Hopefully fix crash when trying to flip a buy order
