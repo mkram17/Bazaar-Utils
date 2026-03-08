@@ -26,10 +26,10 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  * actions such as order creation, filling, claiming, instant transactions, and cancellations.
  * When a bazaar message is detected, it creates and posts the appropriate {@link BazaarChatEvent}.
  * </p>
- * 
+ *
  * <p>The handler automatically registers itself during mod initialization via the
  * {@link RunOnInit} annotation on {@link #registerBazaarChat()}.</p>
- * 
+ *
  * @see BazaarChatEvent
  * @see OrderInfo
  * @see Order
@@ -114,7 +114,7 @@ public class ChatHandler {
 
     /**
      * Parses order data from chat message components.
-     * 
+     *
      * @param siblings the text components of the message
      * @param volumeIndex index of the volume component
      * @param nameIndex index of the item name component
@@ -147,7 +147,7 @@ public class ChatHandler {
 
     /**
      * Processes an order event by parsing the order data and posting to the event bus.
-     * 
+     *
      * @param siblings the text components of the message
      * @param eventType the type of bazaar event
      * @param orderType the order type (buy/sell)
@@ -172,16 +172,17 @@ public class ChatHandler {
 
     /**
      * Handles order flip messages (when an order's price is updated).
-     * 
+     *
      * @param siblings the text components of the message
      */
     public static void handleFlip(ArrayList<Text> siblings) {
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, OrderType.SELL, 3, 4, 6);
+        int priceIndex = Util.componentIndexOf(siblings, "for") + 1;
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, OrderType.SELL, 3, 4, priceIndex);
     }
 
     /**
      * Handles order cancellation messages.
-     * 
+     *
      * @param siblings the text components of the message
      */
     public static void handleCancelled(ArrayList<Text> siblings) {
@@ -192,7 +193,7 @@ public class ChatHandler {
 
     /**
      * Handles instant sell transaction messages.
-     * 
+     *
      * @param siblings the text components of the message
      */
     public static void handleInstaSell(ArrayList<Text> siblings) {
@@ -203,7 +204,7 @@ public class ChatHandler {
 
     /**
      * Handles instant buy transaction messages.
-     * 
+     *
      * @param siblings the text components of the message
      */
     public static void handleInstaBuy(ArrayList<Text> siblings) {
@@ -212,7 +213,7 @@ public class ChatHandler {
 
     /**
      * Handles order filled messages (when an order is completely filled).
-     * 
+     *
      * @param message the full chat message
      */
     private static void handleFilled(Text message) {
@@ -243,7 +244,7 @@ public class ChatHandler {
 
     /**
      * Handles order creation messages (Buy Order Setup / Sell Offer Setup).
-     * 
+     *
      * @param siblings the text components of the message
      */
     private static void handleOrderCreated(ArrayList<Text> siblings) {
@@ -269,7 +270,7 @@ public class ChatHandler {
 
     /**
      * Extracts the item name from message components.
-     * 
+     *
      * @param siblings the text components of the message
      * @return the extracted item name without formatting
      */
@@ -283,7 +284,7 @@ public class ChatHandler {
 
     /**
      * Handles order claim messages (when items or coins from filled orders are claimed).
-     * 
+     *
      * @param siblings the text components of the message
      */
     private static void handleClaimed(ArrayList<Text> siblings) {
@@ -314,7 +315,7 @@ public class ChatHandler {
 
     /**
      * Parses claimed buy order information from chat message components.
-     * 
+     *
      * @param siblings the text components of the message
      * @return the claimed buy order if found in tracked orders, empty otherwise
      */
@@ -377,7 +378,7 @@ public class ChatHandler {
 
     /**
      * Parses claimed sell order information from chat message components.
-     * 
+     *
      * @param siblings the text components of the message
      * @return the claimed sell order if found in tracked orders, empty otherwise
      */
@@ -401,7 +402,7 @@ public class ChatHandler {
 
     /**
      * Finds the matching BazaarOrder from tracked orders based on order info.
-     * 
+     *
      * @param item the order information container to match
      * @return the matching bazaar order if found, empty otherwise
      */
