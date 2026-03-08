@@ -5,16 +5,19 @@ import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
 
 public class MarketPrices extends BUListener {
 
     private final PriceInfo buyPriceInfo = new PriceInfo(null, OrderType.BUY);
     private final PriceInfo sellPriceInfo = new PriceInfo(null, OrderType.SELL);
+    @Getter
     private final String productID;
 
     public MarketPrices(String productID) {
         this.productID = productID;
+        subscribe();
         updateMarketPrices(productID);
     }
 
