@@ -66,12 +66,10 @@ public class Order extends OrderInfo {
         handleOutbidStatusChange();
         subscribe();
         scheduleHealthCheck();
-        updateMarketPrice();
     }
 
     @EventHandler
     private void onDataUpdate(BazaarDataUpdateEvent event) {
-        updateMarketPrice();
         handleOutbidStatusChange();
     }
 
@@ -81,7 +79,6 @@ public class Order extends OrderInfo {
             return;
         }
 
-        updateMarketPrice();
         handleOutbidStatusChange();
     }
 
@@ -209,7 +206,6 @@ public class Order extends OrderInfo {
      */
     public void flipItem(double newPrice) {
         flipPrices(newPrice);
-        updateMarketPrice();
 
         this.amountFilled = 0;
         this.status = OrderStatus.SET;
@@ -218,8 +214,6 @@ public class Order extends OrderInfo {
     }
 
     public double getMarketPrice(OrderType orderType) {
-        updateMarketPrice();
-
         return marketPrices.getPriceForPosition(PricingPosition.MATCHED, orderType);
     }
 
@@ -229,8 +223,6 @@ public class Order extends OrderInfo {
      * @return price .1 coin more competitive than market rate.
      */
     public double getUndercutPrice(OrderType orderType) {
-        updateMarketPrice();
-
         return marketPrices.getPriceForPosition(PricingPosition.COMPETITIVE, orderType);
     }
 
@@ -240,8 +232,6 @@ public class Order extends OrderInfo {
      * @return price .1 coin less competitive than market rate.
      */
     public double getOutbidPrice(OrderType orderType) {
-        updateMarketPrice();
-
         return marketPrices.getPriceForPosition(PricingPosition.OUTBID, orderType);
     }
 
