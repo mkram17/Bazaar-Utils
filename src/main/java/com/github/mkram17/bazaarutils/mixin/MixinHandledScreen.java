@@ -62,13 +62,6 @@ public abstract class MixinHandledScreen extends Screen {
 		}
 	}
 
-	@Inject(method = "init", at = @At("TAIL"))
-	private void addConfiguredButtons(CallbackInfo ci) {
-		for (ClickableWidget button : ConfigUtil.getWidgets()) {
-			this.addDrawableChild(button);
-		}
-	}
-
 	@Inject(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawItem(Lnet/minecraft/item/ItemStack;III)V"))
 	private void drawOnItem_OrderStatusHighlight(DrawContext context, Slot slot, int x, int y, CallbackInfo ci) {
 		if (slot == null || !slot.hasStack() || !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
