@@ -113,7 +113,8 @@ public class ChatHandler {
     }
 
     public static void handleFlip(ArrayList<Text> siblings) {
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, PriceInfoContainer.PriceType.INSTABUY, 3, 4, 6);
+        int priceIndex = Util.componentIndexOf(siblings, "for") + 1;
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, PriceInfoContainer.PriceType.INSTABUY, 3, 4, priceIndex);
     }
 
     public static void handleCancelled(ArrayList<Text> siblings) {
