@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.utils;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
@@ -70,14 +71,14 @@ public class InstaSellUtil {
     }
 
     private static List<Text> getItemLoreLines(List<Text> loreLines) {
-        int firstItemIndex = Util.componentIndexOf(loreLines, "coins");
-        int totalCoinIndex = Util.componentLastIndexOf(loreLines, "coins");
+        int firstItemIndex = TextSearch.indexOf(loreLines, "coins");
+        int totalCoinIndex = TextSearch.lastIndexOf(loreLines, "coins");
 
         if (firstItemIndex == -1 || totalCoinIndex == -1) {
             return Collections.emptyList();
         }
 
-        int lastItemIndex = Util.componentLastIndexOf(loreLines.subList(0, totalCoinIndex-1), "coins");
+        int lastItemIndex = TextSearch.lastIndexOf(loreLines.subList(0, totalCoinIndex-1), "coins");
 
         return loreLines.subList(firstItemIndex, lastItemIndex+1);
     }

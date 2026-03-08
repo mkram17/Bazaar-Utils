@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import meteordevelopment.orbit.EventHandler;
@@ -186,7 +187,7 @@ public class OrderUpdater {
     }
 
     private static double parseUnitPrice(List<Text> lore) {
-        Text line = Util.findComponentWith(lore, LORE_PER_UNIT);
+        Text line = TextSearch.findLine(lore, LORE_PER_UNIT).orElse(null);
 
         if (line == null) {
             return Double.NaN;
@@ -202,10 +203,10 @@ public class OrderUpdater {
     }
 
     private static int parseVolume(List<Text> lore) {
-        Text line = Util.findComponentWith(lore, LORE_ORDER_AMOUNT);
+        Text line = TextSearch.findLine(lore, LORE_ORDER_AMOUNT).orElse(null);
 
         if (line == null) {
-            line = Util.findComponentWith(lore, LORE_OFFER_AMOUNT);
+            line = TextSearch.findLine(lore, LORE_OFFER_AMOUNT).orElse(null);
         }
 
         if (line == null) {
@@ -221,7 +222,7 @@ public class OrderUpdater {
     }
 
     private static int parseAmountFilled(List<Text> lore) {
-        Text filledLine = Util.findComponentWith(lore, LORE_FILLED);
+        Text filledLine = TextSearch.findLine(lore, LORE_FILLED).orElse(null);
 
         if (filledLine == null) {
             return -1;
@@ -247,7 +248,7 @@ public class OrderUpdater {
             return -1;
         }
 
-        Text unclaimedLine = Util.findComponentWith(lore, LORE_TO_CLAIM);
+        Text unclaimedLine = TextSearch.findLine(lore, LORE_TO_CLAIM).orElse(null);
 
         if (unclaimedLine == null) {
             return amountFilled; // fully claimed

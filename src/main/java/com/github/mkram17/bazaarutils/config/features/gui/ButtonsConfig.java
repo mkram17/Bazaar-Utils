@@ -1,13 +1,12 @@
 package com.github.mkram17.bazaarutils.config.features.gui;
 
-import com.github.mkram17.bazaarutils.features.gui.buttons.Bookmarks;
+import com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks.BookmarkUtil;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount.BuyOrderAmountHelper;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount.InstantBuyAmountHelper;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount.SellOfferAmountHelper;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price.BuyOrderPriceHelper;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price.FlipOrderPriceHelper;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price.SellOfferPriceHelper;
-import com.github.mkram17.bazaarutils.features.gui.inventory.restrictsell.controls.SellRestrictionControl;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
@@ -97,23 +96,13 @@ public final class ButtonsConfig {
         )
         public static final WidgetButton OPEN_BOOKMARK_BUTTON = new WidgetButton(true);
 
-        @ConfigEntry(
-                id = "toggle_bookmark",
-                translation = "bazaarutils.config.buttons.bookmarks.toggle_bookmark.label"
-        )
-        @Comment(
-                value = "Adds a button to every item's page to toggle a quick access button to search the same item on the Bazaar.",
-                translation = "bazaarutils.config.buttons.bookmarks.toggle_bookmark.hint"
-        )
-        public static final SmallContainerButton TOGGLE_BOOKMARK_BUTTON = new SmallContainerButton(true, 0);
-
         @ConfigButton(
                 text = "bazaarutils.config.buttons.bookmarks.reset_bookmarks.runnable",
                 title = "bazaarutils.config.buttons.bookmarks.reset_bookmarks.label"
         )
         public static final Runnable RESET_BOOKMARKS_BUTTON = () -> {
-            Bookmarks.bookmarks().clear();
-            Bookmarks.saveBookmarks();
+            BookmarkUtil.getBookmarks().clear();
+            BookmarkUtil.saveBookmarks();
         };
     }
 

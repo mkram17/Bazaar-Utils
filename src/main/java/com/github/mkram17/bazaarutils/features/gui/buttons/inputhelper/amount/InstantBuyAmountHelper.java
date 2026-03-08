@@ -28,7 +28,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount {
             value = "Whether the button will be registered or not",
             translation = "bazaarutils.config.buttons.button.container.enabled.hint"
     )
-    public boolean enabled = false;
+    public boolean enabled;
 
     @ConfigEntry(
             id = "slot_number",
@@ -39,7 +39,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount {
             translation = "bazaarutils.config.buttons.button.container.slot_number.hint"
     )
     @ConfigOption.Range(min = 0, max = 35)
-    public int slotNumber = 17;
+    public int slotNumber;
 
     @ConfigEntry(
             id = "amount_strategy",
