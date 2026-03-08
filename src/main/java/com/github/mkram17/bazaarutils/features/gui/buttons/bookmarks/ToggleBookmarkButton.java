@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.MarketPrices;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -97,7 +98,8 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
                     .flatMap(BazaarScreenHandler::getDisplayProductId)
                     .orElse(null);
 
-            Bookmark newBookmark = new Bookmark(name, itemStack, productId);
+            MarketPrices bookmarkMarketPrices = new MarketPrices(productId);
+            Bookmark newBookmark = new Bookmark(name, itemStack, bookmarkMarketPrices);
             list.add(newBookmark);
 
             BookmarkUtil.currentBookmarkOpt = Optional.of(newBookmark);
