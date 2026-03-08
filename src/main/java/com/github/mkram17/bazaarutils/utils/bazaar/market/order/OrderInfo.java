@@ -106,13 +106,6 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         return itemName != null && BazaarDataManager.findProductIdOptional(itemName).isPresent();
     }
 
-    /**
-     * Refreshes cached market price data for this product.
-     */
-    public void updateMarketPrice() {
-        marketPrices.updateMarketPrices();
-    }
-
     private void validateProduct() {
         if (this.productID == null && this.name != null) {
             if (!fixProductID()) {
@@ -166,8 +159,6 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         if (this.pricePerItem == null || !isProductIDHealthy()) {
             return Optional.empty();
         }
-
-        updateMarketPrice();
 
         double marketPrice = marketPrices.getPriceForPosition(PricingPosition.MATCHED, getOrderType());
 
