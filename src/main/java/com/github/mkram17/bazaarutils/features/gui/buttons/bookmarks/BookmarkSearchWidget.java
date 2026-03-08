@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
-import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
@@ -12,10 +11,10 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
+import com.github.mkram17.bazaarutils.utils.minecraft.PlayerSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -27,6 +26,7 @@ import net.minecraft.util.Formatting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class BookmarkSearchWidget {
     @RegisterWidget
@@ -89,17 +89,15 @@ public class BookmarkSearchWidget {
     public static void onWidgetLeftClick(Bookmark bookmark) {
         SoundUtil.playSound(ItemButton.BUTTON_SOUND, ItemButton.BUTTON_VOLUME);
 
-        boolean userHasSkyblockerBazaarOverlay = BUCompatibilityHelper.isSkyblockerLoaded() && BUCompatibilityHelper.isSkyblockerBazaarOverlayEnabled();
+        if (bookmark.productID() != null) {
+            Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.productID());
 
-        if (userHasSkyblockerBazaarOverlay) {
-            BUCompatibilityHelper.setSkyblockerBazaarOverlayValue(false);
+            if (inventorySlot.isPresent()) {
+                ContainerManager.clickSlot(inventorySlot.get(), 0);
+                return;
+            }
         }
 
-        ContainerManager.clickSlot(BookmarkUtil.SIGN_SLOT_NUMBER, 0);
-        SignManager.runOnNextSignOpen(event -> SignManager.setSignText(bookmark.name(), true));
-
-        if (userHasSkyblockerBazaarOverlay) {
-            Util.tickExecuteLater(10, () -> BUCompatibilityHelper.setSkyblockerBazaarOverlayValue(true));
-        }
+        PlayerActionUtil.runCommand("bz " + bookmark.name());
     }
 }

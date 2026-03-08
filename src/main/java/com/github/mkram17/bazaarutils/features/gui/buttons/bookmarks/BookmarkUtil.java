@@ -13,8 +13,6 @@ public class BookmarkUtil {
     @Getter
     public static Optional<Bookmark> currentBookmarkOpt = Optional.empty();
 
-    public static final int SIGN_SLOT_NUMBER = 45;
-
     public static final Identifier DEFAULT_WIDGET_TEXTURE = Identifier.tryParse(BazaarUtils.MOD_ID, "widget/bookmark_widget_base");
     public static final Identifier HOVER_WIDGET_TEXTURE = Identifier.tryParse(BazaarUtils.MOD_ID, "widget/bookmark_widget_hover");
 
