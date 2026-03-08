@@ -27,7 +27,6 @@ import net.minecraft.util.Formatting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class BookmarkSearchWidget {
     @RegisterWidget
@@ -69,6 +68,7 @@ public class BookmarkSearchWidget {
                         } else {
                             onWidgetLeftClick(bookmark);
                         }
+
                     },
                     itemForButton,
                     text
