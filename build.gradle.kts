@@ -65,7 +65,13 @@ val maxMcVersion = deps["core.maxMcVersion"]
 group = property("maven_group")!!
 val versionNumber = property("mod_version") as String
 val releaseChannel = property("mod_release_channel") as String
-version = "$versionNumber-$releaseChannel+mc$mcVersion"
+val preReleaseNumber = property("mod_prerelease_number")
+
+version = if (preReleaseNumber == 0) {
+    "$versionNumber-$releaseChannel+mc$mcVersion"
+} else {
+    "$versionNumber-$releaseChannel.$preReleaseNumber+mc$mcVersion"
+}
 
 dependencies {
     minecraft("com.mojang:minecraft:${mcVersion}")
@@ -181,8 +187,12 @@ publishMods {
     type = if(releaseChannel == "alpha") ALPHA else STABLE
     modLoaders.add("fabric")
     changelog = rootProject.file("UPDATES.MD").readText()
-    displayName = "Bazaar Utils v$versionNumber-$releaseChannel for $mcVersion"
-    dryRun = true
+    displayName = if (preReleaseNumber == 0) {
+        "Bazaar Utils v$versionNumber-$releaseChannel for $mcVersion"
+    } else {
+        "Bazaar Utils v$versionNumber-$releaseChannel.$preReleaseNumber for $mcVersion"
+    }
+//    dryRun = true
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")

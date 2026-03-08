@@ -1,2 +1,1 @@
- - Fix maximum Custom Order amount being 71679 instead of 71680
- - Internal code changes
+ - Fix "failed to parse order data from chat" error
