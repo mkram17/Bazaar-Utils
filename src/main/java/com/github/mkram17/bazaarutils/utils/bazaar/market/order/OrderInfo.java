@@ -76,9 +76,8 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
 
         validateProduct();
         BazaarDataManager.findProductIdOptional(name).ifPresent(productId -> this.productID = productId);
-        findPricingPosition().ifPresent(pricingPosition -> this.pricingPosition = pricingPosition);
-
         this.marketPrices = new MarketPrices(productID);
+        findPricingPosition().ifPresent(pricingPosition -> this.pricingPosition = pricingPosition);
     }
 
     private double calculateTolerance() {
