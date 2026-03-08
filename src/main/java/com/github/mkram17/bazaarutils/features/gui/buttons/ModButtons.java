@@ -6,20 +6,19 @@ import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
-import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
-import com.github.mkram17.bazaarutils.ui.widgets.ItemSlotButtonWidget;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
-import net.minecraft.client.MinecraftClient;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Module
@@ -45,36 +44,31 @@ public class ModButtons implements BUToggleableFeature {
         return ButtonsConfig.OPEN_ORDERS_BUTTON.enabled || ButtonsConfig.OPEN_SETTINGS_BUTTON.enabled;
     }
 
-    public ModButtons() {};
+    public ModButtons() {}
 
     @RegisterWidget
     public static List<ItemSlotButtonWidget> getWidget() {
+        if (!BazaarUtilsModules.ModButtons.isEnabled()) {
+            return Collections.emptyList();
+        }
+
+        var dimensions = WidgetManager.getScreenDimensions(BazaarScreens.ALL.toArray(ScreenType[]::new));
+        if (dimensions.isEmpty()) return Collections.emptyList();
+
         List<ItemSlotButtonWidget> result = new ArrayList<>();
 
-        if (!BazaarUtilsModules.ModButtons.isEnabled()) {
-            return result;
-        }
-
-        if (!(MinecraftClient.getInstance().currentScreen instanceof AccessorHandledScreen screen) || !ScreenManager.getInstance().isCurrent(BazaarScreens.ALL.toArray(ScreenType[]::new))) {
-            return result;
-        }
-
-        String screenTitle = MinecraftClient.getInstance().currentScreen.getTitle().getString();
-
-        ItemSlotButtonWidget.ScreenWidgetDimensions dimensions = ItemSlotButtonWidget.getSafeScreenDimensions(screen, screenTitle);
-
         if (ButtonsConfig.OPEN_SETTINGS_BUTTON.isEnabled()) {
-            result.add(createModSettingsButtonWidget(dimensions));
+            result.add(createModSettingsButtonWidget(dimensions.get()));
         }
 
         if (ButtonsConfig.OPEN_ORDERS_BUTTON.isEnabled()) {
-            result.add(createBazaarOrdersButtonWidget(dimensions));
+            result.add(createBazaarOrdersButtonWidget(dimensions.get()));
         }
 
         return result;
     }
 
-    private static ItemSlotButtonWidget createModSettingsButtonWidget(ItemSlotButtonWidget.ScreenWidgetDimensions dimensions) {
+    private static ItemSlotButtonWidget createModSettingsButtonWidget(WidgetManager.ScreenWidgetDimensions dimensions) {
         ButtonsConfig.WidgetButton config = ButtonsConfig.OPEN_SETTINGS_BUTTON;
 
         int buttonX = dimensions.x() - config.size - config.spacing;
@@ -91,7 +85,7 @@ public class ModButtons implements BUToggleableFeature {
         );
     }
 
-    private static ItemSlotButtonWidget createBazaarOrdersButtonWidget(ItemSlotButtonWidget.ScreenWidgetDimensions dimensions) {
+    private static ItemSlotButtonWidget createBazaarOrdersButtonWidget(WidgetManager.ScreenWidgetDimensions dimensions) {
         ButtonsConfig.WidgetButton config = ButtonsConfig.OPEN_ORDERS_BUTTON;
 
         int buttonX = dimensions.x() - config.size - config.spacing;

@@ -10,20 +10,18 @@ import com.github.mkram17.bazaarutils.data.BazaarLimitsStorage;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
+import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
-
-import com.github.mkram17.bazaarutils.ui.widgets.ItemSlotButtonWidget;
-import com.github.mkram17.bazaarutils.ui.widgets.TextDisplayWidget;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.TextDisplayWidget;
 import com.github.mkram17.bazaarutils.utils.TimeUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -46,8 +44,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         return OverlaysConfig.BAZAAR_LIMITS_VISUALIZER_TOGGLE;
     }
 
-    public BazaarLimitsVisualizer() {
-    }
+    public BazaarLimitsVisualizer() {}
 
     @RunOnInit
     public static void registerBazaarOpen() {
@@ -76,7 +73,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
     }
 
     public static void addOrderToLimit(double price) {
-        if (price > Integer.MAX_VALUE){
+        if (price > Integer.MAX_VALUE) {
             price = Integer.MAX_VALUE; // hypixel doesnt count coins over the integer limit
         }
 
@@ -113,17 +110,13 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
             return Collections.emptyList();
         }
 
-        if (!(MinecraftClient.getInstance().currentScreen instanceof AccessorHandledScreen screen) || !ScreenManager.getInstance().isCurrent(BazaarScreens.MAIN_PAGE)) {
-            return Collections.emptyList();
-        }
+        var dimensions = WidgetManager.getScreenDimensions(BazaarScreens.MAIN_PAGE);
+        if (dimensions.isEmpty()) return Collections.emptyList();
 
-        String screenTitle = MinecraftClient.getInstance().currentScreen.getTitle().getString();
-        ItemSlotButtonWidget.ScreenWidgetDimensions dimensions = ItemSlotButtonWidget.getSafeScreenDimensions(screen, screenTitle);
-
-        return List.of(createLimitWidget(dimensions), createTimeUntilResetWidget(dimensions));
+        return List.of(createLimitWidget(dimensions.get()), createTimeUntilResetWidget(dimensions.get()));
     }
 
-    private static TextDisplayWidget createLimitWidget(ItemSlotButtonWidget.ScreenWidgetDimensions dimensions) {
+    private static TextDisplayWidget createLimitWidget(WidgetManager.ScreenWidgetDimensions dimensions) {
         double ordered = BazaarLimitsVisualizer.getTotalOrderedCoins();
         String current = formatNumberWithPrefix(ordered);
         String max = formatNumberWithPrefix(BazaarLimitsVisualizer.COIN_LIMIT);
@@ -141,7 +134,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         return new TextDisplayWidget(x, y, OVERLAY_WIDTH, TEXT_HEIGHT, message, TextDisplayWidget.Alignment.LEFT);
     }
 
-    private static TextDisplayWidget createTimeUntilResetWidget(ItemSlotButtonWidget.ScreenWidgetDimensions dimensions) {
+    private static TextDisplayWidget createTimeUntilResetWidget(WidgetManager.ScreenWidgetDimensions dimensions) {
         ZonedDateTime nextReset = TimeUtil.getNextBazaarLimitReset();
         Duration duration = Duration.between(ZonedDateTime.now(), nextReset);
 
@@ -154,7 +147,7 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         Text timeText = Text.literal("Until Reset: ").formatted(Formatting.GOLD)
                 .append(Text.literal(timeLabel).formatted(urgencyColor));
 
-        int spacing = BUCompatibilityHelper.isSkyblockerLoaded() ? 26 : 5; 
+        int spacing = BUCompatibilityHelper.isSkyblockerLoaded() ? 26 : 5;
 
         int x = dimensions.x();
         int y = dimensions.y() - spacing - OVERLAY_HEIGHT + TEXT_HEIGHT + LINE_GAP;
