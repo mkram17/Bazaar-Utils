@@ -167,6 +167,11 @@ public class FlipHelper extends CustomItemButton implements BUListener {
 
         if (marketOppositePrice <= 0) return 0;
 
+        // Users with config from before this option was added will have null value for the biddingType variable. This ensures a default value is set.
+        if(biddingType == null) {
+            biddingType = BiddingType.COMPETITIVE;
+        }
+
         return switch (biddingType) {
             case COMPETITIVE -> order.getFlipPrice();
             case MATCHED -> Util.truncateNum(marketOppositePrice);
