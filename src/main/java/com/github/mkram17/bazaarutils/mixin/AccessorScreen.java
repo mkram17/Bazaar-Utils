@@ -18,14 +18,14 @@ public interface AccessorScreen {
     MinecraftClient getClient();
 
     @Invoker("addDrawableChild")
-    <T extends Element & Drawable & Selectable> T bazaarutils$registerWidget(T widget);
+    <T extends Element & Drawable & Selectable> T registerWidget(T widget);
 
     @Invoker("remove")
-    void bazaarutils$unregisterWidget(Element element);
+    void unregisterWidget(Element element);
 
     @Accessor("drawables")
-    List<Drawable> bazaarutils$getDrawables();
+    List<Drawable> getDrawables();
 
     @Accessor("children")
-    List<Element> bazaarutils$getChildren();
+    List<Element> getChildren();
 }

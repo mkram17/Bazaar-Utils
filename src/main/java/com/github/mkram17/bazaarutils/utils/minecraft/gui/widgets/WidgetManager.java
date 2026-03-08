@@ -3,13 +3,11 @@ package com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
 import com.github.mkram17.bazaarutils.mixin.AccessorScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
@@ -57,16 +55,16 @@ public class WidgetManager {
         List<ClickableWidget> widgets = ConfigUtil.getWidgets();
         if (widgets.isEmpty()) return;
 
-        widgets.forEach(accessor::bazaarutils$registerWidget);
+        widgets.forEach(accessor::registerWidget);
     }
 
     private static void removeWidgetsFrom(Screen screen) {
         if (!(screen instanceof AccessorScreen accessor)) return;
 
-        accessor.bazaarutils$getChildren().stream()
+        accessor.getChildren().stream()
                 .filter(element -> element instanceof ItemSlotButtonWidget || element instanceof TextDisplayWidget)
                 .toList()
-                .forEach(accessor::bazaarutils$unregisterWidget);
+                .forEach(accessor::unregisterWidget);
     }
 
     public static Optional<ScreenWidgetDimensions> getScreenDimensions(ScreenType... required) {
