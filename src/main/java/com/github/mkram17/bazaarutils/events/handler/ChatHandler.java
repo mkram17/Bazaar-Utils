@@ -177,7 +177,7 @@ public class ChatHandler {
      * @param siblings the text components of the message
      */
     public static void handleFlip(ArrayList<Text> siblings) {
-        int priceIndex = Util.componentIndexOf(siblings, "for") + 1;
+        int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
         processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, OrderType.SELL, 3, 4, priceIndex);
     }
 
