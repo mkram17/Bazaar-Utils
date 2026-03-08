@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -13,6 +14,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
@@ -21,8 +23,6 @@ import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
@@ -35,7 +35,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.regex.Matcher;
@@ -145,17 +145,13 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             Optional<ItemStack> productItem = ScreenManager.getInstance()
                     .findBack(BazaarScreens.ITEM_PAGE)
-                    .flatMap(screen -> screen.as(GenericContainerScreen.class))
-                    .map(inv -> SlotLookup.getInventoryItem(inv.getScreenHandler().getInventory(), BazaarSlots.ITEM_PAGE.ITEM_DISPLAY.slot));
+                    .flatMap(BazaarScreenHandler::getDisplayItem);
 
             if (productItem.isEmpty()) return Optional.empty();
 
-            Optional<String> productId = productItem
-                    .flatMap(item -> {
-                        Optional<String> name = Optional.ofNullable(item.getCustomName()).map(Text::getString);
-
-                        return name.isPresent() ? BazaarDataManager.findProductIdOptional(name.get()) : Optional.empty();
-                    });
+            Optional<String> productId = ScreenManager.getInstance()
+                    .findBack(BazaarScreens.ITEM_PAGE)
+                    .flatMap(BazaarScreenHandler::getDisplayProductId);
 
             if (productId.isEmpty()) return Optional.empty();
 
@@ -216,7 +212,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             return Optional.of(new TransactionState(purse.get(), productId.get(), productItem.get(), inputSign.get(), playerInventory.get(), container.get()));
         }
 
-        public TransactionAmount(@NotNull String name,  @NotNull BazaarSlots.BazaarSlot inputSignRef) {
+        public TransactionAmount(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
             super(name, inputSignRef);
         }
 
@@ -310,18 +306,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
          */
         protected abstract PricingPosition getPricingPosition();
 
-        /**
-         * The way this helper resolves—in that of to make state— the inventory item
-         */
-        protected Optional<String> getItemProductId(GenericContainerScreen context, ItemInfo inputSign) {
+        protected Optional<String> getItemProductId(ItemInfo inputSign) {
             return ScreenManager.getInstance()
                     .findBack(BazaarScreens.ITEM_PAGE)
-                    .flatMap(screen -> screen.as(GenericContainerScreen.class))
-                    .map(inv -> SlotLookup.getInventoryItem(inv.getScreenHandler().getInventory(), BazaarSlots.ITEM_PAGE.ITEM_DISPLAY.slot))
-                    .map(ItemStack::getCustomName)
-                    .map(Text::getString)
-                    .flatMap(BazaarDataManager::findProductIdOptional);
-        };
+                    .flatMap(BazaarScreenHandler::getDisplayProductId);
+        }
 
         @Override
         protected Optional<TransactionState> makeState(ChestLoadedEvent event) {
@@ -339,14 +328,14 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (inputSign.isEmpty()) return Optional.empty();
 
-            Optional<String> productId = getItemProductId(container.get(), inputSign.get());
+            Optional<String> productId = getItemProductId(inputSign.get());
 
             if (productId.isEmpty()) return Optional.empty();
 
             return Optional.of(new TransactionState(productId.get(), inputSign.get(), container.get()));
         }
 
-        public TransactionCost(@NotNull String name,  @NotNull BazaarSlots.BazaarSlot inputSignRef) {
+        public TransactionCost(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
             super(name, inputSignRef);
         }
 
@@ -375,29 +364,27 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         }
     }
 
-    public abstract static class TransactionFlip extends SignInputHelper.TransactionCost {
+    public abstract static class TransactionFlip extends TransactionCost {
         public static final Pattern VOLUME_PATTERN = Pattern.compile("([\\d,]+)");
         public static final int INPUT_LORE_LINE_VOLUME = 1;
 
         public static final Pattern PRICE_PATTERN = Pattern.compile("([\\d,.]+) coins");
         public static final int INPUT_LORE_LINE_PRICE = 3;
 
-        public TransactionFlip(@NotNull String name,  @NotNull BazaarSlots.BazaarSlot inputSignRef) {
+        public TransactionFlip(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
             super(name, inputSignRef);
         }
 
         @Override
-        protected Optional<String> getItemProductId(GenericContainerScreen context, ItemInfo inputSign) {
-            LoreComponent lore = inputSign.itemStack().getComponents().get(DataComponentTypes.LORE);
-
-            if (lore == null) return Optional.empty();
-
-            return matchToUserOrder(lore).map(Order::getProductID);
+        protected Optional<String> getItemProductId(ItemInfo inputSign) {
+            List<Text> loreLines = LoreParser.lines(inputSign.itemStack());
+            if (loreLines.isEmpty()) return Optional.empty();
+            return matchToUserOrder(loreLines).map(Order::getProductID);
         }
 
-        private Optional<Order> matchToUserOrder(LoreComponent lore) {
-            Optional<PriceInfo> priceInfo = getOrderPriceInfo(lore);
-            Optional<Integer> volume = getVolumeUnclaimed(lore);
+        private Optional<Order> matchToUserOrder(List<Text> loreLines) {
+            Optional<PriceInfo> priceInfo = getOrderPriceInfo(loreLines);
+            Optional<Integer> volume = getVolumeUnclaimed(loreLines);
 
             if (priceInfo.isEmpty() || volume.isEmpty()) return Optional.empty();
 
@@ -413,11 +400,10 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             return tempOrder.findOrderInList(UserOrdersStorage.INSTANCE.get());
         }
 
-        private Optional<PriceInfo> getOrderPriceInfo(LoreComponent lore) {
-            if (lore.lines().size() <= INPUT_LORE_LINE_PRICE) return Optional.empty();
+        private Optional<PriceInfo> getOrderPriceInfo(List<Text> loreLines) {
+            if (loreLines.size() <= INPUT_LORE_LINE_PRICE) return Optional.empty();
 
-            Matcher matcher = PRICE_PATTERN.matcher(lore.lines().get(INPUT_LORE_LINE_PRICE).getString());
-
+            Matcher matcher = PRICE_PATTERN.matcher(loreLines.get(INPUT_LORE_LINE_PRICE).getString());
             if (matcher.find()) {
                 try {
                     // Flip orders are always on the buy side; the sell price is computed after matching
@@ -430,11 +416,10 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             return Optional.empty();
         }
 
-        private Optional<Integer> getVolumeUnclaimed(LoreComponent lore) {
-            if (lore.lines().size() <= INPUT_LORE_LINE_VOLUME) return Optional.empty();
+        private Optional<Integer> getVolumeUnclaimed(List<Text> loreLines) {
+            if (loreLines.size() <= INPUT_LORE_LINE_VOLUME) return Optional.empty();
 
-            Matcher matcher = VOLUME_PATTERN.matcher(lore.lines().get(INPUT_LORE_LINE_VOLUME).getString());
-
+            Matcher matcher = VOLUME_PATTERN.matcher(loreLines.get(INPUT_LORE_LINE_VOLUME).getString());
             if (matcher.find()) {
                 try {
                     return Optional.of(Integer.parseInt(matcher.group(1).replace(",", "")));

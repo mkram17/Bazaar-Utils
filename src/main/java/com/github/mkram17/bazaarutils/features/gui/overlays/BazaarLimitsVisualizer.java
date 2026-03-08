@@ -57,24 +57,9 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         });
     }
 
-    public static String formatNumberWithPrefix(double number) {
-        String prefix;
-        double value;
-
-        if (number >= 1_000_000_000) {
-            prefix = "B";
-            value = number / 1_000_000_000.0;
-        } else {
-            prefix = "M";
-            value = number / 1_000_000.0;
-        }
-
-        return String.format("%.2f", value) + prefix;
-    }
-
     public static void addOrderToLimit(double price) {
         if (price > Integer.MAX_VALUE) {
-            price = Integer.MAX_VALUE; // hypixel doesnt count coins over the integer limit
+            price = Integer.MAX_VALUE;
         }
 
         limits().add(new OrderLimitEntry(price, ZonedDateTime.now()));
@@ -118,8 +103,8 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
 
     private static TextDisplayWidget createLimitWidget(WidgetManager.ScreenWidgetDimensions dimensions) {
         double ordered = BazaarLimitsVisualizer.getTotalOrderedCoins();
-        String current = formatNumberWithPrefix(ordered);
-        String max = formatNumberWithPrefix(BazaarLimitsVisualizer.COIN_LIMIT);
+        String current = Util.formatNumberWithPrefix(ordered);
+        String max = Util.formatNumberWithPrefix(BazaarLimitsVisualizer.COIN_LIMIT);
 
         Formatting color = (ordered >= BazaarLimitsVisualizer.COIN_LIMIT) ? Formatting.RED : Formatting.GREEN;
         Text message = Text.literal("Bazaar Order Limit: ").formatted(Formatting.GOLD)

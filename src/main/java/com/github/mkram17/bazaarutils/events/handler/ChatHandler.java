@@ -10,6 +10,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.text.Text;
 
@@ -185,7 +186,7 @@ public class ChatHandler {
      * @param siblings the text components of the message
      */
     public static void handleCancelled(ArrayList<Text> siblings) {
-        int priceIndex = Util.componentIndexOf(siblings, "for") + 1;
+        int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
 
         processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_CANCELLED, OrderType.SELL, 2, 4, priceIndex);
     }
@@ -196,7 +197,7 @@ public class ChatHandler {
      * @param siblings the text components of the message
      */
     public static void handleInstaSell(ArrayList<Text> siblings) {
-        int priceIndex = Util.componentIndexOf(siblings, "for") + 1;
+        int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
 
         processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_SELL, OrderType.BUY, 2, 4, priceIndex);
     }
@@ -250,7 +251,7 @@ public class ChatHandler {
         String itemName = Util.removeFormatting(getName(siblings));
         int volume = Integer.parseInt(siblings.get(3).getString().replace(",", ""));
 
-        String totalPriceString = siblings.get(Util.componentLastIndexOf(siblings, "for") + 1).getString().replace(",", "");
+        String totalPriceString = siblings.get(TextSearch.lastIndexOf(siblings, "for") + 1).getString().replace(",", "");
         totalPriceString = totalPriceString.substring(0, totalPriceString.indexOf(" "));
         double price = Double.parseDouble(totalPriceString) / volume;
 
@@ -383,14 +384,14 @@ public class ChatHandler {
      */
     private static Optional<Order> getClaimedSellOrder(ArrayList<Text> siblings) {
         // Sell order claimed messages sometimes include volume and sometimes don't
-        Text volumeComponent = siblings.get(Util.componentIndexOf(siblings, "x") - 1);
+        Text volumeComponent = siblings.get(TextSearch.indexOf(siblings, "x") - 1);
         String volumeString = volumeComponent.getString();
         int volume = Integer.parseInt(volumeString.replace(",", "").trim());
 
-        Text nameComponent = siblings.get(Util.componentIndexOf(siblings, "x") + 1);
+        Text nameComponent = siblings.get(TextSearch.indexOf(siblings, "x") + 1);
         String name = nameComponent.getString().trim();
 
-        Text priceComponent = siblings.get(Util.componentLastIndexOf(siblings, "at") + 1);
+        Text priceComponent = siblings.get(TextSearch.lastIndexOf(siblings, "at") + 1);
         String priceString = priceComponent.getString().replace(",", "").trim();
         double price = Double.parseDouble(priceString);
 

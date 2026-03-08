@@ -1,12 +1,12 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -25,7 +25,19 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
     @Getter
     private transient ItemStack replacementItem;
 
-    private void buildReplacementItem() {
+    private boolean inCorrectScreen() {
+        return ScreenManager.getInstance().isCurrent(BazaarScreens.ITEM_PAGE);
+    }
+
+    public ToggleBookmarkButton() {}
+
+    private Optional<String> resolveCurrentItemName() {
+        return ScreenManager.getInstance()
+                .current()
+                .flatMap(BazaarScreenHandler::getDisplayItemName);
+    }
+
+    private void buildReplacementItem(String itemName) {
         boolean bookmarked = BookmarkUtil.currentBookmarkOpt.isPresent();
 
         this.replacementItem = new ItemStack(
@@ -35,8 +47,8 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
         replacementItem.set(
                 DataComponentTypes.CUSTOM_NAME,
                 Text.literal(bookmarked
-                        ? "Remove " + BookmarkUtil.currentBookmarkOpt.get().name() + " Bookmark"
-                        : "Bookmark " + BookmarkUtil.findItemNameFromContainer())
+                        ? "Remove " + BookmarkUtil.getCurrentBookmarkOpt().get().name() + " Bookmark"
+                        : "Bookmark " + itemName)
         );
 
         replacementItem.set(
@@ -51,42 +63,46 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
             return;
         }
 
-        String currentItemName = BookmarkUtil.findItemNameFromContainer();
-
-        BookmarkUtil.currentBookmarkOpt = BookmarkUtil.findMatchingBookmark(currentItemName);
-        buildReplacementItem();
-
-        event.setReplacement(replacementItem);
+        resolveCurrentItemName().ifPresent(name -> {
+            BookmarkUtil.currentBookmarkOpt = BookmarkUtil.findMatchingBookmark(name);
+            buildReplacementItem(name);
+            event.setReplacement(replacementItem);
+        });
     }
 
     @EventHandler
     private void onClick(SlotClickEvent event) {
-        if (!wasButtonSlotClicked(event) || !BookmarkUtil.inCorrectScreen()) {
+        if (!wasButtonSlotClicked(event) || !ScreenManager.getInstance().isCurrent(BazaarScreens.ITEM_PAGE)) {
             return;
         }
 
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
 
-        toggleBookmark();
+        resolveCurrentItemName().ifPresent(this::toggleBookmark);
     }
 
-    private void toggleBookmark() {
-        String name = BookmarkUtil.findItemNameFromContainer();
+    private void toggleBookmark(String name) {
         List<Bookmark> list = BookmarkUtil.getBookmarks();
 
         if (BookmarkUtil.currentBookmarkOpt.isPresent()) {
             list.remove(BookmarkUtil.currentBookmarkOpt.get());
             BookmarkUtil.currentBookmarkOpt = Optional.empty();
         } else {
-            ItemStack actualItem = BookmarkUtil.findItemStack(name);
+            ItemStack itemStack = ScreenManager.getInstance().current()
+                    .flatMap(BazaarScreenHandler::getDisplayItem)
+                    .orElse(Items.DIAMOND.getDefaultStack());
 
-            Bookmark newBookmark = new Bookmark(name, actualItem, null);
+            String productId = ScreenManager.getInstance().current()
+                    .flatMap(BazaarScreenHandler::getDisplayProductId)
+                    .orElse(null);
+
+            Bookmark newBookmark = new Bookmark(name, itemStack, productId);
             list.add(newBookmark);
 
             BookmarkUtil.currentBookmarkOpt = Optional.of(newBookmark);
         }
 
-        buildReplacementItem();
+        buildReplacementItem(name);
 
         BookmarkUtil.saveBookmarks();
     }

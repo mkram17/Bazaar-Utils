@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.utils.minecraft.gui.container;
 
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
@@ -74,7 +75,7 @@ public class ContainerQuery {
     public ContainerQuery withLore(String lore) {
         return chain(filter.and(stack -> {
             LoreComponent data = stack.get(DataComponentTypes.LORE);
-            return data != null && !Util.findComponentsSpanningMatch(data.lines(), lore).isEmpty();
+            return data != null && !TextSearch.findSpanning(data.lines(), lore).isEmpty();
         }), "lore[" + lore + "]");
     }
 
