@@ -12,18 +12,17 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
-import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
-import com.github.mkram17.bazaarutils.ui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.*;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import meteordevelopment.orbit.EventHandler;
@@ -210,18 +209,13 @@ public class Bookmarks extends BUListener implements ItemButton, BUToggleableFea
 
         List<ItemSlotButtonWidget> widgets = new ArrayList<>();
 
-        boolean isTargetScreen = ScreenManager.getInstance().isCurrent(BazaarScreens.MAIN_PAGE);
-
-        if (!(MinecraftClient.getInstance().currentScreen instanceof AccessorHandledScreen screen) || !isTargetScreen) {
-            return Collections.emptyList();
-        }
-
-        ItemSlotButtonWidget.ScreenWidgetDimensions dimensions = ItemSlotButtonWidget.getSafeScreenDimensions(screen, ContainerManager.getContainerName());
+        var dimensions = WidgetManager.getScreenDimensions(BazaarScreens.ALL.toArray(ScreenType[]::new));
+        if (dimensions.isEmpty()) return Collections.emptyList();
 
         int buttonSize = ButtonsConfig.BookmarksConfig.OPEN_BOOKMARK_BUTTON.size;
         int spacing = ButtonsConfig.BookmarksConfig.OPEN_BOOKMARK_BUTTON.spacing;
-        int buttonX = dimensions.x() + dimensions.backgroundWidth() + spacing;
-        int currentButtonY = dimensions.y() + spacing;
+        int buttonX = dimensions.get().x() + dimensions.get().backgroundWidth() + spacing;
+        int currentButtonY = dimensions.get().y() + spacing;
 
         List<Bookmark> bookmarks = bookmarks();
 
