@@ -267,6 +267,7 @@
 
         "target.{}": {
           "instant_sell.label": "Instant Sell",
+          "sell_sacks.label": "Sell Sacks",
         },
 
         "rules.{}": {

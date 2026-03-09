@@ -16,6 +16,17 @@ public enum RestrictionTarget implements TooltipProvider, Translatable {
         public Text getTooltip() {
             return Text.translatable("bazaarutils.config.inventory.restrictions.target.instant_sell.label");
         }
+    },
+    SELL_SACKS {
+        @Override
+        public String getTranslationKey() {
+            return "bazaarutils.config.inventory.restrictions.target.sell_sacks.label";
+        }
+
+        @Override
+        public Text getTooltip() {
+            return Text.translatable("bazaarutils.config.inventory.restrictions.target.sell_sacks.label");
+        }
     };
 
     public abstract String getTranslationKey();
