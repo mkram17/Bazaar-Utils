@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.MarketType;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
@@ -23,30 +24,6 @@ public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton 
     protected String name;
 
     protected abstract Item getButtonItem();
-
-    public enum MarketType {
-        INSTANT {
-            @Override
-            public OrderType withIntention(OrderType type) {
-                return switch (type) {
-                    case BUY -> OrderType.SELL;
-                    case SELL -> OrderType.BUY;
-                };
-            }
-        },
-
-        ORDER {
-            @Override
-            public OrderType withIntention(OrderType type) {
-                return switch (type) {
-                    case BUY -> OrderType.BUY;
-                    case SELL -> OrderType.SELL;
-                };
-            }
-        };
-
-        public abstract OrderType withIntention(OrderType type);
-    }
 
     /**
      * The market action which this helper is operating on (to buy, to sell).
