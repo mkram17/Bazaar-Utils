@@ -9,6 +9,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
+import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
@@ -90,6 +91,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
         } else {
             ItemStack itemStack = ScreenManager.getInstance().current()
                     .flatMap(BazaarScreenHandler::getDisplayItem)
+                    .map(ItemInfo::itemStack)
                     .orElse(Items.DIAMOND.getDefaultStack());
 
             String productId = ScreenManager.getInstance().current()

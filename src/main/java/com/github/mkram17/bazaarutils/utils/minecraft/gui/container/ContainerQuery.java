@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.container;
 
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -85,9 +86,9 @@ public class ContainerQuery {
         int max = Math.min(invSize - 1, slotRange.getMax().orElse(invSize - 1));
 
         for (int i = min; i <= max; i++) {
-            ItemStack stack = SlotLookup.getInventoryItem(inventory, i);
-            if (!stack.isEmpty() && filter.test(stack)) {
-                return Optional.of(stack);
+            ItemInfo item = SlotLookup.getInventoryItem(inventory, i);
+            if (!item.itemStack().isEmpty() && filter.test(item.itemStack())) {
+                return Optional.of(item.itemStack());
             }
         }
 
@@ -107,9 +108,9 @@ public class ContainerQuery {
         List<ItemStack> out = new ArrayList<>();
 
         for (int i = min; i <= max; i++) {
-            ItemStack stack = SlotLookup.getInventoryItem(inventory, i);
-            if (!stack.isEmpty() && filter.test(stack)) {
-                out.add(stack);
+            ItemInfo item = SlotLookup.getInventoryItem(inventory, i);
+            if (!item.itemStack().isEmpty() && filter.test(item.itemStack())) {
+                out.add(item.itemStack());
             }
         }
 
