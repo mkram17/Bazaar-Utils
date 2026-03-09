@@ -1,113 +1,122 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory;
 
+import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.misc.SlotHighlightCache;
+import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
+import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.InstaSellUtil;
 import meteordevelopment.orbit.EventHandler;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Module
-public class InstantSellHighlight extends BUListener implements BUToggleableFeature {
-    private static final List<Integer> highlightedSlotIndexes = new ArrayList<>();
+public class InstantSellHighlight extends BUListener implements BUToggleableFeature, SlotHighlight {
+    public static final Identifier IDENTIFIER = Identifier.tryParse(BazaarUtils.MOD_ID, "highlights/standard_background");
+
+    @Override
+    public Identifier getIdentifier() {
+        return IDENTIFIER;
+    }
+
+    private static final Map<Integer, Integer> colorCache = new ConcurrentHashMap<>();
+
+    private void populateCache(Set<String> names, HandledScreen<?> screen, PlayerInventory playerInventory) {
+        colorCache.clear();
+
+        for (Slot slot : screen.getScreenHandler().slots) {
+            if (!slot.hasStack() || slot.inventory != playerInventory) continue;
+
+            Text customName = slot.getStack().getCustomName();
+
+            if (customName == null) continue;
+
+            String itemName = customName.getString();
+
+            if (names.stream().anyMatch(itemName::equalsIgnoreCase)) {
+                colorCache.put(slot.getIndex(), InventoryConfig.INSTANT_SELL_HIGHLIGHT_COLOR);
+            }
+        }
+    }
+
+    @Override
+    public Integer getHighlightColor(int slotIndex) {
+        return colorCache.get(slotIndex);
+    }
 
     @Override
     public boolean isEnabled() {
         return InventoryConfig.INSTANT_SELL_HIGHLIGHT_TOGGLE;
     }
 
-    public InstantSellHighlight() {}
+    public InstantSellHighlight() {
+        super();
+    }
+
+    @Override
+    protected void registerFabricEvents() {
+        ScreenEvents.AFTER_INIT.register(this::onScreenInitialized);
+    }
 
     @EventHandler
-    private void onScreenLoad(ChestLoadedEvent e) {
-        highlightedSlotIndexes.clear();
+    private void onChestLoaded(ChestLoadedEvent event) {
+        colorCache.clear();
 
-        if (!isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreens.MAIN_PAGE)) {
-            return;
-        }
+        if (!isEnabled()) return;
 
-        Optional<PlayerInventory> optionalInventory = getInventory();
-        if (optionalInventory.isEmpty()) {
-            Util.notifyError("Failed to get player inventory.", new Throwable());
-            return;
-        }
-        PlayerInventory inventory = optionalInventory.get();
+        ScreenManager.getInstance().current().ifPresent(context -> {
+            HandledScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(HandledScreen.class).orElse(null);
+            MinecraftClient client = MinecraftClient.getInstance();
 
-        List<OrderInfo> instaSellOrders = InstaSellUtil.getInstaSellOrders(e.getItemStacks());
-        List<String> names = instaSellOrders.stream()
-                .map(OrderInfo::getName)
-                .distinct()
-                .toList();
+            if (screen == null || client.player == null) return;
 
-        List<ItemStack> inventoryStacks = getInventoryStacks(names);
+            List<OrderInfo> orders = resolveOrders(context);
 
-        highlightedSlotIndexes.addAll(
-                inventoryStacks.stream()
-                        .filter(itemStack -> !itemStack.isEmpty())
-                        .map(ScreenManager::getInventorySlotFromItemStack)
-                        .flatMap(Optional::stream)
-                        .toList()
-        );
-    }
+            if (orders.isEmpty()) return;
 
-    private Optional<PlayerInventory> getInventory(){
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (player == null) {
-            Util.notifyError("Player is null, cannot get inventory stacks.", new Throwable());
-            return Optional.empty();
-        }
+            Set<String> names = orders.stream()
+                    .map(OrderInfo::getName)
+                    .collect(Collectors.toSet());
 
-        return Optional.of(player.getInventory());
-    }
-
-
-    private List<ItemStack> getInventoryStacks(List<String> names){
-        List<ItemStack> inventoryStacks = new ArrayList<>();
-
-        var inventoryOpt = getInventory();
-        if (inventoryOpt.isEmpty()) return Collections.emptyList();
-        var inventory = inventoryOpt.get();
-
-        var stacks = inventory.getMainStacks();
-
-        stacks.forEach(itemStack -> {
-            if(itemStack.isEmpty()) return;
-            String itemName = itemStack.getName().getString();
-            if (names.stream().anyMatch(name -> itemName.toLowerCase().contains(name.toLowerCase()))) {
-                inventoryStacks.add(itemStack);
-            }
+            populateCache(names, screen, client.player.getInventory());
         });
-        return inventoryStacks;
     }
 
-    public static void updateHighlightCache() {
-        if (!BazaarUtilsModules.InstantSellHighlight.isEnabled()) {
-            return;
-        }
-
-        for (Integer index : highlightedSlotIndexes) {
-            getColorFromIndex(index).ifPresent(instaSellHighlightColor -> SlotHighlightCache.instaSellHighlightCache.computeIfAbsent(index, (k) -> instaSellHighlightColor));
-        }
+    private void onScreenInitialized(MinecraftClient client, Screen screen, int width, int height) {
+        colorCache.clear();
     }
 
-    public static OptionalInt getColorFromIndex(int slotIndex) {
-        if (highlightedSlotIndexes.stream().noneMatch(i -> i.equals(slotIndex))) {
-            return OptionalInt.empty();
-        }
+    private static List<OrderInfo> resolveOrders(ScreenContext context) {
+        if (context.isAnyOf(BazaarScreens.ITEM_PAGE))
+            return BazaarScreenHandler.getInstantSellItem(context)
+                    .map(ItemInfo::itemStack)
+                    .flatMap(InstantSellParser::parseItemPageOrder)
+                    .map(InstantSellParser.InstantSellResult::items)
+                    .orElse(List.of());
 
-        return OptionalInt.of(InventoryConfig.INSTANT_SELL_HIGHLIGHT_COLOR);
+        return BazaarScreenHandler.getInstantSellItem(context)
+                .map(ItemInfo::itemStack)
+                .map(InstantSellParser::parseOrders)
+                .map(InstantSellParser.InstantSellResult::items)
+                .orElse(List.of());
     }
 }

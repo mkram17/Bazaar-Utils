@@ -1,17 +1,24 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory;
 
+import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
+import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
-import com.github.mkram17.bazaarutils.misc.SlotHighlightCache;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
+import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
@@ -21,155 +28,99 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-//drawing done in MixinHandledScreen
 @Module
-public class OrderStatusHighlight extends BUListener implements BUToggleableFeature {
-    public static final Identifier IDENTIFIER = Identifier.tryParse("bazaarutils", "orderstatushighlight/background");
+public class OrderStatusHighlight extends BUListener implements BUToggleableFeature, SlotHighlight {
+    public static final Identifier IDENTIFIER = Identifier.tryParse(BazaarUtils.MOD_ID, "highlights/standard_background");
+
+    @Override
+    public Identifier getIdentifier() {
+        return IDENTIFIER;
+    }
+
+    private static final Map<Integer, Integer> colorCache = new ConcurrentHashMap<>();
+    private static final Map<Integer, List<Text>> tooltipCache = new ConcurrentHashMap<>();
+
+    private void populateCache(ItemStack stack, HandledScreen<?> screen) {
+        int index = getSlotIndex(stack, screen);
+        if (index == -1) return;
+
+        Order order = getOrderForHighlight(index);
+        if (order == null) return;
+
+        PricingPosition pos = order.getPricingPosition();
+        if (pos == null) return;
+
+        colorCache.put(index, getArgbFromPricingPosition(pos));
+        tooltipCache.put(index, buildTooltipLines(order, pos));
+    }
+
+    @Override
+    public Integer getHighlightColor(int slotIndex) {
+        return colorCache.get(slotIndex);
+    }
 
     @Override
     public boolean isEnabled() {
         return InventoryConfig.ORDER_STATUS_HIGHLIGHT_TOGGLE;
     }
 
-    public OrderStatusHighlight() {}
-
-    public static Order getHighlightedOrder(int slotIndex) {
-        Optional<Order> order = OrderUtil.getUserOrderFromIndex(slotIndex);
-
-        return order.filter(
-                bazaarOrder -> bazaarOrder.getStatus() != null && bazaarOrder.getStatus() == OrderStatus.SET)
-                .orElse(null);
+    public OrderStatusHighlight() {
+        super();
     }
 
     @Override
     protected void registerFabricEvents() {
-        super.subscribeToMeteorEventBus = false;
-        registerTooltipListener();
+        ScreenEvents.AFTER_INIT.register(this::onScreenInitialized);
+        ItemTooltipCallback.EVENT.register(this::onTooltip);
     }
 
-    public static void updateHighlightCache(List<ItemStack> itemStacks) {
-        if (!BazaarUtilsModules.OrderStatusHighlight.isEnabled()) {
+    @EventHandler
+    private void onChestLoaded(ChestLoadedEvent event) {
+        if (!BazaarUtilsModules.OrderStatusHighlight.isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
             return;
         }
 
-        for (ItemStack stack : itemStacks) {
-            MinecraftClient client = MinecraftClient.getInstance();
+        HandledScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(HandledScreen.class).orElse(null);
+        if (screen == null) return;
 
-            if (client.player == null || !(client.currentScreen instanceof HandledScreen<?> handledScreen)) {
-                continue;
-            }
-
-            int index = -1;
-
-            for (Slot slot : handledScreen.getScreenHandler().slots) {
-                if (!slot.hasStack() || !slot.getStack().equals(stack)) {
-                    continue;
-                }
-
-                index = slot.getIndex();
-            }
-
-            if (index == -1) {
-                continue;
-            }
-
-            SlotHighlightCache.orderStatusHighlightCache.computeIfAbsent(index, OrderStatusHighlight::getHighlightColorFromIndex);
-        }
+        event.getItemStacks().forEach(stack -> populateCache(stack, screen));
     }
 
-    private static Integer getHighlightColorFromIndex(int index) {
-        Order order = getHighlightedOrder(index);
-
-        if (order == null) {
-            return null;
-        }
-
-        PricingPosition pricingPosition = order.getPricingPosition();
-
-        if (pricingPosition == null) {
-            return null;
-        }
-
-        return getArgbFromPricingPosition(pricingPosition);
+    private void onScreenInitialized(MinecraftClient client, Screen screen, int width, int height) {
+        colorCache.clear();
+        tooltipCache.clear();
     }
 
-    //maybe could be split into separate methods, but this is fine for now
-    private void registerTooltipListener() {
-        ItemTooltipCallback.EVENT.register((ItemStack stack, net.minecraft.item.Item.TooltipContext context, TooltipType type, List<Text> lines) -> {
-            if (!isEnabled()) {
-                return;
-            }
+    private void onTooltip(ItemStack stack, net.minecraft.item.Item.TooltipContext context, TooltipType type, List<Text> lines) {
+        if (!isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) return;
 
-            MinecraftClient client = MinecraftClient.getInstance();
+        HandledScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(HandledScreen.class).orElse(null);
+        if (screen == null) return;
 
-            if (!(client.currentScreen instanceof HandledScreen<?> handledScreen)) {
-                return;
-            }
+        int index = getSlotIndex(stack, screen);
+        if (index == -1) return;
 
-            int index = -1;
+        List<Text> cached = tooltipCache.get(index);
+        if (cached != null) lines.addAll(1, cached);
+    }
 
-            for (Slot slot : handledScreen.getScreenHandler().slots) {
-                if (!slot.hasStack() || !(slot.getStack().equals(stack))) {
-                    continue;
-                }
+    private static int getSlotIndex(ItemStack stack, HandledScreen<?> screen) {
+        for (Slot slot : screen.getScreenHandler().slots) {
+            if (slot.hasStack() && slot.getStack().equals(stack)) return slot.getIndex();
+        }
 
-                index = slot.getIndex();
-            }
+        return -1;
+    }
 
-            if (!SlotHighlightCache.orderStatusHighlightCache.containsKey(index)) {
-                return;
-            }
-
-            Order order = getHighlightedOrder(index);
-
-            if (order == null) {
-                return;
-            }
-
-            PricingPosition pricingPosition = order.getPricingPosition();
-
-            if (pricingPosition == null) {
-                return;
-            }
-
-            switch (pricingPosition) {
-                case COMPETITIVE:
-                    lines.add(1, Text.literal("COMPETITIVE")
-                            .setStyle(Style.EMPTY
-                                    .withColor(TextColor.fromRgb(InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR))
-                                    .withBold(true)));
-                    break;
-
-                case MATCHED:
-                    lines.add(1, Text.literal("MATCHED")
-                            .setStyle(Style.EMPTY
-                                    .withColor(TextColor.fromRgb(InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR))
-                                    .withBold(true)));
-                    break;
-
-                case OUTBID:
-                    lines.add(1, Text.literal("OUTBID")
-                            .setStyle(Style.EMPTY
-                                    .withColor(TextColor.fromRgb(InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR))
-                                    .withBold(true)));
-
-                    lines.add(2, Text.literal("Market Price: " +
-                                    Util.getPrettyString(order.getMarketPrice(order.getTransactionType().getSide())))
-                            .setStyle(Style.EMPTY
-                                    .withColor(TextColor.fromRgb(InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR))));
-                    break;
-            }
-            if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-                var sellPrice = order.getMarketPrice(TransactionType.Side.BUY);
-                var buyPrice = order.getMarketPrice(TransactionType.Side.SELL);
-
-                lines.add(Text.literal("[BU] Buy: " + Util.getPrettyString(sellPrice) + " coins"));
-                lines.add(Text.literal("[BU] Sell: " + Util.getPrettyString(buyPrice) + " coins"));
-            }
-        });
+    private static Order getOrderForHighlight(int slotIndex) {
+        return OrderUtil.getUserOrderFromIndex(slotIndex)
+                .filter(o -> o.getStatus() != null && o.getStatus() == OrderStatus.SET)
+                .orElse(null);
     }
 
     private static int getArgbFromPricingPosition(PricingPosition pricingPosition) {
@@ -178,5 +129,29 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
             case MATCHED -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR;
             case OUTBID -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR;
         };
+    }
+
+    private static List<Text> buildTooltipLines(Order order, PricingPosition pos) {
+        List<Text> lines = new ArrayList<>();
+
+        switch (pos) {
+            case COMPETITIVE -> lines.add(styledText("COMPETITIVE", InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR, true));
+            case MATCHED -> lines.add(styledText("MATCHED", InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR,     true));
+            case OUTBID -> {
+                lines.add(styledText("OUTBID", InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, true));
+                lines.add(styledText("Market Price: " + Util.getPrettyString(order.getMarketPrice(order.getTransactionType().getSide())), InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, false));
+            }
+        }
+
+        if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
+            lines.add(Text.literal("[BU] Buy: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.BUY))  + " coins"));
+            lines.add(Text.literal("[BU] Sell: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.SELL)) + " coins"));
+        }
+
+        return lines;
+    }
+
+    private static Text styledText(String content, int rgb, boolean bold) {
+        return Text.literal(content).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb)).withBold(bold));
     }
 }
