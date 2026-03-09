@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -35,7 +35,7 @@ public final class InstantSellParser {
             double totalPrice = Double.parseDouble(lines.get(5).getSiblings().get(1).getString().replace(" coins", "").replace(",", ""));
             double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
 
-            return Optional.of(new InstantSellResult(List.of(new OrderInfo(name, OrderType.BUY, null, volume, pricePerUnit, null))));
+            return Optional.of(new InstantSellResult(List.of(new OrderInfo(name, TransactionType.Side.BUY, null, volume, pricePerUnit, null))));
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -52,7 +52,7 @@ public final class InstantSellParser {
             double totalPrice = Double.parseDouble(s.get(5).getString().replace(" coins", "").replace(",", ""));
             double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
 
-            return Optional.of(new OrderInfo(name, OrderType.BUY, null, volume, pricePerUnit, null));
+            return Optional.of(new OrderInfo(name, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
         } catch (Exception e) {
             return Optional.empty();
         }
