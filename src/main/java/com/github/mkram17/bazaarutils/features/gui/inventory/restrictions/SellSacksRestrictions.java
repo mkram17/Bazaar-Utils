@@ -17,20 +17,19 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Module
 public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictions.SellSacksState> {
     public record SellSacksState(
             @NotNull
-            ItemInfo restrictedItem,
+            ItemInfo targetItem,
 
             @NotNull
-            List<OrderInfo> orders,
-
-            @NotNull
-            Optional<SellSacksParser.SellSacksResult.OtherItems> otherItems
+            List<RestrictionControl<?>> triggeredRestrictors
     ) implements RestrictionHelper.RestrictionState {}
 
     @Override
@@ -75,28 +74,22 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
 
         SellSacksParser.SellSacksResult result = SellSacksParser.parseOrders(sellSacksItem.get().itemStack());
 
-        return Optional.of(new SellSacksState(sellSacksItem.get(), result.items(), result.otherItems()));
+        Set<RestrictionControl<?>> triggered = new LinkedHashSet<>(getRestrictors().stream()
+                .filter(control -> control.isEnabled() && control.anyMatch(result.items()))
+                .toList());
+
+        result.otherItems().ifPresent(other -> triggered.addAll(collectOtherItemsTriggered(other)));
+
+        return Optional.of(new SellSacksState(sellSacksItem.get(), List.copyOf(triggered)));
     }
 
-    @Override
-    protected boolean computeRestriction(SellSacksState state) {
-        return state.orders().stream().anyMatch(this::isItemRestricted)
-                || state.otherItems().map(this::isOtherItemsRestricted).orElse(false);
-    }
-
-    private boolean isOtherItemsRestricted(SellSacksParser.SellSacksResult.OtherItems otherItems) {
-        for (RestrictionControl<?> control : getRestrictors()) {
-            if (!control.isEnabled()) continue;
-            if (!(control instanceof DoubleRestrictionControl doubleControl)) continue;
-
-            boolean restricted = switch (doubleControl.getRule()) {
-                case VOLUME -> otherItems.volume() > doubleControl.getAmount();
-                case PRICE -> otherItems.totalValue() > doubleControl.getAmount();
-            };
-
-            if (restricted) return true;
-        }
-
-        return false;
+    private List<RestrictionControl<?>> collectOtherItemsTriggered(SellSacksParser.SellSacksResult.OtherItems otherItems) {
+        return getRestrictors().stream()
+                .filter(RestrictionControl::isEnabled)
+                .filter(control -> control instanceof DoubleRestrictionControl doubleControl && switch (doubleControl.getRule()) {
+                    case PRICE -> otherItems.totalValue() > doubleControl.getAmount();
+                    case VOLUME -> otherItems.volume() > doubleControl.getAmount();
+                })
+                .toList();
     }
 }

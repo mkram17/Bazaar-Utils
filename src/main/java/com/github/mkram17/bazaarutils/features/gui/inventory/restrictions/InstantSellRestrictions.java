@@ -22,10 +22,10 @@ import java.util.Optional;
 public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestrictions.InstantSellState> {
     public record InstantSellState(
             @NotNull
-            ItemInfo restrictedItem,
+            ItemInfo targetItem,
 
             @NotNull
-            List<OrderInfo> orders
+            List<RestrictionControl<?>> triggeredRestrictors
     ) implements RestrictionHelper.RestrictionState {}
 
     @Override
@@ -74,11 +74,10 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
                 : InstantSellParser.parseOrders(instantSellItem.get().itemStack())
                         .items();
 
-        return Optional.of(new InstantSellState(instantSellItem.get(), orders));
-    }
+        List<RestrictionControl<?>> triggered = getRestrictors().stream()
+                .filter(control -> control.isEnabled() && control.anyMatch(orders))
+                .toList();
 
-    @Override
-    protected boolean computeRestriction(InstantSellState state) {
-        return state.orders().stream().anyMatch(this::isItemRestricted);
+        return Optional.of(new InstantSellState(instantSellItem.get(), triggered));
     }
 }
