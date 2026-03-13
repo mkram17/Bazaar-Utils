@@ -7,6 +7,14 @@ import net.minecraft.item.ItemStack;
  * such as the originating slot index and the rendered {@link ItemStack}.
  */
 public record ItemInfo(Integer slotIndex, ItemStack itemStack) {
+    public static ItemInfo empty(int slotIndex) {
+        return new ItemInfo(slotIndex, ItemStack.EMPTY);
+    }
+
+    public boolean isEmpty() {
+        return this.itemStack.isEmpty();
+    }
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof ItemInfo(Integer index, ItemStack stack))) {

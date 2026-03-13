@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import lombok.Getter;
@@ -294,10 +295,10 @@ public class ScreenManager {
         return getScreenContainer().map(Inventory::size);
     }
 
-    public static ItemStack getScreenItem(int chestSlot) {
+    public static ItemInfo getScreenItem(int chestSlot) {
         return getScreenContainer()
                 .map(inv -> SlotLookup.getInventoryItem(inv, chestSlot))
-                .orElse(ItemStack.EMPTY);
+                .orElse(ItemInfo.empty(chestSlot));
     }
 
     public static Optional<Integer> getInventorySlotFromItemStack(ItemStack wanted) {

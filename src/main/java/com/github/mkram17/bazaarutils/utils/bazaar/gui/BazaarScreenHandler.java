@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.gui;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -24,7 +25,7 @@ public final class BazaarScreenHandler {
 
     private BazaarScreenHandler() {}
 
-    public static Optional<ItemStack> getDisplayItem(@NotNull ScreenContext context) {
+    public static Optional<ItemInfo> getDisplayItem(@NotNull ScreenContext context) {
         // #isAnyOf rather than #matches — likely to hit computation cache from the
         // preceding isCurrent call in the same stack.
         if (!context.isAnyOf(BazaarScreens.ITEM_PAGE)) return Optional.empty();
@@ -37,6 +38,7 @@ public final class BazaarScreenHandler {
 
     public static Optional<String> getDisplayItemName(@NotNull ScreenContext context) {
         return getDisplayItem(context)
+                .map(ItemInfo::itemStack)
                 .map(ItemStack::getCustomName)
                 .map(Text::getString);
     }

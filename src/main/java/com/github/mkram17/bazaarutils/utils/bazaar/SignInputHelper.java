@@ -104,7 +104,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 String productId,
 
                 @NotNull
-                ItemStack productItem,
+                ItemInfo productItem,
 
                 @NotNull
                 ItemInfo inputSign,
@@ -143,7 +143,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (inputSign.isEmpty()) return Optional.empty();
 
-            Optional<ItemStack> productItem = ScreenManager.getInstance()
+            Optional<ItemInfo> productItem = ScreenManager.getInstance()
                     .findBack(BazaarScreens.ITEM_PAGE)
                     .flatMap(BazaarScreenHandler::getDisplayItem);
 
@@ -254,6 +254,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                             .map(GenericContainerScreen::getScreenHandler)
                             .map(GenericContainerScreenHandler::getInventory)
                             .map(inventory -> SlotLookup.getInventoryItem(inventory, BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot))
+                            .map(ItemInfo::itemStack)
                             .flatMap(BazaarScreens::findOptionAmount)
                             .map(value -> (int) Math.floor(value))
                             .orElse((int) state.playerInventory()
