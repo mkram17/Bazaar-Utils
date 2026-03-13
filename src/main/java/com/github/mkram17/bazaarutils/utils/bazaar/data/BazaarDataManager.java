@@ -85,7 +85,6 @@ public final class BazaarDataManager {
             }
 
             consecutiveFailures.set(0);
-            updateFetchedProductIds(reply);
 
             long snapshotTs = extractLastUpdated(reply);
             if (snapshotTs <= 0) {
