@@ -4,10 +4,13 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -22,8 +25,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 //TODO move config to config/bazaarutils directory and rename to "config". See how REI does this.
@@ -33,6 +35,11 @@ public class ResourceManager {
     private static final Path LOCAL_RESOURCES_PATH = MOD_CONFIG_DIR.resolve("bazaar-resources.json");
     private static final Identifier BUNDLED_RESOURCES_ID = Identifier.of(BazaarUtils.MOD_ID, "bazaar-resources.json");
     private static final String GITHUB_API_URL = "https://api.github.com/repos/mkram17/Skyblock-Bazaar-Conversions/contents/conversionupdating/bazaar-conversions.json?ref=main";
+    /* Cached conversions: lowercase name -> productId */
+    @Getter
+    private static volatile Map<String, String> nameToProductIdCache = Map.of();
+    @Setter
+    private static volatile boolean conversionsLoaded = false;
 
 
     public static void initialize() {
@@ -118,7 +125,7 @@ public class ResourceManager {
 
             MetadataConfig.RESOURCES_SHA = latestSha;
             ConfigUtil.scheduleConfigSave();
-            BazaarDataManager.setConversionsLoaded(false);
+            ResourceManager.setConversionsLoaded(false);
             PlayerActionUtil.notifyAll("Successfully updated Bazaar resources!");
         } catch (Exception e) {
             Util.notifyError("Failed to download resources", e);
@@ -157,5 +164,45 @@ public class ResourceManager {
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
             ResourceManager.initialize();
         });
+    }
+
+    /**
+     * Cached conversion load. Thread-safe (single pass).
+     */
+    public static void ensureConversionsLoaded() {
+        if (conversionsLoaded) {
+            return;
+        }
+
+        // Double-checked guard avoids repeated JSON parsing on the hot path.
+        synchronized (BazaarDataManager.class) {
+            if (conversionsLoaded) {
+                return;
+            }
+
+            try {
+                Map<String, String> mutable = new HashMap<>();
+
+                var resources = getResourceJson();
+                var conversions = resources.getAsJsonObject();
+
+                for (String key : conversions.keySet()) {
+                    String value = conversions.get(key).getAsString();
+                    if (value != null) {
+                        mutable.put(value.toLowerCase(Locale.ROOT), key);
+                    }
+                }
+
+                nameToProductIdCache = Collections.unmodifiableMap(mutable);
+                conversionsLoaded = true;
+
+                PlayerActionUtil.notifyAll("Loaded bazaarConversions cache: " + nameToProductIdCache.size() + " entries.", NotificationType.BAZAARDATA);
+            } catch (Exception e) {
+                Util.notifyError("Failed loading bazaarConversions cache", e);
+
+                nameToProductIdCache = Map.of();
+                conversionsLoaded = true;
+            }
+        }
     }
 }

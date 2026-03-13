@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.data;
 
+import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
@@ -116,8 +117,8 @@ public class BazaarDataUtil {
             return true;
         }
 
-        BazaarDataManager.ensureConversionsLoaded();
-        return BazaarDataManager.getNameToProductIdCache().containsValue(productId);
+        ResourceManager.ensureConversionsLoaded();
+        return ResourceManager.getNameToProductIdCache().containsValue(productId);
     }
 
     public static Optional<String> findProductIdOptional(String naturalName) {
@@ -125,8 +126,8 @@ public class BazaarDataUtil {
             return Optional.empty();
         }
 
-        BazaarDataManager.ensureConversionsLoaded();
+        ResourceManager.ensureConversionsLoaded();
 
-        return Optional.ofNullable(BazaarDataManager.getNameToProductIdCache().get(naturalName.toLowerCase(Locale.ROOT)));
+        return Optional.ofNullable(ResourceManager.getNameToProductIdCache().get(naturalName.toLowerCase(Locale.ROOT)));
     }
 }

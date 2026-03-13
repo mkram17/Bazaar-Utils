@@ -5,17 +5,11 @@ import com.github.mkram17.bazaarutils.data.APIUtils;
 import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import lombok.Getter;
-import lombok.Setter;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,12 +30,6 @@ public final class BazaarDataManager {
 
     private static final AtomicInteger consecutiveIdenticalSnapshots = new AtomicInteger(0);
     private static final AtomicInteger consecutiveFailures = new AtomicInteger(0);
-
-    /* Cached conversions: lowercase name -> productId */
-    @Getter
-    private static volatile Map<String, String> nameToProductIdCache = Map.of();
-    @Setter
-    private static volatile boolean conversionsLoaded = false;
 
     @RunOnInit
     public static void init() {
@@ -170,47 +158,6 @@ public final class BazaarDataManager {
         } catch (Exception e) {
             Util.notifyError("Failed to convert SkyBlockBazaarReply", e);
             return null;
-        }
-    }
-
-
-    /**
-     * Cached conversion load. Thread-safe (single pass).
-     */
-    protected static void ensureConversionsLoaded() {
-        if (conversionsLoaded) {
-            return;
-        }
-
-        // Double-checked guard avoids repeated JSON parsing on the hot path.
-        synchronized (BazaarDataManager.class) {
-            if (conversionsLoaded) {
-                return;
-            }
-
-            try {
-                Map<String, String> mutable = new HashMap<>();
-
-                var resources = ResourceManager.getResourceJson();
-                var conversions = resources.getAsJsonObject();
-
-                for (String key : conversions.keySet()) {
-                    String value = conversions.get(key).getAsString();
-                    if (value != null) {
-                        mutable.put(value.toLowerCase(Locale.ROOT), key);
-                    }
-                }
-
-                nameToProductIdCache = Collections.unmodifiableMap(mutable);
-                conversionsLoaded = true;
-
-                PlayerActionUtil.notifyAll("Loaded bazaarConversions cache: " + nameToProductIdCache.size() + " entries.", NotificationType.BAZAARDATA);
-            } catch (Exception e) {
-                Util.notifyError("Failed loading bazaarConversions cache", e);
-
-                nameToProductIdCache = Map.of();
-                conversionsLoaded = true;
-            }
         }
     }
 }
