@@ -2,6 +2,9 @@ package com.github.mkram17.bazaarutils.utils.bazaar.data;
 
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductData;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductOrder;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
 
@@ -32,16 +35,16 @@ public class BazaarDataUtil {
                 return OptionalInt.empty();
             }
 
-            List<ProductSummary> list = switch (priceType) {
-                case INSTABUY -> product.getBuySummary();
-                case INSTASELL -> product.getSellSummary();
+            List<ProductOrder> list = switch (priceType) {
+                case INSTABUY -> product.getSellOrders();
+                case INSTASELL -> product.getBuyOrders();
             };
 
             if (list == null) {
                 return OptionalInt.empty();
             }
 
-            for (ProductSummary summary : list) {
+            for (ProductOrder summary : list) {
                 if (Double.compare(summary.getPricePerUnit(), price) == 0) {
                     return OptionalInt.of((int) summary.getOrders());
                 }
@@ -78,7 +81,7 @@ public class BazaarDataUtil {
 
             return switch (priceType) {
                 case INSTABUY -> {
-                    List<ProductSummary> buySummary = product.getBuySummary();
+                    List<ProductOrder> buySummary = product.getSellOrders();
 
                     if (buySummary == null || buySummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
@@ -87,7 +90,7 @@ public class BazaarDataUtil {
                     yield OptionalDouble.of(buySummary.getFirst().getPricePerUnit());
                 }
                 case INSTASELL -> {
-                    List<ProductSummary> sellSummary = product.getSellSummary();
+                    List<ProductOrder> sellSummary = product.getBuyOrders();
 
                     if (sellSummary == null || sellSummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);

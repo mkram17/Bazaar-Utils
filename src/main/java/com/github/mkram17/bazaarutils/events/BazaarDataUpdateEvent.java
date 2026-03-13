@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.events;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.data.CustomBazaarReply;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
 import lombok.Getter;
 import meteordevelopment.orbit.ICancellable;
 

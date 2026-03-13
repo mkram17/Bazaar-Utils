@@ -7,8 +7,9 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.APIConversionUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
 import lombok.Getter;
-import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -20,21 +21,24 @@ public final class BazaarDataManager {
 
     @Getter
     private static volatile CustomBazaarReply currentReply;
+
     @Getter
     private static volatile long lastSnapshotTs = -1;
-    private static volatile long lastFetchWallClock = -1;
+
+    private static final BazaarDataSettings BAZAAR_DATA_SETTINGS = new BazaarDataSettings();
 
     private static volatile ScheduledFuture<?> scheduledTask;
     // Serializes schedule/cancel so only one pending fetch task exists at a time.
     private static final Object SCHED_LOCK = new Object();
 
     private static final AtomicInteger consecutiveIdenticalSnapshots = new AtomicInteger(0);
+
     private static final AtomicInteger consecutiveFailures = new AtomicInteger(0);
 
     @RunOnInit
     public static void init() {
         scheduleFetch(0);
-        PlayerActionUtil.notifyAll("BazaarDataManager initialized (simple fixed-interval poller). Base=" + BazaarDataSettings.BASE_INTERVAL_MS + "ms", NotificationType.BAZAARDATA);
+        PlayerActionUtil.notifyAll("BazaarDataManager initialized (simple fixed-interval poller). Base=" + BAZAAR_DATA_SETTINGS.BASE_INTERVAL_MS + "ms", NotificationType.BAZAARDATA);
     }
 
     private static void scheduleFetch(long delayMs) {
@@ -56,19 +60,18 @@ public final class BazaarDataManager {
     }
 
     private static void fetchOnce() {
-        lastFetchWallClock = System.currentTimeMillis();
         APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
             if (throwable != null) {
                 handleFetchFailure(
-                    "Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + BazaarDataSettings.FAILURE_RETRY_MS + "ms",
+                    "Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms",
                     true
                 );
                 return;
             }
 
-            CustomBazaarReply customReply = convertReply(reply);
-            if (customReply == null || !customReply.isSuccess()) {
-                handleFetchFailure("Reply conversion failed. Retry in " + BazaarDataSettings.FAILURE_RETRY_MS + "ms", true);
+            CustomBazaarReply customReply = APIConversionUtil.fromSkyBlockReply(reply);
+            if (!customReply.isSuccess()) {
+                handleFetchFailure("Reply conversion failed. Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms", true);
                 return;
             }
 
@@ -76,10 +79,11 @@ public final class BazaarDataManager {
 
             long snapshotTs = customReply.getLastUpdated();
             if (snapshotTs <= 0) {
-                handleFetchFailure("Invalid lastUpdated <= 0. Retry in " + BazaarDataSettings.FAILURE_RETRY_MS + "ms", false);
+                handleFetchFailure("Invalid lastUpdated <= 0. Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms", false);
                 return;
             }
 
+            customReply.replaceUserProductOrders();
             handleSnapshotResult(customReply, snapshotTs);
             scheduleNextFromSnapshot(snapshotTs);
         });
@@ -93,7 +97,7 @@ public final class BazaarDataManager {
     }
 
     private static void scheduleFailureRetry() {
-        scheduleFetch(BazaarDataSettings.FAILURE_RETRY_MS);
+        scheduleFetch(BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS);
     }
 
     private static void handleSnapshotResult(CustomBazaarReply reply, long snapshotTs) {
@@ -128,7 +132,7 @@ public final class BazaarDataManager {
         int identicalSnapshotCount = consecutiveIdenticalSnapshots.incrementAndGet();
         PlayerActionUtil.notifyAll("Snapshot unchanged (" + snapshotTs + ") x" + identicalSnapshotCount, NotificationType.BAZAARDATA);
 
-        if (identicalSnapshotCount == BazaarDataSettings.STALE_WARNING_THRESHOLD) {
+        if (identicalSnapshotCount == BAZAAR_DATA_SETTINGS.STALE_WARNING_THRESHOLD) {
             PlayerActionUtil.notifyAll(
                 "WARNING: " + identicalSnapshotCount + " identical snapshots in a row. Server might be lagging or BASE_INTERVAL_MS too short.",
                 NotificationType.BAZAARDATA
@@ -138,26 +142,17 @@ public final class BazaarDataManager {
 
     private static void scheduleNextFromSnapshot(long snapshotTs) {
         long nowMs = System.currentTimeMillis();
-        long expectedNextFetchAtMs = snapshotTs + BazaarDataSettings.BASE_INTERVAL_MS + BazaarDataSettings.POST_OFFSET_MS;
+        long expectedNextFetchAtMs = snapshotTs + BAZAAR_DATA_SETTINGS.BASE_INTERVAL_MS + BAZAAR_DATA_SETTINGS.POST_OFFSET_MS;
 
         long nextDelayMs;
         if (nowMs >= expectedNextFetchAtMs) {
             // Past the ideal fetch time; server has not advanced snapshot yet, so back off.
-            nextDelayMs = BazaarDataSettings.STALE_BACKOFF_MS;
+            nextDelayMs = BAZAAR_DATA_SETTINGS.STALE_BACKOFF_MS;
         } else {
             long idealDelayMs = expectedNextFetchAtMs - nowMs;
-            nextDelayMs = Math.max(idealDelayMs, BazaarDataSettings.STALE_BACKOFF_MS);
+            nextDelayMs = Math.max(idealDelayMs, BAZAAR_DATA_SETTINGS.STALE_BACKOFF_MS);
         }
 
         scheduleFetch(nextDelayMs);
-    }
-
-    private static CustomBazaarReply convertReply(SkyBlockBazaarReply reply) {
-        try {
-            return CustomBazaarReply.fromSkyBlockReply(reply);
-        } catch (Exception e) {
-            Util.notifyError("Failed to convert SkyBlockBazaarReply", e);
-            return null;
-        }
     }
 }
