@@ -102,6 +102,24 @@ public class BazaarDataUtil {
         }
     }
 
+    /**
+     * Checks whether the provided string is a known bazaar product ID.
+     * Uses in-memory data only (current reply + conversion cache).
+     */
+    public static boolean isValidProductId(String productId) {
+        if (productId == null || productId.isBlank()) {
+            return false;
+        }
+
+        CustomBazaarReply reply = BazaarDataManager.getCurrentReply();
+        if (reply != null && reply.getProduct(productId) != null) {
+            return true;
+        }
+
+        BazaarDataManager.ensureConversionsLoaded();
+        return BazaarDataManager.getNameToProductIdCache().containsValue(productId);
+    }
+
     public static Optional<String> findProductIdOptional(String naturalName) {
         if (naturalName == null || naturalName.isBlank()) {
             return Optional.empty();
