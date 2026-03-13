@@ -9,22 +9,22 @@ public class ProductOrder {
     @Getter
     private final double pricePerUnit;
     @Getter
-    private final long amount;
+    private final long volume;
     @Getter
-    private final long orders;
+    private final long numOrders;
 
-    public ProductOrder(PriceType priceType, double pricePerUnit, long amount, long orders) {
+    public ProductOrder(PriceType priceType, double pricePerUnit, long volume, long numOrders) {
         this.priceType = priceType;
         this.pricePerUnit = pricePerUnit;
-        this.amount = amount;
-        this.orders = orders;
+        this.volume = volume;
+        this.numOrders = numOrders;
     }
 
     public boolean hasOrders() {
-        return orders >0 && pricePerUnit >0;
+        return numOrders >0 && pricePerUnit >0;
     }
 
     public boolean equalsOrder(Order order) {
-        return order.getOrderType().asPriceType() == priceType && order.getPricePerItem() == pricePerUnit && order.getVolume() == amount;
+        return order.getOrderType().asPriceType() == priceType && order.getPricePerItem() == pricePerUnit && order.getVolume() == volume;
     }
 }

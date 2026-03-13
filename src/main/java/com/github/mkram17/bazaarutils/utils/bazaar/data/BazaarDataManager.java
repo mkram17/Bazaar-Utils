@@ -61,7 +61,7 @@ public final class BazaarDataManager {
 
     private static void fetchOnce() {
         APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
-            if (throwable != null) {
+            if (throwable != null || !reply.isSuccess()) {
                 handleFetchFailure(
                     "Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms",
                     true
@@ -70,18 +70,14 @@ public final class BazaarDataManager {
             }
 
             CustomBazaarReply customReply = APIConversionUtil.fromSkyBlockReply(reply);
-            if (!customReply.isSuccess()) {
-                handleFetchFailure("Reply conversion failed. Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms", true);
-                return;
-            }
-
-            consecutiveFailures.set(0);
 
             long snapshotTs = customReply.getLastUpdated();
             if (snapshotTs <= 0) {
                 handleFetchFailure("Invalid lastUpdated <= 0. Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms", false);
                 return;
             }
+
+            consecutiveFailures.set(0);
 
             customReply.replaceUserProductOrders();
             handleSnapshotResult(customReply, snapshotTs);
@@ -92,7 +88,7 @@ public final class BazaarDataManager {
     private static void handleFetchFailure(String messagePrefix, boolean includeFailureCount) {
         int failureCount = includeFailureCount ? consecutiveFailures.incrementAndGet() : consecutiveFailures.get();
         String message = includeFailureCount ? messagePrefix + " (failures=" + failureCount + ")" : messagePrefix;
-        PlayerActionUtil.notifyAll(message, NotificationType.BAZAARDATA);
+        Util.notifyError(message, new Throwable());
         scheduleFailureRetry();
     }
 

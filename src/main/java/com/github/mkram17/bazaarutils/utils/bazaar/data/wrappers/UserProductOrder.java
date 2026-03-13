@@ -11,7 +11,7 @@ public class UserProductOrder extends ProductOrder {
         this.userOrder = userOrder;
     }
     public UserProductOrder(Order userOrder, ProductOrder productOrder) {
-        super(productOrder.getPriceType(), productOrder.getPricePerUnit(), productOrder.getAmount(), productOrder.getOrders());
+        super(productOrder.getPriceType(), productOrder.getPricePerUnit(), productOrder.getVolume(), productOrder.getNumOrders());
         this.userOrder = userOrder;
     }
 }

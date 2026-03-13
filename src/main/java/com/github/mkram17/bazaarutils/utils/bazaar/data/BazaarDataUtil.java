@@ -46,7 +46,7 @@ public class BazaarDataUtil {
 
             for (ProductOrder summary : list) {
                 if (Double.compare(summary.getPricePerUnit(), price) == 0) {
-                    return OptionalInt.of((int) summary.getOrders());
+                    return OptionalInt.of((int) summary.getNumOrders());
                 }
             }
 
