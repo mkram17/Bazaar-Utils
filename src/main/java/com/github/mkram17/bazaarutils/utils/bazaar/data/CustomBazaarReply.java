@@ -23,16 +23,20 @@ public class CustomBazaarReply extends AbstractReply {
         AccessorSkyBlockBazaarReply accessor = (AccessorSkyBlockBazaarReply) reply;
 
         Map<String, SkyBlockBazaarReply.Product> sourceProducts = reply.getProducts();
+        Map<String, ProductData> converted = convertAPIProducts(sourceProducts);
 
-        Map<String, ProductData> converted = (sourceProducts == null || sourceProducts.isEmpty())
-                ? Map.of()
-                : sourceProducts.entrySet().stream()
+        return new CustomBazaarReply(accessor.getLastUpdated(), converted);
+    }
+
+    public static Map<String, ProductData> convertAPIProducts(Map<String, SkyBlockBazaarReply.Product> apiProducts) {
+        if (apiProducts == null || apiProducts.isEmpty()) {
+            return Map.of();
+        }
+        return apiProducts.entrySet().stream()
                 .collect(Collectors.toUnmodifiableMap(
                         Map.Entry::getKey,
                         e -> ProductData.fromAPIProduct(e.getKey(), e.getValue())
                 ));
-
-        return new CustomBazaarReply(accessor.getLastUpdated(), converted);
     }
 
     public ProductData getProduct(String productId) {

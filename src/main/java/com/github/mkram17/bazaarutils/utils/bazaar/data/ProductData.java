@@ -7,6 +7,7 @@ import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ProductData {
     @Getter
@@ -25,18 +26,25 @@ public class ProductData {
         List<ProductSummary> buy = new ArrayList<>();
 
         if (apiProduct.getSellSummary() != null) {
-            for (SkyBlockBazaarReply.Product.Summary s : apiProduct.getSellSummary()) {
-                sell.add(ProductSummary.fromAPIProductSummary(s, PriceType.INSTASELL));
-            }
+            var convertedSellSummaries = convertAPIProductSummaries(apiProduct.getSellSummary(), PriceType.INSTASELL);
+            sell.addAll(convertedSellSummaries);
         }
 
         if (apiProduct.getBuySummary() != null) {
-            for (SkyBlockBazaarReply.Product.Summary s : apiProduct.getBuySummary()) {
-                buy.add(ProductSummary.fromAPIProductSummary(s, PriceType.INSTABUY));
-            }
+            var convertedBuySummaries = convertAPIProductSummaries(apiProduct.getSellSummary(), PriceType.INSTABUY);
+            buy.addAll(convertedBuySummaries);
         }
 
         return new ProductData(productId, sell, buy);
+    }
+
+    public static List<ProductSummary> convertAPIProductSummaries(List<SkyBlockBazaarReply.Product.Summary> apiSummaries, PriceType priceType) {
+        if (apiSummaries == null || apiSummaries.isEmpty()) {
+            return List.of();
+        }
+        return apiSummaries.stream()
+                .map(s -> ProductSummary.fromAPIProductSummary(s, priceType))
+                .toList();
     }
 
     public List<ProductSummary> getSellSummary() {
