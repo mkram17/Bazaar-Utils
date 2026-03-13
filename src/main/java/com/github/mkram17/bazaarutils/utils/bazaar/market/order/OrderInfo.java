@@ -1,12 +1,11 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -49,7 +48,7 @@ public class OrderInfo extends PriceInfo {
      * Creates a container that tracks market data for a specific Bazaar product.
      *
      * @param name         display name of the item
-     * @param side whether this is a buy or sell transaction
+     * @param side         whether this is a buy or sell transaction
      * @param status       status of the order
      * @param volume       quantity of the order
      * @param pricePerItem current price per unit for the order
@@ -64,7 +63,7 @@ public class OrderInfo extends PriceInfo {
         this.volume = volume;
         this.tolerance = calculateTolerance();
 
-        BazaarDataManager.findProductIdOptional(name).ifPresent(productId -> this.productID = productId);
+        BazaarDataUtil.findProductIdOptional(name).ifPresent(productId -> this.productID = productId);
         validateProductId(productID);
         findPricingPosition().ifPresent(pricingPosition -> this.pricingPosition = pricingPosition);
     }
@@ -98,7 +97,7 @@ public class OrderInfo extends PriceInfo {
      * @return {@code true} when a product ID exists for the name
      */
     public static boolean isValidName(String itemName) {
-        return itemName != null && BazaarDataManager.findProductIdOptional(itemName).isPresent();
+        return itemName != null && BazaarDataUtil.findProductIdOptional(itemName).isPresent();
     }
 
     /**
@@ -113,7 +112,7 @@ public class OrderInfo extends PriceInfo {
 
         double marketPrice = getMarketPrice(transactionType.getSide());
 
-        var orderCountOpt = BazaarDataManager.getOrderCountOptional(productID, getTransactionType(), getPricePerItem());
+        var orderCountOpt = BazaarDataUtil.getOrderCountOptional(productID, getTransactionType(), getPricePerItem());
 
         if (orderCountOpt.isEmpty()) {
             return Optional.empty();

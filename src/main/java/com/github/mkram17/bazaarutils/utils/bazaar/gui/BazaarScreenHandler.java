@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -70,7 +70,7 @@ public final class BazaarScreenHandler {
 
     public static Optional<String> getDisplayProductId(@NotNull ScreenContext context) {
         return getDisplayItemName(context)
-                .flatMap(BazaarDataManager::findProductIdOptional);
+                .flatMap(BazaarDataUtil::findProductIdOptional);
     }
 
     public static Optional<OrderInfo> getDisplayOrderInfo(@NotNull ScreenContext context) {

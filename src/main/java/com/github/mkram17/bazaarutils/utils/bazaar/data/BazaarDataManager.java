@@ -4,19 +4,20 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.data.APIUtils;
 import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
+import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
 import lombok.Getter;
 import lombok.Setter;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
-import java.time.Duration;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,12 +26,6 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public final class BazaarDataManager {
 
-    private static final long BASE_INTERVAL_MS = 20_000;
-    private static final long POST_OFFSET_MS = 500;
-    private static final long STALE_BACKOFF_MS = 750;
-    private static final long FAILURE_RETRY_MS = 500;
-    private static final int STALE_WARNING_THRESHOLD = 5;
-
     @Getter
     private static volatile SkyBlockBazaarReply currentReply;
     @Getter
@@ -38,12 +33,14 @@ public final class BazaarDataManager {
     private static volatile long lastFetchWallClock = -1;
 
     private static volatile ScheduledFuture<?> scheduledTask;
+    // Serializes schedule/cancel so only one pending fetch task exists at a time.
     private static final Object SCHED_LOCK = new Object();
 
     private static final AtomicInteger consecutiveIdenticalSnapshots = new AtomicInteger(0);
     private static final AtomicInteger consecutiveFailures = new AtomicInteger(0);
 
-    /* Cached conversions: lowercase name -> productID */
+    /* Cached conversions: lowercase name -> productId */
+    @Getter
     private static volatile Map<String, String> nameToProductIdCache = Map.of();
     @Setter
     private static volatile boolean conversionsLoaded = false;
@@ -51,9 +48,8 @@ public final class BazaarDataManager {
     @RunOnInit
     public static void init() {
         scheduleFetch(0);
-        PlayerActionUtil.notifyAll("BazaarDataManager initialized (simple fixed-interval poller). Base=" + BASE_INTERVAL_MS + "ms", NotificationType.BAZAARDATA);
+        PlayerActionUtil.notifyAll("BazaarDataManager initialized (simple fixed-interval poller). Base=" + BazaarDataSettings.BASE_INTERVAL_MS + "ms", NotificationType.BAZAARDATA);
     }
-
 
     private static void scheduleFetch(long delayMs) {
         synchronized (SCHED_LOCK) {
@@ -67,75 +63,106 @@ public final class BazaarDataManager {
     private static void fetchOnceSafely() {
         try {
             fetchOnce();
-        } catch (Throwable t) {
-            Util.notifyError("Unexpected error in BazaarDataManager fetch loop", t);
-            scheduleFetch(FAILURE_RETRY_MS);
+        } catch (Throwable throwable) {
+            Util.notifyError("Unexpected error in BazaarDataManager fetch loop", throwable);
+            scheduleFailureRetry();
         }
     }
 
     private static void fetchOnce() {
-        lastFetchWallClock = System.currentTimeMillis();
         APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
             if (throwable != null) {
-                consecutiveFailures.incrementAndGet();
-                PlayerActionUtil.notifyAll("Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + FAILURE_RETRY_MS + "ms (failures=" + consecutiveFailures.get() + ")", NotificationType.BAZAARDATA);
-                scheduleFetch(FAILURE_RETRY_MS);
+                handleFetchFailure(
+                    "Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + BazaarDataSettings.FAILURE_RETRY_MS + "ms",
+                    true
+                );
                 return;
             }
+
             if (reply == null || !reply.isSuccess()) {
-                consecutiveFailures.incrementAndGet();
-                PlayerActionUtil.notifyAll("Null/unsuccessful reply. Retry in " + FAILURE_RETRY_MS + "ms (failures=" + consecutiveFailures.get() + ")", NotificationType.BAZAARDATA);
-                scheduleFetch(FAILURE_RETRY_MS);
+                handleFetchFailure("Null/unsuccessful reply. Retry in " + BazaarDataSettings.FAILURE_RETRY_MS + "ms", true);
                 return;
             }
+
             consecutiveFailures.set(0);
+            updateFetchedProductIds(reply);
 
             long snapshotTs = extractLastUpdated(reply);
             if (snapshotTs <= 0) {
-                PlayerActionUtil.notifyAll("Invalid lastUpdated <= 0. Retry in " + FAILURE_RETRY_MS + "ms", NotificationType.BAZAARDATA);
-                scheduleFetch(FAILURE_RETRY_MS);
+                handleFetchFailure("Invalid lastUpdated <= 0. Retry in " + BazaarDataSettings.FAILURE_RETRY_MS + "ms", false);
                 return;
             }
 
-            if (snapshotTs != lastSnapshotTs) {
-                long previous = lastSnapshotTs;
-                lastSnapshotTs = snapshotTs;
-                currentReply = reply;
-                consecutiveIdenticalSnapshots.set(0);
-
-                EVENT_BUS.post(new BazaarDataUpdateEvent(reply));
-
-                if (previous != -1) {
-                    PlayerActionUtil.notifyAll("New snapshot " + snapshotTs + " (Δ " + (snapshotTs - previous) + " ms). Scheduling next predicted fetch.", NotificationType.BAZAARDATA);
-                } else {
-                    PlayerActionUtil.notifyAll("First snapshot " + snapshotTs + " received.", NotificationType.BAZAARDATA);
-                }
-
-                scheduleNextFromSnapshot(snapshotTs);
-            } else {
-                int identical = consecutiveIdenticalSnapshots.incrementAndGet();
-                PlayerActionUtil.notifyAll("Snapshot unchanged (" + snapshotTs + ") x" + identical, NotificationType.BAZAARDATA);
-                if (identical == STALE_WARNING_THRESHOLD) {
-                    PlayerActionUtil.notifyAll("WARNING: " + identical + " identical snapshots in a row. Server might be lagging or BASE_INTERVAL_MS too short.", NotificationType.BAZAARDATA);
-                }
-                scheduleNextFromSnapshot(snapshotTs);
-            }
+            handleSnapshotResult(reply, snapshotTs);
+            scheduleNextFromSnapshot(snapshotTs);
         });
     }
 
-    private static void scheduleNextFromSnapshot(long snapshotTs) {
-        long now = System.currentTimeMillis();
-        long target = snapshotTs + BASE_INTERVAL_MS + POST_OFFSET_MS;
+    private static void handleFetchFailure(String messagePrefix, boolean includeFailureCount) {
+        int failureCount = includeFailureCount ? consecutiveFailures.incrementAndGet() : consecutiveFailures.get();
+        String message = includeFailureCount ? messagePrefix + " (failures=" + failureCount + ")" : messagePrefix;
+        PlayerActionUtil.notifyAll(message, NotificationType.BAZAARDATA);
+        scheduleFailureRetry();
+    }
 
-        long delay;
-        if (now >= target) {
-            // Past the ideal fetch time; server hasn’t advanced snapshot yet. Don’t spam: back off.
-            delay = STALE_BACKOFF_MS;
-        } else {
-            var typicalDelay = target - now;
-            delay = Math.max(typicalDelay, STALE_BACKOFF_MS);
+    private static void scheduleFailureRetry() {
+        scheduleFetch(BazaarDataSettings.FAILURE_RETRY_MS);
+    }
+
+    private static void handleSnapshotResult(SkyBlockBazaarReply reply, long snapshotTs) {
+        if (snapshotTs != lastSnapshotTs) {
+            handleNewSnapshot(reply, snapshotTs);
+            return;
         }
-        scheduleFetch(delay);
+
+        handleUnchangedSnapshot(snapshotTs);
+    }
+
+    private static void handleNewSnapshot(SkyBlockBazaarReply reply, long snapshotTs) {
+        long previousSnapshotTs = lastSnapshotTs;
+        lastSnapshotTs = snapshotTs;
+        currentReply = reply;
+        consecutiveIdenticalSnapshots.set(0);
+
+        EVENT_BUS.post(new BazaarDataUpdateEvent(reply));
+
+        if (previousSnapshotTs != -1) {
+            PlayerActionUtil.notifyAll(
+                "New snapshot " + snapshotTs + " (Δ " + (snapshotTs - previousSnapshotTs) + " ms). Scheduling next predicted fetch.",
+                NotificationType.BAZAARDATA
+            );
+            return;
+        }
+
+        PlayerActionUtil.notifyAll("First snapshot " + snapshotTs + " received.", NotificationType.BAZAARDATA);
+    }
+
+    private static void handleUnchangedSnapshot(long snapshotTs) {
+        int identicalSnapshotCount = consecutiveIdenticalSnapshots.incrementAndGet();
+        PlayerActionUtil.notifyAll("Snapshot unchanged (" + snapshotTs + ") x" + identicalSnapshotCount, NotificationType.BAZAARDATA);
+
+        if (identicalSnapshotCount == BazaarDataSettings.STALE_WARNING_THRESHOLD) {
+            PlayerActionUtil.notifyAll(
+                "WARNING: " + identicalSnapshotCount + " identical snapshots in a row. Server might be lagging or BASE_INTERVAL_MS too short.",
+                NotificationType.BAZAARDATA
+            );
+        }
+    }
+
+    private static void scheduleNextFromSnapshot(long snapshotTs) {
+        long nowMs = System.currentTimeMillis();
+        long expectedNextFetchAtMs = snapshotTs + BazaarDataSettings.BASE_INTERVAL_MS + BazaarDataSettings.POST_OFFSET_MS;
+
+        long nextDelayMs;
+        if (nowMs >= expectedNextFetchAtMs) {
+            // Past the ideal fetch time; server has not advanced snapshot yet, so back off.
+            nextDelayMs = BazaarDataSettings.STALE_BACKOFF_MS;
+        } else {
+            long idealDelayMs = expectedNextFetchAtMs - nowMs;
+            nextDelayMs = Math.max(idealDelayMs, BazaarDataSettings.STALE_BACKOFF_MS);
+        }
+
+        scheduleFetch(nextDelayMs);
     }
 
     private static long extractLastUpdated(SkyBlockBazaarReply reply) {
@@ -144,133 +171,19 @@ public final class BazaarDataManager {
         } catch (Exception e) {
             Util.notifyError("Failed to access lastUpdated (mixin+reflection failed)", e);
             return -1;
-
         }
     }
 
-
-    /**
-     * Get the number of orders at an exact price for a product & price type.
-     * @return OptionalInt empty if reply / product / priceType invalid or not found.
-     */
-    public static OptionalInt getOrderCountOptional(String productId, TransactionType transactionType, double price) {
-        SkyBlockBazaarReply reply = currentReply;
-
-        if (transactionType == null) {
-            return OptionalInt.empty();
-        }
-
-        PriceType priceType = transactionType.getPriceType();
-
-        if (reply == null || productId == null || priceType == null) {
-            return OptionalInt.empty();
-        }
-
-        try {
-            SkyBlockBazaarReply.Product product = reply.getProduct(productId);
-
-            if (product == null) {
-                return OptionalInt.empty();
-            }
-
-            List<SkyBlockBazaarReply.Product.Summary> list = switch (priceType) {
-                case INSTABUY -> product.getBuySummary();
-                case INSTASELL -> product.getSellSummary();
-            };
-
-            if (list == null) {
-                return OptionalInt.empty();
-            }
-
-            for (SkyBlockBazaarReply.Product.Summary s : list) {
-                if (Double.compare(s.getPricePerUnit(), price) == 0) {
-                    return OptionalInt.of((int) s.getOrders());
-                }
-            }
-
-            return OptionalInt.of(0);
-        } catch (Exception e) {
-            Util.notifyError("Error in getOrderCountOptional for productID=" + productId, e);
-
-            return OptionalInt.empty();
-        }
-    }
-
-    /**
-     * Find the top bazaar price for a product based on the given {@link TransactionType}.
-     * The returned {@link OptionalDouble} is empty if the reply, product ID, or derived {@link PriceType}
-     * is {@code null}, if the product cannot be found, or if an exception occurs while resolving the price.
-     * If the selected summary list exists but is empty, this method returns {@code OptionalDouble.of(0.0)}.
-     *
-     * @param productId       the bazaar product ID to look up
-     * @param transactionType the transaction type whose {@link PriceType} controls which summary is queried
-     * @return an {@link OptionalDouble} containing the resolved price per unit, or empty if unavailable
-     */
-    public static OptionalDouble findItemPriceOptional(String productId, TransactionType transactionType) {
-        SkyBlockBazaarReply reply = currentReply;
-
-        if (transactionType == null) {
-            return OptionalDouble.empty();
-        }
-
-        PriceType priceType = transactionType.getPriceType();
-
-        if (reply == null || productId == null || priceType == null) {
-            return OptionalDouble.empty(); //TODO maybe throw error here instead. Needs testing to make sure it doesn't happen too frequently or at times where it is expected behavior
-        }
-
-        try {
-            SkyBlockBazaarReply.Product product = reply.getProduct(productId);
-
-            if (product == null) {
-                return OptionalDouble.empty();
-            }
-
-            return switch (priceType) {
-                case INSTABUY -> {
-                    List<SkyBlockBazaarReply.Product.Summary> buySummary = product.getBuySummary();
-
-                    if (buySummary == null || buySummary.isEmpty()) {
-                        yield OptionalDouble.of(0.0);
-                    }
-
-                    yield OptionalDouble.of(buySummary.getFirst().getPricePerUnit());
-                }
-                case INSTASELL -> {
-                    List<SkyBlockBazaarReply.Product.Summary> sellSummary = product.getSellSummary();
-
-                    if (sellSummary == null || sellSummary.isEmpty()) {
-                        yield OptionalDouble.of(0.0);
-                    }
-
-                    yield OptionalDouble.of(sellSummary.getFirst().getPricePerUnit());
-                }
-            };
-        } catch (Exception e) {
-            Util.notifyError("Error in findItemPriceOptional for productID=" + productId, e);
-
-            return OptionalDouble.empty();
-        }
-    }
-
-    public static Optional<String> findProductIdOptional(String naturalName) {
-        if (naturalName == null || naturalName.isBlank()) {
-            return Optional.empty();
-        }
-
-        ensureConversionsLoaded();
-
-        return Optional.ofNullable(nameToProductIdCache.get(naturalName.toLowerCase(Locale.ROOT)));
-    }
 
     /**
      * Cached conversion load. Thread-safe (single pass).
      */
-    private static void ensureConversionsLoaded() {
+    protected static void ensureConversionsLoaded() {
         if (conversionsLoaded) {
             return;
         }
 
+        // Double-checked guard avoids repeated JSON parsing on the hot path.
         synchronized (BazaarDataManager.class) {
             if (conversionsLoaded) {
                 return;
@@ -300,25 +213,5 @@ public final class BazaarDataManager {
                 conversionsLoaded = true;
             }
         }
-    }
-
-    public static Optional<Duration> getCurrentSnapshotAge() {
-        long ts = lastSnapshotTs;
-
-        if (ts <= 0) {
-            return Optional.empty();
-        }
-
-        return Optional.of(Duration.ofMillis(System.currentTimeMillis() - ts));
-    }
-
-    public static Optional<Duration> getTimeSinceLastFetchAttempt() {
-        long f = lastFetchWallClock;
-
-        if (f <= 0) {
-            return Optional.empty();
-        }
-
-        return Optional.of(Duration.ofMillis(System.currentTimeMillis() - f));
     }
 }
