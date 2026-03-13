@@ -3,9 +3,12 @@ package com.github.mkram17.bazaarutils.utils.bazaar.data;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
-import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 public class BazaarDataUtil {
     /**
@@ -13,7 +16,7 @@ public class BazaarDataUtil {
      * @return OptionalInt empty if reply / product / priceType invalid or not found.
      */
     public static OptionalInt getOrderCountOptional(String productId, OrderType orderType, double price) {
-        SkyBlockBazaarReply reply = BazaarDataManager.getCurrentReply();
+        CustomBazaarReply reply = BazaarDataManager.getCurrentReply();
 
         PriceType priceType = orderType.asPriceType();
 
@@ -22,13 +25,13 @@ public class BazaarDataUtil {
         }
 
         try {
-            SkyBlockBazaarReply.Product product = reply.getProduct(productId);
+            ProductData product = reply.getProduct(productId);
 
             if (product == null) {
                 return OptionalInt.empty();
             }
 
-            List<SkyBlockBazaarReply.Product.Summary> list = switch (priceType) {
+            List<ProductSummary> list = switch (priceType) {
                 case INSTABUY -> product.getBuySummary();
                 case INSTASELL -> product.getSellSummary();
             };
@@ -37,9 +40,9 @@ public class BazaarDataUtil {
                 return OptionalInt.empty();
             }
 
-            for (SkyBlockBazaarReply.Product.Summary s : list) {
-                if (Double.compare(s.getPricePerUnit(), price) == 0) {
-                    return OptionalInt.of((int) s.getOrders());
+            for (ProductSummary summary : list) {
+                if (Double.compare(summary.getPricePerUnit(), price) == 0) {
+                    return OptionalInt.of((int) summary.getOrders());
                 }
             }
 
@@ -57,7 +60,7 @@ public class BazaarDataUtil {
      * @return OptionalDouble price found.
      */
     public static OptionalDouble findItemPriceOptional(String productId, OrderType orderType) {
-        SkyBlockBazaarReply reply = BazaarDataManager.getCurrentReply();
+        CustomBazaarReply reply = BazaarDataManager.getCurrentReply();
 
         PriceType priceType = orderType.asPriceType();
 
@@ -66,7 +69,7 @@ public class BazaarDataUtil {
         }
 
         try {
-            SkyBlockBazaarReply.Product product = reply.getProduct(productId);
+            ProductData product = reply.getProduct(productId);
 
             if (product == null) {
                 return OptionalDouble.empty();
@@ -74,7 +77,7 @@ public class BazaarDataUtil {
 
             return switch (priceType) {
                 case INSTABUY -> {
-                    List<SkyBlockBazaarReply.Product.Summary> buySummary = product.getBuySummary();
+                    List<ProductSummary> buySummary = product.getBuySummary();
 
                     if (buySummary == null || buySummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
@@ -83,7 +86,7 @@ public class BazaarDataUtil {
                     yield OptionalDouble.of(buySummary.getFirst().getPricePerUnit());
                 }
                 case INSTASELL -> {
-                    List<SkyBlockBazaarReply.Product.Summary> sellSummary = product.getSellSummary();
+                    List<ProductSummary> sellSummary = product.getSellSummary();
 
                     if (sellSummary == null || sellSummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);

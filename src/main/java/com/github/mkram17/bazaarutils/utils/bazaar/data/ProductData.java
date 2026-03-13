@@ -7,7 +7,6 @@ import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class ProductData {
     @Getter
@@ -31,7 +30,7 @@ public class ProductData {
         }
 
         if (apiProduct.getBuySummary() != null) {
-            var convertedBuySummaries = convertAPIProductSummaries(apiProduct.getSellSummary(), PriceType.INSTABUY);
+            var convertedBuySummaries = convertAPIProductSummaries(apiProduct.getBuySummary(), PriceType.INSTABUY);
             buy.addAll(convertedBuySummaries);
         }
 

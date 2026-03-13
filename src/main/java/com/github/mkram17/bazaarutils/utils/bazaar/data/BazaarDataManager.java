@@ -8,14 +8,12 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
 import lombok.Getter;
 import lombok.Setter;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -27,7 +25,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 public final class BazaarDataManager {
 
     @Getter
-    private static volatile SkyBlockBazaarReply currentReply;
+    private static volatile CustomBazaarReply currentReply;
     @Getter
     private static volatile long lastSnapshotTs = -1;
     private static volatile long lastFetchWallClock = -1;
@@ -70,6 +68,7 @@ public final class BazaarDataManager {
     }
 
     private static void fetchOnce() {
+        lastFetchWallClock = System.currentTimeMillis();
         APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
             if (throwable != null) {
                 handleFetchFailure(
@@ -79,20 +78,21 @@ public final class BazaarDataManager {
                 return;
             }
 
-            if (reply == null || !reply.isSuccess()) {
-                handleFetchFailure("Null/unsuccessful reply. Retry in " + BazaarDataSettings.FAILURE_RETRY_MS + "ms", true);
+            CustomBazaarReply customReply = convertReply(reply);
+            if (customReply == null || !customReply.isSuccess()) {
+                handleFetchFailure("Reply conversion failed. Retry in " + BazaarDataSettings.FAILURE_RETRY_MS + "ms", true);
                 return;
             }
 
             consecutiveFailures.set(0);
 
-            long snapshotTs = extractLastUpdated(reply);
+            long snapshotTs = customReply.getLastUpdated();
             if (snapshotTs <= 0) {
                 handleFetchFailure("Invalid lastUpdated <= 0. Retry in " + BazaarDataSettings.FAILURE_RETRY_MS + "ms", false);
                 return;
             }
 
-            handleSnapshotResult(reply, snapshotTs);
+            handleSnapshotResult(customReply, snapshotTs);
             scheduleNextFromSnapshot(snapshotTs);
         });
     }
@@ -108,7 +108,7 @@ public final class BazaarDataManager {
         scheduleFetch(BazaarDataSettings.FAILURE_RETRY_MS);
     }
 
-    private static void handleSnapshotResult(SkyBlockBazaarReply reply, long snapshotTs) {
+    private static void handleSnapshotResult(CustomBazaarReply reply, long snapshotTs) {
         if (snapshotTs != lastSnapshotTs) {
             handleNewSnapshot(reply, snapshotTs);
             return;
@@ -117,7 +117,7 @@ public final class BazaarDataManager {
         handleUnchangedSnapshot(snapshotTs);
     }
 
-    private static void handleNewSnapshot(SkyBlockBazaarReply reply, long snapshotTs) {
+    private static void handleNewSnapshot(CustomBazaarReply reply, long snapshotTs) {
         long previousSnapshotTs = lastSnapshotTs;
         lastSnapshotTs = snapshotTs;
         currentReply = reply;
@@ -164,12 +164,12 @@ public final class BazaarDataManager {
         scheduleFetch(nextDelayMs);
     }
 
-    private static long extractLastUpdated(SkyBlockBazaarReply reply) {
+    private static CustomBazaarReply convertReply(SkyBlockBazaarReply reply) {
         try {
-            return ((AccessorSkyBlockBazaarReply) reply).getLastUpdated();
+            return CustomBazaarReply.fromSkyBlockReply(reply);
         } catch (Exception e) {
-            Util.notifyError("Failed to access lastUpdated (mixin+reflection failed)", e);
-            return -1;
+            Util.notifyError("Failed to convert SkyBlockBazaarReply", e);
+            return null;
         }
     }
 
