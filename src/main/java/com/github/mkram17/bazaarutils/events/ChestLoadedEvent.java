@@ -149,7 +149,6 @@ public class ChestLoadedEvent {
             String name = Util.removeFormatting(customName.getString());
 
             if (name.contains("Loading")) {
-                PlayerActionUtil.notifyAll("Loading item...", NotificationType.GUI);
                 return true;
             }
 
@@ -160,7 +159,6 @@ public class ChestLoadedEvent {
                 if (lore != null && !lore.lines().isEmpty()) {
                     for (Text line : lore.lines()) {
                         if (Util.removeFormatting(line.getString()).contains("Loading")) {
-                            PlayerActionUtil.notifyAll("Loading lore...", NotificationType.GUI);
                             return true;
                         }
                     }
