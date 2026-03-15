@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.MarketPrices;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -9,7 +8,6 @@ import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
@@ -90,12 +88,12 @@ public class BookmarkSearchWidget {
     public static void onWidgetLeftClick(Bookmark bookmark) {
         SoundUtil.playSound(ItemButton.BUTTON_SOUND, ItemButton.BUTTON_VOLUME);
 
-            Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.marketPrices().getProductID());
+        Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.marketPrices().getProductID());
 
-            if (inventorySlot.isPresent()) {
-                ContainerManager.clickSlot(inventorySlot.get(), 0);
-                return;
-            }
+        if (inventorySlot.isPresent()) {
+            ContainerManager.clickSlot(inventorySlot.get(), 0);
+            return;
+        }
 
         PlayerActionUtil.runCommand("bz " + bookmark.name());
     }
