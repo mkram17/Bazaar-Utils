@@ -8,6 +8,8 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
 
+import java.util.OptionalDouble;
+
 public class MarketPrices extends BUListener {
 
     private final PriceInfo buyPriceInfo = new PriceInfo(null, OrderType.BUY);
@@ -55,6 +57,34 @@ public class MarketPrices extends BUListener {
                 case COMPETITIVE -> marketBuyPrice + 0.1;
                 case MATCHED -> marketBuyPrice;
                 case OUTBID -> marketBuyPrice - 0.1;
+            };
+        };
+    }
+
+    /**
+     * Computes the adjusted price for a product at the given pricing position and order type
+     * without creating a {@link MarketPrices} instance. Use this instead of instantiating
+     * {@link MarketPrices} transiently to avoid listener leaks.
+     *
+     * @param productId      the Hypixel product ID to look up
+     * @param pricingPosition the positioning strategy (competitive, matched, outbid)
+     * @param orderType      the order side (BUY or SELL)
+     * @return the market price adjusted for the given pricing position, or {@code 0.0} if no data is available
+     */
+    public static double getPriceForPosition(String productId, PricingPosition pricingPosition, OrderType orderType) {
+        OptionalDouble priceOpt = BazaarDataManager.findItemPriceOptional(productId, orderType);
+        double price = Util.truncateNum(priceOpt.orElse(0.0));
+
+        return switch (orderType) {
+            case SELL -> switch (pricingPosition) {
+                case COMPETITIVE -> price - 0.1;
+                case MATCHED -> price;
+                case OUTBID -> price + 0.1;
+            };
+            case BUY -> switch (pricingPosition) {
+                case COMPETITIVE -> price + 0.1;
+                case MATCHED -> price;
+                case OUTBID -> price - 0.1;
             };
         };
     }

@@ -235,19 +235,17 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 return new ResolvedInput.Value(0);
             }
 
-            MarketPrices marketPrices = new MarketPrices(state.productId);
-
             int amount = switch (getAmountStrategy()) {
-                case MAX -> computeMaxValue(state, marketPrices);
-                case FIXED -> computeFixedValue(state, marketPrices);
+                case MAX -> computeMaxValue(state);
+                case FIXED -> computeFixedValue(state);
             };
 
             return new ResolvedInput.Value(amount);
         }
 
-        protected abstract int computeFixedValue(TransactionState state, MarketPrices price);
+        protected abstract int computeFixedValue(TransactionState state);
 
-        protected int computeMaxValue(TransactionState state, MarketPrices prices) {
+        protected int computeMaxValue(TransactionState state) {
             return switch (getMarketType()) {
                 case INSTANT -> switch (getOrderType()) {
                     case BUY -> Optional.of(state.containerScreen())
@@ -268,7 +266,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 };
                 case ORDER -> switch (getOrderType()) {
                     case BUY -> {
-                        int amountCanAfford = (int) (state.purse() / prices.getPriceForPosition(PricingPosition.COMPETITIVE, getMarketType().withIntention(getOrderType())));
+                        int amountCanAfford = (int) (state.purse() / MarketPrices.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getMarketType().withIntention(getOrderType())));
 
                         yield BazaarScreens.findBuyOrderAmountLimit(state.inputSign().itemStack())
                                 .map(limit -> Math.min(amountCanAfford, limit))
@@ -357,9 +355,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 return new ResolvedInput.Value(0);
             }
 
-            MarketPrices marketPrices = new MarketPrices(state.productId);
-
-            return new ResolvedInput.Value(marketPrices.getPriceForPosition(getPricingPosition(), getOrderType()));
+            return new ResolvedInput.Value(MarketPrices.getPriceForPosition(state.productId(), getPricingPosition(), getOrderType()));
         }
     }
 
