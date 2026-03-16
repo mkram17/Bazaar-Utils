@@ -10,4 +10,8 @@ public enum TransactionType {
     public PriceType asPriceType() {
         return this == BUY ? PriceType.INSTABUY : PriceType.INSTASELL;
     }
+
+    public String getString() {
+        return this == BUY ? "Buy" : "Sell";
+    }
 }

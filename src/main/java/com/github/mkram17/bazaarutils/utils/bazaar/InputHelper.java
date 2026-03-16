@@ -7,9 +7,9 @@ import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.MarketType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import lombok.Getter;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
@@ -28,7 +28,7 @@ public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton 
     /**
      * The market action which this helper is operating on (to buy, to sell).
      */
-    protected abstract OrderType getOrderType();
+    protected abstract TransactionType getTransactionType();
 
     /**
      * The market type which this helper is operating through (instant, orders).

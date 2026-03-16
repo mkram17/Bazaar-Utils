@@ -8,7 +8,7 @@ import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.PlayerSlots;
@@ -49,8 +49,8 @@ public class BookmarkSearchWidget {
             MutableText text = Text.literal(bookmark.name()).formatted(Formatting.BOLD);
 
             Style style = Style.EMPTY.withColor(Formatting.GRAY).withBold(false);
-            text.append(Text.literal("\nBuy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, OrderType.SELL)) + " coins").setStyle(style));
-            text.append(Text.literal("\nSell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, OrderType.BUY)) + " coins").setStyle(style));
+            text.append(Text.literal("\nBuy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, TransactionType.SELL)) + " coins").setStyle(style));
+            text.append(Text.literal("\nSell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, TransactionType.BUY)) + " coins").setStyle(style));
 
             ItemSlotButtonWidget button = new ItemSlotButtonWidget(
                     buttonX,

@@ -5,12 +5,13 @@ import com.github.mkram17.bazaarutils.data.APIUtils;
 import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.MarketType;
 import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import lombok.Getter;
 import lombok.Setter;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
@@ -153,10 +154,14 @@ public final class BazaarDataManager {
      * Get the number of orders at an exact price for a product & price type.
      * @return OptionalInt empty if reply / product / priceType invalid or not found.
      */
-    public static OptionalInt getOrderCountOptional(String productId, OrderType orderType, double price) {
+    public static OptionalInt getOrderCountOptional(String productId, TransactionType transactionType, MarketType marketType, double price) {
         SkyBlockBazaarReply reply = currentReply;
 
-        PriceType priceType = orderType.asPriceType();
+        if (transactionType == null || marketType == null) {
+            return OptionalInt.empty();
+        }
+
+        PriceType priceType = marketType.resolvePriceType(transactionType);
 
         if (reply == null || productId == null || priceType == null) {
             return OptionalInt.empty();
@@ -197,10 +202,14 @@ public final class BazaarDataManager {
      * BUY (top of buySummary aka people's sell orders). SELL (top of sellSummary, aka people's buy orders).
      * @return OptionalDouble price found.
      */
-    public static OptionalDouble findItemPriceOptional(String productId, OrderType orderType) {
+    public static OptionalDouble findItemPriceOptional(String productId, TransactionType transactionType, MarketType marketType) {
         SkyBlockBazaarReply reply = currentReply;
 
-        PriceType priceType = orderType.asPriceType();
+        if (transactionType == null || marketType == null) {
+            return OptionalDouble.empty();
+        }
+
+        PriceType priceType = marketType.resolvePriceType(transactionType);
 
         if (reply == null || productId == null || priceType == null) {
             return OptionalDouble.empty(); //TODO maybe throw error here instead. Needs testing to make sure it doesn't happen too frequently or at times where it is expected behavior

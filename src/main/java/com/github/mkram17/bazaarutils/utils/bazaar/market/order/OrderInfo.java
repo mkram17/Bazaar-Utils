@@ -49,14 +49,14 @@ public class OrderInfo extends PriceInfo {
      * Creates a container that tracks market data for a specific Bazaar product.
      *
      * @param name         display name of the item
-     * @param orderType    whether the price represents a sell (buy order) or buy (sell order)
+     * @param transactionType whether this is a buy or sell transaction
      * @param status       status of the order
      * @param volume       quantity of the order
      * @param pricePerItem current price per unit for the order
      * @param itemInfo     optional UI context from the Bazaar screen
      */
-    public OrderInfo(@Nullable String name, @Nullable OrderType orderType, @Nullable OrderStatus status, @Nullable Integer volume, @Nullable Double pricePerItem, @Nullable ItemInfo itemInfo) {
-        super(pricePerItem, orderType);
+    public OrderInfo(@Nullable String name, @Nullable TransactionType transactionType, @Nullable OrderStatus status, @Nullable Integer volume, @Nullable Double pricePerItem, @Nullable ItemInfo itemInfo) {
+        super(pricePerItem, transactionType);
 
         this.name = name;
         this.itemInfo = itemInfo;
@@ -111,9 +111,9 @@ public class OrderInfo extends PriceInfo {
             return Optional.empty();
         }
 
-        double marketPrice = OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, getOrderType());
+        double marketPrice = OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, getTransactionType());
 
-        var orderCountOpt = BazaarDataManager.getOrderCountOptional(productID, getOrderType(), getPricePerItem());
+        var orderCountOpt = BazaarDataManager.getOrderCountOptional(productID, getTransactionType(), MarketType.ORDER, getPricePerItem());
 
         if (orderCountOpt.isEmpty()) {
             return Optional.empty();
@@ -121,7 +121,7 @@ public class OrderInfo extends PriceInfo {
 
         int orderCount = orderCountOpt.getAsInt();
 
-        if (orderType == OrderType.BUY) {
+        if (transactionType == TransactionType.BUY) {
             if (this.pricePerItem > marketPrice) {
                 return Optional.of(PricingPosition.COMPETITIVE);
             } else if (this.pricePerItem < marketPrice) {
@@ -158,27 +158,27 @@ public class OrderInfo extends PriceInfo {
         Double otherOrderPrice = other.getPricePerItem();
         Integer otherOrderVolume = other.getVolume();
         int otherOrderAmountUnclaimed = other.getAmountFilled() - other.getAmountClaimed();
-        OrderType orderType = other.getOrderType();
+        TransactionType transactionType = other.getTransactionType();
 
         if (isStrict) {
-            return isStrictlySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, orderType);
+            return isStrictlySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, transactionType);
         }
 
-        return isLooselySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, otherOrderAmountUnclaimed, orderType);
+        return isLooselySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, otherOrderAmountUnclaimed, transactionType);
     }
 
-    private boolean isStrictlySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, OrderType orderType) {
+    private boolean isStrictlySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, TransactionType transactionType) {
         return (areAnyNull(this.pricePerItem, otherOrderPrice) || isSimilarPrice(otherOrderPrice)) &&
                 (areAnyNull(this.volume, otherOrderVolume) || this.volume.equals(otherOrderVolume)) &&
                 (areAnyNull(this.name, otherOrderName) || this.name.equalsIgnoreCase(otherOrderName)) &&
-                (areAnyNull(this.orderType, orderType) || this.orderType == orderType);
+                (areAnyNull(this.transactionType, transactionType) || this.transactionType == transactionType);
     }
 
-    private boolean isLooselySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, int otherOrderAmountUnclaimed, OrderType orderType) {
+    private boolean isLooselySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, int otherOrderAmountUnclaimed, TransactionType transactionType) {
         return (areAnyNull(this.pricePerItem, otherOrderPrice) || this.isSimilarPrice(otherOrderPrice)) &&
                 (areAnyNull(this.volume, otherOrderVolume) || Util.genericIsSimilarValue(this.getVolume(), otherOrderVolume, 0.05 * otherOrderVolume) || this.getVolume().equals(otherOrderAmountUnclaimed)) && // sometimes the only volume that can be found is the amount that is unclaimed, like in FlipHelper
                 (areAnyNull(this.name, otherOrderName) || this.getName().equalsIgnoreCase(otherOrderName)) &&
-                (areAnyNull(this.orderType, orderType) || this.getOrderType() == orderType);
+                (areAnyNull(this.transactionType, transactionType) || this.getTransactionType() == transactionType);
     }
 
     private boolean areAnyNull(Object... objects) {
@@ -290,6 +290,6 @@ public class OrderInfo extends PriceInfo {
      * Converts the current container into a fully tracked {@link Order}.
      */
     public Order toBazaarOrder() {
-        return new Order(name, volume, pricePerItem, orderType, null);
+        return new Order(name, volume, pricePerItem, transactionType, null);
     }
 }

@@ -4,7 +4,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.MarketType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
@@ -66,7 +66,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount {
     )
     public int fixedAmount = 1;
 
-    public OrderType orderType = OrderType.BUY;
+    public TransactionType transactionType = TransactionType.BUY;
     public MarketType marketType = MarketType.INSTANT;
 
     @Override

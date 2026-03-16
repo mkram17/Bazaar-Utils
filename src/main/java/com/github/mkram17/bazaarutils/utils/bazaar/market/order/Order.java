@@ -45,8 +45,8 @@ public class Order extends OrderInfo implements AbstractListener {
     /**
      * Creates a Bazaar order, initializing ItemInfo with slot index and ItemStack of the order.
      */
-    public Order(@NonNull String name, int volume, double pricePerItem, @NonNull OrderType orderType, @Nullable ItemInfo itemInfo) {
-        super(name, orderType, OrderStatus.SET, volume, pricePerItem, itemInfo);
+    public Order(@NonNull String name, int volume, double pricePerItem, @NonNull TransactionType transactionType, @Nullable ItemInfo itemInfo) {
+        super(name, transactionType, OrderStatus.SET, volume, pricePerItem, itemInfo);
 
         startTracking();
     }
@@ -111,7 +111,7 @@ public class Order extends OrderInfo implements AbstractListener {
             message = OutbidOrderHandler.getOutbidMessage(this);
 
             if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-                message.append(Text.literal(". Market Price: " + this.getMarketPrice(this.getOrderType()) + " Order Price: " + this.getPricePerItem()));
+                message.append(Text.literal(". Market Price: " + this.getMarketPrice(this.getTransactionType()) + " Order Price: " + this.getPricePerItem()));
             }
 
             if (shouldAutoOpenBazaar) {
@@ -144,8 +144,8 @@ public class Order extends OrderInfo implements AbstractListener {
         return UserOrdersStorage.INSTANCE.get().indexOf(this);
     }
 
-    public double getMarketPrice(OrderType orderType) {
-        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, orderType);
+    public double getMarketPrice(TransactionType transactionType) {
+        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, transactionType);
     }
 
     /**

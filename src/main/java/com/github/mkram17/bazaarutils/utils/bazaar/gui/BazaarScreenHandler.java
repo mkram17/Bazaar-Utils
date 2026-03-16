@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.gui;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
@@ -50,7 +50,7 @@ public final class BazaarScreenHandler {
 
     public static Optional<OrderInfo> getDisplayOrderInfo(@NotNull ScreenContext context) {
         return getDisplayItemName(context)
-                .map(name -> new OrderInfo(name, OrderType.SELL, null, null, null, null));
+                .map(name -> new OrderInfo(name, TransactionType.SELL, null, null, null, null));
     }
 
     public static String getItemNameFromTitle() {
