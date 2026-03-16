@@ -37,7 +37,7 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
     public OrderStatusHighlight() {}
 
     public static Order getHighlightedOrder(int slotIndex) {
-        Optional<Order> order = OrderInfoUtil.getUserOrderFromIndex(slotIndex);
+        Optional<Order> order = OrderUtil.getUserOrderFromIndex(slotIndex);
 
         return order.filter(
                 bazaarOrder -> bazaarOrder.getStatus() != null && bazaarOrder.getStatus() == OrderStatus.SET)

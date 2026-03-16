@@ -1,56 +1,49 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.listener.AbstractListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.MarketPrices;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-
-import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 /**
  * Stores Bazaar item information while automatically tracking market price updates and performing
  * health checks on product identifiers. Intended for order-like data that does not need the full
  * {@link Order} lifecycle.
  */
-//TODO turn into builder class
-@ConfigObject
+@ToString(callSuper=true)
 public class OrderInfo extends PriceInfo {
     private static final double DEFAULT_TOLERANCE = 0.9;
     private static final double TOTAL_PRICE_ROUNDING_THRESHOLD = 10000;
 
-    @Getter @ConfigEntry(id = "productID")
+    @Getter
     protected String productID; //Hypixel's code for the product
     @Getter @ConfigEntry(id = "name")
     protected final String name; //name of the item in game
 
-    @Getter @ConfigEntry(id = "status")
+    @Getter
     protected OrderStatus status;
 
-    @Getter @ConfigEntry(id = "volume")
+    @Getter
     protected final Integer volume;
 
     @Getter @Setter
     protected double tolerance; //When finding item price, it can round to the nearest coin sometimes, so tolerance is needed for price calculations
 
-    @Getter @Setter @ConfigEntry(id = "itemInfo") //TODO fix config serialization for this
+    @Getter @Setter
     private ItemInfo itemInfo;
 
     protected final MarketPrices marketPrices;
@@ -287,14 +280,6 @@ public class OrderInfo extends PriceInfo {
         });
 
         return volumeComparator.thenComparing(priceComparator);
-    }
-
-    @Override
-    public String toString() {
-        return "(name: " + this.name +
-                ", price:" + this.pricePerItem +
-                ", volume: " + this.volume +
-                ")";
     }
 
     /**

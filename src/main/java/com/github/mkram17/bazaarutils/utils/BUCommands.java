@@ -164,7 +164,7 @@ public class BUCommands {
     private static int executeRemove(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
         Order order = UserOrdersStorage.INSTANCE.get().get(index);
-        order.removeFromWatchedItems();
+        order.removeFromUserOrders();
         PlayerActionUtil.notifyAll("Removed " + order, NotificationType.COMMAND);
         return 1;
     }

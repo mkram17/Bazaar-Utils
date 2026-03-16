@@ -76,7 +76,7 @@ public class OrderUpdater {
             //if we can't find a match, this is an order that isn't being tracked, so we add it (shouldn't happen)
             if (matchedOrder.isEmpty()) {
                 Order newOrder =  order.toBazaarOrder();
-                Util.addWatchedOrder(newOrder);
+                OrderUtil.trackUserOrder(newOrder);
                 //add item info, amount filled, amount claimed
                 updateBazaarOrder(newOrder, order.getItemInfo());
             }
@@ -84,7 +84,7 @@ public class OrderUpdater {
 
         //any orders left in userOrdersCopy are old orders that should be removed
         if (!userOrdersCopy.isEmpty()) {
-            userOrdersCopy.forEach(Order::removeFromWatchedItems);
+            userOrdersCopy.forEach(Order::removeFromUserOrders);
         }
     }
 

@@ -12,6 +12,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import meteordevelopment.orbit.EventHandler;
 
 import java.util.Optional;
@@ -66,7 +67,7 @@ public class BazaarChatEventHandler {
 
         BazaarLimitsVisualizer.addOrderToLimit(order.getVolume()* order.getPricePerItem());
 
-        Util.addWatchedOrder(order);
+        OrderUtil.trackUserOrder(order);
         //for some reason 52800046 for 4 was on hypixel as 13200011.6 but calculates to 13200011.5. current theory is that buy price wasnt fully accurate, and it rounded up. also was .2 off on sell order for it. obviously problems with big prices
     }
     /**

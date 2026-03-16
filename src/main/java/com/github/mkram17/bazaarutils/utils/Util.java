@@ -1,12 +1,8 @@
 package com.github.mkram17.bazaarutils.utils;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import lombok.AllArgsConstructor;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.text.ClickEvent;
@@ -22,8 +18,6 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
-import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public class Util {
     private static final LinkedList<ScheduledTask> tasks = new LinkedList<>();
@@ -94,15 +88,6 @@ public class Util {
         }
 
         logError(message, simpleCallingName, e);
-    }
-
-    public static void addWatchedOrder(Order item) {
-        if (item == null) return;
-        assert item.getProductID() != null;
-        UserOrdersStorage.INSTANCE.get().add(item);
-        PlayerActionUtil.notifyAll("Added item: § " + item, NotificationType.ORDERDATA);
-        EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.ADD, item));
-        UserOrdersStorage.INSTANCE.save();
     }
 
     @RunOnInit
