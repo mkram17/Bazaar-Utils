@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.price.MarketPrices;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
@@ -48,12 +48,9 @@ public class BookmarkSearchWidget {
             final ItemStack itemForButton = (configuredItem == null) ? Items.BARRIER.getDefaultStack() : configuredItem;
             MutableText text = Text.literal(bookmark.name()).formatted(Formatting.BOLD);
 
-            MarketPrices marketPrices = bookmark.marketPrices();
-            marketPrices.updateMarketPrices();
-
             Style style = Style.EMPTY.withColor(Formatting.GRAY).withBold(false);
-            text.append(Text.literal("\nBuy: " + Util.getPrettyString(marketPrices.getPriceForPosition(PricingPosition.MATCHED, OrderType.SELL)) + " coins").setStyle(style));
-            text.append(Text.literal("\nSell: " + Util.getPrettyString(marketPrices.getPriceForPosition(PricingPosition.MATCHED, OrderType.BUY)) + " coins").setStyle(style));
+            text.append(Text.literal("\nBuy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, OrderType.SELL)) + " coins").setStyle(style));
+            text.append(Text.literal("\nSell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, OrderType.BUY)) + " coins").setStyle(style));
 
             ItemSlotButtonWidget button = new ItemSlotButtonWidget(
                     buttonX,
@@ -88,7 +85,7 @@ public class BookmarkSearchWidget {
     public static void onWidgetLeftClick(Bookmark bookmark) {
         SoundUtil.playSound(ItemButton.BUTTON_SOUND, ItemButton.BUTTON_VOLUME);
 
-        Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.marketPrices().getProductID());
+        Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.productId());
 
         if (inventorySlot.isPresent()) {
             ContainerManager.clickSlot(inventorySlot.get(), 0);

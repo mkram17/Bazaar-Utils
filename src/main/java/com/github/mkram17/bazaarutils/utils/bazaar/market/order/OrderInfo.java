@@ -2,7 +2,6 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.price.MarketPrices;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
@@ -46,8 +45,6 @@ public class OrderInfo extends PriceInfo {
     @Getter @Setter
     private ItemInfo itemInfo;
 
-    protected final MarketPrices marketPrices;
-
     /**
      * Creates a container that tracks market data for a specific Bazaar product.
      *
@@ -67,9 +64,16 @@ public class OrderInfo extends PriceInfo {
         this.volume = volume;
         this.tolerance = calculateTolerance();
 
-        BazaarDataManager.findProductIdOptional(name).ifPresent(productId -> this.productID = productId); //TODO validate name/product id with method specifically for that. Maybe can switch findProdIdOpt for non optional version and then rely on validation method.
-        this.marketPrices = new MarketPrices(productID);
+        BazaarDataManager.findProductIdOptional(name).ifPresent(productId -> this.productID = productId);
+        validateProductId(productID);
         findPricingPosition().ifPresent(pricingPosition -> this.pricingPosition = pricingPosition);
+    }
+
+    //TODO validate name/product id with method specifically for that. Maybe can switch findProdIdOpt for non optional version and then rely on validation method.
+    private void validateProductId(String productId) {
+        if(productId == null || productId.isBlank()) {
+            Util.notifyError("Error setting product id for " + this, new Throwable("Product ID cannot be null or blank"));
+        }
     }
 
     private double calculateTolerance() {
@@ -107,7 +111,7 @@ public class OrderInfo extends PriceInfo {
             return Optional.empty();
         }
 
-        double marketPrice = marketPrices.getPriceForPosition(PricingPosition.MATCHED, getOrderType());
+        double marketPrice = OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, getOrderType());
 
         var orderCountOpt = BazaarDataManager.getOrderCountOptional(productID, getOrderType(), getPricePerItem());
 

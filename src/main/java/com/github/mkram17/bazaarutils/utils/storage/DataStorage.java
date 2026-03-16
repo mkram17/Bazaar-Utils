@@ -5,9 +5,7 @@ import com.github.mkram17.bazaarutils.events.util.EventPriorities;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.codecs.CodecGsonAdapter;
-import com.github.mkram17.bazaarutils.utils.codecs.MarketPricesGsonAdapter;
 import com.github.mkram17.bazaarutils.utils.codecs.ZonedDateTimeCodec;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.price.MarketPrices;
 import com.google.gson.*;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -32,7 +30,6 @@ public class DataStorage<T> {
             .setPrettyPrinting()
             .registerTypeAdapter(ItemStack.class, new CodecGsonAdapter<>(ItemStack.CODEC))
             .registerTypeAdapter(ZonedDateTime.class, new CodecGsonAdapter<>(ZonedDateTimeCodec.CODEC))
-            .registerTypeAdapter(MarketPrices.class, new MarketPricesGsonAdapter())
             .create();
 
     private static int tickCounter = 0;

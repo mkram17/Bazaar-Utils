@@ -145,7 +145,7 @@ public class Order extends OrderInfo implements AbstractListener {
     }
 
     public double getMarketPrice(OrderType orderType) {
-        return marketPrices.getPriceForPosition(PricingPosition.MATCHED, orderType);
+        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, orderType);
     }
 
     /**
