@@ -32,7 +32,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 //TODO turn into builder class
 @ConfigObject
-public class OrderInfo extends PriceInfo implements AbstractListener {
+public class OrderInfo extends PriceInfo {
     private static final double DEFAULT_TOLERANCE = 0.9;
     private static final double TOTAL_PRICE_ROUNDING_THRESHOLD = 10000;
 
@@ -74,8 +74,7 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         this.volume = volume;
         this.tolerance = calculateTolerance();
 
-        validateProduct();
-        BazaarDataManager.findProductIdOptional(name).ifPresent(productId -> this.productID = productId);
+        BazaarDataManager.findProductIdOptional(name).ifPresent(productId -> this.productID = productId); //TODO validate name/product id with method specifically for that. Maybe can switch findProdIdOpt for non optional version and then rely on validation method.
         this.marketPrices = new MarketPrices(productID);
         findPricingPosition().ifPresent(pricingPosition -> this.pricingPosition = pricingPosition);
     }
@@ -105,57 +104,13 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         return itemName != null && BazaarDataManager.findProductIdOptional(itemName).isPresent();
     }
 
-    private void validateProduct() {
-        if (this.productID == null && this.name != null) {
-            if (!fixProductID()) {
-                Util.notifyError("Product ID for " + this.name + " is null. This may cause issues", new Throwable());
-            }
-        }
-    }
-
-    protected void scheduleHealthCheck() {
-        long START_DELAY_SECONDS = 60;
-        long CHECK_INTERVAL_SECONDS = 30;
-
-        BazaarUtils.BUExecutorService.scheduleAtFixedRate(() -> {
-            if (!fixProductID()) {
-                Util.logError("Could not fix product ID for " + this.name + ". This may cause the mod to work improperly.", new Throwable());
-            }
-        }, START_DELAY_SECONDS, CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS);
-    }
-
-
-    //returns true if productID is safe/fixed after run, and false if it is not
-    private boolean fixProductID() {
-        if (isProductIDHealthy()) {
-            return true;
-        }
-
-        Optional<String> newProductID = BazaarDataManager.findProductIdOptional(this.name);
-
-        if (newProductID.isPresent()) {
-            Util.logMessage("Successfully fixed product ID for " + this.name + ": " + newProductID);
-
-            return true;
-        } else {
-            Util.logError("While refinding product id, could not find product ID for " + this.name, null);
-
-            return false;
-        }
-    }
-
-    //TODO this ideally isn't needed -- fix any bugs that cause these issues in the first place
-    private boolean isProductIDHealthy() {
-        return !(this.productID == null || this.productID.isEmpty() || BazaarDataManager.findItemPriceOptional(this.productID, getOrderType()).isEmpty());
-    }
-
     /**
      * Determines whether the order price is competitive, matched, or outbid relative to the market.
      *
      * @return status reflecting how this order compares to current prices, if calculable
      */
     public Optional<PricingPosition> findPricingPosition() {
-        if (this.pricePerItem == null || !isProductIDHealthy()) {
+        if (this.pricePerItem == null) {
             return Optional.empty();
         }
 
@@ -192,11 +147,6 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         }
 
         return Optional.of(PricingPosition.COMPETITIVE);
-    }
-
-    @Override
-    public void subscribe() {
-        EVENT_BUS.subscribe(this);
     }
 
     /**

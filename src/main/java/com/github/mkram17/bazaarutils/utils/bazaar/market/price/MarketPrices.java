@@ -10,13 +10,16 @@ import meteordevelopment.orbit.EventHandler;
 
 public class MarketPrices extends BUListener {
 
-    private transient final PriceInfo buyPriceInfo = new PriceInfo(null, OrderType.BUY);
-    private transient final PriceInfo sellPriceInfo = new PriceInfo(null, OrderType.SELL);
+    private transient final PriceInfo buyPriceInfo;
+    private transient final PriceInfo sellPriceInfo;
     @Getter
     private final String productID;
 
     public MarketPrices(String productID) {
         this.productID = productID;
+        this.buyPriceInfo = new PriceInfo(0.0, OrderType.BUY);
+        this.sellPriceInfo = new PriceInfo(0.0, OrderType.SELL);
+
         subscribe();
         updateMarketPrices();
     }
@@ -34,11 +37,10 @@ public class MarketPrices extends BUListener {
     }
 
     private void updateMarketPrices(String productId) {
-        var buyPriceOpt = BazaarDataManager.findItemPriceOptional(productId, OrderType.BUY);
-        var sellPriceOpt = BazaarDataManager.findItemPriceOptional(productId, OrderType.SELL);
-
-        buyPriceOpt.ifPresent(price -> buyPriceInfo.setPricePerItem(Util.truncateNum(price)));
-        sellPriceOpt.ifPresent(price -> sellPriceInfo.setPricePerItem(Util.truncateNum(price)));
+        BazaarDataManager.findItemPriceOptional(productId, OrderType.BUY)
+                .ifPresent(price -> buyPriceInfo.setPricePerItem(Util.truncateNum(price)));
+        BazaarDataManager.findItemPriceOptional(productId, OrderType.SELL).
+                ifPresent(price -> sellPriceInfo.setPricePerItem(Util.truncateNum(price)));
     }
 
     public Double getPriceForPosition(PricingPosition pricingPosition, OrderType orderType) {

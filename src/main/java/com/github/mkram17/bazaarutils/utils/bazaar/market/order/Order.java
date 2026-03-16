@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.UserOrdersChangeEvent;
+import com.github.mkram17.bazaarutils.events.listener.AbstractListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
@@ -38,7 +39,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  * as outbids, user order changes, and price updates.
  */
 @Slf4j @ConfigObject
-public class Order extends OrderInfo {
+public class Order extends OrderInfo implements AbstractListener {
     public static final int OUTBID_ORDER_NOTIFICATIONS = 3; // number of notifications to send when an order becomes outdated
 
     @Getter @Setter @ConfigEntry(id = "amountClaimed")
@@ -62,10 +63,14 @@ public class Order extends OrderInfo {
         startTracking();
     }
 
+    @Override
+    public void subscribe() {
+        EVENT_BUS.subscribe(this);
+    }
+
     private void startTracking() {
         handleOutbidStatusChange();
         subscribe();
-        scheduleHealthCheck();
     }
 
     @EventHandler
