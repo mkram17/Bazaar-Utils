@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
@@ -9,6 +8,7 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import lombok.Getter;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
@@ -94,7 +94,7 @@ public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton 
 
         ItemStack stack = getReplacementItem();
 
-        stack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, String.valueOf(getButtonItemStackSize(state.get())));
+        stack.set(CustomDataComponents.CUSTOM_SIZE, String.valueOf(getButtonItemStackSize(state.get())));
         stack.set(DataComponentTypes.CUSTOM_NAME, getButtonItemText(state.get()));
 
         event.setReplacement(stack);

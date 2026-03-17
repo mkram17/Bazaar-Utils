@@ -48,14 +48,9 @@ public class BazaarUtils implements ClientModInitializer {
     public static IEventBus EVENT_BUS = new EventBus();
     public static ScheduledExecutorService BUExecutorService = Executors.newSingleThreadScheduledExecutor();
 
-    public static ComponentType<String> CUSTOM_SIZE_COMPONENT;
-    public static ComponentType<Boolean> CUSTOM_SHOWPRICECHART_COMPONENT;
-
     @Override
     public void onInitializeClient() {
         BazaarUtilsPreInitModules.init();
-
-        registerDataComponents();
 
         BUCompatibilityHelper.initializePatches();
 
@@ -68,20 +63,6 @@ public class BazaarUtils implements ClientModInitializer {
         subscribeEvents();
 
         BazaarUtilsLateInitModules.init();
-    }
-
-    private static void registerDataComponents() {
-        CUSTOM_SIZE_COMPONENT = Registry.register(
-                Registries.DATA_COMPONENT_TYPE,
-                Identifier.of(BazaarUtils.MOD_ID, "custom_size"),
-                ComponentType.<String>builder().codec(Codec.STRING).build()
-        );
-
-        CUSTOM_SHOWPRICECHART_COMPONENT = Registry.register(
-                Registries.DATA_COMPONENT_TYPE,
-                Identifier.of(BazaarUtils.MOD_ID, "has_price_chart"),
-                ComponentType.<Boolean>builder().codec(Codec.BOOL).build()
-        );
     }
 
     //uses orbit for custom events
