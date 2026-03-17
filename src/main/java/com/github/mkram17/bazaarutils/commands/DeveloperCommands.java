@@ -30,6 +30,7 @@ public final class DeveloperCommands implements BUCommand {
     @Getter
     public final Text description = Text.literal("Toggles developer mode.").formatted(Formatting.GRAY);
 
+    @Getter
     private final List<BUCommand> subcommands = List.of(
             new RemoveCommand(),
             new InfoCommand(),

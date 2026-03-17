@@ -14,13 +14,16 @@ import java.util.List;
 
 @LateInitModule
 public final class BazaarUtilsCommands implements BUCommand {
+    private static final List<String> PREFIXES = List.of("bazaarutils", "bu");
+
     @Getter
     public final String commandName = "bazaarutils";
 
-    private static final List<String> PREFIXES = List.of("bazaarutils", "bu");
+    @Getter
+    private final List<BUCommand> subcommands;
 
     public BazaarUtilsCommands() {
-        List<BUCommand> subcommands = BazaarUtilsModules.collected.stream()
+        this.subcommands = BazaarUtilsModules.collected.stream()
                 .filter(it -> it instanceof BUCommand)
                 .map(it -> (BUCommand) it)
                 .toList();
@@ -39,8 +42,6 @@ public final class BazaarUtilsCommands implements BUCommand {
             dispatcher.register(base);
         }
     }
-
-
 
     @Override
     public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {

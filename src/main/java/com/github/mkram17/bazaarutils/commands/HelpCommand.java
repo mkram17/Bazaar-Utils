@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.commands;
 
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -26,24 +27,31 @@ public final class HelpCommand implements BUCommand {
     }
 
     private int execute(CommandContext<FabricClientCommandSource> context) {
-        List<BUCommand> commands = BazaarUtilsModules.collected.stream()
-                .filter(it -> it instanceof BUCommand)
-                .map(it -> (BUCommand) it)
-                .toList();
+        BazaarUtilsCommands root = BazaarUtilsLateInitModules.BazaarUtilsCommands;
 
         MutableText message = Text.literal("BazaarUtils Commands\n").formatted(Formatting.GOLD);
 
         message.append(Text.literal("---------------------\n").formatted(Formatting.DARK_GRAY));
-        for (BUCommand command : commands) {
-            message.append(Text.literal("/bu " + command.getCommandName()).formatted(Formatting.GREEN));
-            message.append(Text.literal(" - ").formatted(Formatting.DARK_GRAY));
-            message.append(command.getDescription());
-            message.append(Text.literal("\n"));
+        for (BUCommand command : root.getSubcommands()) {
+            appendCommand(message, command, "/bu");
         }
         message.append(Text.literal("---------------------").formatted(Formatting.DARK_GRAY));
 
         PlayerActionUtil.notifyAll(message.getString());
 
         return 1;
+    }
+
+    private void appendCommand(MutableText message, BUCommand command, String path) {
+        String fullPath = path + " " + command.getCommandName();
+
+        message.append(Text.literal(fullPath).formatted(Formatting.GREEN));
+        message.append(Text.literal(" - ").formatted(Formatting.DARK_GRAY));
+        message.append(command.getDescription());
+        message.append(Text.literal("\n"));
+
+        for (BUCommand sub : command.getSubcommands()) {
+            appendCommand(message, sub, fullPath);
+        }
     }
 }
