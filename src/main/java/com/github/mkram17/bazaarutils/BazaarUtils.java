@@ -55,30 +55,16 @@ public class BazaarUtils implements ClientModInitializer {
         BUCompatibilityHelper.initializePatches();
 
         getModProperties();
-        registerEventBus();
         registerCommands();
 
         BazaarUtilsModules.init();
 
-        subscribeEvents();
-
         BazaarUtilsLateInitModules.init();
-    }
-
-    //uses orbit for custom events
-    private void registerEventBus() {
-        EVENT_BUS.registerLambdaFactory("com.github.mkram17.bazaarutils", (lookupInMethod, klass) ->
-                (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
     }
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> BUCommands.register(dispatcher));
     }
-
-    private void subscribeEvents(){
-        ListenerManager.subscribeAll();
-    }
-
     private void getModProperties(){
         FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(modContainer -> {
             ModMetadata metadata = modContainer.getMetadata();

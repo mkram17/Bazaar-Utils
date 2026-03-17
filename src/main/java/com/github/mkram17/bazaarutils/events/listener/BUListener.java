@@ -18,14 +18,14 @@ import lombok.Getter;
  */
 //TODO switch to using fabric event system with annotation processor
 public abstract class BUListener implements AbstractListener{
-
     @Getter
     private transient boolean isSubscribed = false;
+
     protected transient boolean runOnInit = true;
     protected transient boolean subscribeToMeteorEventBus = true;
 
     public BUListener(){
-        if(!ListenerManager.listeners.contains(this)){
+        if (!ListenerManager.listeners.contains(this)) {
             ListenerManager.listeners.add(this);
         }
     }
@@ -36,22 +36,21 @@ public abstract class BUListener implements AbstractListener{
      */
     @Override
     public final void subscribe(){
-        if(isSubscribed){
+        if (isSubscribed) {
             return;
         }
 
         isSubscribed = true;
         registerFabricEvents();
 
-        if(subscribeToMeteorEventBus) {
+        if (subscribeToMeteorEventBus) {
             subscribeToMeteorEventBus();
         }
     }
 
-    protected void registerFabricEvents(){
-    }
+    protected void registerFabricEvents() {}
 
-    private void subscribeToMeteorEventBus(){
+    private void subscribeToMeteorEventBus() {
         BazaarUtils.EVENT_BUS.subscribe(this);
     }
 }
