@@ -10,6 +10,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
@@ -53,7 +54,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
         );
 
         replacementItem.set(
-                BazaarUtils.CUSTOM_SIZE_COMPONENT,
+                CustomDataComponents.CUSTOM_SIZE,
                 bookmarked ? "⃠ " : "★"
         );
     }

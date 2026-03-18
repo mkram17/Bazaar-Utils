@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
@@ -17,7 +18,8 @@ public abstract class DrawContentMixin {
             ordinal = 0,
             argsOnly = true)
     private String modifyStackCountString(String text, TextRenderer textRenderer, ItemStack stack, int x, int y) {
-        String customData = stack.get(BazaarUtils.CUSTOM_SIZE_COMPONENT);
+        String customData = stack.get(CustomDataComponents.CUSTOM_SIZE);
+
         double dataSize;
         if (customData != null) {
             boolean hasNumber = customData.matches(".*\\d.*");
