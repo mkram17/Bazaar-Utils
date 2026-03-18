@@ -4,10 +4,10 @@ public enum MarketType {
     INSTANT,
     ORDER;
 
-    public PriceType resolvePriceType(TransactionType transactionType) {
+    public PriceType resolvePriceType(TransactionType2 transactionType) {
         return switch (this) {
-            case INSTANT -> transactionType.asPriceType();
-            case ORDER -> transactionType.opposite().asPriceType();
+            case INSTANT -> transactionType.getSide().asPriceType();
+            case ORDER -> transactionType.getSide().asPriceType().opposite();
         };
     }
 }

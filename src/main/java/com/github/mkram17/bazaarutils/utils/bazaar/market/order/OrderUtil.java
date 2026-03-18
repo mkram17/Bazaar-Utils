@@ -67,15 +67,15 @@ public final class OrderUtil {
         UserOrdersStorage.INSTANCE.save();
     }
 
-    public static double getPriceForPosition(String productID, PricingPosition pricingPosition, TransactionType transactionType) {
+    public static double getPriceForPosition(String productID, PricingPosition pricingPosition, TransactionType2 transactionType) {
         if (productID == null || pricingPosition == null || transactionType == null) {
             return 0;
         }
 
-        double marketSellPrice = resolvePrice(productID, TransactionType.SELL);
-        double marketBuyPrice = resolvePrice(productID, TransactionType.BUY);
+        double marketSellPrice = resolvePrice(productID, TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.ORDER));
+        double marketBuyPrice = resolvePrice(productID, TransactionType2.of(TransactionType2.Side.BUY, TransactionType2.Method.ORDER));
 
-        return switch (transactionType) {
+        return switch (transactionType.getSide()) {
             case SELL -> switch (pricingPosition) {
                 case COMPETITIVE -> marketSellPrice - 0.1;
                 case MATCHED -> marketSellPrice;
@@ -89,8 +89,8 @@ public final class OrderUtil {
         };
     }
 
-    private static double resolvePrice(String productID, TransactionType transactionType) {
-        OptionalDouble priceOptional = BazaarDataManager.findItemPriceOptional(productID, transactionType, MarketType.ORDER);
+    private static double resolvePrice(String productID, TransactionType2 transactionType) {
+        OptionalDouble priceOptional = BazaarDataManager.findItemPriceOptional(productID, transactionType);
         if (priceOptional.isEmpty()) {
             return -1;
         }

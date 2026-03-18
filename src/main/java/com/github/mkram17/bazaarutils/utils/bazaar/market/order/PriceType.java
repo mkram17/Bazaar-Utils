@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import lombok.Getter;
 
 @Getter
@@ -15,10 +14,7 @@ public enum PriceType {
         };
     }
 
-    public PriceType opposite;
-
-    static {
-        INSTASELL.opposite = INSTABUY;
-        INSTABUY.opposite = INSTASELL;
+    public PriceType opposite(){
+        return this == INSTABUY ? INSTASELL : INSTABUY;
     }
 }

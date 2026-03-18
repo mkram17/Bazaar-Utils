@@ -10,7 +10,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType2;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -226,7 +226,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            OptionalDouble price = BazaarDataManager.findItemPriceOptional(state.productId(), getTransactionType(), getMarketType());
+            OptionalDouble price = BazaarDataManager.findItemPriceOptional(state.productId(), getTransactionType());
 
             if (price.isEmpty()) {
                 Util.logMessage("Could not retrieve relevant item pricing for " + name + "'s resolved value.");
@@ -245,9 +245,10 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         protected abstract int computeFixedValue(TransactionState state);
 
         protected int computeMaxValue(TransactionState state) {
-            return switch (getMarketType()) {
-                case INSTANT -> switch (getTransactionType()) {
-                    case BUY -> Optional.of(state.containerScreen())
+            return switch (getTransactionMethod()) {
+                case INSTANT -> {
+                    if (getTransactionType().isBuy()) {
+                        yield Optional.of(state.containerScreen())
                             .map(GenericContainerScreen::getScreenHandler)
                             .map(GenericContainerScreenHandler::getInventory)
                             .map(inventory -> SlotLookup.getInventoryItem(inventory, BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot))
@@ -260,19 +261,20 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                                     .filter(ItemStack::isEmpty)
                                     .count()
                             );
+                    }
                     // Should be impossible to reach, as there is no sign to input a custom amount on items to instant sell.
                     // TODO: consider refactors needed for this case not to exist
-                    case SELL -> 0;
-                };
-                case ORDER -> switch (getTransactionType()) {
-                    case BUY -> {
+                    yield 0;
+                }
+                case ORDER -> {
+                    if (getTransactionType().isBuy()) {
                         int amountCanAfford = (int) (state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()));
 
                         yield BazaarScreens.findBuyOrderAmountLimit(state.inputSign().itemStack())
                                 .map(limit -> Math.min(amountCanAfford, limit))
                                 .orElse(amountCanAfford);
                     }
-                    case SELL -> state.playerInventory().getMainStacks().stream()
+                    yield state.playerInventory().getMainStacks().stream()
                             .filter(stack -> !stack.isEmpty())
                             .filter(stack -> Optional.ofNullable(stack.getCustomName())
                                     .map(Text::getString)
@@ -281,7 +283,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                                     .orElse(false))
                             .mapToInt(ItemStack::getCount)
                             .sum();
-                };
+                }
             };
         }
     }
@@ -346,7 +348,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            OptionalDouble price = BazaarDataManager.findItemPriceOptional(state.productId(), getTransactionType(), getMarketType());
+            OptionalDouble price = BazaarDataManager.findItemPriceOptional(state.productId(), getTransactionType());
 
             if (price.isEmpty()) {
                 Util.logMessage("Could not retrieve relevant item pricing for " + name + "'s resolved value.");
@@ -384,7 +386,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             OrderInfo tempOrder = new OrderInfo(
                     null,
-                    priceInfo.get().getTransactionType(),
+                    priceInfo.get().getTransactionType().getSide(),
                     null,
                     volume.get(),
                     priceInfo.get().getPricePerItem(),
@@ -401,7 +403,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             if (matcher.find()) {
                 try {
                     // Flip orders are always on the buy side; the sell price is computed after matching
-                    return Optional.of(new PriceInfo(Double.parseDouble(matcher.group(1).replace(",", "")), TransactionType.BUY));
+                    return Optional.of(new PriceInfo(Double.parseDouble(matcher.group(1).replace(",", "")), TransactionType2.of(TransactionType2.Side.BUY, TransactionType2.Method.ORDER)));
                 } catch (NumberFormatException e) {
                     Util.notifyError("Error parsing order price in TransactionFlip", e);
                 }

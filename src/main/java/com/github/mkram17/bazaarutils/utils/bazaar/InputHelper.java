@@ -6,8 +6,7 @@ import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.MarketType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType2;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
 import lombok.Getter;
@@ -28,12 +27,12 @@ public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton 
     /**
      * The market action which this helper is operating on (to buy, to sell).
      */
-    protected abstract TransactionType getTransactionType();
+    protected abstract TransactionType2 getTransactionType();
 
     /**
-     * The market type which this helper is operating through (instant, orders).
+     * The transaction method which this helper is operating through (instant, orders).
      */
-    protected abstract MarketType getMarketType();
+    protected abstract TransactionType2.Method getTransactionMethod();
 
 //    Event cycle routines stuff
 
