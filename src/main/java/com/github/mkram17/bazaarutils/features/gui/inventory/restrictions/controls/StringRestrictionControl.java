@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @ConfigObject
-public final class StringRestrictionControl implements RestrictionControl<StringRestrictBy> {
+public final class StringRestrictionControl implements RestrictionControl<StringRestrictBy>, ListEntryInfoProvider {
     @ConfigEntry(
             id = "targets",
             translation = "bazaarutils.config.inventory.restrictions.control.targets.label"
@@ -49,5 +49,15 @@ public final class StringRestrictionControl implements RestrictionControl<String
     @Override
     public String describeRule() {
         return "NAME: " + name;
+    }
+
+    @Override
+    public Text getTitle(int index) {
+        return Text.literal("Blocks items matching \"" + name + "\"");
+    }
+
+    @Override
+    public Text getDescription(int index) {
+        return Text.literal("Applies to: " + formatTargets());
     }
 }

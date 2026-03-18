@@ -11,7 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @ConfigObject
-public final class DoubleRestrictionControl implements RestrictionControl<NumericRestrictBy> {
     @ConfigEntry(
             id = "targets",
             translation = "bazaarutils.config.inventory.restrictions.control.targets.label"
@@ -25,6 +24,7 @@ public final class DoubleRestrictionControl implements RestrictionControl<Numeri
             RestrictionTarget.SELL_SACKS
     };
 
+public final class DoubleRestrictionControl implements RestrictionControl<NumericRestrictBy>, ListEntryInfoProvider {
     @ConfigEntry(
             id = "rule",
             translation = "bazaarutils.config.inventory.restrictions.control.numeric.type.label"
@@ -61,8 +61,21 @@ public final class DoubleRestrictionControl implements RestrictionControl<Numeri
     @Override
     public String describeRule() {
         return switch (rule) {
-            case PRICE  -> "PRICE: "  + amount;
-            case VOLUME -> "VOLUME: " + amount;
+            case PRICE -> "PRICE > " + amount;
+            case VOLUME -> "VOLUME > " + amount;
         };
+    }
+
+    @Override
+    public Text getTitle(int index) {
+        return Text.literal(switch (rule) {
+            case PRICE -> "Blocks if total price > " + amount;
+            case VOLUME -> "Blocks if volume held > " + amount;
+        });
+    }
+
+    @Override
+    public Text getDescription(int index) {
+        return Text.literal("Applies to: " + formatTargets());
     }
 }

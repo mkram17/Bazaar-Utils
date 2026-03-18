@@ -14,4 +14,27 @@ public sealed interface RestrictionControl<T extends Enum<T>> extends Restrictor
 
         return false;
     }
+
+    default String formatTargets() {
+        RestrictionTarget[] targets = getTargets();
+
+        if (targets == null || targets.length == 0) return "None";
+
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < targets.length; i++) {
+            String pretty = switch (targets[i]) {
+                case INSTANT_SELL -> "Instant Sell";
+                case SELL_SACKS -> "Sell Sacks";
+            };
+
+            builder.append(pretty);
+
+            if (i < targets.length - 1) {
+                builder.append(", ");
+            }
+        }
+
+        return builder.toString();
+    }
 }
