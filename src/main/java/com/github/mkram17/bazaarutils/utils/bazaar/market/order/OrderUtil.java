@@ -58,12 +58,13 @@ public final class OrderUtil {
         });
     }
 
-    public static void trackUserOrder(Order item) {
-        if (item == null) return;
-        assert item.getProductID() != null;
-        UserOrdersStorage.INSTANCE.get().add(item);
-        PlayerActionUtil.notifyAll("Added item: § " + item, NotificationType.ORDERDATA);
-        EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.ADD, item));
+    public static void trackUserOrder(Order order) {
+        if (order == null){
+            return;
+        }
+        UserOrdersStorage.INSTANCE.get().add(order);
+        PlayerActionUtil.notifyAll("Added order: § " + order, NotificationType.ORDERDATA);
+        EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.ADD, order));
         UserOrdersStorage.INSTANCE.save();
     }
 
@@ -72,28 +73,28 @@ public final class OrderUtil {
             return 0;
         }
 
-        double marketSellPrice = resolvePrice(productID, TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.ORDER));
-        double marketBuyPrice = resolvePrice(productID, TransactionType2.of(TransactionType2.Side.BUY, TransactionType2.Method.ORDER));
+        OptionalDouble marketSellPriceOpt = BazaarDataManager.findItemPriceOptional(productID, TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.ORDER));
+        OptionalDouble marketBuyPriceOpt = BazaarDataManager.findItemPriceOptional(productID, TransactionType2.of(TransactionType2.Side.BUY, TransactionType2.Method.ORDER));
 
-        return switch (transactionType.getSide()) {
-            case SELL -> switch (pricingPosition) {
+        if(marketBuyPriceOpt.isEmpty() || marketSellPriceOpt.isEmpty()) {
+            Util.notifyError("Could not resolve market prices for " + productID + " when calculating price for position. Buy price present: " + marketBuyPriceOpt.isPresent() + " Sell price present: " + marketSellPriceOpt.isPresent(), new Exception("Price resolution error"));
+            return -1;
+        }
+
+        double marketBuyPrice = marketBuyPriceOpt.getAsDouble();
+        double marketSellPrice = marketSellPriceOpt.getAsDouble();
+
+        return switch (transactionType.getPriceType()) {
+            case PriceType.INSTABUY -> switch (pricingPosition) {
                 case COMPETITIVE -> marketSellPrice - 0.1;
                 case MATCHED -> marketSellPrice;
                 case OUTBID -> marketSellPrice + 0.1;
             };
-            case BUY -> switch (pricingPosition) {
+            case PriceType.INSTASELL -> switch (pricingPosition) {
                 case COMPETITIVE -> marketBuyPrice + 0.1;
                 case MATCHED -> marketBuyPrice;
                 case OUTBID -> marketBuyPrice - 0.1;
             };
         };
-    }
-
-    private static double resolvePrice(String productID, TransactionType2 transactionType) {
-        OptionalDouble priceOptional = BazaarDataManager.findItemPriceOptional(productID, transactionType);
-        if (priceOptional.isEmpty()) {
-            return -1;
-        }
-        return Util.truncateNum(priceOptional.getAsDouble());
     }
 }

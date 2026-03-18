@@ -49,8 +49,8 @@ public class BookmarkSearchWidget {
             MutableText text = Text.literal(bookmark.name()).formatted(Formatting.BOLD);
 
             Style style = Style.EMPTY.withColor(Formatting.GRAY).withBold(false);
-            text.append(Text.literal("\nInsta Buy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.INSTANT))) + " coins").setStyle(style));
-            text.append(Text.literal("\nInsta Sell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, TransactionType2.of(TransactionType2.Side.BUY, TransactionType2.Method.INSTANT))) + " coins").setStyle(style));
+            text.append(Text.literal("\nInsta Buy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType2.of(TransactionType2.Side.BUY, TransactionType2.Method.INSTANT))) + " coins").setStyle(style));
+            text.append(Text.literal("\nInsta Sell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.INSTANT))) + " coins").setStyle(style));
 
             ItemSlotButtonWidget button = new ItemSlotButtonWidget(
                     buttonX,
@@ -85,7 +85,7 @@ public class BookmarkSearchWidget {
     public static void onWidgetLeftClick(Bookmark bookmark) {
         SoundUtil.playSound(ItemButton.BUTTON_SOUND, ItemButton.BUTTON_VOLUME);
 
-        Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.productId());
+        Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.productID());
 
         if (inventorySlot.isPresent()) {
             ContainerManager.clickSlot(inventorySlot.get(), 0);

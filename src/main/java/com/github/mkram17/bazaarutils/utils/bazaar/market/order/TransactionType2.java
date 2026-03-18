@@ -78,6 +78,11 @@ public class TransactionType2 {
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        return priceType != null ? priceType.hashCode() : 0;
+    }
+
     public String getString() {
         return method.getString() + " " + side.getString();
     }

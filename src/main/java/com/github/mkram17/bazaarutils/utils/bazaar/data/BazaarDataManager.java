@@ -43,7 +43,7 @@ public final class BazaarDataManager {
     private static final AtomicInteger consecutiveIdenticalSnapshots = new AtomicInteger(0);
     private static final AtomicInteger consecutiveFailures = new AtomicInteger(0);
 
-    /* Cached conversions: lowercase name -> productId */
+    /* Cached conversions: lowercase name -> productID */
     private static volatile Map<String, String> nameToProductIdCache = Map.of();
     @Setter
     private static volatile boolean conversionsLoaded = false;
@@ -190,16 +190,21 @@ public final class BazaarDataManager {
 
             return OptionalInt.of(0);
         } catch (Exception e) {
-            Util.notifyError("Error in getOrderCountOptional for productId=" + productId, e);
+            Util.notifyError("Error in getOrderCountOptional for productID=" + productId, e);
 
             return OptionalInt.empty();
         }
     }
 
     /**
-     * Empty can mean: reply/product/priceType invalid or not found; exception while finding price
-     * BUY (top of buySummary aka people's sell orders). SELL (top of sellSummary, aka people's buy orders).
-     * @return OptionalDouble price found.
+     * Find the top bazaar price for a product based on the given {@link TransactionType2}.
+     * The returned {@link OptionalDouble} is empty if the reply, product ID, or derived {@link PriceType}
+     * is {@code null}, if the product cannot be found, or if an exception occurs while resolving the price.
+     * If the selected summary list exists but is empty, this method returns {@code OptionalDouble.of(0.0)}.
+     *
+     * @param productId       the bazaar product ID to look up
+     * @param transactionType the transaction type whose {@link PriceType} controls which summary is queried
+     * @return an {@link OptionalDouble} containing the resolved price per unit, or empty if unavailable
      */
     public static OptionalDouble findItemPriceOptional(String productId, TransactionType2 transactionType) {
         SkyBlockBazaarReply reply = currentReply;
@@ -242,7 +247,7 @@ public final class BazaarDataManager {
                 }
             };
         } catch (Exception e) {
-            Util.notifyError("Error in findItemPriceOptional for productId=" + productId, e);
+            Util.notifyError("Error in findItemPriceOptional for productID=" + productId, e);
 
             return OptionalDouble.empty();
         }

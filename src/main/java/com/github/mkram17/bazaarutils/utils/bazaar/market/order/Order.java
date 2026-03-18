@@ -111,7 +111,7 @@ public class Order extends OrderInfo implements AbstractListener {
             message = OutbidOrderHandler.getOutbidMessage(this);
 
             if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-                message.append(Text.literal(". Market Price: " + this.getMarketPrice(this.getTransactionType()) + " Order Price: " + this.getPricePerItem()));
+                message.append(Text.literal(". Market Price: " + this.getMarketPrice(this.getTransactionType().getSide()) + " Order Price: " + this.getPricePerItem()));
             }
 
             if (shouldAutoOpenBazaar) {
@@ -144,8 +144,8 @@ public class Order extends OrderInfo implements AbstractListener {
         return UserOrdersStorage.INSTANCE.get().indexOf(this);
     }
 
-    public double getMarketPrice(TransactionType2 transactionType) {
-        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, transactionType);
+    public double getMarketPrice(TransactionType2.Side transactionSide) {
+        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, TransactionType2.of(transactionSide, TransactionType2.Method.ORDER));
     }
 
     /**

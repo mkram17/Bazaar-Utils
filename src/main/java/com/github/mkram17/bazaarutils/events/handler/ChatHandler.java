@@ -122,7 +122,7 @@ public class ChatHandler {
      * @param priceIndex index of the price component
      * @return the parsed order information if successful, empty otherwise
      */
-    private static Optional<OrderInfo> parseOrderData(ArrayList<Text> siblings, int volumeIndex, int nameIndex, int priceIndex) {
+    private static Optional<OrderInfo> parseOrderData(ArrayList<Text> siblings, int volumeIndex, int nameIndex, int priceIndex, TransactionType2.Side side) {
         try {
             String volumeString = siblings.get(volumeIndex).getString().replace(",", "");
             int volume = Integer.parseInt(volumeString);
@@ -139,7 +139,7 @@ public class ChatHandler {
             double totalPrice = Double.parseDouble(priceString);
             double pricePerUnit = totalPrice / volume;
 
-            return Optional.of(new OrderInfo(name, null, null, volume, pricePerUnit, null));
+            return Optional.of(new OrderInfo(name, side, null, volume, pricePerUnit, null));
         } catch (Exception e) {
             Util.notifyError("Failed to parse order data from chat: " + siblings.stream().map(Text::getString), e);
             return Optional.empty();
@@ -164,7 +164,7 @@ public class ChatHandler {
             int nameIndex,
             int priceIndex
     ) {
-        parseOrderData(siblings, volumeIndex, nameIndex, priceIndex).ifPresent(order -> {
+        parseOrderData(siblings, volumeIndex, nameIndex, priceIndex, transactionType.getSide()).ifPresent(order -> {
             order.setTransactionType(transactionType);
 
             EVENT_BUS.post(new BazaarChatEvent<>(eventType, order));
