@@ -250,14 +250,56 @@
       "category.label": "Inventory",
       "category.hint": "Configurations for the inventory features of the mod",
 
-      "separator.restrictions.label": "Inventory Restrictions",
+      "separator.instant_sell_highlight.label": "Instant Sell Highlight",
+      "instant_sell_highlight.{}": {
+        "label": "Instant Sell Highlight",
+        "hint": [
+          "Highlights items in your inventory that would be sold by the Instant Sell button."
+        ],
+        "color.label": "Highlight Color"
+      },
+
+      "separator.order_status_highlight.label": "Order Status Highlight",
+      "order_status_highlight.{}": {
+        "label": "Order Status Highlight",
+        "hint": "Highlights the status of your Bazaar Orders by coloring the items with representative colors.",
+
+        "competitive_color.{}": {
+          "label": "Competitive Color",
+          "hint": "The highlight color for orders that are currently the best market offer."
+        },
+
+        "matched_color.{}": {
+          "label": "Matched Color",
+          "hint": "The highlight color for orders that match the current market price."
+        },
+
+        "outbid_color.{}": {
+          "label": "Outbid Color",
+          "hint": "The highlight color for orders that have been outbid."
+        }
+      },
+
       "restrictions.{}": {
-        "label": "Inventory Restrictions",
-        "hint": "Locks selected Bazaar buttons based on inventory or action criteria to prevent accidental market actions.",
+        "separator.introductory.{}": {
+          "label": "Inventory Restrictions"
+        },
+
+        "category.label": "Inventory Restrictions",
+
+        "enabled.{}": {
+          "label": "Inventory Restrictions",
+          "hint": "Locks selected Bazaar buttons based on inventory or action criteria to prevent accidental market actions.",
+        },
 
         "features.{}": {
           "label": "Restricted Buttons",
-          "hint": "The inventory buttons for which restrictions are enabled."
+          "hint": "The inventory buttons for which restrictions are enabled.",
+
+          "target.{}": {
+            "instant_sell.label": "Instant Sell",
+            "sell_sacks.label": "Sell Sacks",
+          }
         },
 
         "clicks_required.{}": {
@@ -265,45 +307,22 @@
           "hint": "The number of clicks required on the feature button to confirm the action."
         },
 
-        "target.{}": {
-          "instant_sell.label": "Instant Sell",
-          "sell_sacks.label": "Sell Sacks",
+        "separator.rules_informational.{}": {
+          "label": "Restriction Rules",
+          "hint": "Manage the rules to be checked by the Restrictions feature"
         },
 
-        "rules.{}": {
-          "category.label": "Restriction Rules",
-          "category.hint": "Manage the rules to be evaluated by the Inventory Restrictions feature.",
+        "numeric_restrictions.{}": {
+          "label": "Numeric Predicates",
+          "hint": "Rules checking numeric conditions (e.g., total items or coins) to restrict targeted actions."
+        },
 
-          "separator.numeric_restrictions.{}": {
-            "label": "Numeric Predicates",
-            "hint": "Rules that trigger based on numeric conditions such as total coin value or item quantity."
-          },
-
-          "numeric_restriction.{}.label": [
-            "#1 Numeric Predicate",
-            "#2 Numeric Predicate",
-            "#3 Numeric Predicate",
-            "#4 Numeric Predicate",
-            "#5 Numeric Predicate"
-          ],
-
-          "separator.string_restrictions.{}": {
-            "label": "Name Predicates",
-            "hint": "Rules that trigger based on a specific item name being present in the sell action."
-          },
-
-          "string_restriction.{}.label": [
-            "#1 Name Predicate",
-            "#2 Name Predicate",
-            "#3 Name Predicate",
-            "#4 Name Predicate",
-            "#5 Name Predicate"
-          ]
+        "string_restrictions.{}": {
+          "label": "Name Predicates",
+          "hint": "Rules checking specific item names or types to restrict targeted actions."
         },
 
         "control.{}": {
-          "enabled.label": "Enabled",
-
           "targets.{}": {
             "label": "Features",
             "hint": "The features for which this rule is active."
@@ -326,33 +345,6 @@
               "hint": "The item name that, if present in the sell action, will trigger the restriction."
             }
           }
-        }
-      },
-
-      "separator.instant_sell_highlight.label": "Instant Sell Highlight",
-      "instant_sell_highlight.{}": {
-        "label": "Instant Sell Highlight",
-        "hint": [
-          "Highlights items in your inventory that would be sold by the Instant Sell button."
-        ],
-        "color.label": "Highlight Color"
-      },
-
-      "separator.order_status_highlight.label": "Order Status Highlight",
-      "order_status_highlight.{}": {
-        "label": "Order Status Highlight",
-        "hint": "Highlights the status of your Bazaar Orders by coloring the items with representative colors.",
-        "competitive_color.{}": {
-          "label": "Competitive Color",
-          "hint": "The highlight color for orders that are currently the best market offer."
-        },
-        "matched_color.{}": {
-          "label": "Matched Color",
-          "hint": "The highlight color for orders that match the current market price."
-        },
-        "outbid_color.{}": {
-          "label": "Outbid Color",
-          "hint": "The highlight color for orders that have been outbid."
         }
       }
     },

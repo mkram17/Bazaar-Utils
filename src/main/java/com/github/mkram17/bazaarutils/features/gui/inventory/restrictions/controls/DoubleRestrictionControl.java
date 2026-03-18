@@ -5,25 +5,17 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
+import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.text.Text;
+
+import java.util.Arrays;
+import java.util.Locale;
 
 @Getter
 @Setter
 @ConfigObject
-    @ConfigEntry(
-            id = "targets",
-            translation = "bazaarutils.config.inventory.restrictions.control.targets.label"
-    )
-    @Comment(
-            value = "The features for which this rule is enabled",
-            translation = "bazaarutils.config.inventory.restrictions.control.targets.hint"
-    )
-    public RestrictionTarget[] targets = new RestrictionTarget[] {
-            RestrictionTarget.INSTANT_SELL,
-            RestrictionTarget.SELL_SACKS
-    };
-
 public final class DoubleRestrictionControl implements RestrictionControl<NumericRestrictBy>, ListEntryInfoProvider {
     @ConfigEntry(
             id = "rule",
@@ -45,9 +37,26 @@ public final class DoubleRestrictionControl implements RestrictionControl<Numeri
     )
     public double amount;
 
+    @ConfigEntry(
+            id = "targets",
+            translation = "bazaarutils.config.inventory.restrictions.control.targets.label"
+    )
+    @Comment(
+            value = "The features for which this rule is enabled",
+            translation = "bazaarutils.config.inventory.restrictions.control.targets.hint"
+    )
+    public RestrictionTarget[] targets = new RestrictionTarget[] {
+            RestrictionTarget.INSTANT_SELL,
+            RestrictionTarget.SELL_SACKS
+    };
+
     public DoubleRestrictionControl(NumericRestrictBy rule, double amount) {
         this.rule = rule;
         this.amount = amount;
+    }
+
+    public DoubleRestrictionControl() {
+        this(NumericRestrictBy.PRICE, 0);
     }
 
     @Override

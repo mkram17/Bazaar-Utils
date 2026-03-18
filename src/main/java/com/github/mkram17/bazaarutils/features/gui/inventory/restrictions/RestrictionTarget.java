@@ -9,30 +9,30 @@ public enum RestrictionTarget implements TooltipProvider, Translatable {
     INSTANT_SELL {
         @Override
         public String getTranslationKey() {
-            return "bazaarutils.config.inventory.restrictions.target.instant_sell.label";
+            return "bazaarutils.config.inventory.restrictions.features.target.instant_sell.label";
         }
 
         @Override
         public Text getTooltip() {
-            return Text.translatable("bazaarutils.config.inventory.restrictions.target.instant_sell.label");
+            return Text.translatable("bazaarutils.config.inventory.restrictions.features.target.instant_sell.label");
         }
     },
     SELL_SACKS {
         @Override
         public String getTranslationKey() {
-            return "bazaarutils.config.inventory.restrictions.target.sell_sacks.label";
+            return "bazaarutils.config.inventory.restrictions.features.target.sell_sacks.label";
         }
 
         @Override
         public Text getTooltip() {
-            return Text.translatable("bazaarutils.config.inventory.restrictions.target.sell_sacks.label");
+            return Text.translatable("bazaarutils.config.inventory.restrictions.features.target.sell_sacks.label");
         }
     };
 
     public abstract String getTranslationKey();
 
     public static boolean isRestrictorFeatureEnabled(RestrictionTarget target) {
-        for (RestrictionTarget scoped : InventoryConfig.RESTRICTIONS_ENABLED_FEATURES) {
+        for (RestrictionTarget scoped : InventoryConfig.RestrictionRules.RESTRICTIONS_ENABLED_FEATURES) {
             if (scoped == target) return true;
         }
 

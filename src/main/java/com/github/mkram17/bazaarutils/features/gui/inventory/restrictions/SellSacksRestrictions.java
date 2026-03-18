@@ -3,15 +3,12 @@ package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
-import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.NumericRestrictBy;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
-import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.StringRestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -34,12 +31,12 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
 
     @Override
     public boolean isEnabled() {
-        return InventoryConfig.RESTRICTIONS_TOGGLE && RestrictionTarget.isRestrictorFeatureEnabled(RestrictionTarget.SELL_SACKS);
+        return InventoryConfig.RestrictionRules.RESTRICTIONS_TOGGLE && RestrictionTarget.isRestrictorFeatureEnabled(RestrictionTarget.SELL_SACKS);
     }
 
     @Override
     protected int getClicksOverride() {
-        return InventoryConfig.RESTRICTIONS_CLICKS_OVERRIDE;
+        return InventoryConfig.RestrictionRules.RESTRICTIONS_CLICKS_OVERRIDE;
     }
 
     @Override
@@ -49,7 +46,7 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
 
     @Override
     protected List<RestrictionControl<?>> getRestrictors() {
-        return InventoryConfig.SellRestrictionsRules.restrictors(RestrictionTarget.SELL_SACKS);
+        return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.SELL_SACKS);
     }
 
 

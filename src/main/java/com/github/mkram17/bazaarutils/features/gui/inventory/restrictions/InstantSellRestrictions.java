@@ -30,12 +30,12 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
 
     @Override
     public boolean isEnabled() {
-        return InventoryConfig.RESTRICTIONS_TOGGLE && RestrictionTarget.isRestrictorFeatureEnabled(RestrictionTarget.INSTANT_SELL);
+        return InventoryConfig.RestrictionRules.RESTRICTIONS_TOGGLE && RestrictionTarget.isRestrictorFeatureEnabled(RestrictionTarget.INSTANT_SELL);
     }
 
     @Override
     protected int getClicksOverride() {
-        return InventoryConfig.RESTRICTIONS_CLICKS_OVERRIDE;
+        return InventoryConfig.RestrictionRules.RESTRICTIONS_CLICKS_OVERRIDE;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
 
     @Override
     protected List<RestrictionControl<?>> getRestrictors() {
-        return InventoryConfig.SellRestrictionsRules.restrictors(RestrictionTarget.INSTANT_SELL);
+        return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.INSTANT_SELL);
     }
 
     public InstantSellRestrictions() {
