@@ -75,7 +75,7 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
         SellSacksParser.SellSacksResult result = SellSacksParser.parseOrders(sellSacksItem.get().itemStack());
 
         Set<RestrictionControl<?>> triggered = new LinkedHashSet<>(getRestrictors().stream()
-                .filter(control -> control.isEnabled() && control.anyMatch(result.items()))
+                .filter(control -> control.anyMatch(result.items()))
                 .toList());
 
         result.otherItems().ifPresent(other -> triggered.addAll(collectOtherItemsTriggered(other)));
@@ -85,7 +85,6 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
 
     private List<RestrictionControl<?>> collectOtherItemsTriggered(SellSacksParser.SellSacksResult.OtherItems otherItems) {
         return getRestrictors().stream()
-                .filter(RestrictionControl::isEnabled)
                 .filter(control -> control instanceof DoubleRestrictionControl doubleControl && switch (doubleControl.getRule()) {
                     case PRICE -> otherItems.totalValue() > doubleControl.getAmount();
                     case VOLUME -> otherItems.volume() > doubleControl.getAmount();

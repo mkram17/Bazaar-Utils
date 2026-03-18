@@ -13,12 +13,6 @@ import lombok.Setter;
 @ConfigObject
 public final class StringRestrictionControl implements RestrictionControl<StringRestrictBy> {
     @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.inventory.restrictions.control.enabled.label"
-    )
-    public boolean enabled;
-
-    @ConfigEntry(
             id = "targets",
             translation = "bazaarutils.config.inventory.restrictions.control.targets.label"
     )
@@ -43,8 +37,7 @@ public final class StringRestrictionControl implements RestrictionControl<String
 
     private StringRestrictBy rule = StringRestrictBy.NAME;
 
-    public StringRestrictionControl(boolean enabled, String name) {
-        this.enabled = enabled;
+    public StringRestrictionControl(String name) {
         this.name = name;
     }
 

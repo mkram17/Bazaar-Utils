@@ -3,7 +3,6 @@ package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.contr
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.RestrictionTarget;
 
 public sealed interface RestrictionControl<T extends Enum<T>> extends Restrictor permits DoubleRestrictionControl, StringRestrictionControl {
-    boolean isEnabled();
     RestrictionTarget[] getTargets();
     T getRule();
     String describeRule();

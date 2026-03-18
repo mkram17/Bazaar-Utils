@@ -75,7 +75,7 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
                         .items();
 
         List<RestrictionControl<?>> triggered = getRestrictors().stream()
-                .filter(control -> control.isEnabled() && control.anyMatch(orders))
+                .filter(control -> control.anyMatch(orders))
                 .toList();
 
         return Optional.of(new InstantSellState(instantSellItem.get(), triggered));

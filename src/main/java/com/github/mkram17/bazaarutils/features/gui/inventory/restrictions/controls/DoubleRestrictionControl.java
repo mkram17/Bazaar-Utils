@@ -13,12 +13,6 @@ import lombok.Setter;
 @ConfigObject
 public final class DoubleRestrictionControl implements RestrictionControl<NumericRestrictBy> {
     @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.inventory.restrictions.control.enabled.label"
-    )
-    public boolean enabled;
-
-    @ConfigEntry(
             id = "targets",
             translation = "bazaarutils.config.inventory.restrictions.control.targets.label"
     )
@@ -51,8 +45,7 @@ public final class DoubleRestrictionControl implements RestrictionControl<Numeri
     )
     public double amount;
 
-    public DoubleRestrictionControl(boolean enabled, NumericRestrictBy rule, double amount) {
-        this.enabled = enabled;
+    public DoubleRestrictionControl(NumericRestrictBy rule, double amount) {
         this.rule = rule;
         this.amount = amount;
     }
