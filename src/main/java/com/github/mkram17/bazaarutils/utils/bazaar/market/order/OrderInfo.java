@@ -56,7 +56,7 @@ public class OrderInfo extends PriceInfo {
      * @param itemInfo     optional UI context from the Bazaar screen
      */
     public OrderInfo(@Nullable String name, @Nullable TransactionType.Side side, @Nullable OrderStatus status, @Nullable Integer volume, @Nullable Double pricePerItem, @Nullable ItemInfo itemInfo) {
-        super(pricePerItem, TransactionType.of(side, TransactionType.Method.ORDER));
+        super(pricePerItem, side != null ? TransactionType.of(side, TransactionType.Method.ORDER) : null);
 
         this.name = name;
         this.itemInfo = itemInfo;

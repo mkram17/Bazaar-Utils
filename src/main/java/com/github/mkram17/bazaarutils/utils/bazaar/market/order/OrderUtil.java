@@ -70,7 +70,8 @@ public final class OrderUtil {
 
     public static double getPriceForPosition(String productID, PricingPosition pricingPosition, TransactionType transactionType) {
         if (productID == null || pricingPosition == null || transactionType == null) {
-            return 0;
+            Util.notifyError("Call to OrderUtil.getPriceForPosition contained a null param", new Exception("Price resolution error"));
+            return -1;
         }
 
         OptionalDouble marketSellPriceOpt = BazaarDataManager.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER));
