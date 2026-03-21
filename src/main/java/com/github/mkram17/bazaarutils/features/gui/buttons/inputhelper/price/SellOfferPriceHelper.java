@@ -58,8 +58,6 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost {
 
     public TransactionType transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
 
-    public TransactionType.Method transactionMethod = TransactionType.Method.ORDER;
-
     @Override
     public Item getButtonItem() {
         return switch (getPricingPosition()) {

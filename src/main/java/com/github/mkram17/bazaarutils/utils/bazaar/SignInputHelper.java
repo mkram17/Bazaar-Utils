@@ -245,7 +245,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         protected abstract int computeFixedValue(TransactionState state);
 
         protected int computeMaxValue(TransactionState state) {
-            return switch (getTransactionMethod()) {
+            return switch (getTransactionType().getMethod()) {
                 case INSTANT -> {
                     if (getTransactionType().isBuy()) {
                         yield Optional.of(state.containerScreen())

@@ -66,7 +66,6 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
     public int fixedAmount = 1;
 
     public TransactionType transactionType = TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER);
-    public TransactionType.Method transactionMethod = TransactionType.Method.ORDER;
 
     @Override
     public Item getButtonItem() {

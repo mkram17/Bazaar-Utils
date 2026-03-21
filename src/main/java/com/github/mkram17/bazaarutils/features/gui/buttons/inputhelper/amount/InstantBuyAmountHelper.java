@@ -66,7 +66,6 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount {
     public int fixedAmount = 1;
 
     public TransactionType transactionType = TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT);
-    public TransactionType.Method transactionMethod = TransactionType.Method.INSTANT;
 
     @Override
     public Item getButtonItem() {
