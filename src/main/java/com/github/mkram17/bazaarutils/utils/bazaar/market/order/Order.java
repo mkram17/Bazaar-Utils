@@ -144,10 +144,6 @@ public class Order extends OrderInfo implements AbstractListener {
         return UserOrdersStorage.INSTANCE.get().indexOf(this);
     }
 
-    public double getMarketPrice(TransactionType.Side transactionSide) {
-        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, TransactionType.of(transactionSide, TransactionType.Method.ORDER));
-    }
-
     /**
      * Updates the tracked filled amount and automatically marks the order as filled when the volume is reached.
      */

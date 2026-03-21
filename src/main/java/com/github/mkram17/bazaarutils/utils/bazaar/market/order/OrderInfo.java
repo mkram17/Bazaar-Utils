@@ -30,7 +30,7 @@ public class OrderInfo extends PriceInfo {
 
     @Getter
     protected String productID; //Hypixel's code for the product
-    @Getter @ConfigEntry(id = "name")
+    @Getter
     protected final String name; //name of the item in game
 
     @Getter
@@ -111,7 +111,7 @@ public class OrderInfo extends PriceInfo {
             return Optional.empty();
         }
 
-        double marketPrice = OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, getTransactionType());
+        double marketPrice = getMarketPrice(transactionType.getSide());
 
         var orderCountOpt = BazaarDataManager.getOrderCountOptional(productID, getTransactionType(), getPricePerItem());
 
@@ -144,6 +144,10 @@ public class OrderInfo extends PriceInfo {
         }
 
         return Optional.of(PricingPosition.COMPETITIVE);
+    }
+
+    public double getMarketPrice(TransactionType.Side transactionSide) {
+        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, TransactionType.of(transactionSide, TransactionType.Method.ORDER));
     }
 
     /**
