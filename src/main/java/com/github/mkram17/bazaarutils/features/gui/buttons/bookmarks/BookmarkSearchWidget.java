@@ -1,14 +1,14 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.PlayerSlots;
@@ -48,13 +48,9 @@ public class BookmarkSearchWidget {
             final ItemStack itemForButton = (configuredItem == null) ? Items.BARRIER.getDefaultStack() : configuredItem;
             MutableText text = Text.literal(bookmark.name()).formatted(Formatting.BOLD);
 
-            OrderInfo orderInfo = new OrderInfo(bookmark.name(), OrderType.SELL, null, null, null, null);
-
-            orderInfo.updateMarketPrice();
-
             Style style = Style.EMPTY.withColor(Formatting.GRAY).withBold(false);
-            text.append(Text.literal("\nBuy: " + Util.getPrettyString(orderInfo.getPriceForPosition(PricingPosition.MATCHED, OrderType.SELL)) + " coins").setStyle(style));
-            text.append(Text.literal("\nSell: " + Util.getPrettyString(orderInfo.getPriceForPosition(PricingPosition.MATCHED, OrderType.BUY)) + " coins").setStyle(style));
+            text.append(Text.literal("\nInsta Buy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT))) + " coins").setStyle(style));
+            text.append(Text.literal("\nInsta Sell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT))) + " coins").setStyle(style));
 
             ItemSlotButtonWidget button = new ItemSlotButtonWidget(
                     buttonX,
@@ -89,13 +85,11 @@ public class BookmarkSearchWidget {
     public static void onWidgetLeftClick(Bookmark bookmark) {
         SoundUtil.playSound(ItemButton.BUTTON_SOUND, ItemButton.BUTTON_VOLUME);
 
-        if (bookmark.productID() != null) {
-            Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.productID());
+        Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.productID());
 
-            if (inventorySlot.isPresent()) {
-                ContainerManager.clickSlot(inventorySlot.get(), 0);
-                return;
-            }
+        if (inventorySlot.isPresent()) {
+            ContainerManager.clickSlot(inventorySlot.get(), 0);
+            return;
         }
 
         PlayerActionUtil.runCommand("bz " + bookmark.name());

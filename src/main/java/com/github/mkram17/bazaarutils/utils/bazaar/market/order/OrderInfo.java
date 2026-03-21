@@ -1,69 +1,62 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.listener.AbstractListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-
-import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 /**
  * Stores Bazaar item information while automatically tracking market price updates and performing
  * health checks on product identifiers. Intended for order-like data that does not need the full
  * {@link Order} lifecycle.
  */
-//TODO turn into builder class
-@ConfigObject
-public class OrderInfo extends PriceInfo implements AbstractListener {
+@ToString(callSuper=true)
+public class OrderInfo extends PriceInfo {
     private static final double DEFAULT_TOLERANCE = 0.9;
     private static final double TOTAL_PRICE_ROUNDING_THRESHOLD = 10000;
 
-    @Getter @ConfigEntry(id = "productID")
+    @Getter
     protected String productID; //Hypixel's code for the product
-    @Getter @ConfigEntry(id = "name")
+    @Getter
     protected final String name; //name of the item in game
 
-    @Getter @ConfigEntry(id = "status")
+    @Getter
     protected OrderStatus status;
 
-    @Getter @ConfigEntry(id = "volume")
+    @Getter
     protected final Integer volume;
 
     @Getter @Setter
     protected double tolerance; //When finding item price, it can round to the nearest coin sometimes, so tolerance is needed for price calculations
 
-    @Getter @Setter @ConfigEntry(id = "itemInfo") //TODO fix config serialization for this
+    @Getter @Setter
     private ItemInfo itemInfo;
 
     /**
      * Creates a container that tracks market data for a specific Bazaar product.
      *
      * @param name         display name of the item
-     * @param orderType    whether the price represents a sell (buy order) or buy (sell order)
+     * @param side whether this is a buy or sell transaction
      * @param status       status of the order
      * @param volume       quantity of the order
      * @param pricePerItem current price per unit for the order
      * @param itemInfo     optional UI context from the Bazaar screen
      */
-    public OrderInfo(@Nullable String name, @Nullable OrderType orderType, @Nullable OrderStatus status, @Nullable Integer volume, @Nullable Double pricePerItem, @Nullable ItemInfo itemInfo) {
-        super(pricePerItem, orderType);
+    public OrderInfo(@Nullable String name, @Nullable TransactionType.Side side, @Nullable OrderStatus status, @Nullable Integer volume, @Nullable Double pricePerItem, @Nullable ItemInfo itemInfo) {
+        super(pricePerItem, side != null ? TransactionType.of(side, TransactionType.Method.ORDER) : null);
 
         this.name = name;
         this.itemInfo = itemInfo;
@@ -71,9 +64,16 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         this.volume = volume;
         this.tolerance = calculateTolerance();
 
-        validateProduct();
         BazaarDataManager.findProductIdOptional(name).ifPresent(productId -> this.productID = productId);
+        validateProductId(productID);
         findPricingPosition().ifPresent(pricingPosition -> this.pricingPosition = pricingPosition);
+    }
+
+    //TODO validate name/product id with method specifically for that. Maybe can switch findProdIdOpt for non optional version and then rely on validation method.
+    private void validateProductId(String productId) {
+        if(productId == null || productId.isBlank()) {
+            Util.notifyError("Error setting product id for " + this, new Throwable("Product ID cannot be null or blank"));
+        }
     }
 
     private double calculateTolerance() {
@@ -102,71 +102,18 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
     }
 
     /**
-     * Refreshes cached market price data for this product.
-     */
-    public void updateMarketPrice() {
-        updateMarketPrice(productID);
-    }
-
-    private void validateProduct() {
-        if (this.productID == null && this.name != null) {
-            if (!fixProductID()) {
-                Util.notifyError("Product ID for " + this.name + " is null. This may cause issues", new Throwable());
-            }
-        }
-    }
-
-    protected void scheduleHealthCheck() {
-        long START_DELAY_SECONDS = 60;
-        long CHECK_INTERVAL_SECONDS = 30;
-
-        BazaarUtils.BUExecutorService.scheduleAtFixedRate(() -> {
-            if (!fixProductID()) {
-                Util.logError("Could not fix product ID for " + this.name + ". This may cause the mod to work improperly.", new Throwable());
-            }
-        }, START_DELAY_SECONDS, CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS);
-    }
-
-
-    //returns true if productID is safe/fixed after run, and false if it is not
-    private boolean fixProductID() {
-        if (isProductIDHealthy()) {
-            return true;
-        }
-
-        Optional<String> newProductID = BazaarDataManager.findProductIdOptional(this.name);
-
-        if (newProductID.isPresent()) {
-            Util.logMessage("Successfully fixed product ID for " + this.name + ": " + newProductID);
-
-            return true;
-        } else {
-            Util.logError("While refinding product id, could not find product ID for " + this.name, null);
-
-            return false;
-        }
-    }
-
-    //TODO this ideally isn't needed -- fix any bugs that cause these issues in the first place
-    private boolean isProductIDHealthy() {
-        return !(this.productID == null || this.productID.isEmpty() || BazaarDataManager.findItemPriceOptional(this.productID, getOrderType()).isEmpty());
-    }
-
-    /**
      * Determines whether the order price is competitive, matched, or outbid relative to the market.
      *
      * @return status reflecting how this order compares to current prices, if calculable
      */
     public Optional<PricingPosition> findPricingPosition() {
-        if (this.pricePerItem == null || !isProductIDHealthy()) {
+        if (this.pricePerItem == null) {
             return Optional.empty();
         }
 
-        updateMarketPrice();
+        double marketPrice = getMarketPrice(transactionType.getSide());
 
-        double marketPrice = getPriceForPosition(PricingPosition.MATCHED, getOrderType());
-
-        var orderCountOpt = BazaarDataManager.getOrderCountOptional(productID, getOrderType(), getPricePerItem());
+        var orderCountOpt = BazaarDataManager.getOrderCountOptional(productID, getTransactionType(), getPricePerItem());
 
         if (orderCountOpt.isEmpty()) {
             return Optional.empty();
@@ -174,7 +121,7 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
 
         int orderCount = orderCountOpt.getAsInt();
 
-        if (orderType == OrderType.BUY) {
+        if (transactionType != null && transactionType.getSide() == TransactionType.Side.BUY) {
             if (this.pricePerItem > marketPrice) {
                 return Optional.of(PricingPosition.COMPETITIVE);
             } else if (this.pricePerItem < marketPrice) {
@@ -199,9 +146,8 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         return Optional.of(PricingPosition.COMPETITIVE);
     }
 
-    @Override
-    public void subscribe() {
-        EVENT_BUS.subscribe(this);
+    public double getMarketPrice(TransactionType.Side transactionSide) {
+        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, TransactionType.of(transactionSide, TransactionType.Method.ORDER));
     }
 
     /**
@@ -216,27 +162,27 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         Double otherOrderPrice = other.getPricePerItem();
         Integer otherOrderVolume = other.getVolume();
         int otherOrderAmountUnclaimed = other.getAmountFilled() - other.getAmountClaimed();
-        OrderType orderType = other.getOrderType();
+        TransactionType transactionType = other.getTransactionType();
 
         if (isStrict) {
-            return isStrictlySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, orderType);
+            return isStrictlySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, transactionType);
         }
 
-        return isLooselySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, otherOrderAmountUnclaimed, orderType);
+        return isLooselySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, otherOrderAmountUnclaimed, transactionType);
     }
 
-    private boolean isStrictlySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, OrderType orderType) {
+    private boolean isStrictlySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, TransactionType transactionType) {
         return (areAnyNull(this.pricePerItem, otherOrderPrice) || isSimilarPrice(otherOrderPrice)) &&
                 (areAnyNull(this.volume, otherOrderVolume) || this.volume.equals(otherOrderVolume)) &&
                 (areAnyNull(this.name, otherOrderName) || this.name.equalsIgnoreCase(otherOrderName)) &&
-                (areAnyNull(this.orderType, orderType) || this.orderType == orderType);
+                (areAnyNull(this.transactionType, transactionType) || this.transactionType.getSide() == transactionType.getSide());
     }
 
-    private boolean isLooselySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, int otherOrderAmountUnclaimed, OrderType orderType) {
+    private boolean isLooselySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, int otherOrderAmountUnclaimed, TransactionType transactionType) {
         return (areAnyNull(this.pricePerItem, otherOrderPrice) || this.isSimilarPrice(otherOrderPrice)) &&
                 (areAnyNull(this.volume, otherOrderVolume) || Util.genericIsSimilarValue(this.getVolume(), otherOrderVolume, 0.05 * otherOrderVolume) || this.getVolume().equals(otherOrderAmountUnclaimed)) && // sometimes the only volume that can be found is the amount that is unclaimed, like in FlipHelper
                 (areAnyNull(this.name, otherOrderName) || this.getName().equalsIgnoreCase(otherOrderName)) &&
-                (areAnyNull(this.orderType, orderType) || this.getOrderType() == orderType);
+                (areAnyNull(this.transactionType, transactionType) || this.getTransactionType().getSide() == transactionType.getSide());
     }
 
     private boolean areAnyNull(Object... objects) {
@@ -344,18 +290,10 @@ public class OrderInfo extends PriceInfo implements AbstractListener {
         return volumeComparator.thenComparing(priceComparator);
     }
 
-    @Override
-    public String toString() {
-        return "(name: " + this.name +
-                ", price:" + this.pricePerItem +
-                ", volume: " + this.volume +
-                ")";
-    }
-
     /**
      * Converts the current container into a fully tracked {@link Order}.
      */
     public Order toBazaarOrder() {
-        return new Order(name, volume, pricePerItem, orderType, null);
+        return new Order(name, volume, pricePerItem, transactionType.getSide(), null);
     }
 }

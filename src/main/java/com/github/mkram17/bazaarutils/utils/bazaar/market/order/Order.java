@@ -5,73 +5,64 @@ import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.UserOrdersChangeEvent;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.events.listener.AbstractListener;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.ToString;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 
 //TODO figure out how to handle rounding with price
-//TODO sometimes a BazaarOrder is created that is for the same order as one in userOrders, but not the same object. This causes problems sometimes, and should be fixed.
 //TODO use last viewed item in bazaar to help with finding accurate price instead of just chat message
 /**
  * Extension of {@link OrderInfo} that tracks live Bazaar orders and reacts to events such
  * as outbids, user order changes, and price updates.
  */
-@Slf4j @ConfigObject
-public class Order extends OrderInfo {
+@ToString(callSuper=true)
+public class Order extends OrderInfo implements AbstractListener {
     public static final int OUTBID_ORDER_NOTIFICATIONS = 3; // number of notifications to send when an order becomes outdated
 
-    @Getter @Setter @ConfigEntry(id = "amountClaimed")
+    @Getter @Setter
     private int amountClaimed = 0;
-    @Getter @ConfigEntry(id = "amountFilled")
+    @Getter
     private int amountFilled = 0;
-
-    /**
-     * Creates a Bazaar order with no captured {@link ItemInfo} context.
-     */
-    public Order(String name, Integer volume, Double pricePerItem, OrderType orderType) {
-        this(name, volume, pricePerItem, orderType, null);
-    }
 
     /**
      * Creates a Bazaar order, initializing ItemInfo with slot index and ItemStack of the order.
      */
-    public Order(String name, Integer volume, Double pricePerItem, OrderType orderType, ItemInfo itemInfo) {
-        super(name, orderType, OrderStatus.SET, volume, pricePerItem, itemInfo);
+    public Order(@NonNull String name, int volume, double pricePerItem, TransactionType.Side side, @Nullable ItemInfo itemInfo) {
+        super(name, side, OrderStatus.SET, volume, pricePerItem, itemInfo);
 
         startTracking();
+    }
+
+    @Override
+    public void subscribe() {
+        EVENT_BUS.subscribe(this);
     }
 
     private void startTracking() {
         handleOutbidStatusChange();
         subscribe();
-        scheduleHealthCheck();
-        updateMarketPrice();
     }
 
     @EventHandler
     private void onDataUpdate(BazaarDataUpdateEvent event) {
-        updateMarketPrice();
         handleOutbidStatusChange();
     }
 
@@ -81,7 +72,6 @@ public class Order extends OrderInfo {
             return;
         }
 
-        updateMarketPrice();
         handleOutbidStatusChange();
     }
 
@@ -121,11 +111,11 @@ public class Order extends OrderInfo {
             message = OutbidOrderHandler.getOutbidMessage(this);
 
             if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-                message.append(Text.literal(". Market Price: " + this.getMarketPrice(this.getOrderType()) + " Order Price: " + this.getPricePerItem()));
+                message.append(Text.literal(". Market Price: " + this.getMarketPrice(this.getTransactionType().getSide()) + " Order Price: " + this.getPricePerItem()));
             }
 
             if (shouldAutoOpenBazaar) {
-                openBazaar();
+                OrderUtil.openBazaar();
             }
 
             MinecraftClient client = MinecraftClient.getInstance();
@@ -146,103 +136,12 @@ public class Order extends OrderInfo {
         }
     }
 
-    /**
-     * Opens the Bazaar order management screen after a short countdown if the player is not already there.
-     */
-    public void openBazaar() {
-        if (ScreenManager.getInstance().isCurrent(BazaarScreens.ALL.toArray(ScreenType[]::new))) {
-            return;
-        }
-
-        CompletableFuture.runAsync(() -> {
-            for (int i = 3; i >= 1; i--) {
-                try {
-                    if (i == 3) {
-                        PlayerActionUtil.notifyAll("Opening bazaar in 3");
-                    } else {
-                        PlayerActionUtil.notifyAll(String.valueOf(i));
-                    }
-
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-
-            PlayerActionUtil.runCommand("managebazaarorders");
-        });
-    }
-
 
     /**
      * @return index of this order within the persisted user order list.
      */
     public int getIndex() {
         return UserOrdersStorage.INSTANCE.get().indexOf(this);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder(super.toString());
-
-        builder.append(name).append("[").append(getIndex()).append("]");
-
-        if (amountClaimed != 0) {
-            builder.append(", amount claimed: ").append(amountClaimed);
-        }
-
-        builder.append(", type: ").append(getOrderType().getString());
-
-        if (status == OrderStatus.FILLED) {
-            builder.append(", status: ").append(status);
-        }
-
-        builder.append(")");
-
-        return builder.toString();
-    }
-
-    /**
-     * Converts a filled order into its opposite side for flipping and resets fill tracking.
-     *
-     * @param newPrice price to use for the flipped order
-     */
-    public void flipItem(double newPrice) {
-        flipPrices(newPrice);
-        updateMarketPrice();
-
-        this.amountFilled = 0;
-        this.status = OrderStatus.SET;
-
-        EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.UPDATE, this));
-    }
-
-    public double getMarketPrice(OrderType orderType) {
-        updateMarketPrice();
-
-        return this.getPriceForPosition(PricingPosition.MATCHED, orderType);
-    }
-
-    /**
-     * Calculates a competitive flip price using the opposite side of the market.
-     *
-     * @return price .1 coin more competitive than market rate.
-     */
-    public double getUndercutPrice(OrderType orderType) {
-        updateMarketPrice();
-
-        return this.getPriceForPosition(PricingPosition.COMPETITIVE, orderType);
-    }
-
-    /**
-     * Calculates a non-competitive flip price.
-     * 
-     * @return price .1 coin less competitive than market rate.
-     */
-    public double getOutbidPrice(OrderType orderType) {
-        updateMarketPrice();
-
-        return this.getPriceForPosition(PricingPosition.OUTBID, orderType);
     }
 
     /**
@@ -267,11 +166,11 @@ public class Order extends OrderInfo {
     }
 
     /**
-     * Removes this order from the tracked watched items list and notifies listeners.
+     * Removes this order from the tracked user orders list and notifies listeners.
      */
-    public void removeFromWatchedItems() {
+    public void removeFromUserOrders() {
         if (!UserOrdersStorage.INSTANCE.get().remove(this)) {
-            PlayerActionUtil.notifyAll("Error removing " + name + " from watched items. Item couldn't be found.");
+            PlayerActionUtil.notifyAll("Error removing " + name + " from user orders. Item couldn't be found.");
         }
 
         EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.REMOVE, this));

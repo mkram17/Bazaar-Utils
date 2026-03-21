@@ -5,11 +5,12 @@ import com.github.mkram17.bazaarutils.data.APIUtils;
 import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import lombok.Getter;
 import lombok.Setter;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
@@ -23,25 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public final class BazaarDataManager {
-    @Getter
-    public enum PriceType {
-        INSTABUY,
-        INSTASELL;
-
-        public String getString() {
-            return switch (this) {
-                case INSTASELL -> "Buy";
-                case INSTABUY -> "Sell";
-            };
-        }
-
-        private PriceType opposite;
-
-        static {
-            INSTASELL.opposite = INSTABUY;
-            INSTABUY.opposite = INSTASELL;
-        }
-    }
 
     private static final long BASE_INTERVAL_MS = 20_000;
     private static final long POST_OFFSET_MS = 500;
@@ -61,7 +43,7 @@ public final class BazaarDataManager {
     private static final AtomicInteger consecutiveIdenticalSnapshots = new AtomicInteger(0);
     private static final AtomicInteger consecutiveFailures = new AtomicInteger(0);
 
-    /* Cached conversions: lowercase name -> productId */
+    /* Cached conversions: lowercase name -> productID */
     private static volatile Map<String, String> nameToProductIdCache = Map.of();
     @Setter
     private static volatile boolean conversionsLoaded = false;
@@ -171,10 +153,14 @@ public final class BazaarDataManager {
      * Get the number of orders at an exact price for a product & price type.
      * @return OptionalInt empty if reply / product / priceType invalid or not found.
      */
-    public static OptionalInt getOrderCountOptional(String productId, OrderType orderType, double price) {
+    public static OptionalInt getOrderCountOptional(String productId, TransactionType transactionType, double price) {
         SkyBlockBazaarReply reply = currentReply;
 
-        PriceType priceType = orderType.asPriceType();
+        if (transactionType == null) {
+            return OptionalInt.empty();
+        }
+
+        PriceType priceType = transactionType.getPriceType();
 
         if (reply == null || productId == null || priceType == null) {
             return OptionalInt.empty();
@@ -204,21 +190,30 @@ public final class BazaarDataManager {
 
             return OptionalInt.of(0);
         } catch (Exception e) {
-            Util.notifyError("Error in getOrderCountOptional for productId=" + productId, e);
+            Util.notifyError("Error in getOrderCountOptional for productID=" + productId, e);
 
             return OptionalInt.empty();
         }
     }
 
     /**
-     * Empty can mean: reply/product/priceType invalid or not found; exception while finding price
-     * BUY (top of buySummary aka people's sell orders). SELL (top of sellSummary, aka people's buy orders).
-     * @return OptionalDouble price found.
+     * Find the top bazaar price for a product based on the given {@link TransactionType}.
+     * The returned {@link OptionalDouble} is empty if the reply, product ID, or derived {@link PriceType}
+     * is {@code null}, if the product cannot be found, or if an exception occurs while resolving the price.
+     * If the selected summary list exists but is empty, this method returns {@code OptionalDouble.of(0.0)}.
+     *
+     * @param productId       the bazaar product ID to look up
+     * @param transactionType the transaction type whose {@link PriceType} controls which summary is queried
+     * @return an {@link OptionalDouble} containing the resolved price per unit, or empty if unavailable
      */
-    public static OptionalDouble findItemPriceOptional(String productId, OrderType orderType) {
+    public static OptionalDouble findItemPriceOptional(String productId, TransactionType transactionType) {
         SkyBlockBazaarReply reply = currentReply;
 
-        PriceType priceType = orderType.asPriceType();
+        if (transactionType == null) {
+            return OptionalDouble.empty();
+        }
+
+        PriceType priceType = transactionType.getPriceType();
 
         if (reply == null || productId == null || priceType == null) {
             return OptionalDouble.empty(); //TODO maybe throw error here instead. Needs testing to make sure it doesn't happen too frequently or at times where it is expected behavior
@@ -252,7 +247,7 @@ public final class BazaarDataManager {
                 }
             };
         } catch (Exception e) {
-            Util.notifyError("Error in findItemPriceOptional for productId=" + productId, e);
+            Util.notifyError("Error in findItemPriceOptional for productID=" + productId, e);
 
             return OptionalDouble.empty();
         }

@@ -76,7 +76,7 @@ public class OrderUpdater {
             //if we can't find a match, this is an order that isn't being tracked, so we add it (shouldn't happen)
             if (matchedOrder.isEmpty()) {
                 Order newOrder =  order.toBazaarOrder();
-                Util.addWatchedOrder(newOrder);
+                OrderUtil.trackUserOrder(newOrder);
                 //add item info, amount filled, amount claimed
                 updateBazaarOrder(newOrder, order.getItemInfo());
             }
@@ -84,7 +84,7 @@ public class OrderUpdater {
 
         //any orders left in userOrdersCopy are old orders that should be removed
         if (!userOrdersCopy.isEmpty()) {
-            userOrdersCopy.forEach(Order::removeFromWatchedItems);
+            userOrdersCopy.forEach(Order::removeFromUserOrders);
         }
     }
 
@@ -139,9 +139,9 @@ public class OrderUpdater {
 
         List<Text> loreLines = loreComponent.get().styledLines();
 
-        OrderType orderType = detectOrderType(title);
+        TransactionType.Side side = detectTransactionSide(title);
 
-        if (orderType == null) {
+        if (side == null) {
             Util.notifyError("Error while parsing order from item stack", new Exception("Could not determine order side"));
 
             return null;
@@ -163,25 +163,25 @@ public class OrderUpdater {
             return null;
         }
 
-        String cleanName = stripPrefix(title, orderType);
+        String cleanName = stripPrefix(title, side);
 
-        return new OrderInfo(cleanName, orderType, null, volume, unitPrice, itemInfo);
+        return new OrderInfo(cleanName, side, null, volume, unitPrice, itemInfo);
     }
 
-    private static OrderType detectOrderType(String title) {
+    private static TransactionType.Side detectTransactionSide(String title) {
         if (title.contains(PREFIX_BUY)) {
-            return OrderType.BUY;
+            return TransactionType.Side.BUY;
         }
 
         if (title.contains(PREFIX_SELL)) {
-            return OrderType.SELL;
+            return TransactionType.Side.SELL;
         }
 
         return null;
     }
 
-    private static String stripPrefix(String title, OrderType type) {
-        String prefix = (type == OrderType.BUY ? PREFIX_BUY : PREFIX_SELL) + " ";
+    private static String stripPrefix(String title, TransactionType.Side side) {
+        String prefix = (side == TransactionType.Side.BUY ? PREFIX_BUY : PREFIX_SELL) + " ";
 
         return title.startsWith(prefix) ? title.substring(prefix.length()) : title;
     }

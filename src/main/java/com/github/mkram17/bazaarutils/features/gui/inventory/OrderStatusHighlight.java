@@ -37,7 +37,7 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
     public OrderStatusHighlight() {}
 
     public static Order getHighlightedOrder(int slotIndex) {
-        Optional<Order> order = OrderInfoUtil.getUserOrderFromIndex(slotIndex);
+        Optional<Order> order = OrderUtil.getUserOrderFromIndex(slotIndex);
 
         return order.filter(
                 bazaarOrder -> bazaarOrder.getStatus() != null && bazaarOrder.getStatus() == OrderStatus.SET)
@@ -157,14 +157,14 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
                                     .withBold(true)));
 
                     lines.add(2, Text.literal("Market Price: " +
-                                    Util.getPrettyString(order.getMarketPrice(order.getOrderType())))
+                                    Util.getPrettyString(order.getMarketPrice(order.getTransactionType().getSide())))
                             .setStyle(Style.EMPTY
                                     .withColor(TextColor.fromRgb(InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR))));
                     break;
             }
             if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-                var sellPrice = order.getMarketPrice(OrderType.BUY);
-                var buyPrice = order.getMarketPrice(OrderType.SELL);
+                var sellPrice = order.getMarketPrice(TransactionType.Side.BUY);
+                var buyPrice = order.getMarketPrice(TransactionType.Side.SELL);
 
                 lines.add(Text.literal("[BU] Buy: " + Util.getPrettyString(sellPrice) + " coins"));
                 lines.add(Text.literal("[BU] Sell: " + Util.getPrettyString(buyPrice) + " coins"));

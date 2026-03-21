@@ -39,7 +39,7 @@ public class OutbidOrderHandler implements BUToggleableFeature {
     }
 
     private static MutableText createYourOrderForText(Order order) {
-        return Text.literal("Your " + order.getOrderType().getString().toLowerCase() + " order for ").formatted(Formatting.WHITE)
+        return Text.literal("Your " + order.getTransactionType().getSide().toString().toLowerCase() + " order for ").formatted(Formatting.WHITE)
                 .append(Text.literal(order.getVolume().toString() + " ").formatted(Formatting.DARK_PURPLE))
                 .append(Text.literal(order.getName()).formatted(Formatting.GOLD));
     }

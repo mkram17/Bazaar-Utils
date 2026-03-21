@@ -3,8 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
@@ -66,8 +65,7 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
     )
     public int fixedAmount = 1;
 
-    public OrderType orderType = OrderType.BUY;
-    public MarketType marketType = MarketType.ORDER;
+    public TransactionType transactionType = TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER);
 
     @Override
     public Item getButtonItem() {
@@ -91,7 +89,7 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
     }
 
     @Override
-    protected int computeFixedValue(TransactionState state, PriceInfo price) {
+    protected int computeFixedValue(TransactionState state) {
         return getFixedAmount();
     }
 

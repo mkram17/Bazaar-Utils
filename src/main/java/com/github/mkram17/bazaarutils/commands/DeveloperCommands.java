@@ -9,7 +9,7 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -81,7 +81,7 @@ public final class DeveloperCommands implements BUCommand {
             int index = IntegerArgumentType.getInteger(context, "index");
 
             Order order = UserOrdersStorage.INSTANCE.get().get(index);
-            order.removeFromWatchedItems();
+            order.removeFromUserOrders();
             PlayerActionUtil.notifyAll("Removed " + order, NotificationType.COMMAND);
 
             return 1;
@@ -127,7 +127,7 @@ public final class DeveloperCommands implements BUCommand {
 
             for (Order item : OutbidOrderHandler.getOutbidOrders()) {
                 PlayerActionUtil.notifyAll(item.getName() + " is outdated. Market Price: "
-                        + item.getMarketPrice(OrderType.BUY) + " Order Price: " + item.getPricePerItem());
+                        + item.getMarketPrice(TransactionType.Side.BUY) + " Order Price: " + item.getPricePerItem());
             }
 
             return 1;
