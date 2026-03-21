@@ -23,6 +23,13 @@ public class PriceInfo {
     protected Double pricePerItem;
 
 
+    /**
+     * Creates market price metadata for a product snapshot.
+     *
+     * <p>{@code pricePerItem} is rounded to one decimal place when present. If
+     * {@code transactionType} is {@code null}, a default sell-order type is assigned so downstream
+     * logic can rely on a non-null value.</p>
+     */
     public PriceInfo(Double pricePerItem, TransactionType transactionType) {
         this.transactionType = transactionType;
 

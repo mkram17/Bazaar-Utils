@@ -1,23 +1,22 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import lombok.Getter;
-
-@Getter
+/**
+ * Bazaar API price buckets used to quote the current market side.
+ */
 public enum PriceType {
     INSTABUY,
     INSTASELL;
 
-    public String getString() {
-        return switch (this) {
-            case INSTASELL -> "Buy";
-            case INSTABUY -> "Sell";
-        };
-    }
-
+    /**
+     * Returns the opposite market side.
+     */
     public PriceType opposite(){
         return this == INSTABUY ? INSTASELL : INSTABUY;
     }
 
+    /**
+     * Checks whether this resolves to a {@link TransactionType}.
+     */
     public boolean is(TransactionType transactionType) {
         return this == transactionType.getPriceType();
     }
