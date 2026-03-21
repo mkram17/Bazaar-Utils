@@ -2,11 +2,8 @@
 package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
-import com.github.mkram17.bazaarutils.features.gui.inventory.OrderStatusHighlight;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.misc.SlotHighlightCache;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.client.MinecraftClient;
@@ -14,11 +11,11 @@ import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Atlases;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,9 +31,7 @@ public abstract class MixinHandledScreen extends Screen {
 
 	@Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
 	private void onHandleMouseClick(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
-		if (slot == null) {
-            return;
-        }
+		if (slot == null) return;
 
 		HandledScreen<?> screen = (HandledScreen<?>) (Object) this;
 		SlotClickEvent event = new SlotClickEvent(screen, slot, slotId, button, actionType);
@@ -64,7 +59,8 @@ public abstract class MixinHandledScreen extends Screen {
 
 	@Inject(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawItem(Lnet/minecraft/item/ItemStack;III)V"))
 	private void drawOnItem_OrderStatusHighlight(DrawContext context, Slot slot, int x, int y, CallbackInfo ci) {
-		if (slot == null || !slot.hasStack() || !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
+		if (slot == null || !slot.hasStack() || !BazaarUtilsModules.OrderStatusHighlight.isEnabled()
+				|| !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
 			return;
 		}
 
@@ -72,34 +68,31 @@ public abstract class MixinHandledScreen extends Screen {
 			return;
 		}
 
-		if (BazaarUtilsModules.OrderStatusHighlight.isEnabled() && SlotHighlightCache.orderStatusHighlightCache.containsKey(slot.getIndex())) {
-			draw(context, x, y, SlotHighlightCache.orderStatusHighlightCache.get(slot.getIndex()));
-		}
+		Integer color = BazaarUtilsModules.OrderStatusHighlight.getHighlightColor(slot.getIndex());
+		if (color != null) draw(context, slot.x, slot.y, BazaarUtilsModules.OrderStatusHighlight.getIdentifier(), color);
 	}
 
 	@Inject(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawItem(Lnet/minecraft/item/ItemStack;III)V"))
-	private void drawOnItem_InstaSellHighlight(DrawContext context, Slot slot, int x, int y, CallbackInfo ci) {
-		if (slot == null || !slot.hasStack() || !ScreenManager.getInstance().isCurrent(BazaarScreens.MAIN_PAGE)) {
+	private void drawOnItem_InstantSellHighlight(DrawContext context, Slot slot, int x, int y, CallbackInfo ci) {
+		if (slot == null || !slot.hasStack() || !BazaarUtilsModules.InstantSellHighlight.isEnabled()
+				|| !ScreenManager.getInstance().isCurrent(BazaarScreens.MAIN_PAGE, BazaarScreens.ITEMS_GROUP_PAGE, BazaarScreens.ITEM_PAGE)) {
 			return;
 		}
 
-		if (MinecraftClient.getInstance().player != null && !(slot.inventory == MinecraftClient.getInstance().player.getInventory())) {
+		if (MinecraftClient.getInstance().player != null && slot.inventory != MinecraftClient.getInstance().player.getInventory()) {
 			return;
 		}
 
-		if (BazaarUtilsModules.InstantSellHighlight.isEnabled() && SlotHighlightCache.instaSellHighlightCache.containsKey(slot.getIndex())) {
-			draw(context, x, y, SlotHighlightCache.instaSellHighlightCache.get(slot.getIndex()));
-		}
+		Integer color = BazaarUtilsModules.InstantSellHighlight.getHighlightColor(slot.getIndex());
+		if (color != null) draw(context, slot.x, slot.y, BazaarUtilsModules.InstantSellHighlight.getIdentifier(), color);
 	}
 
 	@Unique
-	protected void draw(DrawContext context, int x, int y, int argb) {
-		final var sprite = MinecraftClient.getInstance().getAtlasManager().getAtlasTexture(Atlases.GUI)
-				.getSprite(OrderStatusHighlight.IDENTIFIER);
+	protected void draw(DrawContext context, int x, int y, Identifier identifier, int argb) {
+		final var sprite = MinecraftClient.getInstance().getAtlasManager()
+				.getAtlasTexture(Atlases.GUI)
+				.getSprite(identifier);
 
-		context.drawSpriteStretched(RenderPipelines.GUI_TEXTURED,
-				sprite, x, y, 16, 16, argb
-		);
+		context.drawSpriteStretched(RenderPipelines.GUI_TEXTURED, sprite, x, y, 16, 16, argb);
 	}
-
 }

@@ -23,6 +23,31 @@ public class BazaarSlots {
     }
 
     @AllArgsConstructor
+    public enum OVERVIEW_PAGE {
+        SELL_INVENTORY(new BazaarSlot(
+                new SlotLookup.IndexReference.FixedIndex(47),
+                (query) -> query
+                        .itemType(Items.CHEST)
+                        .withCustomName("Sell Inventory Now")
+                )
+        ),
+
+        SELL_SACKS(new BazaarSlot(
+                new SlotLookup.IndexReference.FixedIndex(48),
+                (query) -> query
+                        .itemType(Items.CAULDRON)
+                        .withCustomName("Sell Sacks Now")
+                )
+        );
+
+        public final BazaarSlot slot;
+
+        public ContainerQuery query(Inventory container) {
+            return slot.query(container);
+        }
+    }
+
+    @AllArgsConstructor
     public enum ITEM_PAGE {
         BUY_INSTANTLY(new BazaarSlot(
                 new SlotLookup.IndexReference.FixedIndex(10),
@@ -86,7 +111,24 @@ public class BazaarSlots {
 
     @AllArgsConstructor
     public enum ITEMS_GROUP_PAGE {
-        SWITCH_VIEW_MODE (new BazaarSlot(
+        SELL_INVENTORY(
+                new BazaarSlot(
+                        new SlotLookup.IndexReference.ContainerSizeNegativeOffset(6),
+                        (query) -> query
+                                .itemType(Items.CHEST)
+                                .withCustomName("Sell Inventory Now")
+                )
+        ),
+
+        SELL_SACKS(new BazaarSlot(
+                new SlotLookup.IndexReference.ContainerSizeNegativeOffset(2),
+                (query) -> query
+                        .itemType(Items.CAULDRON)
+                        .withCustomName("Sell Sacks Now")
+                )
+        ),
+
+        SWITCH_VIEW_MODE(new BazaarSlot(
                 new SlotLookup.IndexReference.ContainerSizeNegativeOffset(1),
                 (query) -> query
                         .itemType(Items.IRON_ORE, Items.GOLD_ORE)

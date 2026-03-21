@@ -10,6 +10,7 @@ import lombok.Getter;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LoreComponent;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
@@ -143,11 +144,24 @@ public class ChestLoadedEvent {
             if (item.isEmpty()) continue;
 
             Text customName = item.get(DataComponentTypes.CUSTOM_NAME);
-            if (customName != null) {
-                String displayName = Util.removeFormatting(customName.getString());
-                if (displayName.contains("Loading")) {
-                    PlayerActionUtil.notifyAll("Loading item...", NotificationType.GUI);
-                    return true;
+            if (customName == null) continue;
+
+            String name = Util.removeFormatting(customName.getString());
+
+            if (name.contains("Loading")) {
+                return true;
+            }
+
+            // Only bottleneck on lore data of items known to have partialized lore
+            if (name.contains("Sell")) {
+                LoreComponent lore = item.get(DataComponentTypes.LORE);
+
+                if (lore != null && !lore.lines().isEmpty()) {
+                    for (Text line : lore.lines()) {
+                        if (Util.removeFormatting(line.getString()).contains("Loading")) {
+                            return true;
+                        }
+                    }
                 }
             }
         }
