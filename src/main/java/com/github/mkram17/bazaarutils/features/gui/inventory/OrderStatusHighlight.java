@@ -163,8 +163,8 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
                     break;
             }
             if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-                var sellPrice = order.getMarketPrice(TransactionType2.Side.BUY);
-                var buyPrice = order.getMarketPrice(TransactionType2.Side.SELL);
+                var sellPrice = order.getMarketPrice(TransactionType.Side.BUY);
+                var buyPrice = order.getMarketPrice(TransactionType.Side.SELL);
 
                 lines.add(Text.literal("[BU] Buy: " + Util.getPrettyString(sellPrice) + " coins"));
                 lines.add(Text.literal("[BU] Sell: " + Util.getPrettyString(buyPrice) + " coins"));

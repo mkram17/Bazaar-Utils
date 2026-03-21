@@ -7,7 +7,7 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType2;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
@@ -122,7 +122,7 @@ public class ChatHandler {
      * @param priceIndex index of the price component
      * @return the parsed order information if successful, empty otherwise
      */
-    private static Optional<OrderInfo> parseOrderData(ArrayList<Text> siblings, int volumeIndex, int nameIndex, int priceIndex, TransactionType2.Side side) {
+    private static Optional<OrderInfo> parseOrderData(ArrayList<Text> siblings, int volumeIndex, int nameIndex, int priceIndex, TransactionType.Side side) {
         try {
             String volumeString = siblings.get(volumeIndex).getString().replace(",", "");
             int volume = Integer.parseInt(volumeString);
@@ -159,7 +159,7 @@ public class ChatHandler {
     private static void processOrderEvent(
             ArrayList<Text> siblings,
             BazaarChatEvent.BazaarEventTypes eventType,
-            TransactionType2 transactionType,
+            TransactionType transactionType,
             int volumeIndex,
             int nameIndex,
             int priceIndex
@@ -178,7 +178,7 @@ public class ChatHandler {
      */
     public static void handleFlip(ArrayList<Text> siblings) {
         int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.ORDER), 3, 4, priceIndex);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER), 3, 4, priceIndex);
     }
 
     /**
@@ -189,7 +189,7 @@ public class ChatHandler {
     public static void handleCancelled(ArrayList<Text> siblings) {
         int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
 
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_CANCELLED, TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.ORDER), 2, 4, priceIndex);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_CANCELLED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER), 2, 4, priceIndex);
     }
 
     /**
@@ -200,7 +200,7 @@ public class ChatHandler {
     public static void handleInstaSell(ArrayList<Text> siblings) {
         int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
 
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_SELL, TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.INSTANT), 2, 4, priceIndex);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_SELL, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT), 2, 4, priceIndex);
     }
 
     /**
@@ -209,7 +209,7 @@ public class ChatHandler {
      * @param siblings the text components of the message
      */
     public static void handleInstaBuy(ArrayList<Text> siblings) {
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_BUY, TransactionType2.of(TransactionType2.Side.BUY, TransactionType2.Method.INSTANT), 2, 4, 6);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_BUY, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT), 2, 4, 6);
     }
 
     /**
@@ -232,7 +232,7 @@ public class ChatHandler {
             int volume = Integer.parseInt(parts[1].replace(",", ""));
             String itemName = parts[2].trim();
 
-            TransactionType2.Side side = messageString.contains("Sell Offer") ? TransactionType2.Side.SELL: TransactionType2.Side.BUY;
+            TransactionType.Side side = messageString.contains("Sell Offer") ? TransactionType.Side.SELL: TransactionType.Side.BUY;
             OrderInfo item = new OrderInfo(itemName, side, null, volume, null, null);
 
             EVENT_BUS.post(new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_FILLED, item));
@@ -263,7 +263,7 @@ public class ChatHandler {
             price /= ((100 - BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE.userBazaarTax) / 100);
         }
 
-        TransactionType2.Side transactionType = isSellOrder ? TransactionType2.Side.SELL: TransactionType2.Side.BUY;
+        TransactionType.Side transactionType = isSellOrder ? TransactionType.Side.SELL: TransactionType.Side.BUY;
         Order orderToAdd = new Order(itemName, volume, price, transactionType, null);
 
         EVENT_BUS.post(new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_CREATED, orderToAdd));
@@ -369,9 +369,9 @@ public class ChatHandler {
         OrderInfo item;
 
         if (OrderInfo.getVariables(OrderInfo::getVolume).contains(volumeClaimed)) {
-            item = new OrderInfo(itemName, TransactionType2.Side.BUY, null, volumeClaimed, price, null);
+            item = new OrderInfo(itemName, TransactionType.Side.BUY, null, volumeClaimed, price, null);
         } else {
-            item = new OrderInfo(itemName, TransactionType2.Side.BUY, null, null, price, null);
+            item = new OrderInfo(itemName, TransactionType.Side.BUY, null, null, price, null);
         }
 
         return getOrderInfo(item);
@@ -396,7 +396,7 @@ public class ChatHandler {
         String priceString = priceComponent.getString().replace(",", "").trim();
         double price = Double.parseDouble(priceString);
 
-        OrderInfo item = new OrderInfo(name, TransactionType2.Side.SELL, null, volume, price, null);
+        OrderInfo item = new OrderInfo(name, TransactionType.Side.SELL, null, volume, price, null);
 
         return getOrderInfo(item);
     }

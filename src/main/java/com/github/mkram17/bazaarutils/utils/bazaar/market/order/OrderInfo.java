@@ -55,8 +55,8 @@ public class OrderInfo extends PriceInfo {
      * @param pricePerItem current price per unit for the order
      * @param itemInfo     optional UI context from the Bazaar screen
      */
-    public OrderInfo(@Nullable String name, @Nullable TransactionType2.Side side, @Nullable OrderStatus status, @Nullable Integer volume, @Nullable Double pricePerItem, @Nullable ItemInfo itemInfo) {
-        super(pricePerItem, TransactionType2.of(side, TransactionType2.Method.ORDER));
+    public OrderInfo(@Nullable String name, @Nullable TransactionType.Side side, @Nullable OrderStatus status, @Nullable Integer volume, @Nullable Double pricePerItem, @Nullable ItemInfo itemInfo) {
+        super(pricePerItem, TransactionType.of(side, TransactionType.Method.ORDER));
 
         this.name = name;
         this.itemInfo = itemInfo;
@@ -121,7 +121,7 @@ public class OrderInfo extends PriceInfo {
 
         int orderCount = orderCountOpt.getAsInt();
 
-        if (transactionType != null && transactionType.getSide() == TransactionType2.Side.BUY) {
+        if (transactionType != null && transactionType.getSide() == TransactionType.Side.BUY) {
             if (this.pricePerItem > marketPrice) {
                 return Optional.of(PricingPosition.COMPETITIVE);
             } else if (this.pricePerItem < marketPrice) {
@@ -158,7 +158,7 @@ public class OrderInfo extends PriceInfo {
         Double otherOrderPrice = other.getPricePerItem();
         Integer otherOrderVolume = other.getVolume();
         int otherOrderAmountUnclaimed = other.getAmountFilled() - other.getAmountClaimed();
-        TransactionType2 transactionType = other.getTransactionType();
+        TransactionType transactionType = other.getTransactionType();
 
         if (isStrict) {
             return isStrictlySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, transactionType);
@@ -167,14 +167,14 @@ public class OrderInfo extends PriceInfo {
         return isLooselySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, otherOrderAmountUnclaimed, transactionType);
     }
 
-    private boolean isStrictlySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, TransactionType2 transactionType) {
+    private boolean isStrictlySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, TransactionType transactionType) {
         return (areAnyNull(this.pricePerItem, otherOrderPrice) || isSimilarPrice(otherOrderPrice)) &&
                 (areAnyNull(this.volume, otherOrderVolume) || this.volume.equals(otherOrderVolume)) &&
                 (areAnyNull(this.name, otherOrderName) || this.name.equalsIgnoreCase(otherOrderName)) &&
                 (areAnyNull(this.transactionType, transactionType) || this.transactionType.getSide() == transactionType.getSide());
     }
 
-    private boolean isLooselySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, int otherOrderAmountUnclaimed, TransactionType2 transactionType) {
+    private boolean isLooselySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, int otherOrderAmountUnclaimed, TransactionType transactionType) {
         return (areAnyNull(this.pricePerItem, otherOrderPrice) || this.isSimilarPrice(otherOrderPrice)) &&
                 (areAnyNull(this.volume, otherOrderVolume) || Util.genericIsSimilarValue(this.getVolume(), otherOrderVolume, 0.05 * otherOrderVolume) || this.getVolume().equals(otherOrderAmountUnclaimed)) && // sometimes the only volume that can be found is the amount that is unclaimed, like in FlipHelper
                 (areAnyNull(this.name, otherOrderName) || this.getName().equalsIgnoreCase(otherOrderName)) &&

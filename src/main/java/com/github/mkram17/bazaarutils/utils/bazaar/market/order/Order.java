@@ -45,7 +45,7 @@ public class Order extends OrderInfo implements AbstractListener {
     /**
      * Creates a Bazaar order, initializing ItemInfo with slot index and ItemStack of the order.
      */
-    public Order(@NonNull String name, int volume, double pricePerItem, TransactionType2.Side side, @Nullable ItemInfo itemInfo) {
+    public Order(@NonNull String name, int volume, double pricePerItem, TransactionType.Side side, @Nullable ItemInfo itemInfo) {
         super(name, side, OrderStatus.SET, volume, pricePerItem, itemInfo);
 
         startTracking();
@@ -144,8 +144,8 @@ public class Order extends OrderInfo implements AbstractListener {
         return UserOrdersStorage.INSTANCE.get().indexOf(this);
     }
 
-    public double getMarketPrice(TransactionType2.Side transactionSide) {
-        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, TransactionType2.of(transactionSide, TransactionType2.Method.ORDER));
+    public double getMarketPrice(TransactionType.Side transactionSide) {
+        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, TransactionType.of(transactionSide, TransactionType.Method.ORDER));
     }
 
     /**

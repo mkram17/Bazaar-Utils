@@ -68,13 +68,13 @@ public final class OrderUtil {
         UserOrdersStorage.INSTANCE.save();
     }
 
-    public static double getPriceForPosition(String productID, PricingPosition pricingPosition, TransactionType2 transactionType) {
+    public static double getPriceForPosition(String productID, PricingPosition pricingPosition, TransactionType transactionType) {
         if (productID == null || pricingPosition == null || transactionType == null) {
             return 0;
         }
 
-        OptionalDouble marketSellPriceOpt = BazaarDataManager.findItemPriceOptional(productID, TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.ORDER));
-        OptionalDouble marketBuyPriceOpt = BazaarDataManager.findItemPriceOptional(productID, TransactionType2.of(TransactionType2.Side.BUY, TransactionType2.Method.ORDER));
+        OptionalDouble marketSellPriceOpt = BazaarDataManager.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER));
+        OptionalDouble marketBuyPriceOpt = BazaarDataManager.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
 
         if(marketBuyPriceOpt.isEmpty() || marketSellPriceOpt.isEmpty()) {
             Util.notifyError("Could not resolve market prices for " + productID + " when calculating price for position. Buy price present: " + marketBuyPriceOpt.isPresent() + " Sell price present: " + marketSellPriceOpt.isPresent(), new Exception("Price resolution error"));

@@ -10,7 +10,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType2;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -403,7 +403,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             if (matcher.find()) {
                 try {
                     // Flip orders are always on the buy side; the sell price is computed after matching
-                    return Optional.of(new PriceInfo(Double.parseDouble(matcher.group(1).replace(",", "")), TransactionType2.of(TransactionType2.Side.BUY, TransactionType2.Method.ORDER)));
+                    return Optional.of(new PriceInfo(Double.parseDouble(matcher.group(1).replace(",", "")), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER)));
                 } catch (NumberFormatException e) {
                     Util.notifyError("Error parsing order price in TransactionFlip", e);
                 }

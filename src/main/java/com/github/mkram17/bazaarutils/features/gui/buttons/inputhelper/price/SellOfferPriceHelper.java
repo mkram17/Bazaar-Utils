@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType2;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
@@ -56,9 +56,9 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost {
     )
     public PricingPosition pricingPosition;
 
-    public TransactionType2 transactionType = TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.ORDER);
+    public TransactionType transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
 
-    public TransactionType2.Method transactionMethod = TransactionType2.Method.ORDER;
+    public TransactionType.Method transactionMethod = TransactionType.Method.ORDER;
 
     @Override
     public Item getButtonItem() {

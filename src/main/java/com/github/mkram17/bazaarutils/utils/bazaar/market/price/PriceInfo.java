@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.price;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType2;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,7 +14,7 @@ import lombok.ToString;
 @ToString
 public class PriceInfo {
     @Setter @Getter
-    protected TransactionType2 transactionType;
+    protected TransactionType transactionType;
 
     @Setter @Getter
     protected PricingPosition pricingPosition;
@@ -23,7 +23,7 @@ public class PriceInfo {
     protected Double pricePerItem;
 
 
-    public PriceInfo(Double pricePerItem, TransactionType2 transactionType) {
+    public PriceInfo(Double pricePerItem, TransactionType transactionType) {
         this.transactionType = transactionType;
 
         if (pricePerItem != null) {
@@ -33,7 +33,7 @@ public class PriceInfo {
         if (transactionType == null) {
             // if the transactionType is null, its value does not matter, but the rest of the code expects one.
             //TODO revisit whether this still needs to have default value
-            this.transactionType = TransactionType2.of(TransactionType2.Side.SELL, TransactionType2.Method.ORDER);
+            this.transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
         }
     }
 }

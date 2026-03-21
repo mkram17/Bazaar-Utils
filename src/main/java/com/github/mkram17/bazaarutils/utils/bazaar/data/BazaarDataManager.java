@@ -10,7 +10,7 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType2;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import lombok.Getter;
 import lombok.Setter;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
@@ -153,7 +153,7 @@ public final class BazaarDataManager {
      * Get the number of orders at an exact price for a product & price type.
      * @return OptionalInt empty if reply / product / priceType invalid or not found.
      */
-    public static OptionalInt getOrderCountOptional(String productId, TransactionType2 transactionType, double price) {
+    public static OptionalInt getOrderCountOptional(String productId, TransactionType transactionType, double price) {
         SkyBlockBazaarReply reply = currentReply;
 
         if (transactionType == null) {
@@ -197,7 +197,7 @@ public final class BazaarDataManager {
     }
 
     /**
-     * Find the top bazaar price for a product based on the given {@link TransactionType2}.
+     * Find the top bazaar price for a product based on the given {@link TransactionType}.
      * The returned {@link OptionalDouble} is empty if the reply, product ID, or derived {@link PriceType}
      * is {@code null}, if the product cannot be found, or if an exception occurs while resolving the price.
      * If the selected summary list exists but is empty, this method returns {@code OptionalDouble.of(0.0)}.
@@ -206,7 +206,7 @@ public final class BazaarDataManager {
      * @param transactionType the transaction type whose {@link PriceType} controls which summary is queried
      * @return an {@link OptionalDouble} containing the resolved price per unit, or empty if unavailable
      */
-    public static OptionalDouble findItemPriceOptional(String productId, TransactionType2 transactionType) {
+    public static OptionalDouble findItemPriceOptional(String productId, TransactionType transactionType) {
         SkyBlockBazaarReply reply = currentReply;
 
         if (transactionType == null) {

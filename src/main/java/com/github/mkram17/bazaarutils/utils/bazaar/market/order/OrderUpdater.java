@@ -139,7 +139,7 @@ public class OrderUpdater {
 
         List<Text> loreLines = loreComponent.get().styledLines();
 
-        TransactionType2.Side side = detectTransactionSide(title);
+        TransactionType.Side side = detectTransactionSide(title);
 
         if (side == null) {
             Util.notifyError("Error while parsing order from item stack", new Exception("Could not determine order side"));
@@ -168,20 +168,20 @@ public class OrderUpdater {
         return new OrderInfo(cleanName, side, null, volume, unitPrice, itemInfo);
     }
 
-    private static TransactionType2.Side detectTransactionSide(String title) {
+    private static TransactionType.Side detectTransactionSide(String title) {
         if (title.contains(PREFIX_BUY)) {
-            return TransactionType2.Side.BUY;
+            return TransactionType.Side.BUY;
         }
 
         if (title.contains(PREFIX_SELL)) {
-            return TransactionType2.Side.SELL;
+            return TransactionType.Side.SELL;
         }
 
         return null;
     }
 
-    private static String stripPrefix(String title, TransactionType2.Side side) {
-        String prefix = (side == TransactionType2.Side.BUY ? PREFIX_BUY : PREFIX_SELL) + " ";
+    private static String stripPrefix(String title, TransactionType.Side side) {
+        String prefix = (side == TransactionType.Side.BUY ? PREFIX_BUY : PREFIX_SELL) + " ";
 
         return title.startsWith(prefix) ? title.substring(prefix.length()) : title;
     }
