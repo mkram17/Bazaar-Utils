@@ -17,4 +17,8 @@ public enum PriceType {
     public PriceType opposite(){
         return this == INSTABUY ? INSTASELL : INSTABUY;
     }
+
+    public boolean is(TransactionType transactionType) {
+        return this == transactionType.getPriceType();
+    }
 }

@@ -70,17 +70,18 @@ public class TransactionType {
         return side == Side.SELL;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj instanceof TransactionType other) return priceType == other.priceType;
-        if (obj instanceof PriceType otherPriceType) return priceType == otherPriceType;
-        return false;
+    /**
+     * Helper to easily check if this transaction resolves to a specific PriceType.
+     */
+    public boolean is(PriceType targetPriceType) {
+        return this.priceType == targetPriceType;
     }
 
-    @Override
-    public int hashCode() {
-        return priceType != null ? priceType.hashCode() : 0;
+    /**
+     * Helper to easily check if this transaction resolves to a specific TransactionType.
+     */
+    public boolean is(TransactionType targetTransactionType) {
+        return this.priceType == targetTransactionType.getPriceType();
     }
 
     public String getString() {
