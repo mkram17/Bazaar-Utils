@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+//drawing done in MixinHandledScreen
 @Module
 public class OrderStatusHighlight extends BUListener implements BUToggleableFeature, SlotHighlight {
     public static final Identifier IDENTIFIER = Identifier.tryParse(BazaarUtils.MOD_ID, "highlights/standard_background");

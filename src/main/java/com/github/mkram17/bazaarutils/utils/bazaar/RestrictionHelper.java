@@ -17,10 +17,11 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionState> extends BUListener implements BUToggleableFeature {
-
     public interface RestrictionState {
         @NotNull
-        ItemInfo restrictedItem();
+        ItemInfo targetItem();
+        @NotNull
+        List<RestrictionControl<?>> triggeredRestrictors();
     }
 
     @Getter
@@ -63,7 +64,7 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
         }
 
         state = makeState(event);
-        isRestricted = state.map(this::computeRestriction).orElse(true);
+        isRestricted = state.map(state -> !state.triggeredRestrictors().isEmpty()).orElse(true);
         clicks = 0;
     }
 
@@ -71,7 +72,7 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     public void onSlotClicked(SlotClickEvent event) {
         if (!(isEnabled() && inCorrectScreen())) return;
 
-        boolean isRestrictedSlot = state.map(RestrictionState::restrictedItem)
+        boolean isRestrictedSlot = state.map(RestrictionState::targetItem)
                 .map(info -> info.slotIndex() == event.slotId)
                 .orElse(false);
 
@@ -86,21 +87,10 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
 
     public abstract boolean inCorrectScreen();
 
-    protected abstract boolean computeRestriction(T state);
-
-    protected boolean isItemRestricted(OrderInfo item) {
-        for (RestrictionControl<?> control : getRestrictors()) {
-            if (!control.isEnabled()) continue;
-            if (control.shouldRestrict(item)) return true;
-        }
-        return false;
-    }
-
     protected String getMessage(T state) {
         StringBuilder message = new StringBuilder(getMessagePrefix());
 
-        for (RestrictionControl<?> control : getRestrictors()) {
-            if (!control.isEnabled()) continue;
+        for (RestrictionControl<?> control : state.triggeredRestrictors()) {
             message.append(" ").append(control.describeRule());
         }
 

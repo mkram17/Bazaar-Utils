@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -36,7 +36,7 @@ public final class SellSacksParser {
                 if (name.equals("Other items")) {
                     otherItems = Optional.of(new SellSacksResult.OtherItems(volume, totalPrice));
                 } else {
-                    items.add(new OrderInfo(name, OrderType.BUY, null, volume, pricePerUnit, null));
+                    items.add(new OrderInfo(name, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
                 }
             } catch (Exception ignored) {}
         }
