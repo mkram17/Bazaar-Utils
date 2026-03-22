@@ -4,5 +4,9 @@ import net.minecraft.item.ItemStack;
 
 @FunctionalInterface
 public interface SlotProvider {
-    ItemStack getStack(int slotIndex);
+    ItemStack getStack(int slotIndex, int selectedSlotIndex);
+
+    default ItemStack getStack(int slotIndex) {
+        return getStack(slotIndex, -1);
+    }
 }
