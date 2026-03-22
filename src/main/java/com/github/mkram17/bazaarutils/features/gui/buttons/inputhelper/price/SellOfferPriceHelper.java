@@ -1,11 +1,14 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price;
 
+import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
+import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
@@ -15,6 +18,8 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import net.minecraft.text.Text;
+
+import java.util.stream.IntStream;
 
 @Getter
 @ConfigObject
@@ -77,6 +82,10 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implem
         this.pricingPosition = pricingPosition;
     }
 
+    public SellOfferPriceHelper() {
+        this(getNextSlotIndex(), PricingPosition.COMPETITIVE);
+    }
+
     @Override
     protected Text getButtonItemText(TransactionState state) {
         return Text.of("Ask " + getButtonItemStackSize(state) + " per item.");
@@ -96,4 +105,11 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implem
         return Text.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
     }
 
+    private static int getNextSlotIndex() {
+        return IntStream.rangeClosed(0, 35)
+                .filter(i -> !SlotProviders.get("bazaar:sell_offer_price").getStack(i)
+                        .getOrDefault(CustomDataComponents.SLOT_SELECTOR_LOCKED, false))
+                .findFirst()
+                .orElse(35);
+    }
 }
