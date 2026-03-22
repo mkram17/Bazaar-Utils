@@ -17,7 +17,7 @@ import net.minecraft.text.Text;
 
 @Getter
 @ConfigObject
-public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost {
+public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost implements ListEntryInfoProvider {
     @ConfigEntry(
             id = "item_id",
             translation = "bazaarutils.config.buttons.button.container.item_id.label"
@@ -80,4 +80,19 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost {
     protected Text getButtonItemText(TransactionState state) {
         return Text.of("Bid " + getButtonItemStackSize(state) + " per item.");
     }
+
+    @Override
+    public Text getTitle(int index) {
+        return Text.literal(switch (pricingPosition) {
+            case COMPETITIVE -> "Bids +0.1 above best offer";
+            case MATCHED -> "Bids equal to best offer";
+            case OUTBID -> "Bids -0.1 below best offer";
+        });
+    }
+
+    @Override
+    public Text getDescription(int index) {
+        return Text.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
+    }
+
 }

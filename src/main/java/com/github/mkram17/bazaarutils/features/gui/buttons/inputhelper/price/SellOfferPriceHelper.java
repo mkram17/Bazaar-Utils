@@ -12,12 +12,13 @@ import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import net.minecraft.text.Text;
 
 @Getter
 @ConfigObject
-public class SellOfferPriceHelper extends SignInputHelper.TransactionCost {
+public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implements ListEntryInfoProvider {
     @ConfigEntry(
             id = "item_id",
             translation = "bazaarutils.config.buttons.button.container.item_id.label"
@@ -80,4 +81,19 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost {
     protected Text getButtonItemText(TransactionState state) {
         return Text.of("Ask " + getButtonItemStackSize(state) + " per item.");
     }
+
+    @Override
+    public Text getTitle(int index) {
+        return Text.literal(switch (pricingPosition) {
+            case COMPETITIVE -> "Asks +0.1 above best bid";
+            case MATCHED -> "Asks equal to best bid";
+            case OUTBID -> "Asks -0.1 below best bid";
+        });
+    }
+
+    @Override
+    public Text getDescription(int index) {
+        return Text.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
+    }
+
 }

@@ -11,12 +11,13 @@ import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import net.minecraft.text.Text;
 
 @Getter
 @ConfigObject
-public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
+public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount implements ListEntryInfoProvider {
     @ConfigEntry(
             id = "item_id",
             translation = "bazaarutils.config.buttons.button.container.item_id.label"
@@ -92,4 +93,18 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
     protected Text getButtonItemText(TransactionState state) {
         return Text.of("Order " + getButtonItemStackSize(state) + " items.");
     }
+
+    @Override
+    public Text getTitle(int index) {
+        return Text.literal(switch (amountStrategy) {
+            case AmountStrategy.MAX -> "Orders MAX possible items";
+            case AmountStrategy.FIXED -> "Orders " + fixedAmount + " items";
+        });
+    }
+
+    @Override
+    public Text getDescription(int index) {
+        return Text.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
+    }
+
 }
