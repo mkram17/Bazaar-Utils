@@ -18,16 +18,6 @@ import net.minecraft.text.Text;
 @ConfigObject
 public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
     @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.buttons.button.container.enabled.label"
-    )
-    @Comment(
-            value = "Whether the button will be registered or not",
-            translation = "bazaarutils.config.buttons.button.container.enabled.hint"
-    )
-    public boolean enabled;
-
-    @ConfigEntry(
             id = "item_id",
             translation = "bazaarutils.config.buttons.button.container.item_id.label"
     )
@@ -88,9 +78,8 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount {
         return ScreenManager.getInstance().isCurrent(BazaarScreens.BUY_ORDER_AMOUNT);
     }
 
-    public BuyOrderAmountHelper(boolean enabled, int slotIndex) {
+    public BuyOrderAmountHelper(int slotIndex) {
         super("Buy Order Amount Helper", BazaarSlots.BUY_ORDER.INPUT_CUSTOM_AMOUNT.slot);
-        this.enabled = enabled;
         this.slotIndex = slotIndex;
     }
 

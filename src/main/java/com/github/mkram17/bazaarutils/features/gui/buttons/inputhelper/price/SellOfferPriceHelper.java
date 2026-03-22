@@ -19,16 +19,6 @@ import net.minecraft.text.Text;
 @ConfigObject
 public class SellOfferPriceHelper extends SignInputHelper.TransactionCost {
     @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.buttons.button.container.enabled.label"
-    )
-    @Comment(
-            value = "Whether the button will be registered or not",
-            translation = "bazaarutils.config.buttons.button.container.enabled.hint"
-    )
-    public boolean enabled;
-
-    @ConfigEntry(
             id = "item_id",
             translation = "bazaarutils.config.buttons.button.container.item_id.label"
     )
@@ -80,9 +70,8 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost {
         return ScreenManager.getInstance().isCurrent(BazaarScreens.SELL_ORDER_PRICE);
     }
 
-    public SellOfferPriceHelper(boolean enabled, int slotIndex, PricingPosition pricingPosition) {
+    public SellOfferPriceHelper(int slotIndex, PricingPosition pricingPosition) {
         super("Sell Offer Price Helper", BazaarSlots.SELL_OFFER.INPUT_CUSTOM_PRICE.slot);
-        this.enabled = enabled;
         this.slotIndex = slotIndex;
         this.pricingPosition = pricingPosition;
     }

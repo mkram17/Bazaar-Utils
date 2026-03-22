@@ -19,16 +19,6 @@ import net.minecraft.text.Text;
 @ConfigObject
 public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip {
     @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.buttons.button.container.enabled.label"
-    )
-    @Comment(
-            value = "Whether the button will be registered or not",
-            translation = "bazaarutils.config.buttons.button.container.enabled.hint"
-    )
-    public boolean enabled;
-
-    @ConfigEntry(
             id = "item_id",
             translation = "bazaarutils.config.buttons.button.container.item_id.label"
     )
@@ -80,9 +70,8 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip {
         return ScreenManager.getInstance().isCurrent(BazaarScreens.COMPLETED_BUY_ORDER_OPTIONS);
     }
 
-    public FlipOrderPriceHelper(boolean enabled, int slotIndex, PricingPosition pricingPosition) {
+    public FlipOrderPriceHelper(int slotIndex, PricingPosition pricingPosition) {
         super("Flip Order Price Helper", BazaarSlots.ORDER_OPTIONS.FLIP_FILLED_BUY_ORDER.slot);
-        this.enabled = enabled;
         this.slotIndex = slotIndex;
         this.pricingPosition = pricingPosition;
     }
