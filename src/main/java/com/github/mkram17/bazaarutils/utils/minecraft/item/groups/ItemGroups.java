@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.utils.minecraft.item;
+package com.github.mkram17.bazaarutils.utils.minecraft.item.groups;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
