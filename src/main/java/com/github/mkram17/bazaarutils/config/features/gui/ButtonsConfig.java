@@ -12,9 +12,12 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Category(
         value = "buttons_config",
@@ -112,211 +115,68 @@ public final class ButtonsConfig {
             titleTranslation = "bazaarutils.config.buttons.helpers.category.label"
     )
     public static final class HelpersConfig {
-
-        @ConfigEntry(
-                id = "buy_order_amount",
-                translation = "bazaarutils.config.buttons.helpers.buy_order_amount.label"
+        @ConfigEntry(id = "buy_related_separator")
+        @ConfigOption.Hidden
+        @ConfigOption.Separator(
+                value = "bazaarutils.config.buttons.helpers.separator.buy_related.label",
+                description = "bazaarutils.config.buttons.helpers.separator.buy_related.hint"
         )
-        @Comment(
-                value = "Places an item at the desired slot, which when clicked will input as the amount for this order the computed, configurable, value.",
-                translation = "bazaarutils.config.buttons.helpers.buy_order_amount.hint"
-        )
-        @ConfigOption.Separator(value = "bazaarutils.config.buttons.helpers.buy_order_amount.separator.label")
-        public static boolean BUY_ORDER_AMOUNT_TOGGLE = true;
-
-        @ConfigEntry(
-                id = "first_buy_order_amount",
-                translation = "bazaarutils.config.buttons.helpers.buy_order_amount.1.label"
-        )
-        public static final BuyOrderAmountHelper FIRST_BUY_ORDER_AMOUNT = new BuyOrderAmountHelper(true, 17);
-
-        @ConfigEntry(
-                id = "second_buy_order_amount",
-                translation = "bazaarutils.config.buttons.helpers.buy_order_amount.2.label"
-        )
-        public static final BuyOrderAmountHelper SECOND_BUY_ORDER_AMOUNT = new BuyOrderAmountHelper(false, 8);
-
-        @ConfigEntry(
-                id = "third_buy_order_amount",
-                translation = "bazaarutils.config.buttons.helpers.buy_order_amount.3.label"
-        )
-        public static final BuyOrderAmountHelper THIRD_BUY_ORDER_AMOUNT = new BuyOrderAmountHelper(false, 26);
+        public static boolean HELPERS_BUY_RELATED_SEPARATOR = true;
 
         @ConfigEntry(
                 id = "instant_buy_amount",
                 translation = "bazaarutils.config.buttons.helpers.instant_buy_amount.label"
         )
-        @Comment(
-                value = "Places an item at the desired slot, which when clicked will input as the amount for this purchase the computed, configurable, value.",
-                translation = "bazaarutils.config.buttons.helpers.instant_buy_amount.hint"
-        )
-        @ConfigOption.Separator(value = "bazaarutils.config.buttons.helpers.instant_buy_amount.separator.label")
-        public static boolean INSTANT_BUY_AMOUNT_TOGGLE = true;
+        public static final List<InstantBuyAmountHelper> HELPERS_INSTANT_BUY_AMOUNT_BUTTONS = new ArrayList<>(List.of(new InstantBuyAmountHelper(17)));
 
         @ConfigEntry(
-                id = "first_instant_buy_amount",
-                translation = "bazaarutils.config.buttons.helpers.instant_buy_amount.1.label"
+                id = "buy_order_amount",
+                translation = "bazaarutils.config.buttons.helpers.buy_order_amount.label"
         )
-        public static final InstantBuyAmountHelper FIRST_INSTANT_BUY_AMOUNT = new InstantBuyAmountHelper(true, 17);
-
-        @ConfigEntry(
-                id = "second_instant_buy_amount",
-                translation = "bazaarutils.config.buttons.helpers.instant_buy_amount.2.label"
-        )
-        public static final InstantBuyAmountHelper SECOND_INSTANT_BUY_AMOUNT = new InstantBuyAmountHelper(false, 8);
-
-        @ConfigEntry(
-                id = "third_instant_buy_amount",
-                translation = "bazaarutils.config.buttons.helpers.instant_buy_amount.3.label"
-        )
-        public static final InstantBuyAmountHelper THIRD_INSTANT_BUY_AMOUNT = new InstantBuyAmountHelper(false, 26);
-
-        @ConfigEntry(
-                id = "sell_offer_amount",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_amount.label"
-        )
-        @Comment(
-                value = "Places an item at the desired slot, which when clicked will input as the amount for this offer the computed, configurable, value.",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_amount.hint"
-        )
-        @ConfigOption.Separator(value = "bazaarutils.config.buttons.helpers.sell_offer_amount.separator.label")
-        public static boolean SELL_OFFER_AMOUNT_TOGGLE = true;
-
-        @ConfigEntry(
-                id = "first_sell_offer_amount",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_amount.1.label"
-        )
-        public static final SellOfferAmountHelper FIRST_SELL_OFFER_AMOUNT = new SellOfferAmountHelper(true, 17);
-
-        @ConfigEntry(
-                id = "second_sell_offer_amount",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_amount.2.label"
-        )
-        public static final SellOfferAmountHelper SECOND_SELL_OFFER_AMOUNT = new SellOfferAmountHelper(false, 8);
-
-        @ConfigEntry(
-                id = "third_sell_offer_amount",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_amount.3.label"
-        )
-        public static final SellOfferAmountHelper THIRD_SELL_OFFER_AMOUNT = new SellOfferAmountHelper(false, 26);
+        public static final List<BuyOrderAmountHelper> HELPERS_BUY_ORDER_AMOUNT_BUTTONS = new ArrayList<>(List.of(new BuyOrderAmountHelper(17)));
 
         @ConfigEntry(
                 id = "buy_order_price",
                 translation = "bazaarutils.config.buttons.helpers.buy_order_price.label"
         )
-        @Comment(
-                value = "Places an item at the desired slot, which when clicked will input as the price for this order the computed, configurable, value.",
-                translation = "bazaarutils.config.buttons.helpers.buy_order_price.hint"
-        )
-        @ConfigOption.Separator(value = "bazaarutils.config.buttons.helpers.buy_order_price.separator.label")
-        public static boolean BUY_ORDER_PRICE_TOGGLE = true;
+        public static final List<BuyOrderPriceHelper> HELPERS_BUY_ORDER_PRICE_BUTTONS = new ArrayList<>(List.of(new BuyOrderPriceHelper(17, PricingPosition.COMPETITIVE)));
 
-        @ConfigEntry(
-                id = "first_buy_order_price",
-                translation = "bazaarutils.config.buttons.helpers.buy_order_price.1.label"
+        @ConfigEntry(id = "sell_related_separator")
+        @ConfigOption.Hidden
+        @ConfigOption.Separator(
+                value = "bazaarutils.config.buttons.helpers.separator.sell_related.label",
+                description = "bazaarutils.config.buttons.helpers.separator.sell_related.hint"
         )
-        public static final BuyOrderPriceHelper FIRST_BUY_ORDER_PRICE = new BuyOrderPriceHelper(true, 17, PricingPosition.COMPETITIVE);
-
-        @ConfigEntry(
-                id = "second_buy_order_price",
-                translation = "bazaarutils.config.buttons.helpers.buy_order_price.2.label"
-        )
-        public static final BuyOrderPriceHelper SECOND_BUY_ORDER_PRICE = new BuyOrderPriceHelper(false, 8, PricingPosition.MATCHED);
-
-        @ConfigEntry(
-                id = "third_buy_order_price",
-                translation = "bazaarutils.config.buttons.helpers.buy_order_price.3.label"
-        )
-        public static final BuyOrderPriceHelper THIRD_BUY_ORDER_PRICE = new BuyOrderPriceHelper(false, 26, PricingPosition.OUTBID);
-
-        @ConfigEntry(
-                id = "sell_offer_price",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_price.label"
-        )
-        @Comment(
-                value = "Places an item at the desired slot, which when clicked will input as the price for this offer the computed, configurable, value.",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_price.hint"
-        )
-        @ConfigOption.Separator(value = "bazaarutils.config.buttons.helpers.sell_offer_price.separator.label")
-        public static boolean SELL_OFFER_PRICE_TOGGLE = true;
-
-        @ConfigEntry(
-                id = "first_sell_offer_price",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_price.1.label"
-        )
-        public static final SellOfferPriceHelper FIRST_SELL_OFFER_PRICE = new SellOfferPriceHelper(true, 17, PricingPosition.COMPETITIVE);
-
-        @ConfigEntry(
-                id = "second_sell_offer_price",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_price.2.label"
-        )
-        public static final SellOfferPriceHelper SECOND_SELL_OFFER_PRICE = new SellOfferPriceHelper(false, 8, PricingPosition.MATCHED);
-
-        @ConfigEntry(
-                id = "third_sell_offer_price",
-                translation = "bazaarutils.config.buttons.helpers.sell_offer_price.3.label"
-        )
-        public static final SellOfferPriceHelper THIRD_SELL_OFFER_PRICE = new SellOfferPriceHelper(false, 26, PricingPosition.OUTBID);
+        public static boolean HELPERS_SELL_RELATED_SEPARATOR = true;
 
         @ConfigEntry(
                 id = "flip_order_price",
                 translation = "bazaarutils.config.buttons.helpers.flip_order_price.label"
         )
-        @Comment(
-                value = "Places an item at the desired slot, which when clicked will input as the price for this flip the computed, configurable, value.",
-                translation = "bazaarutils.config.buttons.helpers.flip_order_price.hint"
-        )
-        @ConfigOption.Separator(value = "bazaarutils.config.buttons.helpers.flip_order_price.separator.label")
-        public static boolean FLIP_ORDER_PRICE_TOGGLE = true;
+        public static final List<FlipOrderPriceHelper> HELPERS_FLIP_ORDER_PRICE_BUTTONS = new ArrayList<>(List.of(new FlipOrderPriceHelper(17, PricingPosition.COMPETITIVE)));
 
         @ConfigEntry(
-                id = "first_flip_order_price",
-                translation = "bazaarutils.config.buttons.helpers.flip_order_price.1.label"
+                id = "sell_offer_amount",
+                translation = "bazaarutils.config.buttons.helpers.sell_offer_amount.label"
         )
-        public static final FlipOrderPriceHelper FIRST_FLIP_ORDER_PRICE = new FlipOrderPriceHelper(true, 17, PricingPosition.COMPETITIVE);
+        public static final List<SellOfferAmountHelper> HELPERS_SELL_OFFER_AMOUNT_BUTTONS = new ArrayList<>(List.of(new SellOfferAmountHelper(17)));
 
         @ConfigEntry(
-                id = "second_flip_order_price",
-                translation = "bazaarutils.config.buttons.helpers.flip_order_price.2.label"
+                id = "sell_offer_price",
+                translation = "bazaarutils.config.buttons.helpers.sell_offer_price.label"
         )
-        public static final FlipOrderPriceHelper SECOND_FLIP_ORDER_PRICE = new FlipOrderPriceHelper(false, 8, PricingPosition.MATCHED);
-
-        @ConfigEntry(
-                id = "third_flip_order_price",
-                translation = "bazaarutils.config.buttons.helpers.flip_order_price.3.label"
-        )
-        public static final FlipOrderPriceHelper THIRD_FLIP_ORDER_PRICE = new FlipOrderPriceHelper(false, 26, PricingPosition.OUTBID);
-
-        public static final SignInputHelper.TransactionAmount[] AMOUNT_HELPERS = {
-                FIRST_BUY_ORDER_AMOUNT,
-                SECOND_BUY_ORDER_AMOUNT,
-                THIRD_BUY_ORDER_AMOUNT,
-                FIRST_INSTANT_BUY_AMOUNT,
-                SECOND_INSTANT_BUY_AMOUNT,
-                THIRD_INSTANT_BUY_AMOUNT,
-                FIRST_SELL_OFFER_AMOUNT,
-                SECOND_SELL_OFFER_AMOUNT,
-                THIRD_SELL_OFFER_AMOUNT
-        };
+        public static final List<SellOfferPriceHelper> HELPERS_SELL_OFFER_PRICE_BUTTONS = new ArrayList<>(List.of(new SellOfferPriceHelper(17, PricingPosition.COMPETITIVE)));
 
         public static List<SignInputHelper.TransactionAmount> amountHelpers() {
-            return Arrays.stream(AMOUNT_HELPERS).collect(Collectors.toList());
+            return Stream.of(HELPERS_INSTANT_BUY_AMOUNT_BUTTONS, HELPERS_BUY_ORDER_AMOUNT_BUTTONS, HELPERS_SELL_OFFER_AMOUNT_BUTTONS)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
         }
 
-        public static final SignInputHelper.TransactionCost[] PRICE_HELPERS = {
-                FIRST_BUY_ORDER_PRICE,
-                SECOND_BUY_ORDER_PRICE,
-                THIRD_BUY_ORDER_PRICE,
-                FIRST_SELL_OFFER_PRICE,
-                SECOND_SELL_OFFER_PRICE,
-                THIRD_SELL_OFFER_PRICE,
-                FIRST_FLIP_ORDER_PRICE,
-                SECOND_FLIP_ORDER_PRICE,
-                THIRD_FLIP_ORDER_PRICE
-        };
-
         public static List<SignInputHelper.TransactionCost> priceHelpers() {
-            return Arrays.stream(PRICE_HELPERS).collect(Collectors.toList());
+            return Stream.of(HELPERS_FLIP_ORDER_PRICE_BUTTONS, HELPERS_BUY_ORDER_PRICE_BUTTONS, HELPERS_SELL_OFFER_PRICE_BUTTONS)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
         }
     }
 
@@ -337,7 +197,7 @@ public final class ButtonsConfig {
                 id = "size",
                 translation = "bazaarutils.config.buttons.button.widget.size.label"
         )
-        public int size = 18;
+        public int size = 117;
 
         @ConfigEntry(
                 id = "spacing",
