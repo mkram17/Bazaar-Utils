@@ -68,6 +68,13 @@
   "mod.bazaarutils": "Bazaar Utils",
   "key.category.minecraft.bazaarutils": "Bazaar Utils",
 
+  "bazaarutils.rconfig.ui.{}": {
+    "constant.{}": {
+      "search": "Search...",
+      "select": "Select"
+    }
+  },
+
   "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
     "not_upgraded.label": "Not Upgraded",
     "first_tier.label": "Bazaar Flipper I",

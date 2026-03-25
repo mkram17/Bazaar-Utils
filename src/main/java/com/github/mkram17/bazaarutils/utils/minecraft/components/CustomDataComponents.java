@@ -12,10 +12,12 @@ import net.minecraft.util.Identifier;
 public final class CustomDataComponents {
     public static ComponentType<String> CUSTOM_SIZE;
     public static ComponentType<Boolean> SHOW_PRICE_CHART;
+    public static ComponentType<Boolean> SLOT_SELECTOR_LOCKED;
 
     public CustomDataComponents() {
         CUSTOM_SIZE = register("custom_size", ComponentType.<String>builder().codec(Codec.STRING).build());
         SHOW_PRICE_CHART = register("has_price_chart", ComponentType.<Boolean>builder().codec(Codec.BOOL).build());
+        SLOT_SELECTOR_LOCKED = register("slot_selector_locked", ComponentType.<Boolean>builder().codec(Codec.BOOL).build());
     }
 
     private static <T> ComponentType<T> register(String id, ComponentType<T> type) {
