@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
@@ -226,7 +227,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            OptionalDouble price = BazaarDataManager.findItemPriceOptional(state.productId(), getTransactionType());
+            OptionalDouble price = BazaarDataUtil.findItemPriceOptional(state.productId(), getTransactionType());
 
             if (price.isEmpty()) {
                 Util.logMessage("Could not retrieve relevant item pricing for " + name + "'s resolved value.");
@@ -278,7 +279,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                             .filter(stack -> !stack.isEmpty())
                             .filter(stack -> Optional.ofNullable(stack.getCustomName())
                                     .map(Text::getString)
-                                    .flatMap(BazaarDataManager::findProductIdOptional)
+                                    .flatMap(BazaarDataUtil::findProductIdOptional)
                                     .map(productId -> productId.equals(state.productId()))
                                     .orElse(false))
                             .mapToInt(ItemStack::getCount)
@@ -348,7 +349,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            OptionalDouble price = BazaarDataManager.findItemPriceOptional(state.productId(), getTransactionType());
+            OptionalDouble price = BazaarDataUtil.findItemPriceOptional(state.productId(), getTransactionType());
 
             if (price.isEmpty()) {
                 Util.logMessage("Could not retrieve relevant item pricing for " + name + "'s resolved value.");

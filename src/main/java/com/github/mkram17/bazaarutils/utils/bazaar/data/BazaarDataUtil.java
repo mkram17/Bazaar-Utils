@@ -5,8 +5,9 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductData;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductOrder;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
 import java.util.List;
 import java.util.Locale;
@@ -19,10 +20,14 @@ public class BazaarDataUtil {
      * Get the number of orders at an exact price for a product & price type.
      * @return OptionalInt empty if reply / product / priceType invalid or not found.
      */
-    public static OptionalInt getOrderCountOptional(String productId, OrderType orderType, double price) {
+    public static OptionalInt getOrderCountOptional(String productId, TransactionType transactionType, double price) {
         CustomBazaarReply reply = BazaarDataManager.getCurrentReply();
 
-        PriceType priceType = orderType.asPriceType();
+        if (transactionType == null) {
+            return OptionalInt.empty();
+        }
+
+        PriceType priceType = transactionType.getPriceType();
 
         if (reply == null || productId == null || priceType == null) {
             return OptionalInt.empty();
@@ -36,37 +41,45 @@ public class BazaarDataUtil {
             }
 
             List<ProductOrder> list = switch (priceType) {
-                case INSTABUY -> product.getSellOrders();
-                case INSTASELL -> product.getBuyOrders();
+                case INSTABUY -> product.getBuyOrders();
+                case INSTASELL -> product.getSellOrders();
             };
 
             if (list == null) {
                 return OptionalInt.empty();
             }
 
-            for (ProductOrder summary : list) {
-                if (Double.compare(summary.getPricePerUnit(), price) == 0) {
-                    return OptionalInt.of((int) summary.getNumOrders());
+            for (ProductOrder s : list) {
+                if (Double.compare(s.getPricePerUnit(), price) == 0) {
+                    return OptionalInt.of((int) s.getVolume());
                 }
             }
 
             return OptionalInt.of(0);
         } catch (Exception e) {
-            Util.notifyError("Error in getOrderCountOptional for productId=" + productId, e);
+            Util.notifyError("Error in getOrderCountOptional for productID=" + productId, e);
 
             return OptionalInt.empty();
         }
     }
 
     /**
-     * Empty can mean: reply/product/priceType invalid or not found; exception while finding price
-     * BUY (top of buySummary aka people's sell orders). SELL (top of sellSummary, aka people's buy orders).
-     * @return OptionalDouble price found.
+     * Find the top bazaar price for a product based on the given {@link TransactionType}.
+     * The returned {@link OptionalDouble} is empty if the reply, product ID, or derived {@link PriceType}
+     * is {@code null}, if the product cannot be found, or if an exception occurs while resolving the price.
+     * If the selected summary list exists but is empty, this method returns {@code OptionalDouble.of(0.0)}.
+     *
+     * @param productId       the bazaar product ID to look up
+     * @param transactionType the transaction type whose {@link PriceType} controls which summary is queried
+     * @return an {@link OptionalDouble} containing the resolved price per unit, or empty if unavailable
      */
-    public static OptionalDouble findItemPriceOptional(String productId, OrderType orderType) {
+    public static OptionalDouble findItemPriceOptional(String productId, TransactionType transactionType) {
         CustomBazaarReply reply = BazaarDataManager.getCurrentReply();
+        if (transactionType == null) {
+            return OptionalDouble.empty();
+        }
 
-        PriceType priceType = orderType.asPriceType();
+        PriceType priceType = transactionType.getPriceType();
 
         if (reply == null || productId == null || priceType == null) {
             return OptionalDouble.empty(); //TODO maybe throw error here instead. Needs testing to make sure it doesn't happen too frequently or at times where it is expected behavior
@@ -81,7 +94,7 @@ public class BazaarDataUtil {
 
             return switch (priceType) {
                 case INSTABUY -> {
-                    List<ProductOrder> buySummary = product.getSellOrders();
+                    List<ProductOrder> buySummary = product.getBuyOrders();
 
                     if (buySummary == null || buySummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
@@ -90,7 +103,7 @@ public class BazaarDataUtil {
                     yield OptionalDouble.of(buySummary.getFirst().getPricePerUnit());
                 }
                 case INSTASELL -> {
-                    List<ProductOrder> sellSummary = product.getBuyOrders();
+                    List<ProductOrder> sellSummary = product.getSellOrders();
 
                     if (sellSummary == null || sellSummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
@@ -100,11 +113,12 @@ public class BazaarDataUtil {
                 }
             };
         } catch (Exception e) {
-            Util.notifyError("Error in findItemPriceOptional for productId=" + productId, e);
+            Util.notifyError("Error in findItemPriceOptional for productID=" + productId, e);
 
             return OptionalDouble.empty();
         }
     }
+
 
     /**
      * Checks whether the provided string is a known bazaar product ID.

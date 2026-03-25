@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -152,7 +153,7 @@ public final class DeveloperCommands implements BUCommand {
             if (!isEnabled()) return 0;
 
             String name = StringArgumentType.getString(context, "item name").replaceAll("_", " ");
-            BazaarDataManager.findProductIdOptional(name).ifPresentOrElse(
+            BazaarDataUtil.findProductIdOptional(name).ifPresentOrElse(
                     id -> PlayerActionUtil.notifyAll(name + ": " + id),
                     () -> PlayerActionUtil.notifyAll("Could not find product ID for " + name)
             );

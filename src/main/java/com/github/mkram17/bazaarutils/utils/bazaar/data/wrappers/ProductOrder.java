@@ -25,6 +25,6 @@ public class ProductOrder {
     }
 
     public boolean equalsOrder(Order order) {
-        return order.getOrderType().asPriceType() == priceType && order.getPricePerItem() == pricePerUnit && order.getVolume() == volume;
+        return order.getTransactionType().getPriceType() == priceType && order.getPricePerItem() == pricePerUnit && order.getVolume() == volume;
     }
 }
