@@ -33,7 +33,9 @@
 		"minecraft": ">=${mcVersion} <=${maxMcVersion}",
 		"java": ">=21",
 		"fabric-api": "*",
-		"resourcefulconfig": "*"
+		"resourcefulconfig": "*",
+		"hypixel-mod-api": ">=1.0.1",
+		"fabric-language-kotlin": ">=1.13.4+kotlin.2.2.0"
 	},
 	"suggests": {
 		"modmenu": ">=13.0.1"
