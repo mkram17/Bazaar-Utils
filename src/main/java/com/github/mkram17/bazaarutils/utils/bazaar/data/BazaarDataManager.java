@@ -79,7 +79,6 @@ public final class BazaarDataManager {
 
             consecutiveFailures.set(0);
 
-            customReply.replaceUserProductOrders();
             handleSnapshotResult(customReply, snapshotTs);
             scheduleNextFromSnapshot(snapshotTs);
         });

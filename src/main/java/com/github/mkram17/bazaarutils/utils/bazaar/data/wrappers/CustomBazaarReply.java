@@ -22,14 +22,4 @@ public class CustomBazaarReply extends AbstractReply {
     public ProductData getProduct(String productId) {
         return products.get(productId);
     }
-
-    public void replaceUserProductOrders() {
-        List<Order> userOrders = UserOrdersStorage.INSTANCE.get();
-
-        for (Order order : userOrders) {
-            ProductData product = getProduct(order.getProductID());
-            APIConversionUtil.replaceUserOrdersInList(order, product.getSellOrders());
-            APIConversionUtil.replaceUserOrdersInList(order, product.getBuyOrders());
-        }
-    }
 }

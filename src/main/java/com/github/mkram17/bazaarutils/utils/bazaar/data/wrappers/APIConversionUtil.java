@@ -11,23 +11,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class APIConversionUtil {
-
-    public static List<UserProductOrder> replaceUserOrdersInList(Order order, List<ProductOrder> orders) {
-        List<UserProductOrder> replaced = new ArrayList<>();
-
-        for (int i = 0; i < orders.size(); i++) {
-            ProductOrder productOrder = orders.get(i);
-            if (!productOrder.equalsOrder(order)) {
-                continue;
-            }
-
-            UserProductOrder replacement = new UserProductOrder(order, productOrder);
-            orders.set(i, replacement);
-            replaced.add(replacement);
-        }
-
-        return replaced;
-    }
     
     public static CustomBazaarReply fromSkyBlockReply(SkyBlockBazaarReply reply) {
         AccessorSkyBlockBazaarReply accessor = (AccessorSkyBlockBazaarReply) reply;
