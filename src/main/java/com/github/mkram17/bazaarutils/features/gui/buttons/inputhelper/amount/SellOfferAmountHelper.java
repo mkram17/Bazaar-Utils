@@ -1,44 +1,50 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 
+import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.text.Text;
+
+import java.util.stream.IntStream;
 
 @Getter
 @ConfigObject
-public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount {
-
+public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount implements ListEntryInfoProvider {
     @ConfigEntry(
-            id = "enabled",
-            translation = "bazaarutils.config.buttons.button.container.enabled.label"
+            id = "item_id",
+            translation = "bazaarutils.config.buttons.button.container.item_id.label"
     )
     @Comment(
-            value = "Whether the button will be registered or not",
-            translation = "bazaarutils.config.buttons.button.container.enabled.hint"
+            value = "The item that will be placed as the button.",
+            translation = "bazaarutils.config.buttons.button.container.item_id.hint"
     )
-    public boolean enabled;
+    @ConfigOption.Renderer("bazaarutils:item")
+    public String itemId = "minecraft:green_stained_glass_pane";
 
     @ConfigEntry(
-            id = "slot_number",
-            translation = "bazaarutils.config.buttons.button.container.slot_number.label"
+            id = "slot_index",
+            translation = "bazaarutils.config.buttons.button.container.slot_index.label"
     )
     @Comment(
             value = "The container slot where the button will be registered at",
-            translation = "bazaarutils.config.buttons.button.container.slot_number.hint"
+            translation = "bazaarutils.config.buttons.button.container.slot_index.hint"
     )
+    @ContainerSlot(rows = 4, cols = 9, provider = "bazaar:sell_offer_amount")
     @ConfigOption.Range(min = 0, max = 35)
-    public int slotNumber;
+    @ConfigOption.Renderer("bazaarutils:slot")
+    public int slotIndex;
 
     @ConfigEntry(
             id = "amount_strategy",
@@ -68,13 +74,8 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount {
     public TransactionType transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
 
     @Override
-    public Item getButtonItem() {
-        return Items.GREEN_STAINED_GLASS_PANE;
-    }
-
-    @Override
-    public ItemStack getReplacementItem() {
-        return new ItemStack(this::getButtonItem, 1);
+    public ItemRef getItemRef() {
+        return ItemRef.of(this::getItemId);
     }
 
     @Override
@@ -82,10 +83,13 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount {
         return ScreenManager.getInstance().isCurrent(BazaarScreens.SELL_ORDER_AMOUNT);
     }
 
-    public SellOfferAmountHelper(boolean enabled, int slotNumber) {
+    public SellOfferAmountHelper(int slotIndex) {
         super("Sell Offer Amount Helper", BazaarSlots.SELL_OFFER.INPUT_CUSTOM_AMOUNT.slot);
-        this.enabled = enabled;
-        this.slotNumber = slotNumber;
+        this.slotIndex = slotIndex;
+    }
+
+    public SellOfferAmountHelper() {
+        this(getNextSlotIndex());
     }
 
     @Override
@@ -96,5 +100,26 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount {
     @Override
     protected Text getButtonItemText(TransactionState state) {
         return Text.of("Offer " + getButtonItemStackSize(state) + " items.");
+    }
+
+    @Override
+    public Text getTitle(int index) {
+        return Text.literal(switch (amountStrategy) {
+            case MAX -> "Offers the whole of your inventory";
+            case FIXED -> "Offers " + fixedAmount + " items";
+        });
+    }
+
+    @Override
+    public Text getDescription(int index) {
+        return Text.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
+    }
+
+    private static int getNextSlotIndex() {
+        return IntStream.rangeClosed(0, 35)
+                .filter(i -> !SlotProviders.get("bazaar:sell_offer_amount").getStack(i)
+                        .getOrDefault(CustomDataComponents.SLOT_SELECTOR_LOCKED, false))
+                .findFirst()
+                .orElse(35);
     }
 }

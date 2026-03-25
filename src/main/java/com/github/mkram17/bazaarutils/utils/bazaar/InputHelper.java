@@ -6,29 +6,24 @@ import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
-import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import lombok.Getter;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton {
+public abstract class InputHelper<T> implements ItemButton {
     @Getter
     protected String name;
-
-    protected abstract Item getButtonItem();
 
     /**
      * The market action which this helper is operating on (to buy, to sell; instant, order).
      */
     protected abstract TransactionType getTransactionType();
-
 
 //    Event cycle routines stuff
 
@@ -47,7 +42,7 @@ public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton 
     }
 
     public void onChestLoaded(ChestLoadedEvent event) {
-        if (!isEnabled() || !inCorrectScreen()) {
+        if (!inCorrectScreen()) {
             resetState();
 
             return;
@@ -57,8 +52,7 @@ public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton 
     }
 
     public void onReplaceItem(ReplaceItemEvent event) {
-        if (!(isEnabled()
-                && inCorrectScreen()
+        if (!(inCorrectScreen()
                 && state.isPresent()
                 && shouldReplaceItem(event))) {
             return;
@@ -73,9 +67,7 @@ public abstract class InputHelper<T> implements BUToggleableFeature, ItemButton 
     }
 
     public void onSlotClicked(SlotClickEvent event) {
-        if (!(isEnabled()
-                && inCorrectScreen()
-                && wasButtonSlotClicked(event))) {
+        if (!(inCorrectScreen() && wasButtonClicked(event))) {
             return;
         }
 

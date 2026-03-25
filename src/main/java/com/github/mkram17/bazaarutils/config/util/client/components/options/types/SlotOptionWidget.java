@@ -46,7 +46,7 @@ public class SlotOptionWidget extends SelectorOptionWidget {
 
         private final Consumer<Integer> setter;
 
-        private int selectedSlot;
+        private final int selectedSlot;
 
         private final List<ClickableWidget> cellWidgets = new ArrayList<>();
 
@@ -68,7 +68,7 @@ public class SlotOptionWidget extends SelectorOptionWidget {
                 final int s = slot;
                 int col = slot % element.cols();
                 int row = slot / element.cols();
-                ItemStack stack = element.provider().getStack(slot);
+                ItemStack stack = element.provider().getStack(slot, selectedSlot);
 
                 ContainerCell cell = new ContainerCell(
                         startX + col * ContainerCell.CELL_SIZE,

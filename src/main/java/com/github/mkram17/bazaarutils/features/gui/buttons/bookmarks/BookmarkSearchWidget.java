@@ -10,7 +10,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.Registe
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.PlayerSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;

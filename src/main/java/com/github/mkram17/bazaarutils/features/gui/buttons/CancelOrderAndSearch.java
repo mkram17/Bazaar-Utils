@@ -3,7 +3,8 @@ package com.github.mkram17.bazaarutils.features.gui.buttons;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemButton;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import lombok.Getter;
 import net.minecraft.item.ItemStack;
@@ -12,8 +13,13 @@ import net.minecraft.item.Items;
 @ConfigObject
 public class CancelOrderAndSearch extends BUListener implements ItemButton {
     @Override
-    public int getSlotNumber() {
-        return ButtonsConfig.CANCEL_ORDER_AND_SEARCH.slotNumber;
+    public int getSlotIndex() {
+        return ButtonsConfig.CANCEL_ORDER_AND_SEARCH.slotIndex;
+    }
+
+    @Override
+    public ItemRef getItemRef() {
+        return ItemRef.of(Items.BLUE_TERRACOTTA);
     }
 
     @Getter

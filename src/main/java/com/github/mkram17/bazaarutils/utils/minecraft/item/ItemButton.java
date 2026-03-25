@@ -1,0 +1,70 @@
+package com.github.mkram17.bazaarutils.utils.minecraft.item;
+
+import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
+import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
+import com.github.mkram17.bazaarutils.events.SlotClickEvent;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.StateItemGroup;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+
+public interface ItemButton {
+    Item DEFAULT_ITEM = Items.BARRIER;
+
+    float BUTTON_VOLUME = 0.2f;
+    RegistryEntry<SoundEvent> BUTTON_SOUND = SoundEvents.UI_BUTTON_CLICK;
+
+    int getSlotIndex();
+    ItemRef getItemRef();
+
+    default Item resolveItem() {
+        return switch (getItemRef()) {
+            case ItemRef.Direct(Item item) -> item;
+            case ItemRef.ById(var id) -> resolveId(id.get());
+            case ItemRef.Stateful<?> stateful -> resolveStateful(stateful);
+        };
+    }
+
+    default ItemStack getReplacementItem(int size) {
+        return new ItemStack(resolveItem(), size);
+    }
+
+    default ItemStack getReplacementItem() {
+        return getReplacementItem(1);
+    }
+
+    default boolean shouldReplaceItem(ReplaceItemEvent event) {
+        return event.getSlotId() == getSlotIndex();
+    }
+
+    default boolean wasButtonClicked(SlotClickEvent event) {
+        return event.getSlotId() == getSlotIndex();
+    }
+
+    private static Item resolveId(String rawId) {
+        Item resolved = ResourcefulConfigItems.resolve(rawId);
+
+        return resolved != null ? resolved : DEFAULT_ITEM;
+    }
+
+    private static <S> Item resolveStateful(ItemRef.Stateful<S> stateful) {
+        Item resolved = stateful.source()
+                .map(source -> switch (source) {
+                    case ItemRef.Direct(Item item) -> item;
+                    case ItemRef.ById(var id) -> resolveId(id.get());
+                    case ItemRef.Stateful<?> ignored -> throw new IllegalStateException("Stateful ItemRef cannot nest another Stateful as its source");
+                })
+                .orElse(DEFAULT_ITEM);
+
+        S state = stateful.state().get();
+
+        for (StateItemGroup<S> group : stateful.groups()) {
+            if (group.contains(resolved)) return group.forState(state, resolved);
+        }
+
+        return resolved;
+    }
+}
