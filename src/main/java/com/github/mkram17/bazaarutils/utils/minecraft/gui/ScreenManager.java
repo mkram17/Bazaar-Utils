@@ -14,16 +14,16 @@ import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.SignEditScreen;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
-import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.SignEditScreen;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -124,7 +124,7 @@ public class ScreenManager {
     private static void onChestLoaded(ChestLoadedEvent event) {
         ContainerManager.onChestLoaded(event);
 
-        GenericContainerScreen screen = event.getGenericContainerScreen();
+        ContainerScreen screen = event.getGenericContainerScreen();
         ScreenType resolved = matchType(screen).orElse(null);
 
         List<ScreenSnapshot> list = new ArrayList<>(instance.history);
@@ -258,41 +258,41 @@ public class ScreenManager {
         return isCurrent(types.toArray(ScreenType[]::new));
     }
 
-    public Optional<GenericContainerScreen> inGenericContainerScreen() {
-        return current().flatMap(ctx -> ctx.as(GenericContainerScreen.class));
+    public Optional<ContainerScreen> inGenericContainerScreen() {
+        return current().flatMap(ctx -> ctx.as(ContainerScreen.class));
     }
 
-    public static <T extends ScreenHandler> Optional<T> getCurrentScreenHandler(Class<T> type) {
-        MinecraftClient client = MinecraftClient.getInstance();
+    public static <T extends AbstractContainerMenu> Optional<T> getCurrentScreenHandler(Class<T> type) {
+        Minecraft client = Minecraft.getInstance();
 
         if (client == null || client.player == null) {
             return Optional.empty();
         }
 
-        return type.isInstance(client.player.currentScreenHandler)
-                ? Optional.of(type.cast(client.player.currentScreenHandler))
+        return type.isInstance(client.player.containerMenu)
+                ? Optional.of(type.cast(client.player.containerMenu))
                 : Optional.empty();
     }
 
-    public static <T extends HandledScreen<?>> Optional<T> getCurrentlyHandledScreen(Class<T> type) {
-        MinecraftClient client = MinecraftClient.getInstance();
+    public static <T extends AbstractContainerScreen<?>> Optional<T> getCurrentlyHandledScreen(Class<T> type) {
+        Minecraft client = Minecraft.getInstance();
 
         if (client == null || client.player == null) {
             return Optional.empty();
         }
 
-        return type.isInstance(client.currentScreen)
-                ? Optional.of(type.cast(client.currentScreen))
+        return type.isInstance(client.screen)
+                ? Optional.of(type.cast(client.screen))
                 : Optional.empty();
     }
 
-    public static Optional<Inventory> getScreenContainer() {
-        return getCurrentScreenHandler(GenericContainerScreenHandler.class)
-                .map(GenericContainerScreenHandler::getInventory);
+    public static Optional<Container> getScreenContainer() {
+        return getCurrentScreenHandler(ChestMenu.class)
+                .map(ChestMenu::getContainer);
     }
 
     public static Optional<Integer> getScreenContainerSize() {
-        return getScreenContainer().map(Inventory::size);
+        return getScreenContainer().map(Container::getContainerSize);
     }
 
     public static ItemInfo getScreenItem(int chestSlot) {
@@ -309,14 +309,14 @@ public class ScreenManager {
     public static void closeHandledScreen() {
         PlayerActionUtil.notifyAll("Closing GUI", NotificationType.GUI);
 
-        if (getCurrentlyHandledScreen(HandledScreen.class).isEmpty()) {
+        if (getCurrentlyHandledScreen(AbstractContainerScreen.class).isEmpty()) {
             Util.notifyError("Current screen does not implement HandledScreen", new Throwable());
 
             return;
         }
 
         try {
-            MinecraftClient client = MinecraftClient.getInstance();
+            Minecraft client = Minecraft.getInstance();
 
             if (client == null) {
                 Util.notifyError("Client is null", new Throwable());
@@ -332,16 +332,16 @@ public class ScreenManager {
 
     private static void customCloseHandledScreen() {
         try {
-            MinecraftClient client = MinecraftClient.getInstance();
+            Minecraft client = Minecraft.getInstance();
 
             if (client.player == null) {
                 Util.notifyError("Player is null, cannot close screen", new Throwable());
                 return;
             }
 
-            client.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(client.player.currentScreenHandler.syncId));
+            client.player.connection.send(new ServerboundContainerClosePacket(client.player.containerMenu.containerId));
             client.setScreen(null);
-            client.player.currentScreenHandler = client.player.playerScreenHandler;
+            client.player.containerMenu = client.player.inventoryMenu;
         } catch (Exception exception) {
             Util.notifyError("Error encountered while closing screen with custom method", exception);
             throw new RuntimeException(exception);

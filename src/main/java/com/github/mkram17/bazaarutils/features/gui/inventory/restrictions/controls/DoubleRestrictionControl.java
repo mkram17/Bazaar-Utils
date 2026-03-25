@@ -8,7 +8,7 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -76,15 +76,15 @@ public final class DoubleRestrictionControl implements RestrictionControl<Numeri
     }
 
     @Override
-    public Text getTitle(int index) {
-        return Text.literal(switch (rule) {
+    public Component getTitle(int index) {
+        return Component.literal(switch (rule) {
             case PRICE -> "Blocks if total price > " + amount;
             case VOLUME -> "Blocks if volume held > " + amount;
         });
     }
 
     @Override
-    public Text getDescription(int index) {
-        return Text.literal("Applies to: " + formatTargets());
+    public Component getDescription(int index) {
+        return Component.literal("Applies to: " + formatTargets());
     }
 }

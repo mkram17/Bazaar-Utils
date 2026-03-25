@@ -6,11 +6,11 @@ import com.google.gson.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public record AddPatch(String path, JsonElement insert) implements Patch {
 
-    public static final Identifier ID = Identifier.of("bazaarutils", "add");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("bazaarutils", "add");
     public static final MapCodec<AddPatch> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.STRING.fieldOf("path").forGetter(AddPatch::path),
             JsonUtils.JSON_ELEMENT_CODEC.fieldOf("insert").forGetter(AddPatch::insert)

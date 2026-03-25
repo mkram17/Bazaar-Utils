@@ -17,16 +17,16 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 //drawing done in MixinHandledScreen
 @Module
 public class OrderStatusHighlight extends BUListener implements BUToggleableFeature, SlotHighlight {
-    public static final Identifier IDENTIFIER = Identifier.tryParse(BazaarUtils.MOD_ID, "highlights/standard_background");
+    public static final Identifier IDENTIFIER = Identifier.tryBuild(BazaarUtils.MOD_ID, "highlights/standard_background");
 
     @Override
     public Identifier getIdentifier() {
@@ -44,9 +44,9 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
     }
 
     private static final Map<Integer, Integer> colorCache = new ConcurrentHashMap<>();
-    private static final Map<Integer, List<Text>> tooltipCache = new ConcurrentHashMap<>();
+    private static final Map<Integer, List<Component>> tooltipCache = new ConcurrentHashMap<>();
 
-    private void populateCache(ItemStack stack, HandledScreen<?> screen) {
+    private void populateCache(ItemStack stack, AbstractContainerScreen<?> screen) {
         int index = getSlotIndex(stack, screen);
         if (index == -1) return;
 
@@ -86,33 +86,33 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
             return;
         }
 
-        HandledScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(HandledScreen.class).orElse(null);
+        AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
         if (screen == null) return;
 
         event.getItemStacks().forEach(stack -> populateCache(stack, screen));
     }
 
-    private void onScreenInitialized(MinecraftClient client, Screen screen, int width, int height) {
+    private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {
         colorCache.clear();
         tooltipCache.clear();
     }
 
-    private void onTooltip(ItemStack stack, net.minecraft.item.Item.TooltipContext context, TooltipType type, List<Text> lines) {
+    private void onTooltip(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, TooltipFlag type, List<Component> lines) {
         if (!isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) return;
 
-        HandledScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(HandledScreen.class).orElse(null);
+        AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
         if (screen == null) return;
 
         int index = getSlotIndex(stack, screen);
         if (index == -1) return;
 
-        List<Text> cached = tooltipCache.get(index);
+        List<Component> cached = tooltipCache.get(index);
         if (cached != null) lines.addAll(1, cached);
     }
 
-    private static int getSlotIndex(ItemStack stack, HandledScreen<?> screen) {
-        for (Slot slot : screen.getScreenHandler().slots) {
-            if (slot.hasStack() && slot.getStack().equals(stack)) return slot.getIndex();
+    private static int getSlotIndex(ItemStack stack, AbstractContainerScreen<?> screen) {
+        for (Slot slot : screen.getMenu().slots) {
+            if (slot.hasItem() && slot.getItem().equals(stack)) return slot.getContainerSlot();
         }
 
         return -1;
@@ -132,8 +132,8 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
         };
     }
 
-    private static List<Text> buildTooltipLines(Order order, PricingPosition pos) {
-        List<Text> lines = new ArrayList<>();
+    private static List<Component> buildTooltipLines(Order order, PricingPosition pos) {
+        List<Component> lines = new ArrayList<>();
 
         switch (pos) {
             case COMPETITIVE -> lines.add(styledText("COMPETITIVE", InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR, true));
@@ -145,14 +145,14 @@ public class OrderStatusHighlight extends BUListener implements BUToggleableFeat
         }
 
         if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-            lines.add(Text.literal("[BU] Buy: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.BUY))  + " coins"));
-            lines.add(Text.literal("[BU] Sell: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.SELL)) + " coins"));
+            lines.add(Component.literal("[BU] Buy: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.BUY))  + " coins"));
+            lines.add(Component.literal("[BU] Sell: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.SELL)) + " coins"));
         }
 
         return lines;
     }
 
-    private static Text styledText(String content, int rgb, boolean bold) {
-        return Text.literal(content).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb)).withBold(bold));
+    private static Component styledText(String content, int rgb, boolean bold) {
+        return Component.literal(content).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb)).withBold(bold));
     }
 }

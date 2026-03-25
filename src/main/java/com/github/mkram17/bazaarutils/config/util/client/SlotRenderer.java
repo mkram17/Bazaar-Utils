@@ -6,24 +6,24 @@ import com.github.mkram17.bazaarutils.config.util.client.components.options.type
 import com.github.mkram17.bazaarutils.config.util.client.components.options.types.SlotOptionWidget;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigElementRenderer;
 import com.teamresourceful.resourcefulconfig.api.types.entries.ResourcefulConfigValueEntry;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
 public record SlotRenderer(SlotElement element) implements ResourcefulConfigElementRenderer {
     @Override
-    public Text title() {
+    public Component title() {
         return element.title();
     }
 
     @Override
-    public Text description() {
+    public Component description() {
         return element.description();
     }
 
     @Override
-    public List<ClickableWidget> widgets() {
+    public List<AbstractWidget> widgets() {
         ResourcefulConfigValueEntry entry = element.valueEntry();
 
         SlotOptionWidget slotWidget = new SlotOptionWidget(
@@ -34,7 +34,7 @@ public record SlotRenderer(SlotElement element) implements ResourcefulConfigElem
 
         SlotNumberOptionWidget numberWidget = new SlotNumberOptionWidget(element);
 
-        ClickableWidget resetWidget = ResetOptionWidget.of(() -> {
+        AbstractWidget resetWidget = ResetOptionWidget.of(() -> {
             entry.reset();
             numberWidget.reset();
         });

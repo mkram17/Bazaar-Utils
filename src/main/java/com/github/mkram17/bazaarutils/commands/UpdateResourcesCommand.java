@@ -5,8 +5,8 @@ import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 @Module
@@ -15,7 +15,7 @@ public final class UpdateResourcesCommand implements BUCommand {
     public final String commandName = "updateresources";
 
     @Getter
-    public final Text description = Text.literal("Checks for and applies resource updates.").formatted(Formatting.GRAY);
+    public final Component description = Component.literal("Checks for and applies resource updates.").withStyle(ChatFormatting.GRAY);
 
     @Override
     public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {

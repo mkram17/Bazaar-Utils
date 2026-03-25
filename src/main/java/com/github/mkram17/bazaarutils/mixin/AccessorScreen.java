@@ -1,10 +1,10 @@
 package com.github.mkram17.bazaarutils.mixin;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -14,18 +14,18 @@ import java.util.List;
 //used for SlotClickEvent
 @Mixin(Screen.class)
 public interface AccessorScreen {
-    @Accessor("client")
-    MinecraftClient getClient();
+    @Accessor("minecraft")
+    Minecraft getMinecraft();
 
-    @Invoker("addDrawableChild")
-    <T extends Element & Drawable & Selectable> T registerWidget(T widget);
+    @Invoker("addRenderableWidget")
+    <T extends GuiEventListener & Renderable & NarratableEntry> T registerWidget(T widget);
 
-    @Invoker("remove")
-    void unregisterWidget(Element element);
+    @Invoker("removeWidget")
+    void unregisterWidget(GuiEventListener element);
 
-    @Accessor("drawables")
-    List<Drawable> getDrawables();
+    @Accessor("renderables")
+    List<Renderable> getRenderables();
 
     @Accessor("children")
-    List<Element> getChildren();
+    List<GuiEventListener> getChildren();
 }

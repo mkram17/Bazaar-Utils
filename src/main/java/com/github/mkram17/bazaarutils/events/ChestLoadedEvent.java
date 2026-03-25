@@ -8,14 +8,14 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerMan
 import com.github.mkram17.bazaarutils.utils.Util;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The event uses a polling mechanism that checks every 40ms (up to 50 attempts / 2 seconds)
  * to determine when the GUI is fully loaded.
  *
- * @see Inventory
+ * @see Container
  * @see ItemStack
  */
 public class ChestLoadedEvent {
@@ -61,13 +61,13 @@ public class ChestLoadedEvent {
      * The container that is being displayed.
      */
     @Getter
-    private GenericContainerScreen genericContainerScreen;
+    private ContainerScreen genericContainerScreen;
 
     /**
      * The inventory of the lower chest/container (this is actually the inventory on top, NOT the player's inventory (ask Mojang, not me)).
      */
     @Getter
-    private Inventory lowerChestInventory;
+    private Container lowerChestInventory;
 
     /**
      * List of all non-empty item stacks in the container.
@@ -88,7 +88,7 @@ public class ChestLoadedEvent {
     @RunOnInit
     public static void registerScreenEvent() {
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
-            if (screen instanceof GenericContainerScreen gcs) {
+            if (screen instanceof ContainerScreen gcs) {
                 // Use an AtomicInteger for mutable integer in lambda
                 final AtomicInteger attempts = new AtomicInteger(0);
                 final int MAX_ATTEMPTS = 50; // ~2.5 seconds timeout (50 * 1 tick)
@@ -98,15 +98,15 @@ public class ChestLoadedEvent {
                     @Override
                     public void run() {
                         // Ensure we are still on the same screen
-                        if (client.currentScreen != gcs) {
+                        if (client.screen != gcs) {
                             return;
                         }
 
-                        ScreenHandler handler = gcs.getScreenHandler();
-                        if (handler instanceof GenericContainerScreenHandler containerHandler) {
-                            Inventory inv = containerHandler.getInventory();
+                        AbstractContainerMenu handler = gcs.getMenu();
+                        if (handler instanceof ChestMenu containerHandler) {
+                            Container inv = containerHandler.getContainer();
                             // Check if inventory is populated and not in a loading state
-                            if (!inv.isEmpty() && !inv.getStack(inv.size() - 1).isEmpty() && !isItemLoading(inv)) {
+                            if (!inv.isEmpty() && !inv.getItem(inv.getContainerSize() - 1).isEmpty() && !isItemLoading(inv)) {
                                 // GUI is loaded, post the event
                                 ChestLoadedEvent event = new ChestLoadedEvent();
                                 event.lowerChestInventory = inv;
@@ -127,10 +127,10 @@ public class ChestLoadedEvent {
         });
     }
 
-    private static List<ItemStack> getChestItemSlots(Inventory inventory) {
+    private static List<ItemStack> getChestItemSlots(Container inventory) {
         List<ItemStack> stacks = new ArrayList<>();
-        for (int i = 0; i < inventory.size(); i++) {
-            ItemStack stack = inventory.getStack(i);
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
             if (!stack.isEmpty()) {
                 stacks.add(stack);
             }
@@ -138,12 +138,12 @@ public class ChestLoadedEvent {
         return stacks;
     }
 
-    private static boolean isItemLoading(Inventory inventory) {
-        for (int i = 0; i < inventory.size(); i++) {
-            ItemStack item = inventory.getStack(i);
+    private static boolean isItemLoading(Container inventory) {
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack item = inventory.getItem(i);
             if (item.isEmpty()) continue;
 
-            Text customName = item.get(DataComponentTypes.CUSTOM_NAME);
+            Component customName = item.get(DataComponents.CUSTOM_NAME);
             if (customName == null) continue;
 
             String name = Util.removeFormatting(customName.getString());
@@ -154,10 +154,10 @@ public class ChestLoadedEvent {
 
             // Only bottleneck on lore data of items known to have partialized lore
             if (name.contains("Sell")) {
-                LoreComponent lore = item.get(DataComponentTypes.LORE);
+                ItemLore lore = item.get(DataComponents.LORE);
 
                 if (lore != null && !lore.lines().isEmpty()) {
-                    for (Text line : lore.lines()) {
+                    for (Component line : lore.lines()) {
                         if (Util.removeFormatting(line.getString()).contains("Loading")) {
                             return true;
                         }

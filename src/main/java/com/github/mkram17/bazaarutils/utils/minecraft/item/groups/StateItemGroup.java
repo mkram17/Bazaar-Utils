@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item.groups;
 
 import com.github.mkram17.bazaarutils.utils.minecraft.item.StateItem;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

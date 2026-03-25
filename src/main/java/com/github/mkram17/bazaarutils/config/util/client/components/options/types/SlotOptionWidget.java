@@ -6,10 +6,10 @@ import com.github.mkram17.bazaarutils.config.util.client.components.options.Sele
 import com.github.mkram17.bazaarutils.config.util.client.components.options.types.selector.ContainerCell;
 import com.teamresourceful.resourcefulconfig.client.UIConstants;
 import com.teamresourceful.resourcefulconfig.client.components.ModSprites;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -32,8 +32,8 @@ public class SlotOptionWidget extends SelectorOptionWidget {
     }
 
     @Override
-    public void onPress(@NotNull net.minecraft.client.input.AbstractInput modifiers) {
-        MinecraftClient.getInstance().setScreen(new SlotSelector(this, element, getter.get(), setter));
+    public void onPress(@NotNull net.minecraft.client.input.InputWithModifiers modifiers) {
+        Minecraft.getInstance().setScreen(new SlotSelector(this, element, getter.get(), setter));
     }
 
     public static class SlotSelector extends AbstractSelectorOverlay {
@@ -48,7 +48,7 @@ public class SlotOptionWidget extends SelectorOptionWidget {
 
         private final int selectedSlot;
 
-        private final List<ClickableWidget> cellWidgets = new ArrayList<>();
+        private final List<AbstractWidget> cellWidgets = new ArrayList<>();
 
         public SlotSelector(SlotOptionWidget source, SlotElement element, int currentSlot, Consumer<Integer> setter) {
             this.source = source;
@@ -58,7 +58,7 @@ public class SlotOptionWidget extends SelectorOptionWidget {
         }
 
         private void rebuildCells() {
-            cellWidgets.forEach(this::remove);
+            cellWidgets.forEach(this::removeWidget);
             cellWidgets.clear();
 
             int startX = ox + PADDING;
@@ -77,11 +77,11 @@ public class SlotOptionWidget extends SelectorOptionWidget {
                         slot == selectedSlot,
                         () -> {
                             setter.accept(s);
-                            close();
+                            onClose();
                         }
                 );
                 cellWidgets.add(cell);
-                addDrawableChild(cell);
+                addRenderableWidget(cell);
             }
         }
 
@@ -95,7 +95,7 @@ public class SlotOptionWidget extends SelectorOptionWidget {
                     : source.getY() - oh - SPACING;
 
             int centerX = source.getX() + source.getWidth() / 2;
-            ox = MathHelper.clamp(centerX - ow / 2, 0, this.width - ow);
+            ox = Mth.clamp(centerX - ow / 2, 0, this.width - ow);
 
             rebuildCells();
         }

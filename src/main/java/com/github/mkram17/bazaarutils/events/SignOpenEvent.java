@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.events;
 
 import lombok.Getter;
-import net.minecraft.client.gui.screen.ingame.SignEditScreen;
+import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 
 /**
  * Event fired when a sign editing screen is opened.

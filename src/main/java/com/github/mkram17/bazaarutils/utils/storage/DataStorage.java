@@ -9,7 +9,7 @@ import com.github.mkram17.bazaarutils.utils.codecs.ZonedDateTimeCodec;
 import com.google.gson.*;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

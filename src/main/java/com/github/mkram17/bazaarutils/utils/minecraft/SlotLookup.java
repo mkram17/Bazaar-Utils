@@ -2,27 +2,27 @@ package com.github.mkram17.bazaarutils.utils.minecraft;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQuery;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 
 public class SlotLookup {
-    public static ItemInfo getInventoryItem(Inventory inventory, int chestSlot) {
-        return new ItemInfo(chestSlot, inventory.getStack(chestSlot));
+    public static ItemInfo getInventoryItem(Container inventory, int chestSlot) {
+        return new ItemInfo(chestSlot, inventory.getItem(chestSlot));
     }
 
-    public static ItemInfo getInventoryItem(Inventory inventory, BazaarSlots.BazaarSlot slot) {
+    public static ItemInfo getInventoryItem(Container inventory, BazaarSlots.BazaarSlot slot) {
         return getInventoryItem(inventory, slot.resolve(inventory));
     }
 
-    public static Optional<Integer> getInventorySlotFromItemStack(Inventory inventory, ItemStack wanted) {
-        for (int i = 0; i < inventory.size() - 1; i++) {
-            ItemStack item = inventory.getStack(i);
+    public static Optional<Integer> getInventorySlotFromItemStack(Container inventory, ItemStack wanted) {
+        for (int i = 0; i < inventory.getContainerSize() - 1; i++) {
+            ItemStack item = inventory.getItem(i);
 
             if (item.isEmpty()) continue;
 
-            if (item == wanted || (ItemStack.areItemsEqual(item, wanted) && item.getCount() == wanted.getCount())) {
+            if (item == wanted || (ItemStack.isSameItem(item, wanted) && item.getCount() == wanted.getCount())) {
                 return Optional.of(i);
             }
         }
@@ -32,13 +32,13 @@ public class SlotLookup {
 
 
     public sealed interface IndexReference permits IndexReference.FixedIndex, IndexReference.ContainerSizeNegativeOffset {
-        int resolve(Inventory container);
+        int resolve(Container container);
 
-        default int getMaxInventoryIndex(Inventory container) {
-            return container.size() - 1;
+        default int getMaxInventoryIndex(Container container) {
+            return container.getContainerSize() - 1;
         }
 
-        default ContainerQuery query(Inventory container) {
+        default ContainerQuery query(Container container) {
             return ContainerQuery.at(resolve(container));
         }
 
@@ -50,7 +50,7 @@ public class SlotLookup {
             }
 
             @Override
-            public int resolve(Inventory container) {
+            public int resolve(Container container) {
                 return index;
             }
         }
@@ -63,7 +63,7 @@ public class SlotLookup {
             }
 
             @Override
-            public int resolve(Inventory container) {
+            public int resolve(Container container) {
                 return this.getMaxInventoryIndex(container) - delta;
             }
         }

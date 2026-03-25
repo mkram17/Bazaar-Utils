@@ -17,8 +17,8 @@ import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public final class DeveloperCommands implements BUCommand {
     public final String commandName = "developer";
 
     @Getter
-    public final Text description = Text.literal("Toggles developer mode.").formatted(Formatting.GRAY);
+    public final Component description = Component.literal("Toggles developer mode.").withStyle(ChatFormatting.GRAY);
 
     @Getter
     private final List<BUCommand> subcommands = List.of(
@@ -68,7 +68,7 @@ public final class DeveloperCommands implements BUCommand {
         public final String commandName = "remove";
 
         @Getter
-        public final Text description = Text.literal("Removes an order by index.").formatted(Formatting.GRAY);
+        public final Component description = Component.literal("Removes an order by index.").withStyle(ChatFormatting.GRAY);
 
         @Override
         public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
@@ -93,7 +93,7 @@ public final class DeveloperCommands implements BUCommand {
         public final String commandName = "info";
 
         @Getter
-        public final Text description = Text.literal("Prints info about an order by index.").formatted(Formatting.GRAY);
+        public final Component description = Component.literal("Prints info about an order by index.").withStyle(ChatFormatting.GRAY);
 
         @Override
         public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
@@ -115,7 +115,7 @@ public final class DeveloperCommands implements BUCommand {
         public final String commandName = "outdated";
 
         @Getter
-        public final Text description = Text.literal("Lists all outdated orders.").formatted(Formatting.GRAY);
+        public final Component description = Component.literal("Lists all outdated orders.").withStyle(ChatFormatting.GRAY);
 
         @Override
         public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
@@ -139,7 +139,7 @@ public final class DeveloperCommands implements BUCommand {
         public final String commandName = "convertname";
 
         @Getter
-        public final Text description = Text.literal("Converts an item name to its product ID.").formatted(Formatting.GRAY);
+        public final Component description = Component.literal("Converts an item name to its product ID.").withStyle(ChatFormatting.GRAY);
 
         @Override
         public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(
@@ -166,7 +166,7 @@ public final class DeveloperCommands implements BUCommand {
         public final String commandName = "list";
 
         @Getter
-        public final Text description = Text.literal("Lists all watched orders.").formatted(Formatting.GRAY);
+        public final Component description = Component.literal("Lists all watched orders.").withStyle(ChatFormatting.GRAY);
 
         @Override
         public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {

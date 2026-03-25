@@ -16,7 +16,7 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.stream.IntStream;
 
@@ -86,13 +86,13 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost impleme
     }
 
     @Override
-    protected Text getButtonItemText(TransactionState state) {
-        return Text.of("Bid " + getButtonItemStackSize(state) + " per item.");
+    protected Component getButtonItemText(TransactionState state) {
+        return Component.nullToEmpty("Bid " + getButtonItemStackSize(state) + " per item.");
     }
 
     @Override
-    public Text getTitle(int index) {
-        return Text.literal(switch (pricingPosition) {
+    public Component getTitle(int index) {
+        return Component.literal(switch (pricingPosition) {
             case COMPETITIVE -> "Bids +0.1 above best offer";
             case MATCHED -> "Bids equal to best offer";
             case OUTBID -> "Bids -0.1 below best offer";
@@ -100,8 +100,8 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost impleme
     }
 
     @Override
-    public Text getDescription(int index) {
-        return Text.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
+    public Component getDescription(int index) {
+        return Component.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
     }
 
     private static int getNextSlotIndex() {

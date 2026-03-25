@@ -9,7 +9,7 @@ import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.teamresourceful.resourcefulconfig.api.types.info.TooltipProvider;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 
@@ -33,8 +33,8 @@ public class UselessBazaarNotificationsRemover extends BUListener implements BUT
         }
 
         @Override
-        public Text getTooltip() {
-            return Text.of(getMessage());
+        public Component getTooltip() {
+            return Component.nullToEmpty(getMessage());
         }
     }
 

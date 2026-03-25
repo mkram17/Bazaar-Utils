@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.events;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 /**
  * Event fired when the player's current screen changes.
@@ -23,7 +23,7 @@ import net.minecraft.client.gui.screen.Screen;
  * }
  * }
  * </pre>
- * @see com.github.mkram17.bazaarutils.mixin.MinecraftClientMixin
+ * @see com.github.mkram17.bazaarutils.mixin.MinecraftMixin
  */
 @AllArgsConstructor
 public class ScreenChangeEvent {

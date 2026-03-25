@@ -3,9 +3,9 @@ package com.github.mkram17.bazaarutils.events;
 import lombok.Getter;
 import lombok.Setter;
 import meteordevelopment.orbit.ICancellable;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -30,16 +30,16 @@ import org.jetbrains.annotations.NotNull;
  * }
  * </pre>
  * 
- * @see HandledScreen
+ * @see AbstractContainerScreen
  * @see Slot
- * @see SlotActionType
+ * @see ClickType
  */
 public class SlotClickEvent implements ICancellable {
     /**
      * The screen where the slot was clicked.
      */
     @NotNull
-    public final HandledScreen<?> handledScreen;
+    public final AbstractContainerScreen<?> handledScreen;
     
     /**
      * The slot that was clicked.
@@ -61,7 +61,7 @@ public class SlotClickEvent implements ICancellable {
     /**
      * The type of click action performed.
      */
-    public SlotActionType clickType;
+    public ClickType clickType;
     
     /**
      * If true, the pickblock action will be used instead of the normal click action.
@@ -84,7 +84,7 @@ public class SlotClickEvent implements ICancellable {
      * @param clickedButton the mouse button clicked
      * @param actionType the type of click action
      */
-    public SlotClickEvent(HandledScreen<?> handledScreen, Slot slot, int slotId, int clickedButton, SlotActionType actionType) {
+    public SlotClickEvent(AbstractContainerScreen<?> handledScreen, Slot slot, int slotId, int clickedButton, ClickType actionType) {
         this.handledScreen = handledScreen;
         this.slot = slot;
         this.slotId = slotId;

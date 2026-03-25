@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar;
 import com.teamresourceful.resourcefulconfig.api.types.info.TooltipProvider;
 import com.teamresourceful.resourcefulconfig.api.types.info.Translatable;
 import lombok.Getter;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public class PlayerAccountUpgrades {
 
@@ -13,8 +13,8 @@ public class PlayerAccountUpgrades {
                 return "bazaarutils.hypixel.account_upgrades.bazaar_flipper.not_upgraded.label";
             }
             @Override
-            public Text getTooltip() {
-                return Text.translatable("bazaarutils.hypixel.account_upgrades.bazaar_flipper.not_upgraded.label");
+            public Component getTooltip() {
+                return Component.translatable("bazaarutils.hypixel.account_upgrades.bazaar_flipper.not_upgraded.label");
             }
         },
         FIRST_TIER(1.125, 21) {
@@ -22,8 +22,8 @@ public class PlayerAccountUpgrades {
                 return "bazaarutils.hypixel.account_upgrades.bazaar_flipper.first_tier.label";
             }
             @Override
-            public Text getTooltip() {
-                return Text.translatable("bazaarutils.hypixel.account_upgrades.bazaar_flipper.first_tier.label");
+            public Component getTooltip() {
+                return Component.translatable("bazaarutils.hypixel.account_upgrades.bazaar_flipper.first_tier.label");
             }
         },
         SECOND_TIER(1, 28) {
@@ -31,8 +31,8 @@ public class PlayerAccountUpgrades {
                 return "bazaarutils.hypixel.account_upgrades.bazaar_flipper.second_tier.label";
             }
             @Override
-            public Text getTooltip() {
-                return Text.translatable("bazaarutils.hypixel.account_upgrades.bazaar_flipper.second_tier.label");
+            public Component getTooltip() {
+                return Component.translatable("bazaarutils.hypixel.account_upgrades.bazaar_flipper.second_tier.label");
             }
         };
 

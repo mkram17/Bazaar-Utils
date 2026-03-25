@@ -5,13 +5,13 @@ import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.predicate.NumberRange.IntRange;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.advancements.criterion.MinMaxBounds.Ints;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +20,11 @@ import java.util.function.Predicate;
 
 public class ContainerQuery {
 
-    private final IntRange          slotRange;
+    private final Ints slotRange;
     private final Predicate<ItemStack> filter;
     private final List<String>      description;
 
-    private ContainerQuery(IntRange slotRange, Predicate<ItemStack> filter, List<String> description) {
+    private ContainerQuery(Ints slotRange, Predicate<ItemStack> filter, List<String> description) {
         this.slotRange   = slotRange;
         this.filter      = filter;
         this.description = List.copyOf(description);
@@ -32,14 +32,14 @@ public class ContainerQuery {
 
     public static ContainerQuery at(int slot) {
         return new ContainerQuery(
-                IntRange.exactly(slot),
+                Ints.exactly(slot),
                 item -> true,
                 List.of("slot=" + slot));
     }
 
     public static ContainerQuery range(int minInclusive, int maxInclusive) {
         return new ContainerQuery(
-                IntRange.between(minInclusive, maxInclusive),
+                Ints.between(minInclusive, maxInclusive),
                 item -> true,
                 List.of("slots=" + minInclusive + ".." + maxInclusive));
     }
@@ -63,7 +63,7 @@ public class ContainerQuery {
         String names = String.join("|", allowed);
 
         return chain(filter.and(stack -> {
-            Text data = stack.get(DataComponentTypes.CUSTOM_NAME);
+            Component data = stack.get(DataComponents.CUSTOM_NAME);
             if (data != null) {
                 for (String name : allowed) {
                     if (data.getString().contains(name)) return true;
@@ -75,15 +75,15 @@ public class ContainerQuery {
 
     public ContainerQuery withLore(String lore) {
         return chain(filter.and(stack -> {
-            LoreComponent data = stack.get(DataComponentTypes.LORE);
+            ItemLore data = stack.get(DataComponents.LORE);
             return data != null && !TextSearch.findSpanning(data.lines(), lore).isEmpty();
         }), "lore[" + lore + "]");
     }
 
-    public Optional<ItemStack> first(Inventory inventory) {
-        int invSize = inventory.size();
-        int min = Math.max(0, slotRange.getMin().orElse(0));
-        int max = Math.min(invSize - 1, slotRange.getMax().orElse(invSize - 1));
+    public Optional<ItemStack> first(Container inventory) {
+        int invSize = inventory.getContainerSize();
+        int min = Math.max(0, slotRange.min().orElse(0));
+        int max = Math.min(invSize - 1, slotRange.max().orElse(invSize - 1));
 
         for (int i = min; i <= max; i++) {
             ItemInfo item = SlotLookup.getInventoryItem(inventory, i);
@@ -96,15 +96,15 @@ public class ContainerQuery {
     }
 
     public Optional<ItemStack> first() {
-        Optional<Inventory> inventory = ScreenManager.getScreenContainer();
+        Optional<Container> inventory = ScreenManager.getScreenContainer();
         if (inventory.isEmpty()) return Optional.empty();
         return first(inventory.get());
     }
 
-    public List<ItemStack> all(Inventory inventory) {
-        int invSize = inventory.size();
-        int min = Math.max(0, slotRange.getMin().orElse(0));
-        int max = Math.min(invSize - 1, slotRange.getMax().orElse(invSize - 1));
+    public List<ItemStack> all(Container inventory) {
+        int invSize = inventory.getContainerSize();
+        int min = Math.max(0, slotRange.min().orElse(0));
+        int max = Math.min(invSize - 1, slotRange.max().orElse(invSize - 1));
         List<ItemStack> out = new ArrayList<>();
 
         for (int i = min; i <= max; i++) {
@@ -118,7 +118,7 @@ public class ContainerQuery {
     }
 
     public List<ItemStack> all() {
-        Optional<Inventory> inventory = ScreenManager.getScreenContainer();
+        Optional<Container> inventory = ScreenManager.getScreenContainer();
         if (inventory.isEmpty()) return new ArrayList<>();
         return all(inventory.get());
     }

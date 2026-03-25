@@ -3,8 +3,8 @@ package com.github.mkram17.bazaarutils.utils.bazaar.gui;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQuery;
 import lombok.AllArgsConstructor;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Items;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Items;
 
 import java.util.function.Function;
 
@@ -13,11 +13,11 @@ public class BazaarSlots {
             SlotLookup.IndexReference ref,
             Function<ContainerQuery, ContainerQuery> builder
     ) {
-        public int resolve(Inventory container) {
+        public int resolve(Container container) {
             return ref.resolve(container);
         }
 
-        public ContainerQuery query(Inventory container) {
+        public ContainerQuery query(Container container) {
             return builder.apply(ref.query(container));
         }
     }
@@ -42,7 +42,7 @@ public class BazaarSlots {
 
         public final BazaarSlot slot;
 
-        public ContainerQuery query(Inventory container) {
+        public ContainerQuery query(Container container) {
             return slot.query(container);
         }
     }
@@ -104,7 +104,7 @@ public class BazaarSlots {
 
         public final BazaarSlot slot;
 
-        public ContainerQuery query(Inventory container) {
+        public ContainerQuery query(Container container) {
             return slot.query(container);
         }
     }
@@ -139,7 +139,7 @@ public class BazaarSlots {
 
         public final BazaarSlot slot;
 
-        public ContainerQuery query(Inventory container) {
+        public ContainerQuery query(Container container) {
             return slot.query(container);
         }
     }
@@ -194,7 +194,7 @@ public class BazaarSlots {
 
         public final BazaarSlot slot;
 
-        public ContainerQuery query(Inventory container) {
+        public ContainerQuery query(Container container) {
             return slot.query(container);
         }
     }
@@ -219,7 +219,7 @@ public class BazaarSlots {
 
         public final BazaarSlot slot;
 
-        public ContainerQuery query(Inventory container) {
+        public ContainerQuery query(Container container) {
             return slot.query(container);
         }
     }
@@ -253,7 +253,7 @@ public class BazaarSlots {
 
         public final BazaarSlot slot;
 
-        public ContainerQuery query(Inventory container) {
+        public ContainerQuery query(Container container) {
             return slot.query(container);
         }
     }
@@ -278,7 +278,7 @@ public class BazaarSlots {
 
         public final BazaarSlot slot;
 
-        public ContainerQuery query(Inventory container) {
+        public ContainerQuery query(Container container) {
             return slot.query(container);
         }
     }
@@ -295,7 +295,7 @@ public class BazaarSlots {
 
         public final BazaarSlot slot;
 
-        public ContainerQuery query(Inventory container) {
+        public ContainerQuery query(Container container) {
             return slot.query(container);
         }
     }

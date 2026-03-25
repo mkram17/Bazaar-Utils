@@ -3,8 +3,8 @@ package com.github.mkram17.bazaarutils.events;
 import lombok.Getter;
 import lombok.Setter;
 import meteordevelopment.orbit.ICancellable;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Event fired when an item in an inventory is about to be replaced.
@@ -27,7 +27,7 @@ import net.minecraft.item.ItemStack;
  * </pre>
  * 
  * @see ItemStack
- * @see SimpleInventory
+ * @see SimpleContainer
  */
 public class ReplaceItemEvent implements ICancellable {
     /**
@@ -40,7 +40,7 @@ public class ReplaceItemEvent implements ICancellable {
      * The inventory containing the item being replaced.
      */
     @Getter
-    private final SimpleInventory inventory;
+    private final SimpleContainer inventory;
     
     /**
      * The slot ID where the replacement is occurring.
@@ -62,7 +62,7 @@ public class ReplaceItemEvent implements ICancellable {
      * @param inventory the inventory containing the item
      * @param slotId the slot where the replacement occurs
      */
-    public ReplaceItemEvent(ItemStack original, SimpleInventory inventory, int slotId) {
+    public ReplaceItemEvent(ItemStack original, SimpleContainer inventory, int slotId) {
         this.original = original;
         this.inventory = inventory;
         this.slotId = slotId;

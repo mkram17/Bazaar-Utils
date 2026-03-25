@@ -4,8 +4,8 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public final class InstantSellParser {
     }
 
     public static Optional<InstantSellResult> parseItemPageOrder(ItemStack sellInstantlyStack) {
-        List<Text> lines = LoreParser.lines(sellInstantlyStack);
+        List<Component> lines = LoreParser.lines(sellInstantlyStack);
         if (lines.size() < 6) return Optional.empty();
 
         try {
@@ -41,8 +41,8 @@ public final class InstantSellParser {
         }
     }
 
-    private static Optional<OrderInfo> parseLine(Text line) {
-        List<Text> s = line.getSiblings();
+    private static Optional<OrderInfo> parseLine(Component line) {
+        List<Component> s = line.getSiblings();
         if (s.size() != 6) return Optional.empty();
 
         String name = s.get(3).getString().trim();

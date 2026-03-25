@@ -2,17 +2,17 @@ package com.github.mkram17.bazaarutils.features.keybinds;
 
 import com.github.mkram17.bazaarutils.features.util.BUKeybinding;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.KeyMapping;
 
 public class StashHelper extends BUKeybinding {
     @Getter
     private int ticksBetweenPresses;
 
-    public StashHelper(KeyBinding keyBinding) {
+    public StashHelper(KeyMapping keyBinding) {
         super(keyBinding);
     }
 
@@ -20,7 +20,7 @@ public class StashHelper extends BUKeybinding {
     protected void registerOnPressed(){
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             ticksBetweenPresses++;
-            if(!keyBinding.isPressed()) {
+            if(!keyBinding.isDown()) {
                 return;
             }
             if(ticksBetweenPresses > 10) {

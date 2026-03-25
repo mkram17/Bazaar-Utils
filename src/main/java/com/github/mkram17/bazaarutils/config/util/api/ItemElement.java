@@ -8,8 +8,8 @@ import com.teamresourceful.resourcefulconfig.api.types.elements.ResourcefulConfi
 import com.teamresourceful.resourcefulconfig.api.types.entries.ResourcefulConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.types.entries.ResourcefulConfigValueEntry;
 import com.teamresourceful.resourcefulconfig.api.types.options.EntryType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -59,21 +59,21 @@ public final class ItemElement implements ResourcefulConfigEntryElement {
         return (ResourcefulConfigValueEntry) delegate.entry();
     }
 
-    public Text title() {
+    public Component title() {
         Field field = entryField();
 
         if (field != null) {
             ConfigEntry options = field.getAnnotation(ConfigEntry.class);
 
             if (options != null && !options.translation().isEmpty()) {
-                return Text.translatable(options.translation());
+                return Component.translatable(options.translation());
             }
         }
 
-        return Text.literal(delegate.id());
+        return Component.literal(delegate.id());
     }
 
-    public Text description() {
+    public Component description() {
         Field field = entryField();
 
         if (field != null) {
@@ -81,12 +81,12 @@ public final class ItemElement implements ResourcefulConfigEntryElement {
 
             if (comment != null) {
                 return !comment.translation().isEmpty()
-                        ? Text.translatable(comment.translation())
-                        : Text.literal(comment.value());
+                        ? Component.translatable(comment.translation())
+                        : Component.literal(comment.value());
             }
         }
 
-        return Text.empty();
+        return Component.empty();
     }
 
     @Override public ResourcefulConfigEntry entry() {

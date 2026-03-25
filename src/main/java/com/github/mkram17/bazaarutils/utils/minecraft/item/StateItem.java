@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 public sealed interface StateItem {
     record Fixed(Item item) implements StateItem {}

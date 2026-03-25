@@ -13,14 +13,14 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.Util;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConfirmLinkScreen;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,23 +41,23 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, BUTo
     public PriceCharts() {}
 
     @Override
-    public void getTooltip(ItemStack stack, Item.TooltipContext ctx, TooltipType type, List<Text> lines) {
+    public void getTooltip(ItemStack stack, Item.TooltipContext ctx, TooltipFlag type, List<Component> lines) {
         if (!isEnabled() || stack == null || stack.isEmpty() || !shouldShow()) return;
         if (stack.getItem().getName().getString().contains("GLASS_PANE")) return;
 
-        String key = sanitizeName(stack.getName().getString());
+        String key = sanitizeName(stack.getHoverName().getString());
 
         // Lazily populate cache if a synced/replaced stack appears later
         if (!SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName)) {
             return;
         }
 
-        MutableText text = Text.literal("CTRL+SHIFT click for price charts & other info")
-                .formatted(Formatting.GOLD, Formatting.BOLD);
-        MutableText poweredBy = Text.literal("Powered by skyblock.finance")
-                .formatted(Formatting.GRAY);
+        MutableComponent text = Component.literal("CTRL+SHIFT click for price charts & other info")
+                .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
+        MutableComponent poweredBy = Component.literal("Powered by skyblock.finance")
+                .withStyle(ChatFormatting.GRAY);
 
-        lines.add(Text.literal(""));
+        lines.add(Component.literal(""));
         lines.add(text);
         lines.add(poweredBy);
     }
@@ -68,11 +68,11 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, BUTo
             return;
         }
 
-        if (!MinecraftClient.getInstance().isShiftPressed() || !MinecraftClient.getInstance().isCtrlPressed()) {
+        if (!Minecraft.getInstance().hasShiftDown() || !Minecraft.getInstance().hasControlDown()) {
             return;
         }
 
-        String itemName = sanitizeName(e.slot.getStack().getName().getString());
+        String itemName = sanitizeName(e.slot.getItem().getHoverName().getString());
 
         if (!SHOW_CACHE.getOrDefault(itemName, false)) {
             return;
@@ -81,15 +81,15 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, BUTo
         String productID = BazaarDataUtil.findProductIdOptional(itemName).get(); // All cached items are safe
         String link = "https://skyblock.finance/items/" + productID;
 
-        MinecraftClient.getInstance().setScreen(new ConfirmLinkScreen(confirmed -> {
+        Minecraft.getInstance().setScreen(new ConfirmLinkScreen(confirmed -> {
             if (confirmed) {
                 try {
-                    net.minecraft.util.Util.getOperatingSystem().open(new URI(link));
+                    net.minecraft.util.Util.getPlatform().openUri(new URI(link));
                 } catch (URISyntaxException ex) {
                     Util.notifyError("Failed to open skyblock.finance link.", ex);
                 }
             }
-            MinecraftClient.getInstance().setScreen(null);
+            Minecraft.getInstance().setScreen(null);
         }, link, true));
 
         e.cancel();

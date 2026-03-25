@@ -12,10 +12,10 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,18 +23,18 @@ import java.util.List;
 
 @Module
 public class ModButtons implements BUToggleableFeature {
-    private static final Identifier DEFAULT_ORDERS = Identifier.tryParse(BazaarUtils.MOD_ID, "widget/generic_widget_base");
-    private static final Identifier HOVERED_ORDERS = Identifier.tryParse(BazaarUtils.MOD_ID, "widget/generic_widget_hover");
+    private static final Identifier DEFAULT_ORDERS = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/generic_widget_base");
+    private static final Identifier HOVERED_ORDERS = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/generic_widget_hover");
 
-    public static final ButtonTextures SLOT_ORDERS_BUTTON_TEXTURES = new ButtonTextures(
+    public static final WidgetSprites SLOT_ORDERS_BUTTON_TEXTURES = new WidgetSprites(
             DEFAULT_ORDERS,
             HOVERED_ORDERS
     );
 
-    private static final Identifier DEFAULT_SETTINGS = Identifier.tryParse(BazaarUtils.MOD_ID, "widget/settings_widget_base");
-    private static final Identifier HOVERED_SETTINGS = Identifier.tryParse(BazaarUtils.MOD_ID, "widget/settings_widget_hover");
+    private static final Identifier DEFAULT_SETTINGS = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/settings_widget_base");
+    private static final Identifier HOVERED_SETTINGS = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/settings_widget_hover");
 
-    public static final ButtonTextures SLOT_SETTINGS_BUTTON_TEXTURES = new ButtonTextures(
+    public static final WidgetSprites SLOT_SETTINGS_BUTTON_TEXTURES = new WidgetSprites(
             DEFAULT_SETTINGS,
             HOVERED_SETTINGS
     );
@@ -81,7 +81,7 @@ public class ModButtons implements BUToggleableFeature {
                 SLOT_SETTINGS_BUTTON_TEXTURES,
                 (widget) -> ConfigUtil.openGUI(),
                 null,
-                Text.literal("Bazaar Utils Settings")
+                Component.literal("Bazaar Utils Settings")
         );
     }
 
@@ -97,8 +97,8 @@ public class ModButtons implements BUToggleableFeature {
                 config.size, config.size,
                 SLOT_ORDERS_BUTTON_TEXTURES,
                 (widget) -> PlayerActionUtil.runCommand("managebazaarorders"),
-                Items.BOOK.getDefaultStack(),
-                Text.literal("Go to Orders (Requires Cookie)")
+                Items.BOOK.getDefaultInstance(),
+                Component.literal("Go to Orders (Requires Cookie)")
         );
     }
 }

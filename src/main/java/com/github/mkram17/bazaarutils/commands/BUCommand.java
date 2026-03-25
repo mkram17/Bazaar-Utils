@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +11,8 @@ import java.util.List;
 public interface BUCommand {
     String getCommandName();
 
-    default Text getDescription() {
-        return Text.empty();
+    default Component getDescription() {
+        return Component.empty();
     }
 
     default List<String> getAliases() {

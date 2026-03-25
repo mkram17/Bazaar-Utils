@@ -7,11 +7,11 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public record MovePatch(String from, String to) implements Patch {
 
-    public static final Identifier ID = Identifier.of("bazaarutils", "move");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("bazaarutils", "move");
     public static final MapCodec<MovePatch> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.STRING.fieldOf("from").forGetter(MovePatch::from),
             Codec.STRING.fieldOf("to").forGetter(MovePatch::to)

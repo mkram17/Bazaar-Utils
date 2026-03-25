@@ -17,13 +17,13 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Module
 public class InstantSellHighlight extends BUListener implements BUToggleableFeature, SlotHighlight {
-    public static final Identifier IDENTIFIER = Identifier.tryParse(BazaarUtils.MOD_ID, "highlights/standard_background");
+    public static final Identifier IDENTIFIER = Identifier.tryBuild(BazaarUtils.MOD_ID, "highlights/standard_background");
 
     @Override
     public Identifier getIdentifier() {
@@ -40,20 +40,20 @@ public class InstantSellHighlight extends BUListener implements BUToggleableFeat
 
     private static final Map<Integer, Integer> colorCache = new ConcurrentHashMap<>();
 
-    private void populateCache(Set<String> names, HandledScreen<?> screen, PlayerInventory playerInventory) {
+    private void populateCache(Set<String> names, AbstractContainerScreen<?> screen, Inventory playerInventory) {
         colorCache.clear();
 
-        for (Slot slot : screen.getScreenHandler().slots) {
-            if (!slot.hasStack() || slot.inventory != playerInventory) continue;
+        for (Slot slot : screen.getMenu().slots) {
+            if (!slot.hasItem() || slot.container != playerInventory) continue;
 
-            Text customName = slot.getStack().getCustomName();
+            Component customName = slot.getItem().getCustomName();
 
             if (customName == null) continue;
 
             String itemName = customName.getString();
 
             if (names.stream().anyMatch(itemName::equalsIgnoreCase)) {
-                colorCache.put(slot.getIndex(), InventoryConfig.INSTANT_SELL_HIGHLIGHT_COLOR);
+                colorCache.put(slot.getContainerSlot(), InventoryConfig.INSTANT_SELL_HIGHLIGHT_COLOR);
             }
         }
     }
@@ -84,8 +84,8 @@ public class InstantSellHighlight extends BUListener implements BUToggleableFeat
         if (!isEnabled()) return;
 
         ScreenManager.getInstance().current().ifPresent(context -> {
-            HandledScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(HandledScreen.class).orElse(null);
-            MinecraftClient client = MinecraftClient.getInstance();
+            AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
+            Minecraft client = Minecraft.getInstance();
 
             if (screen == null || client.player == null) return;
 
@@ -101,7 +101,7 @@ public class InstantSellHighlight extends BUListener implements BUToggleableFeat
         });
     }
 
-    private void onScreenInitialized(MinecraftClient client, Screen screen, int width, int height) {
+    private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {
         colorCache.clear();
     }
 

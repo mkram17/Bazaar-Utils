@@ -7,13 +7,13 @@ import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import lombok.Getter;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 
 import java.util.Optional;
 
@@ -34,37 +34,37 @@ public class ContainerManager {
     }
 
     @Getter
-    private static Inventory lowerChestInventory = null;
+    private static Container lowerChestInventory = null;
 
     public static int getLowerChestInventorySize() {
-        Inventory inventory = getLowerChestInventory();
+        Container inventory = getLowerChestInventory();
 
         if (inventory == null) {
             return -1;
         }
 
-        return inventory.size();
+        return inventory.getContainerSize();
     }
 
     public static void clickSlot(int slotIndex, int button) {
-        Optional<ScreenHandler> handlerOpt = ScreenManager.getCurrentScreenHandler(ScreenHandler.class);
+        Optional<AbstractContainerMenu> handlerOpt = ScreenManager.getCurrentScreenHandler(AbstractContainerMenu.class);
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
-        ClientPlayerInteractionManager interactionManager = client.interactionManager;
-        ClientPlayerEntity player = client.player;
+        MultiPlayerGameMode interactionManager = client.gameMode;
+        LocalPlayer player = client.player;
 
         if (interactionManager == null || player == null || handlerOpt.isEmpty()) {
             return;
         }
 
-        int syncId = handlerOpt.get().syncId;
+        int syncId = handlerOpt.get().containerId;
 
         Util.tickExecuteLater(1, () -> interactionManager
-                .clickSlot(syncId,
+                .handleInventoryMouseClick(syncId,
                         slotIndex,
                         button,
-                        SlotActionType.PICKUP,
+                        ClickType.PICKUP,
                         player
                 )
         );
@@ -74,7 +74,7 @@ public class ContainerManager {
         return SlotLookup.getInventoryItem(lowerChestInventory, chestSlot);
     }
 
-    public static int getInventorySlotFromItemStack(Inventory lowerChestInventory, ItemStack itemStack) {
+    public static int getInventorySlotFromItemStack(Container lowerChestInventory, ItemStack itemStack) {
         return SlotLookup.getInventorySlotFromItemStack(lowerChestInventory, itemStack).orElse(-1);
     }
 }

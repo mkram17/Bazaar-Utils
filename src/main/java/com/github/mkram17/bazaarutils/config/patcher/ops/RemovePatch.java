@@ -7,11 +7,11 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public record RemovePatch(String path) implements Patch {
 
-    public static final Identifier ID = Identifier.of("bazaarutils", "remove");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("bazaarutils", "remove");
     public static final MapCodec<RemovePatch> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.STRING.fieldOf("path").forGetter(RemovePatch::path)
     ).apply(i, RemovePatch::new));

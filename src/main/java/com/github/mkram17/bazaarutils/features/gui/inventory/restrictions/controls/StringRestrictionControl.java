@@ -8,7 +8,7 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 @Getter
 @Setter
@@ -58,12 +58,12 @@ public final class StringRestrictionControl implements RestrictionControl<String
     }
 
     @Override
-    public Text getTitle(int index) {
-        return Text.literal("Blocks items matching \"" + name + "\"");
+    public Component getTitle(int index) {
+        return Component.literal("Blocks items matching \"" + name + "\"");
     }
 
     @Override
-    public Text getDescription(int index) {
-        return Text.literal("Applies to: " + formatTargets());
+    public Component getDescription(int index) {
+        return Component.literal("Applies to: " + formatTargets());
     }
 }

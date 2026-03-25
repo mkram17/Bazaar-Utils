@@ -4,8 +4,8 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +22,8 @@ public final class SellSacksParser {
         List<OrderInfo> items = new ArrayList<>();
         Optional<SellSacksResult.OtherItems> otherItems = Optional.empty();
 
-        for (Text line : LoreParser.lines(sellSacksStack)) {
-            List<Text> s = line.getSiblings();
+        for (Component line : LoreParser.lines(sellSacksStack)) {
+            List<Component> s = line.getSiblings();
             if (s.size() != 6) continue;
 
             String name = s.get(3).getString().trim();

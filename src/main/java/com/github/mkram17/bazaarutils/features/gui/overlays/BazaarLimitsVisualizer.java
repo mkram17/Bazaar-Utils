@@ -22,8 +22,8 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 @Module
 public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFeature {
@@ -106,10 +106,10 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         String current = Util.formatNumberWithPrefix(ordered);
         String max = Util.formatNumberWithPrefix(BazaarLimitsVisualizer.COIN_LIMIT);
 
-        Formatting color = (ordered >= BazaarLimitsVisualizer.COIN_LIMIT) ? Formatting.RED : Formatting.GREEN;
-        Text message = Text.literal("Bazaar Order Limit: ").formatted(Formatting.GOLD)
-                .append(Text.literal(current).formatted(color))
-                .append(Text.literal(" / " + max).formatted(Formatting.GRAY));
+        ChatFormatting color = (ordered >= BazaarLimitsVisualizer.COIN_LIMIT) ? ChatFormatting.RED : ChatFormatting.GREEN;
+        Component message = Component.literal("Bazaar Order Limit: ").withStyle(ChatFormatting.GOLD)
+                .append(Component.literal(current).withStyle(color))
+                .append(Component.literal(" / " + max).withStyle(ChatFormatting.GRAY));
 
         int spacing = BUCompatibilityHelper.isSkyblockerLoaded() ? 26 : 5;
 
@@ -126,11 +126,11 @@ public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFe
         long hours = duration.toHours();
         long minutes = duration.toMinutesPart();
 
-        Formatting urgencyColor = (hours < 1) ? Formatting.RED : (hours < 10 ? Formatting.YELLOW : Formatting.GRAY);
+        ChatFormatting urgencyColor = (hours < 1) ? ChatFormatting.RED : (hours < 10 ? ChatFormatting.YELLOW : ChatFormatting.GRAY);
 
         String timeLabel = String.format("%dh %dm", hours, minutes);
-        Text timeText = Text.literal("Until Reset: ").formatted(Formatting.GOLD)
-                .append(Text.literal(timeLabel).formatted(urgencyColor));
+        Component timeText = Component.literal("Until Reset: ").withStyle(ChatFormatting.GOLD)
+                .append(Component.literal(timeLabel).withStyle(urgencyColor));
 
         int spacing = BUCompatibilityHelper.isSkyblockerLoaded() ? 26 : 5;
 
