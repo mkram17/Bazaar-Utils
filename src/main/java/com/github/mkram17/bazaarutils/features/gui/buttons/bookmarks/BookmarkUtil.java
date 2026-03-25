@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.data.BookmarksStorage;
+import com.github.mkram17.bazaarutils.utils.storage.BookmarksStorage;
 import lombok.Getter;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.util.Identifier;

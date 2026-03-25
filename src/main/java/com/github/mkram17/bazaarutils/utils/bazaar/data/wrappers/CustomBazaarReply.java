@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers;
 
-import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
+import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import lombok.Getter;
 import net.hypixel.api.reply.AbstractReply;

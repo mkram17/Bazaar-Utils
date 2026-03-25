@@ -1,7 +1,6 @@
-package com.github.mkram17.bazaarutils.data;
+package com.github.mkram17.bazaarutils.utils.storage;
 
 import com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks.Bookmark;
-import com.github.mkram17.bazaarutils.utils.storage.DataStorage;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;

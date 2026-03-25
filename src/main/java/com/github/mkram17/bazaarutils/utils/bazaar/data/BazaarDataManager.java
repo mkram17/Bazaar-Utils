@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.data;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.data.APIUtils;
+import com.github.mkram17.bazaarutils.utils.APIUtil;
 import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -60,7 +60,7 @@ public final class BazaarDataManager {
     }
 
     private static void fetchOnce() {
-        APIUtils.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
+        APIUtil.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
             if (throwable != null || !reply.isSuccess()) {
                 handleFetchFailure(
                     "Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms",
