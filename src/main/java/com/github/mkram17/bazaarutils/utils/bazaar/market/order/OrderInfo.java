@@ -63,15 +63,14 @@ public class OrderInfo extends PriceInfo {
         this.volume = volume;
         this.tolerance = calculateTolerance();
 
-        BazaarDataUtil.findProductIdOptional(name).ifPresent(productId -> this.productID = productId);
-        validateProductId(productID);
+        BazaarDataUtil.findProductIdOptional(name).ifPresent(id -> this.productID = id);
+        validateProductId();
         findPricingPosition().ifPresent(pricingPosition -> this.pricingPosition = pricingPosition);
     }
 
-    //TODO validate name/product id with method specifically for that. Maybe can switch findProdIdOpt for non optional version and then rely on validation method.
-    private void validateProductId(String productId) {
-        if(productId == null || productId.isBlank()) {
-            Util.notifyError("Error setting product id for " + this, new Throwable("Product ID cannot be null or blank"));
+    private void validateProductId() {
+        if(!BazaarDataUtil.isValidProductId(productID)){
+            Util.notifyError("Error setting product id for " + this, new Throwable("Product ID is invalid"));
         }
     }
 
