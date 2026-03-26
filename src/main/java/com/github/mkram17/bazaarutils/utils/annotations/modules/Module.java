@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@AutoCollect("Modules")
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
 public @interface Module {}
