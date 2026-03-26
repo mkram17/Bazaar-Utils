@@ -98,7 +98,8 @@ dependencies {
 
     modCompileOnly("net.hypixel:mod-api:1.0.1")
 
-    modRuntimeOnly("net.fabricmc:fabric-language-kotlin:1.13.4+kotlin.2.2.0")
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.4+kotlin.2.2.0")
 
     modImplementation("net.hypixel:hypixel-api-transport-apache:4.4")
     include("net.hypixel:hypixel-api-transport-apache:4.4")
