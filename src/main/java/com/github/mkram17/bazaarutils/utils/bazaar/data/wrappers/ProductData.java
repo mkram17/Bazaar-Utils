@@ -19,10 +19,10 @@ public class ProductData {
     }
 
     public List<ProductOrder> getBuyOrders() {
-        return productBuyOrders;
+        return Collections.unmodifiableList(productBuyOrders);
     }
 
     public List<ProductOrder> getSellOrders() {
-        return productSellOrders;
+        return Collections.unmodifiableList(productSellOrders);
     }
 }
