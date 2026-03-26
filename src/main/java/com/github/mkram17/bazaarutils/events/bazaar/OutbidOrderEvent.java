@@ -1,8 +1,8 @@
-package com.github.mkram17.bazaarutils.events;
+package com.github.mkram17.bazaarutils.events.bazaar;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import lombok.Getter;
-import meteordevelopment.orbit.ICancellable;
+import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 
 /**
  * Event fired when a bazaar order is outbid or becomes competitive again.
@@ -27,7 +27,7 @@ import meteordevelopment.orbit.ICancellable;
  * @see Order
  */
 //TODO actually use this maybe? not sure what my thinking on this was back then
-public class OutbidOrderEvent implements ICancellable {
+public class OutbidOrderEvent extends SkyBlockEvent {
     /**
      * The bazaar order that was affected.
      */
@@ -49,15 +49,5 @@ public class OutbidOrderEvent implements ICancellable {
     public OutbidOrderEvent(Order order, boolean isOutbid) {
         this.order = order;
         this.isOutbid = isOutbid;
-    }
-    
-    @Override
-    public void setCancelled(boolean b) {
-
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return false;
     }
 }

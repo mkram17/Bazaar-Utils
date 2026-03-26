@@ -1,9 +1,9 @@
-package com.github.mkram17.bazaarutils.events;
+package com.github.mkram17.bazaarutils.events.bazaar;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import meteordevelopment.orbit.ICancellable;
+import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 
 /**
  * Event fired when the user's bazaar orders list changes.
@@ -30,7 +30,7 @@ import meteordevelopment.orbit.ICancellable;
  * @see ChangeTypes
  */
 @AllArgsConstructor
-public class UserOrdersChangeEvent implements ICancellable {
+public class UserOrdersChangeEvent extends SkyBlockEvent {
 
     /**
      * Enumeration of possible change types for user orders.
@@ -55,13 +55,4 @@ public class UserOrdersChangeEvent implements ICancellable {
      */
     @Getter
     private Order order;
-
-    @Override
-    public void setCancelled(boolean cancelled) {
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return false;
-    }
 }

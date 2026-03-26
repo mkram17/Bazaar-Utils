@@ -1,8 +1,10 @@
-package com.github.mkram17.bazaarutils.events.handler;
+package com.github.mkram17.bazaarutils.events.bazaar.handlers;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.BazaarChatEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -11,14 +13,14 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.network.chat.Component;
+import tech.thatgravyboat.skyblockapi.api.SkyBlockAPI;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.chat.ChatReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 /**
  * Handler for parsing and processing bazaar-related chat messages.
@@ -29,14 +31,15 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  * </p>
  *
  * <p>The handler automatically registers itself during mod initialization via the
- * {@link RunOnInit} annotation on {@link #registerBazaarChat()}.</p>
+ * {@link RunOnInit} annotation on {@link #registerFabricEvents()}.</p>
  *
  * @see BazaarChatEvent
  * @see OrderInfo
  * @see Order
  */
 //TODO make finding order consistent. Some (eg handleClaimed) find the actual BazaarOrder object from userOrders, while others (eg handleFilled) just make a new OrderInfoContainer without finding the actual order
-public class ChatHandler {
+@Module
+public class ChatHandler extends BUListener {
 
     /**
      * Registers the chat message listener that parses bazaar messages.
@@ -46,26 +49,23 @@ public class ChatHandler {
      * posts appropriate events to the event bus.
      * </p>
      */
-    @RunOnInit
-    public static void registerBazaarChat() {
-        ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
-            if (message.getString().contains("Error")) {
-                return;
+    @Subscription
+    private void onChat(ChatReceivedEvent.Post event) {
+        Component message = event.getComponent();
+
+        if (message.getString().contains("Error")) return;
+
+        ArrayList<Component> siblings = new ArrayList<>(message.getSiblings());
+        getMessageType(message, siblings).ifPresent(messageType -> {
+            switch (messageType) {
+                case ORDER_CREATED -> handleOrderCreated(siblings);
+                case ORDER_FILLED -> handleFilled(message);
+                case ORDER_CLAIMED -> handleClaimed(siblings);
+                case INSTA_SELL -> handleInstaSell(siblings);
+                case INSTA_BUY -> handleInstaBuy(siblings);
+                case ORDER_FLIPPED -> handleFlip(siblings);
+                case ORDER_CANCELLED -> handleCancelled(siblings);
             }
-
-            ArrayList<Component> siblings = new ArrayList<>(message.getSiblings());
-
-            getMessageType(message, siblings).ifPresent(messageType -> {
-                switch (messageType) {
-                    case ORDER_CREATED -> handleOrderCreated(siblings);
-                    case ORDER_FILLED -> handleFilled(message);
-                    case ORDER_CLAIMED -> handleClaimed(siblings);
-                    case INSTA_SELL -> handleInstaSell(siblings);
-                    case INSTA_BUY -> handleInstaBuy(siblings);
-                    case ORDER_FLIPPED -> handleFlip(siblings);
-                    case ORDER_CANCELLED -> handleCancelled(siblings);
-                }
-            });
         });
     }
 
@@ -167,7 +167,7 @@ public class ChatHandler {
         parseOrderData(siblings, volumeIndex, nameIndex, priceIndex, transactionType.getSide()).ifPresent(order -> {
             order.setTransactionType(transactionType);
 
-            EVENT_BUS.post(new BazaarChatEvent<>(eventType, order));
+            new BazaarChatEvent<>(eventType, order).post(SkyBlockAPI.getEventBus());
         });
     }
 
@@ -235,7 +235,7 @@ public class ChatHandler {
             TransactionType.Side side = messageString.contains("Sell Offer") ? TransactionType.Side.SELL: TransactionType.Side.BUY;
             OrderInfo item = new OrderInfo(itemName, side, null, volume, null, null);
 
-            EVENT_BUS.post(new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_FILLED, item));
+            new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_FILLED, item).post(SkyBlockAPI.getEventBus());
         } catch (NumberFormatException e) {
             Util.notifyError("Invalid volume format in FILLED message: " + messageString, e);
         } catch (Exception e) {
@@ -266,7 +266,7 @@ public class ChatHandler {
         TransactionType.Side transactionType = isSellOrder ? TransactionType.Side.SELL: TransactionType.Side.BUY;
         Order orderToAdd = new Order(itemName, volume, price, transactionType, null);
 
-        EVENT_BUS.post(new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_CREATED, orderToAdd));
+        new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_CREATED, orderToAdd).post(SkyBlockAPI.getEventBus());
     }
 
     /**
@@ -311,7 +311,7 @@ public class ChatHandler {
 
         PlayerActionUtil.notifyAll(order.getName() + " has claimed " + order.getAmountClaimed() + " out of " + order.getVolume(), NotificationType.ORDERDATA);
 
-        EVENT_BUS.post(new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_CLAIMED, order));
+        new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_CLAIMED, order).post(SkyBlockAPI.getEventBus());
     }
 
     /**

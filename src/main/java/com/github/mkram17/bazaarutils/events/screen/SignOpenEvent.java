@@ -1,7 +1,8 @@
-package com.github.mkram17.bazaarutils.events;
+package com.github.mkram17.bazaarutils.events.screen;
 
 import lombok.Getter;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
+import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 
 /**
  * Event fired when a sign editing screen is opened.
@@ -12,20 +13,12 @@ import net.minecraft.client.gui.screens.inventory.SignEditScreen;
  *
  * 
  * @see SignEditScreen
- * @see com.github.mkram17.bazaarutils.mixin.MixinSignOpen
+ * @see com.github.mkram17.bazaarutils.events.screen.handlers.SignEventHandler
  */
-public class SignOpenEvent {
-    /**
-     * The sign editing screen being opened.
-     */
+public class SignOpenEvent extends SkyBlockEvent {
     @Getter
     private final SignEditScreen signEditScreen;
 
-    /**
-     * Creates a new SignOpenEvent.
-     *
-     * @param signEditScreen the sign editing screen being opened
-     */
     public SignOpenEvent(SignEditScreen signEditScreen) {
         this.signEditScreen = signEditScreen;
     }
