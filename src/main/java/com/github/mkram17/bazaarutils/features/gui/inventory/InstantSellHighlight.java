@@ -19,8 +19,8 @@ public class InstantSellHighlight implements AbstractItemModifier {
     }
 
     @Override
-    public boolean appliesToScreen(ScreenContext context) {
-        return context.isAnyOf(BazaarScreens.MAIN_PAGE, BazaarScreens.ITEMS_GROUP_PAGE, BazaarScreens.ITEM_PAGE);
+    public boolean appliesToScreen(Optional<ScreenContext> context) {
+        return context.map(it -> it.isAnyOf(BazaarScreens.MAIN_PAGE, BazaarScreens.ITEMS_GROUP_PAGE, BazaarScreens.ITEM_PAGE)).orElse(false);
     }
 
     public InstantSellHighlight() {

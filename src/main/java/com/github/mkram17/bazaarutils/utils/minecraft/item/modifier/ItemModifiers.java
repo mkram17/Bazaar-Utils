@@ -147,7 +147,7 @@ public class ItemModifiers extends BUListener {
         List<AbstractItemModifier> matching = candidates.stream()
                 .filter(ToggleableFeature::isEnabled)
                 .filter(modifier -> modifier.getModifierSources().contains(source))
-                .filter(modifier -> context.map(modifier::appliesToScreen).orElse(true))
+                .filter(modifier -> modifier.appliesToScreen(context))
                 .filter(modifier -> modifier.appliesTo(stack, slot))
                 .toList();
 
@@ -260,7 +260,7 @@ public class ItemModifiers extends BUListener {
 
         for (AbstractItemModifier modifier : MODIFIERS) {
             if (!modifier.isEnabled() || !modifier.appliesTo(stack)) continue;
-            if (!context.map(modifier::appliesToScreen).orElse(true)) continue;
+            if (!modifier.appliesToScreen(context)) continue;
 
             result = modifier.modifyLore(stack, lines, result);
             if (result.modified()) anyModified = true;

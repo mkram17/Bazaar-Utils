@@ -61,7 +61,7 @@ public interface AbstractItemModifier extends ToggleableFeature {
         return ModifierSource.ALL;
     }
 
-    default boolean appliesToScreen(ScreenContext context) {
+    default boolean appliesToScreen(Optional<ScreenContext> context) {
         return true;
     }
 
