@@ -40,10 +40,12 @@ public class BazaarUtils implements ClientModInitializer {
     public static EventBus EVENT_BUS = SkyBlockAPI.getEventBus();
     public static ScheduledExecutorService BUExecutorService = Executors.newSingleThreadScheduledExecutor();
 
+    static {
+        BazaarUtilsPreInitModules.init();
+    }
+
     @Override
     public void onInitializeClient() {
-        BazaarUtilsPreInitModules.init();
-
         BUCompatibilityHelper.initializePatches();
 
         getModProperties();
