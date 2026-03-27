@@ -3,9 +3,9 @@ package com.github.mkram17.bazaarutils.utils.minecraft.components;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
 import com.mojang.serialization.Codec;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 
 @PreInitModule
