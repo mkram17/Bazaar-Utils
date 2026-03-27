@@ -1,28 +1,34 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
-import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.events.SlotClickEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.screen.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.ItemGroups;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
-import meteordevelopment.orbit.EventHandler;
-import net.minecraft.core.component.DataComponents;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.ItemGroups;
+import net.minecraft.core.component.DataComponentPatch;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.MustBeContainer;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
+import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.util.List;
 import java.util.Optional;
 
-@Module
+@ItemModifier
 public class ToggleBookmarkButton extends BUListener implements ItemButton {
     @Override
     public int getSlotIndex() {
@@ -34,47 +40,44 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
         return ItemRef.of(BookmarkUtil.currentBookmarkOpt::isEmpty, ItemGroups.BOOKMARKED_STATE_GROUP);
     }
 
-    private boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.ITEM_PAGE);
+    @Override
+    public boolean appliesToScreen(ScreenContext context) {
+        return context.isAnyOf(BazaarScreens.ITEM_PAGE);
     }
 
     public ToggleBookmarkButton() {}
 
-    private Optional<String> resolveCurrentItemName() {
-        return ScreenManager.getInstance()
-                .current()
-                .flatMap(BazaarScreenHandler::getDisplayItemName);
+    @Override
+    public Optional<Component> nameOverride(ItemStack stack) {
+        boolean bookmarked = BookmarkUtil.currentBookmarkOpt.isPresent();
+
+        return Optional.of(Component.literal(bookmarked
+                ? "Remove " + BookmarkUtil.currentBookmarkOpt.get().name() + " Bookmark"
+                : "Bookmark " + resolveCurrentItemName().orElse("?")));
     }
 
     @Override
-    public ItemStack getReplacementItem(int size) {
+    public Optional<DataComponentPatch> patchComponents(ItemStack stack) {
         boolean bookmarked = BookmarkUtil.currentBookmarkOpt.isPresent();
 
-        ItemStack stack = ItemButton.super.getReplacementItem(size);
-
-        stack.set(
-                DataComponents.CUSTOM_NAME,
-                Component.literal(bookmarked
-                        ? "Remove " + BookmarkUtil.currentBookmarkOpt.get().name() + " Bookmark"
-                        : "Bookmark " + resolveCurrentItemName().orElse("?")));
-
-        stack.set(CustomDataComponents.CUSTOM_SIZE, bookmarked ? "⃠ " : "★");
-
-        return stack;
+        return Optional.of(DataComponentPatch.builder()
+                .set(CustomDataComponents.CUSTOM_SIZE, bookmarked ? "⃠ " : "★")
+                .build());
     }
 
-    @EventHandler
-    private void onReplaceItemEvent(ReplaceItemEvent event) {
-        if (!shouldReplaceItem(event) || !inCorrectScreen()) return;
-
+    @Subscription
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(BazaarScreenType.ITEM_PAGE)
+    private void onContainerInitialized(ContainerInitializedEvent event) {
         resolveCurrentItemName().ifPresent(name -> BookmarkUtil.currentBookmarkOpt = BookmarkUtil.findMatchingBookmark(name));
-
-        event.setReplacement(getReplacementItem());
     }
 
-    @EventHandler
+    @Subscription
+    @OnlyOnSkyBlock
+    @MustBeContainer
+    @OnlyBazaarScreen(BazaarScreenType.ITEM_PAGE)
     private void onClick(SlotClickEvent event) {
-        if (!wasButtonClicked(event) || !inCorrectScreen()) return;
+        if (!wasButtonClicked(event)) return;
 
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
 
@@ -103,6 +106,13 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
             BookmarkUtil.currentBookmarkOpt = Optional.of(newBookmark);
         }
 
+        retriggerModifier();
         BookmarkUtil.saveBookmarks();
+    }
+
+    private static Optional<String> resolveCurrentItemName() {
+        return ScreenManager.getInstance()
+                .current()
+                .flatMap(BazaarScreenHandler::getDisplayItemName);
     }
 }
