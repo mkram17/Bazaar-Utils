@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
+import tech.thatgravyboat.skyblockapi.api.item.VisualItemAccessorKt;
 
 import java.util.List;
 import java.util.Optional;
@@ -139,7 +140,10 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
                     if (screen == null) return false;
 
                     for (Slot slot : screen.getMenu().slots) {
-                        if (slot.getContainerSlot() == info.slotIndex() && slot.getItem() == stack) return true;
+                        if (slot.getContainerSlot() != info.slotIndex()) continue;
+                        ItemStack original = slot.getItem();
+                        ItemStack visual = VisualItemAccessorKt.getVisualItem(original);
+                        if (original == stack || (visual != null && visual == stack)) return true;
                     }
 
                     return false;
