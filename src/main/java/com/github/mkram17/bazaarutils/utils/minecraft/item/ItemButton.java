@@ -15,7 +15,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.AbstractItemModifier;
 import org.jetbrains.annotations.Nullable;
-import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +52,11 @@ public interface ItemButton extends AbstractItemModifier {
     @Override
     default List<ModifierSource> getModifierSources() {
         return List.of(ModifierSource.INVENTORY);
+    }
+
+    @Override
+    default Result onClick(ItemStack stack, int button) {
+        return onButtonClicked(button);
     }
 
     // Simple helper such that state changes on consumers may recompute the modifier

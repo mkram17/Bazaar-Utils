@@ -95,6 +95,10 @@ public interface AbstractItemModifier extends ToggleableFeature {
         return Optional.empty();
     }
 
+    default Result onClick(ItemStack stack, int button) {
+        return Result.UNMODIFIED;
+    }
+
     default Result modifyStack(ItemStack stack) {
         return Result.UNMODIFIED;
     }

@@ -40,7 +40,6 @@ import java.util.stream.Stream;
 
 @LateInitModule
 public class ItemModifiers extends BUListener {
-
     public static List<AbstractItemModifier> MODIFIERS;
     public static final WeakHashMap<ItemStack, List<AbstractItemModifier>> MODIFIED_ITEMS = new WeakHashMap<>();
 
@@ -202,6 +201,17 @@ public class ItemModifiers extends BUListener {
 
                 if (modifier.modifyStack(builder.build()).modified()) anyModified[0] = true;
             }
+
+            builder.onClick(button -> {
+                AbstractItemModifier.Result result = AbstractItemModifier.Result.UNMODIFIED;
+
+                for (AbstractItemModifier modifier : matching) {
+                    result = modifier.onClick(stack, button);
+                    if (!result.propagateFurther()) break;
+                }
+
+                return result.modified() ? kotlin.Unit.INSTANCE : null;
+            });
 
             // No applyDefaults here — indicator is tooltip-time, not visual-item-time
             return kotlin.Unit.INSTANCE;

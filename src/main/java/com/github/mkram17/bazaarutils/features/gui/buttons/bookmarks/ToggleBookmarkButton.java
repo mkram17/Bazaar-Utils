@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
-import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.screen.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
@@ -20,10 +19,8 @@ import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
-import tech.thatgravyboat.skyblockapi.api.events.base.predicates.MustBeContainer;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
-import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -65,23 +62,20 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
                 .build());
     }
 
+    @Override
+    public Result onButtonClicked(int button) {
+        SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
+
+        resolveCurrentItemName().ifPresent(this::toggleBookmark);
+
+        return Result.CONSUME;
+    }
+
     @Subscription
     @OnlyOnSkyBlock
     @OnlyBazaarScreen(BazaarScreenType.ITEM_PAGE)
     private void onContainerInitialized(ContainerInitializedEvent event) {
         resolveCurrentItemName().ifPresent(name -> BookmarkUtil.currentBookmarkOpt = BookmarkUtil.findMatchingBookmark(name));
-    }
-
-    @Subscription
-    @OnlyOnSkyBlock
-    @MustBeContainer
-    @OnlyBazaarScreen(BazaarScreenType.ITEM_PAGE)
-    private void onClick(SlotClickEvent event) {
-        if (!wasButtonClicked(event)) return;
-
-        SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
-
-        resolveCurrentItemName().ifPresent(this::toggleBookmark);
     }
 
     private void toggleBookmark(String name) {
