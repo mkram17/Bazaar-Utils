@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui;
 
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.InputHelper;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import net.minecraft.core.component.DataComponents;
@@ -102,7 +101,7 @@ public class BazaarScreens {
             .containerQuery("CANCEL_FILLED_BUY_ORDER", BazaarSlots.ORDER_OPTIONS.CANCEL_FILLED_BUY_ORDER::query)
             .build();
 
-    public static final ScreenType INSTANT_BUY = new ScreenType.Builder()
+    public static final ScreenType INSTANT_BUY_AMOUNT = new ScreenType.Builder()
             .name("INSTANT_BUY")
             .genericContainer()
             .containerTitle("➜ Inst")
@@ -136,11 +135,26 @@ public class BazaarScreens {
             .containerQuery("CANCEL_SELL_ORDER", BazaarSlots.ORDER_OPTIONS.CANCEL_SELL_ORDER::query)
             .build();
 
-    public static final ScreenType INSTANT_SELL = new ScreenType.Builder()
-            .name("INSTANT_SELL")
+    public static final ScreenType INSTANT_SELL_ITEM_AMOUNT = new ScreenType.Builder()
+            .name("INSTANT_SELL_ITEM_AMOUNT")
             .genericContainer()
             .containerTitle("➜ Inst")
-            .containerQuery("SELL_INVENTORY", BazaarSlots.INSTANT_SELL.SELL_INVENTORY::query)
+            .containerQuery("SELL_INVENTORY", BazaarSlots.INSTANT_SELL_ITEM.SELL_INVENTORY::query)
+            .build();
+
+    public static final ScreenType INSTANT_SELL_ITEM_CONFIRMATION = new ScreenType.Builder()
+            .name("INSTANT_SELL_ITEM_CONFIRMATION")
+            .genericContainer()
+            .containerTitle("Confirm")
+            .containerQuery("CONFIRM_SELL", BazaarSlots.INSTANT_SELL_ITEM.CONFIRM_SELL::query)
+            .build();
+
+
+    public static final ScreenType INSTANT_SELL_GROUP_CONFIRMATION = new ScreenType.Builder()
+            .name("INSTANT_SELL_GROUP_CONFIRMATION")
+            .genericContainer()
+            .containerTitle("Are you sure?")
+            .containerQuery("CONFIRM_SELL", BazaarSlots.INSTANT_SELL_GROUP.CONFIRM_SELL::query)
             .build();
 
     public static final Set<ScreenType> ALL = Set.of(
@@ -156,13 +170,13 @@ public class BazaarScreens {
             BUY_ORDER_CONFIRMATION,
             PENDING_BUY_ORDER_OPTIONS,
             COMPLETED_BUY_ORDER_OPTIONS,
-            INSTANT_BUY,
+            INSTANT_BUY_AMOUNT,
 
             SELL_ORDER_AMOUNT,
             SELL_ORDER_PRICE,
             SELL_ORDER_CONFIRMATION,
             SELL_ORDER_OPTIONS,
-            INSTANT_SELL
+            INSTANT_SELL_ITEM_AMOUNT
     );
 
     public static final Map<BazaarScreenType, ScreenType> ALL_MAP = Map.ofEntries(
@@ -176,12 +190,12 @@ public class BazaarScreens {
             Map.entry(BazaarScreenType.BUY_ORDER_CONFIRMATION, BUY_ORDER_CONFIRMATION),
             Map.entry(BazaarScreenType.PENDING_BUY_ORDER_OPTIONS, PENDING_BUY_ORDER_OPTIONS),
             Map.entry(BazaarScreenType.COMPLETED_BUY_ORDER_OPTIONS, COMPLETED_BUY_ORDER_OPTIONS),
-            Map.entry(BazaarScreenType.INSTANT_BUY, INSTANT_BUY),
+            Map.entry(BazaarScreenType.INSTANT_BUY, INSTANT_BUY_AMOUNT),
             Map.entry(BazaarScreenType.SELL_ORDER_AMOUNT, SELL_ORDER_AMOUNT),
             Map.entry(BazaarScreenType.SELL_ORDER_PRICE, SELL_ORDER_PRICE),
             Map.entry(BazaarScreenType.SELL_ORDER_CONFIRMATION, SELL_ORDER_CONFIRMATION),
             Map.entry(BazaarScreenType.SELL_ORDER_OPTIONS, SELL_ORDER_OPTIONS),
-            Map.entry(BazaarScreenType.INSTANT_SELL, INSTANT_SELL)
+            Map.entry(BazaarScreenType.INSTANT_SELL, INSTANT_SELL_ITEM_AMOUNT)
     );
 
     public static Optional<Double> findOptionAmount(ItemStack option) {

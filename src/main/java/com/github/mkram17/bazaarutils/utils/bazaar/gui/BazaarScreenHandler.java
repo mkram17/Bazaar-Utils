@@ -4,8 +4,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -81,7 +79,7 @@ public final class BazaarScreenHandler {
     public static String getItemNameFromTitle() {
         String containerName = ContainerManager.getContainerName();
 
-        if (ScreenManager.getInstance().isCurrent(BazaarScreens.INSTANT_BUY)) {
+        if (ScreenManager.getInstance().isCurrent(BazaarScreens.INSTANT_BUY_AMOUNT)) {
             return containerName.substring(0, containerName.indexOf("➜") - 1);
         }
 

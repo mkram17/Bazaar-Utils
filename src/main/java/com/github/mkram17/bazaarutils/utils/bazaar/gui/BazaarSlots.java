@@ -234,7 +234,6 @@ public class BazaarSlots {
                 )
         ),
 
-
         INPUT_FILLING_AMOUNT(new BazaarSlot(
                 new SlotLookup.IndexReference.FixedIndex(14),
                 (query) -> query
@@ -284,12 +283,38 @@ public class BazaarSlots {
     }
 
     @AllArgsConstructor
-    public enum INSTANT_SELL {
+    public enum INSTANT_SELL_ITEM {
         SELL_INVENTORY(new BazaarSlot(
                 new SlotLookup.IndexReference.FixedIndex(15),
                 (query) -> query
                         .itemType(Items.CHEST)
                         .withCustomName("Sell whole inventory!")
+                )
+        ),
+
+        CONFIRM_SELL(new BazaarSlot(
+                new SlotLookup.IndexReference.FixedIndex(13),
+                query -> query
+                        .itemType(Items.BARRIER)
+                        .withCustomName("WARNING")
+                )
+
+        );
+
+        public final BazaarSlot slot;
+
+        public ContainerQuery query(Container container) {
+            return slot.query(container);
+        }
+    }
+
+    @AllArgsConstructor
+    public enum INSTANT_SELL_GROUP {
+        CONFIRM_SELL(new BazaarSlot(
+                new SlotLookup.IndexReference.FixedIndex(11),
+                (query) -> query
+                        .itemType(Items.HOPPER)
+                        .withCustomName("Selling whole inventory")
                 )
         );
 

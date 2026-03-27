@@ -80,7 +80,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
 
     @Override
     protected boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.INSTANT_BUY);
+        return ScreenManager.getInstance().isCurrent(BazaarScreens.INSTANT_BUY_AMOUNT);
     }
 
     public InstantBuyAmountHelper(int slotIndex) {
