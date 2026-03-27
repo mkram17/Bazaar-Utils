@@ -1,38 +1,32 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
-import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.screen.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.mixin.AccessorScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
-import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
-
-public class WidgetManager {
+@LateInitModule
+public class WidgetManager extends BUListener {
     public record ScreenWidgetDimensions(int x, int y, int backgroundWidth) {}
 
-    @RunOnInit
-    public static void initialize() {
-        EVENT_BUS.subscribe(WidgetManager.class);
-    }
-
-    @EventHandler
-    private static void onScreenChange(ScreenChangeEvent event) {
+    @Subscription
+    private void onScreenChange(ScreenChangeEvent event) {
         if (event.getOldScreen() != null) removeWidgetsFrom(event.getOldScreen());
 
         // causes a flash when onChestLoaded removes and re-adds immediately after.
@@ -42,8 +36,8 @@ public class WidgetManager {
         addWidgetsTo(next);
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    private static void onChestLoaded(ChestLoadedEvent event) {
+    @Subscription(priority = Subscription.LOW)
+    private void onChestLoaded(ChestLoadedEvent event) {
         Screen screen = event.getGenericContainerScreen();
         removeWidgetsFrom(screen);
         addWidgetsTo(screen);

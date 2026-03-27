@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.data;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.APIUtil;
-import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -10,6 +10,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnIn
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.APIConversionUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
 import lombok.Getter;
+import tech.thatgravyboat.skyblockapi.api.SkyBlockAPI;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -124,7 +125,7 @@ public final class BazaarDataManager {
         currentReply = reply;
         consecutiveIdenticalSnapshots.set(0);
 
-        EVENT_BUS.post(new BazaarDataUpdateEvent(reply));
+        new BazaarDataUpdateEvent(reply).post(EVENT_BUS);
 
         if (previousSnapshotTs != -1) {
             PlayerActionUtil.notifyAll(

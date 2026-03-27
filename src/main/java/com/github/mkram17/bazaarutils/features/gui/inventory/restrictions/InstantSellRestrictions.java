@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;

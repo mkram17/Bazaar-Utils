@@ -3,9 +3,9 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.BazaarDataUpdateEvent;
-import com.github.mkram17.bazaarutils.events.UserOrdersChangeEvent;
-import com.github.mkram17.bazaarutils.events.listener.AbstractListener;
+import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.UserOrdersChangeEvent;
+import com.github.mkram17.bazaarutils.events.AbstractListener;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -15,17 +15,17 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import tech.thatgravyboat.skyblockapi.api.SkyBlockAPI;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.Optional;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
-
 
 //TODO figure out how to handle rounding with price
 //TODO use last viewed item in bazaar to help with finding accurate price instead of just chat message
@@ -53,7 +53,7 @@ public class Order extends OrderInfo implements AbstractListener {
 
     @Override
     public void subscribe() {
-        EVENT_BUS.subscribe(this);
+        EVENT_BUS.register(this);
     }
 
     private void startTracking() {
@@ -61,12 +61,12 @@ public class Order extends OrderInfo implements AbstractListener {
         subscribe();
     }
 
-    @EventHandler
+    @Subscription
     private void onDataUpdate(BazaarDataUpdateEvent event) {
         handleOutbidStatusChange();
     }
 
-    @EventHandler
+    @Subscription
     private void onUserOrderChange(UserOrdersChangeEvent event) {
         if (event.getChangeType() == UserOrdersChangeEvent.ChangeTypes.REMOVE || event.getOrder() != this) {
             return;
@@ -173,7 +173,7 @@ public class Order extends OrderInfo implements AbstractListener {
             PlayerActionUtil.notifyAll("Error removing " + name + " from user orders. Item couldn't be found.");
         }
 
-        EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.REMOVE, this));
+        new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.REMOVE, this).post(EVENT_BUS);
 
         UserOrdersStorage.INSTANCE.save();
     }

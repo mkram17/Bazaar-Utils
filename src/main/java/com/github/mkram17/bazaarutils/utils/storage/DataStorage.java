@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.events.util.EventPriorities;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.codecs.CodecGsonAdapter;
@@ -10,6 +9,7 @@ import com.google.gson.*;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.item.ItemStack;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -35,7 +35,7 @@ public class DataStorage<T> {
     private static int tickCounter = 0;
     private static final Set<DataStorage<?>> REQUIRES_SAVE = ConcurrentHashMap.newKeySet();
 
-    @RunOnInit(priority = EventPriorities.HIGH)
+    @RunOnInit(priority = Subscription.HIGH)
     public static void registerTickListener() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (++tickCounter >= 100) {

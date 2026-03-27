@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.mixin;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.screen.ScreenChangeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
@@ -10,6 +9,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 //for ScreenChangeEvent
 @Mixin(value = Minecraft.class)
@@ -20,6 +21,6 @@ public class MinecraftMixin {
 
     @Inject(method = "setScreen", at = @At("HEAD"))
     public void setScreen(Screen newScreen, CallbackInfo ci) {
-        BazaarUtils.EVENT_BUS.post(new ScreenChangeEvent(screen, newScreen));
+        new ScreenChangeEvent(screen, newScreen).post(EVENT_BUS);
     }
 }

@@ -2,6 +2,8 @@ package com.github.mkram17.bazaarutils.events;
 
 import lombok.Getter;
 
+import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
+
 /**
  * Interface for event listeners.
  * <p>
@@ -31,7 +33,9 @@ public abstract class BUListener implements AbstractListener {
         }
 
         isSubscribed = true;
+
         registerFabricEvents();
+        EVENT_BUS.register(this);
     }
 
     protected void registerFabricEvents() {}

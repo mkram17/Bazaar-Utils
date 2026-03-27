@@ -1,7 +1,5 @@
 package com.github.mkram17.bazaarutils.utils.annotations.autoregistration;
 
-import com.github.mkram17.bazaarutils.events.util.EventPriorities;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,7 +14,7 @@ import java.lang.annotation.Target;
 public @interface RunOnInit {
     /**
      * The priority of the initialization method. Lower values run first.
-     * @return the priority, defaults to 2.
+     * @return the priority, defaults to 0 (normal).
      */
-    EventPriorities priority() default EventPriorities.NORMAL;
+    int priority() default 0;
 }

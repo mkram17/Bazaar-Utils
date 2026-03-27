@@ -2,8 +2,7 @@ package com.github.mkram17.bazaarutils.features.gui.overlays;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.events.SlotClickEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
@@ -11,7 +10,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.Util;
-import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -21,6 +19,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -62,9 +62,9 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, Togg
         lines.add(poweredBy);
     }
 
-    @EventHandler
-    private void onClick(SlotClickEvent e){
-        if (!isEnabled() || !shouldShow() || e.isCancelled()) {
+    @Subscription
+    private void onClick(SlotClickEvent event) {
+        if (!isEnabled() || !shouldShow() || event.isCancelled()) {
             return;
         }
 
@@ -72,7 +72,7 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, Togg
             return;
         }
 
-        String itemName = sanitizeName(e.slot.getItem().getHoverName().getString());
+        String itemName = sanitizeName(event.getSlot().getItem().getHoverName().getString());
 
         if (!SHOW_CACHE.getOrDefault(itemName, false)) {
             return;
@@ -92,7 +92,7 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, Togg
             Minecraft.getInstance().setScreen(null);
         }, link, true));
 
-        e.cancel();
+        event.cancel();
     }
 
     @Override

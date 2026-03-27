@@ -2,12 +2,11 @@ package com.github.mkram17.bazaarutils;
 
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsItemModifiers;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
 import lombok.Getter;
-import meteordevelopment.orbit.EventBus;
-import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -17,6 +16,8 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
+import tech.thatgravyboat.skyblockapi.api.SkyBlockAPI;
+import tech.thatgravyboat.skyblockapi.api.events.base.EventBus;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -36,7 +37,7 @@ public class BazaarUtils implements ClientModInitializer {
     @Getter
     private static String updateNotes;
 
-    public static IEventBus EVENT_BUS = new EventBus();
+    public static EventBus EVENT_BUS = SkyBlockAPI.getEventBus();
     public static ScheduledExecutorService BUExecutorService = Executors.newSingleThreadScheduledExecutor();
 
     @Override

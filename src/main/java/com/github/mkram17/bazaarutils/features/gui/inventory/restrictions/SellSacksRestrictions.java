@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -48,7 +48,6 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
     protected List<RestrictionControl<?>> getRestrictors() {
         return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.SELL_SACKS);
     }
-
 
     public SellSacksRestrictions() {
         super("Sell Sacks Restrictions");

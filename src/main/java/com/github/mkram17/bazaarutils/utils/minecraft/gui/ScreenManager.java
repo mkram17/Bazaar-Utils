@@ -1,18 +1,18 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
-import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.screen.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import lombok.Getter;
-import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,6 +25,7 @@ import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,8 +40,7 @@ public class ScreenManager {
     public static void initialize() {
         BazaarScreens.initialize();
 
-        EVENT_BUS.subscribe(ScreenManager.class);
-
+        EVENT_BUS.register(instance);
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> instance.setCurrentScreen(screen));
     }
 
@@ -85,8 +85,8 @@ public class ScreenManager {
      */
     private boolean expectingServerFollowUp = false;
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    private static void onScreenChange(ScreenChangeEvent event) {
+    @Subscription(priority = Subscription.HIGHEST)
+    private void onScreenChange(ScreenChangeEvent event) {
         Screen next = event.getNewScreen();
         Screen prev = event.getOldScreen();
 
@@ -120,8 +120,8 @@ public class ScreenManager {
         return screen instanceof SignEditScreen;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    private static void onChestLoaded(ChestLoadedEvent event) {
+    @Subscription(priority = Subscription.HIGHEST)
+    private void onChestLoaded(ChestLoadedEvent event) {
         ContainerManager.onChestLoaded(event);
 
         ContainerScreen screen = event.getGenericContainerScreen();
@@ -147,16 +147,10 @@ public class ScreenManager {
         ScreenSnapshot snapshot = new ScreenSnapshot(screen, matchType(screen).orElse(null));
 
         ScreenSnapshot head = history.peekFirst();
-        if (head != null && head.screen() == screen) {
-            if (head.type() == null && snapshot.type() != null) {
-                history.removeFirst();
-                history.addFirst(snapshot);
-//                logHistory("RETYPE " + typeLabel(snapshot.type()));
-                logHistoryCompact("RETYPE");
-            }
-
-            return;
-        }
+        // ScreenEvents.AFTER_INIT fires after setScreen — same screen instance arriving twice is a no-op
+        // we no longer check for a RETYPE op as the cases were we fall to that are generally ones where
+        // we depend on off ContainerQuery, and that solely is handled by #onChestLoaded
+        if (head != null && head.screen() == screen) return;
 
         if (history.size() >= MAX_HISTORY) history.removeLast();
         history.addFirst(snapshot);
@@ -265,7 +259,7 @@ public class ScreenManager {
     public static <T extends AbstractContainerMenu> Optional<T> getCurrentScreenHandler(Class<T> type) {
         Minecraft client = Minecraft.getInstance();
 
-        if (client == null || client.player == null) {
+        if (client.player == null) {
             return Optional.empty();
         }
 
@@ -277,7 +271,7 @@ public class ScreenManager {
     public static <T extends AbstractContainerScreen<?>> Optional<T> getCurrentlyHandledScreen(Class<T> type) {
         Minecraft client = Minecraft.getInstance();
 
-        if (client == null || client.player == null) {
+        if (client.player == null) {
             return Optional.empty();
         }
 
@@ -317,12 +311,6 @@ public class ScreenManager {
 
         try {
             Minecraft client = Minecraft.getInstance();
-
-            if (client == null) {
-                Util.notifyError("Client is null", new Throwable());
-
-                return;
-            }
 
             client.execute(ScreenManager::customCloseHandledScreen);
         } catch (Exception exception) {

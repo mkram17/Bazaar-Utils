@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.container;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;

@@ -1,30 +1,31 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.sign;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.events.SignOpenEvent;
+import com.github.mkram17.bazaarutils.events.screen.SignOpenEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
+
 public class SignManager {
     public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
-        BazaarUtils.EVENT_BUS.subscribe(new Object() {
-            @EventHandler
+        EVENT_BUS.register(new Object() {
+            @Subscription(priority = Subscription.HIGHEST)
             private void onSignOpen(SignOpenEvent event) {
                 try {
                     action.accept(event);
                 } finally {
-                    BazaarUtils.EVENT_BUS.unsubscribe(this);
+                    EVENT_BUS.unregister(this);
                 }
             }
         });

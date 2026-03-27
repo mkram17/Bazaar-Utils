@@ -1,8 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
-import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.events.SlotClickEvent;
+import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.screen.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
@@ -13,6 +12,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.util.Optional;
 

@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.UserOrdersChangeEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -64,7 +64,7 @@ public final class OrderUtil {
         }
         UserOrdersStorage.INSTANCE.get().add(order);
         PlayerActionUtil.notifyAll("Added order: § " + order, NotificationType.ORDERDATA);
-        EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.ADD, order));
+        new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.ADD, order).post(EVENT_BUS);
         UserOrdersStorage.INSTANCE.save();
     }
 
