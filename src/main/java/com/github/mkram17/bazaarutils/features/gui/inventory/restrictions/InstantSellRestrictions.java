@@ -1,13 +1,13 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.SellParser;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-//TODO maybe color chest if it is locked
 @Module
 public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestrictions.InstantSellState> {
     public record InstantSellState(
@@ -60,19 +59,13 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
     @Override
     protected Optional<InstantSellState> makeState(ChestLoadedEvent event) {
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
-
         if (context.isEmpty()) return Optional.empty();
 
         Optional<ItemInfo> instantSellItem = BazaarScreenHandler.getInstantSellItem(context.get());
-
         if (instantSellItem.isEmpty()) return Optional.empty();
 
-        List<OrderInfo> orders = context.get().isAnyOf(BazaarScreens.ITEM_PAGE)
-                ? InstantSellParser.parseItemPageOrder(instantSellItem.get().itemStack())
-                        .map(InstantSellParser.InstantSellResult::items)
-                        .orElse(List.of())
-                : InstantSellParser.parseOrders(instantSellItem.get().itemStack())
-                        .items();
+        List<OrderInfo> orders = SellParser.InstantSell.orders();
+        if (orders.isEmpty()) return Optional.empty();
 
         List<RestrictionControl<?>> triggered = getRestrictors().stream()
                 .filter(control -> control.anyMatch(orders))

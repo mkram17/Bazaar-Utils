@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.SellParser;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
@@ -61,14 +62,13 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
     @Override
     protected Optional<SellSacksState> makeState(ChestLoadedEvent event) {
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
-
         if (context.isEmpty()) return Optional.empty();
 
         Optional<ItemInfo> sellSacksItem = BazaarScreenHandler.getSellSacksItem(context.get());
-
         if (sellSacksItem.isEmpty()) return Optional.empty();
 
-        SellSacksParser.SellSacksResult result = SellSacksParser.parseOrders(sellSacksItem.get().itemStack());
+        SellSacksParser.SellSacksResult result = SellParser.SellSacks.getResult();
+        if (result == null) return Optional.empty();
 
         Set<RestrictionControl<?>> triggered = new LinkedHashSet<>(getRestrictors().stream()
                 .filter(control -> control.anyMatch(result.items()))
