@@ -60,7 +60,7 @@ public class ItemModifiers extends BUListener {
     @OnlyOnSkyBlock
     @MustBeContainer
     private void onContainerChange(InventoryChangeEvent event) {
-        tryModify(event.getItem(), AbstractItemModifier.ModifierSource.INVENTORY);
+        tryModify(event.getItem(), AbstractItemModifier.ModifierSource.INVENTORY, event.getSlot());
     }
 
     @Subscription
@@ -121,20 +121,30 @@ public class ItemModifiers extends BUListener {
     }
 
     public static void tryModify(ItemStack stack) {
-        tryModify(stack, AbstractItemModifier.ModifierSource.PLAYER_INVENTORY);
+        tryModify(stack, AbstractItemModifier.ModifierSource.PLAYER_INVENTORY, null, List.of());
     }
 
     public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source) {
-        tryModify(stack, source, null);
+        tryModify(stack, source, null, List.of());
     }
 
     public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source, @Nullable Slot slot) {
-        if (stack.isEmpty()) return;
-        if (MODIFIED_ITEMS.containsKey(stack)) return;
+        tryModify(stack, source, slot, List.of());
+    }
 
+    public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source, @Nullable Slot slot, List<AbstractItemModifier> extra) {
+        if (stack.isEmpty()) return;
+
+        ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
+        if (MODIFIED_ITEMS.containsKey(stack) || (visual != null && MODIFIED_ITEMS.containsKey(visual))) return;
+
+        List<AbstractItemModifier> candidates = extra.isEmpty() ? MODIFIERS :
+                Stream.concat(MODIFIERS.stream(), extra.stream())
+                        .sorted(Comparator.comparingInt(AbstractItemModifier::getPriority))
+                        .toList();
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
 
-        List<AbstractItemModifier> matching = MODIFIERS.stream()
+        List<AbstractItemModifier> matching = candidates.stream()
                 .filter(ToggleableFeature::isEnabled)
                 .filter(modifier -> modifier.getModifierSources().contains(source))
                 .filter(modifier -> context.map(modifier::appliesToScreen).orElse(true))
