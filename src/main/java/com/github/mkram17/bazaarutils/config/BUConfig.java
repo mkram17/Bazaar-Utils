@@ -9,6 +9,7 @@ import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.AbstractItemModifier;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 
 
@@ -67,4 +68,14 @@ public final class BUConfig {
             translation = "bazaarutils.config.bazaar_flipper_account_upgrade.hint"
     )
     public static PlayerAccountUpgrades.BazaarFlipper USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE = PlayerAccountUpgrades.BazaarFlipper.NOT_UPGRADED;
+
+    @ConfigEntry(
+            id = "modify_indicator",
+            translation = "bazaarutils.config.modify_indicator.label"
+    )
+    @Comment(
+            value = "Items modified by Bazaar Utils will have a small indicator. Customize how it appears.",
+            translation = "bazaarutils.config.modify_indicator.hint"
+    )
+    public static AbstractItemModifier.BazaarUtilsModifyIndicator MODIFY_INDICATOR = AbstractItemModifier.BazaarUtilsModifyIndicator.PREFIX;
 }

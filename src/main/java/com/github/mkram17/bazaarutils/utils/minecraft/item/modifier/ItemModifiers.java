@@ -7,7 +7,7 @@ import com.github.mkram17.bazaarutils.generated.BazaarUtilsItemModifiers;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
-import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -106,7 +106,7 @@ public class ItemModifiers extends BUListener {
         if (MODIFIED_ITEMS.containsKey(stack)) return;
 
         List<AbstractItemModifier> matching = MODIFIERS.stream()
-                .filter(BUToggleableFeature::isEnabled)
+                .filter(ToggleableFeature::isEnabled)
                 .filter(modifier -> {
                     Optional<ScreenContext> context = ScreenManager.getInstance().current();
 
