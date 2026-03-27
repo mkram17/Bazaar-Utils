@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.utils.minecraft.item.modifier;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsItemModifiers;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
@@ -20,10 +21,14 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.TooltipDisplay;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.MustBeContainer;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
@@ -81,6 +86,24 @@ public class ItemModifiers extends BUListener {
         });
     }
 
+    // Some DataTypes/ItemModifiers depend on the ChestLoadedEvent to have fired before they
+    // can assert their data. InventoryChangeEvent fires before ChestLoadedEvent,
+    // so those stacks are skipped on first pass. This sweeps unmodified
+    // slots at LOW priority — after all parsers have stamped their components.
+    @Subscription(priority = Subscription.LOW)
+    @OnlyOnSkyBlock
+    private void onChestLoaded(ChestLoadedEvent event) {
+        for (Slot slot : event.getSlots()) {
+            if (!slot.hasItem() || MODIFIED_ITEMS.containsKey(slot.getItem())) continue;
+
+            AbstractItemModifier.ModifierSource source = (slot.container instanceof Inventory)
+                    ? slotToSource(slot.getContainerSlot())
+                    : AbstractItemModifier.ModifierSource.INVENTORY;
+
+            tryModify(slot.getItem(), source, slot);
+        }
+    }
+
     private static void reapplyInventory(@NotNull LocalPlayer player) {
         var inv = player.getInventory();
 
@@ -102,18 +125,20 @@ public class ItemModifiers extends BUListener {
     }
 
     public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source) {
+        tryModify(stack, source, null);
+    }
+
+    public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source, @Nullable Slot slot) {
         if (stack.isEmpty()) return;
         if (MODIFIED_ITEMS.containsKey(stack)) return;
 
+        Optional<ScreenContext> context = ScreenManager.getInstance().current();
+
         List<AbstractItemModifier> matching = MODIFIERS.stream()
                 .filter(ToggleableFeature::isEnabled)
-                .filter(modifier -> {
-                    Optional<ScreenContext> context = ScreenManager.getInstance().current();
-
-                    return context.map(modifier::appliesToScreen).orElse(true);
-                })
                 .filter(modifier -> modifier.getModifierSources().contains(source))
-                .filter(modifier -> modifier.appliesTo(stack))
+                .filter(modifier -> context.map(modifier::appliesToScreen).orElse(true))
+                .filter(modifier -> modifier.appliesTo(stack, slot))
                 .toList();
 
         if (matching.isEmpty()) return;
@@ -122,6 +147,11 @@ public class ItemModifiers extends BUListener {
 
         VisualItemAccessorKt.replaceVisually(stack, builder -> {
             builder.copyFrom(stack);
+
+            TooltipDisplay existing = stack.get(DataComponents.TOOLTIP_DISPLAY);
+            if (existing != null) {
+                builder.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, existing.hiddenComponents()));
+            }
 
             for (AbstractItemModifier modifier : matching) {
                 modifier.nameOverride(stack).ifPresent(name -> {

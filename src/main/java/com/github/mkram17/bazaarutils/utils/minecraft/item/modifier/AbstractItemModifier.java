@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.teamresourceful.resourcefulconfig.api.types.info.Translatable;
 import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
@@ -62,6 +63,10 @@ public interface AbstractItemModifier extends ToggleableFeature {
 
     default boolean appliesToScreen(ScreenContext context) {
         return true;
+    }
+
+    default boolean appliesTo(ItemStack stack, @Nullable Slot slot) {
+        return appliesTo(stack);
     }
 
     boolean appliesTo(ItemStack stack);
