@@ -160,6 +160,7 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
         return withMerger(lore, merger -> {
             merger.copy(); // item name
             merger.add(Component.literal("Safety clicks remaining: " + remaining).withStyle(style -> style.withColor(ChatFormatting.YELLOW).withItalic(false)));
+            merger.add(Component.literal(""));
 
             return Result.MODIFIED;
         });
