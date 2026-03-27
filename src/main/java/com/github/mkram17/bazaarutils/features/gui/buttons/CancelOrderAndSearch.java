@@ -22,6 +22,11 @@ public class CancelOrderAndSearch extends BUListener implements ItemButton {
         return ItemRef.of(Items.BLUE_TERRACOTTA);
     }
 
+    @Override
+    public Result onButtonClicked(int button) {
+        return null;
+    }
+
     @Getter
     private transient ItemStack replacementItem;
 
