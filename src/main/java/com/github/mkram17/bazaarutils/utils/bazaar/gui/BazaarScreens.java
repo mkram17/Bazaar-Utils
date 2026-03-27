@@ -165,6 +165,25 @@ public class BazaarScreens {
             INSTANT_SELL
     );
 
+    public static final Map<BazaarScreenType, ScreenType> ALL_MAP = Map.ofEntries(
+            Map.entry(BazaarScreenType.MAIN_PAGE, MAIN_PAGE),
+            Map.entry(BazaarScreenType.SETTINGS_PAGE, SETTINGS_PAGE),
+            Map.entry(BazaarScreenType.ORDERS_PAGE, ORDERS_PAGE),
+            Map.entry(BazaarScreenType.ITEM_PAGE, ITEM_PAGE),
+            Map.entry(BazaarScreenType.ITEMS_GROUP_PAGE, ITEMS_GROUP_PAGE),
+            Map.entry(BazaarScreenType.BUY_ORDER_AMOUNT, BUY_ORDER_AMOUNT),
+            Map.entry(BazaarScreenType.BUY_ORDER_PRICE, BUY_ORDER_PRICE),
+            Map.entry(BazaarScreenType.BUY_ORDER_CONFIRMATION, BUY_ORDER_CONFIRMATION),
+            Map.entry(BazaarScreenType.PENDING_BUY_ORDER_OPTIONS, PENDING_BUY_ORDER_OPTIONS),
+            Map.entry(BazaarScreenType.COMPLETED_BUY_ORDER_OPTIONS, COMPLETED_BUY_ORDER_OPTIONS),
+            Map.entry(BazaarScreenType.INSTANT_BUY, INSTANT_BUY),
+            Map.entry(BazaarScreenType.SELL_ORDER_AMOUNT, SELL_ORDER_AMOUNT),
+            Map.entry(BazaarScreenType.SELL_ORDER_PRICE, SELL_ORDER_PRICE),
+            Map.entry(BazaarScreenType.SELL_ORDER_CONFIRMATION, SELL_ORDER_CONFIRMATION),
+            Map.entry(BazaarScreenType.SELL_ORDER_OPTIONS, SELL_ORDER_OPTIONS),
+            Map.entry(BazaarScreenType.INSTANT_SELL, INSTANT_SELL)
+    );
+
     public static Optional<Double> findOptionAmount(ItemStack option) {
         ItemLore lore = option.getComponents().get(DataComponents.LORE);
 
