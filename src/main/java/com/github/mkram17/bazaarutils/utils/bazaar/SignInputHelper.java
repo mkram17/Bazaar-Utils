@@ -268,7 +268,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 }
                 case ORDER -> {
                     if (getTransactionType().isBuy()) {
-                        int amountCanAfford = (int) (state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()));
+                        int amountCanAfford = (int) Math.min(state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()), 71680);
 
                         yield BazaarScreens.findBuyOrderAmountLimit(state.inputSign().itemStack())
                                 .map(limit -> Math.min(amountCanAfford, limit))

@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
@@ -17,6 +18,7 @@ import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvide
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Getter
@@ -79,8 +81,8 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
     }
 
     @Override
-    protected boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.INSTANT_BUY_AMOUNT);
+    public boolean appliesToScreen(Optional<ScreenContext> context) {
+        return context.map(it -> it.isAnyOf(BazaarScreens.INSTANT_BUY_AMOUNT)).orElse(false);
     }
 
     public InstantBuyAmountHelper(int slotIndex) {

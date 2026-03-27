@@ -9,6 +9,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
@@ -19,6 +20,7 @@ import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvide
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Getter
@@ -72,8 +74,8 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implem
     }
 
     @Override
-    protected boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.SELL_ORDER_PRICE);
+    public boolean appliesToScreen(Optional<ScreenContext> context) {
+        return context.map(it -> it.isAnyOf(BazaarScreens.SELL_ORDER_PRICE)).orElse(false);
     }
 
     public SellOfferPriceHelper(int slotIndex, PricingPosition pricingPosition) {

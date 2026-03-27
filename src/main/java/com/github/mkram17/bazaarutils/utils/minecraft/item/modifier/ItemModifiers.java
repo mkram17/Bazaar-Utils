@@ -12,6 +12,7 @@ import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.google.common.collect.MapMaker;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -53,6 +54,16 @@ public class ItemModifiers extends BUListener {
                 .map(it -> (AbstractItemModifier) it)
                 .sorted(Comparator.comparingInt(AbstractItemModifier::getPriority))
                 .toList();
+    }
+
+    private static final Set<AbstractItemModifier> DYNAMIC_MODIFIERS = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
+
+    public static void registerDynamic(AbstractItemModifier modifier) {
+        DYNAMIC_MODIFIERS.add(modifier);
+    }
+
+    public static void unregisterDynamic(AbstractItemModifier modifier) {
+        DYNAMIC_MODIFIERS.remove(modifier);
     }
 
     @Subscription
@@ -120,27 +131,22 @@ public class ItemModifiers extends BUListener {
     }
 
     public static void tryModify(ItemStack stack) {
-        tryModify(stack, AbstractItemModifier.ModifierSource.PLAYER_INVENTORY, null, List.of());
+        tryModify(stack, AbstractItemModifier.ModifierSource.PLAYER_INVENTORY, null);
     }
 
     public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source) {
-        tryModify(stack, source, null, List.of());
+        tryModify(stack, source, null);
     }
-
     public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source, @Nullable Slot slot) {
-        tryModify(stack, source, slot, List.of());
-    }
-
-    public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source, @Nullable Slot slot, List<AbstractItemModifier> extra) {
         if (stack.isEmpty()) return;
 
         ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
         if (MODIFIED_ITEMS.containsKey(stack) || (visual != null && MODIFIED_ITEMS.containsKey(visual))) return;
 
-        List<AbstractItemModifier> candidates = extra.isEmpty() ? MODIFIERS :
-                Stream.concat(MODIFIERS.stream(), extra.stream())
-                        .sorted(Comparator.comparingInt(AbstractItemModifier::getPriority))
-                        .toList();
+        List<AbstractItemModifier> candidates = Stream.concat(MODIFIERS.stream(), DYNAMIC_MODIFIERS.stream())
+                .sorted(Comparator.comparingInt(AbstractItemModifier::getPriority))
+                .toList();
+
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
 
         List<AbstractItemModifier> matching = candidates.stream()
