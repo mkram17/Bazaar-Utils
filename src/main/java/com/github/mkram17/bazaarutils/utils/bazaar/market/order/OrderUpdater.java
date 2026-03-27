@@ -10,6 +10,7 @@ import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +24,7 @@ import java.util.Optional;
 
 @LateInitModule
 public class OrderUpdater extends BUListener {
-    private static Container lowerChestInventory;
+    private static List<Slot> containerSlots = List.of();
 
     private static final String PREFIX_BUY = "BUY";
     private static final String PREFIX_SELL = "SELL";
@@ -40,15 +41,10 @@ public class OrderUpdater extends BUListener {
 
     @Subscription(priority = Subscription.HIGH)
     public void onGUI(ChestLoadedEvent event) {
-        if (!ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
-            return;
-        }
+        if (!ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) return;
 
-        lowerChestInventory = event.getLowerChestInventory();
-
-        List<ItemStack> allInventoryStacks = event.getItemStacks();
-        List<ItemStack> orderStacks = extractOrderStacks(allInventoryStacks);
-
+        containerSlots = event.getContainerSlots();
+        List<ItemStack> orderStacks = extractOrderStacks(event.getContainerItems());
         updateWatchedOrders(orderStacks);
     }
 
@@ -286,13 +282,10 @@ public class OrderUpdater extends BUListener {
     }
 
     private static int mapScreenIndexToInventoryIndex(ItemStack target) {
-        if (lowerChestInventory == null) return -1;
-        for (int i = 0; i < lowerChestInventory.getContainerSize(); i++) {
-            ItemStack current = lowerChestInventory.getItem(i);
-            if (!current.isEmpty() && current.equals(target)) {
-                return i;
-            }
-        }
-        return -1;
+        return containerSlots.stream()
+                .filter(slot -> !slot.getItem().isEmpty() && slot.getItem().equals(target))
+                .findFirst()
+                .map(Slot::getContainerSlot)
+                .orElse(-1);
     }
 }

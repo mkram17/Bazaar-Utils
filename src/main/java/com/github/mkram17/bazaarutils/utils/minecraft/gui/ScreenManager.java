@@ -124,7 +124,7 @@ public class ScreenManager {
     private void onChestLoaded(ChestLoadedEvent event) {
         ContainerManager.onChestLoaded(event);
 
-        ContainerScreen screen = event.getGenericContainerScreen();
+        AbstractContainerScreen screen = event.getScreen();
         ScreenType resolved = matchType(screen).orElse(null);
 
         List<ScreenSnapshot> list = new ArrayList<>(instance.history);

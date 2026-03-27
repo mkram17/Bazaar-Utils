@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.Container;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -20,7 +21,9 @@ import java.util.Optional;
 // Utility class for current screen info
 public class ContainerManager {
     public static void onChestLoaded(ChestLoadedEvent event) {
-        lowerChestInventory = event.getLowerChestInventory();
+        if (event.getScreen().getMenu() instanceof ChestMenu chest) {
+            lowerChestInventory = chest.getContainer();
+        }
     }
 
     public static String getContainerName() {

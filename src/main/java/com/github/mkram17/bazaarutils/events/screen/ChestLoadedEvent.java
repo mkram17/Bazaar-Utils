@@ -2,9 +2,11 @@ package com.github.mkram17.bazaarutils.events.screen;
 
 import com.github.mkram17.bazaarutils.events.screen.handlers.ChestLoadedEventHandler;
 import lombok.Getter;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
-import net.minecraft.world.Container;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 
 import java.util.List;
@@ -19,11 +21,12 @@ import java.util.List;
  * before firing this event. This ensures that listeners can safely access all container contents.
  * </p>
  *
- * <p>The event includes:</p>
+ * <p>The event exposes:</p>
  * <ul>
- *   <li>The container's inventory</li>
- *   <li>A list of all non-empty item stacks</li>
- *   <li>The container's display name</li>
+ *   <li>The container screen</li>
+ *   <li>The container title as both a raw {@link Component} and a stripped {@link String}</li>
+ *   <li>All slots and items, split between container-only and full menu views</li>
+ *   <li>The container row count, if available</li>
  * </ul>
  *
  * <p><strong>Usage Example:</strong></p>
@@ -31,8 +34,9 @@ import java.util.List;
  * {@code
  * @EventHandler
  * public void onChestLoaded(ChestLoadedEvent event) {
- *    List<ItemStack> items = event.getItemStacks();
- *    processBazaarItems(items);
+ *     for (Slot slot : event.getContainerSlots()) {
+ *         process(slot.getItem());
+ *     }
  * }
  * }
  * </pre>
@@ -41,39 +45,63 @@ import java.util.List;
  * The event uses a polling mechanism that checks every tick (up to 50 attempts / ~2.5 seconds)
  * to determine when the GUI is fully loaded. See {@link ChestLoadedEventHandler}.
  *
- * @see Container
+ * @see AbstractContainerScreen
+ * @see Slot
  * @see ItemStack
  */
+@Getter
 public class ChestLoadedEvent extends SkyBlockEvent {
-
     /**
      * The container screen that is being displayed.
      */
-    @Getter
-    private final ContainerScreen genericContainerScreen;
+    private final AbstractContainerScreen<?> screen;
 
     /**
-     * The inventory of the container (this is the top inventory, NOT the player's inventory).
+     * The title of the container as a {@link Component}, preserving formatting.
      */
-    @Getter
-    private final Container lowerChestInventory;
+    private final Component titleComponent;
 
     /**
-     * List of all non-empty item stacks in the container.
+     * The display name of the container, with formatting stripped.
      */
-    @Getter
-    private final List<ItemStack> itemStacks;
+    private final String title;
 
     /**
-     * The display name of the container.
+     * The number of rows in the container, or {@code null} if not a chest-type menu.
      */
-    @Getter
-    private final String containerName;
+    @Nullable
+    private final Integer rowCount;
 
-    public ChestLoadedEvent(ContainerScreen screen, Container inventory, List<ItemStack> itemStacks, String containerName) {
-        this.genericContainerScreen = screen;
-        this.lowerChestInventory = inventory;
-        this.itemStacks = itemStacks;
-        this.containerName = containerName;
+    /**
+     * All slots in the menu, including the player's inventory slots.
+     */
+    private final List<Slot> slots;
+
+    /**
+     * Slots belonging to the container only — the player's inventory slots are excluded.
+     */
+    private final List<Slot> containerSlots;
+
+    /**
+     * Item stacks from the container slots. Mirrors {@link #getContainerSlots()} as items.
+     */
+    private final List<ItemStack> containerItems;
+
+    public ChestLoadedEvent(
+            AbstractContainerScreen<?> screen,
+            Component titleComponent,
+            String title,
+            @Nullable Integer rowCount,
+            List<Slot> slots,
+            List<Slot> containerSlots,
+            List<ItemStack> containerItems
+    ) {
+        this.screen = screen;
+        this.titleComponent = titleComponent;
+        this.title = title;
+        this.rowCount = rowCount;
+        this.slots = slots;
+        this.containerSlots = containerSlots;
+        this.containerItems = containerItems;
     }
 }

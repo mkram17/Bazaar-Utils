@@ -13,6 +13,7 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -38,7 +39,7 @@ public class WidgetManager extends BUListener {
 
     @Subscription(priority = Subscription.LOW)
     private void onChestLoaded(ChestLoadedEvent event) {
-        Screen screen = event.getGenericContainerScreen();
+        AbstractContainerScreen<?> screen = event.getScreen();
         removeWidgetsFrom(screen);
         addWidgetsTo(screen);
     }
