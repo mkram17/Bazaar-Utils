@@ -1,68 +1,66 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
+import com.github.mkram17.bazaarutils.events.screen.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.ItemModifier;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
-import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import meteordevelopment.orbit.EventHandler;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.AbstractItemModifier;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.LoreModifier;
+import com.google.common.collect.MapMaker;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.Nullable;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.IgnoreFiller;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.MustBeContainer;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
+import tech.thatgravyboat.skyblockapi.api.events.screen.InventoryChangeEvent;
+import tech.thatgravyboat.skyblockapi.api.item.VisualItemAccessorKt;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
-//drawing done in MixinHandledScreen
-@Module
-public class OrderStatusHighlight extends BUListener implements ToggleableFeature, SlotHighlight {
-    public static final Identifier IDENTIFIER = Identifier.tryBuild(BazaarUtils.MOD_ID, "highlights/standard_background");
+@ItemModifier
+public class OrderStatusHighlight extends BUListener implements AbstractItemModifier, LoreModifier {
+    private static final Map<ItemStack, PricingPosition> cache = new MapMaker()
+            .weakKeys()
+            .concurrencyLevel(1)
+            .makeMap();
 
-    @Override
-    public Identifier getIdentifier() {
-        return IDENTIFIER;
+    public static Optional<PricingPosition> get(ItemStack stack) {
+        return Optional.ofNullable(cache.get(stack));
     }
 
-    private static final Map<Integer, Integer> colorCache = new ConcurrentHashMap<>();
-    private static final Map<Integer, List<Component>> tooltipCache = new ConcurrentHashMap<>();
+    private static void stamp(ItemStack stack, PricingPosition position) {
+        cache.put(stack, position);
+    }
 
-    private void populateCache(ItemStack stack, AbstractContainerScreen<?> screen) {
-        int index = getSlotIndex(stack, screen);
-        if (index == -1) return;
+    private static void clearAll() {
+        cache.clear();
+    }
 
-        Order order = getOrderForHighlight(index);
+    private static void resolve(ItemStack stack, int slotIndex) {
+        Order order = OrderUtil.getUserOrderFromIndex(slotIndex)
+                .filter(it -> it.getStatus() != null && it.getStatus() == OrderStatus.SET)
+                .orElse(null);
+
         if (order == null) return;
 
-        PricingPosition pos = order.getPricingPosition();
-        if (pos == null) return;
-
-        colorCache.put(index, getArgbFromPricingPosition(pos));
-        tooltipCache.put(index, buildTooltipLines(order, pos));
-    }
-
-    @Override
-    public Integer getHighlightColor(int slotIndex) {
-        return colorCache.get(slotIndex);
+        order.findPricingPosition().ifPresent(pos -> stamp(stack, pos));
     }
 
     @Override
@@ -70,86 +68,117 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
         return InventoryConfig.ORDER_STATUS_HIGHLIGHT_TOGGLE;
     }
 
+    @Override
+    public boolean appliesToScreen(Optional<ScreenContext> context) {
+        return context.map(it -> it.isAnyOf(BazaarScreens.ORDERS_PAGE)).orElse(false);
+    }
+
     public OrderStatusHighlight() {
         super();
     }
 
-    @Override
-    protected void registerFabricEvents() {
-        ScreenEvents.AFTER_INIT.register(this::onScreenInitialized);
-        ItemTooltipCallback.EVENT.register(this::onTooltip);
-    }
-
-    @EventHandler
+    @Subscription
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
     private void onChestLoaded(ChestLoadedEvent event) {
-        if (!BazaarUtilsModules.OrderStatusHighlight.isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
-            return;
+        if (!isEnabled()) return;
+
+        for (Slot slot : event.getContainerSlots()) {
+            if (slot.hasItem()) resolve(slot.getItem(), slot.getContainerSlot());
         }
-
-        AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
-        if (screen == null) return;
-
-        event.getItemStacks().forEach(stack -> populateCache(stack, screen));
     }
 
-    private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {
-        colorCache.clear();
-        tooltipCache.clear();
+    @Subscription
+    @OnlyOnSkyBlock
+    @MustBeContainer
+    @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
+    @IgnoreFiller
+    private void onInventoryChange(InventoryChangeEvent event) {
+        if (!isEnabled()) return;
+
+        resolve(event.getItem(), event.getSlot().getContainerSlot());
     }
 
-    private void onTooltip(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, TooltipFlag type, List<Component> lines) {
-        if (!isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) return;
+    @Subscription
+    @OnlyOnSkyBlock
+    private void onContainerInitialized(ContainerInitializedEvent ignored) {
+        if (!isEnabled()) return;
 
-        AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
-        if (screen == null) return;
-
-        int index = getSlotIndex(stack, screen);
-        if (index == -1) return;
-
-        List<Component> cached = tooltipCache.get(index);
-        if (cached != null) lines.addAll(1, cached);
+        clearAll();
     }
 
-    private static int getSlotIndex(ItemStack stack, AbstractContainerScreen<?> screen) {
-        for (Slot slot : screen.getMenu().slots) {
-            if (slot.hasItem() && slot.getItem().equals(stack)) return slot.getContainerSlot();
-        }
+    @Subscription
+    private void onContainerClose(ContainerCloseEvent ignored) {
+        if (!isEnabled()) return;
 
-        return -1;
+        clearAll();
     }
 
-    private static Order getOrderForHighlight(int slotIndex) {
-        return OrderUtil.getUserOrderFromIndex(slotIndex)
-                .filter(o -> o.getStatus() != null && o.getStatus() == OrderStatus.SET)
-                .orElse(null);
+    @Override
+    public boolean appliesTo(ItemStack stack) {
+        return cache.containsKey(stack);
     }
 
-    private static int getArgbFromPricingPosition(PricingPosition pricingPosition) {
-        return switch (pricingPosition) {
+    @Override
+    public List<ModifierSource> getModifierSources() {
+        return List.of(ModifierSource.INVENTORY);
+    }
+
+    @Override
+    public Optional<Integer> highlightColor(ItemStack stack) {
+        return get(stack).map(OrderStatusHighlight::getArgbFromPricingPosition);
+    }
+
+    @Override
+    public Result modifyLore(ItemStack stack, List<Component> lore, @Nullable Result previous) {
+        PricingPosition position = cache.get(stack);
+        if (position == null) return Result.UNMODIFIED;
+
+        int slotIndex = findSlotIndex(stack);
+        if (slotIndex == -1) return Result.UNMODIFIED;
+
+        Order order = OrderUtil.getUserOrderFromIndex(slotIndex).orElse(null);
+        if (order == null) return Result.UNMODIFIED;
+
+        return withMerger(lore, merger -> {
+            merger.copy(); // item name
+
+            switch (position) {
+                case COMPETITIVE -> merger.add(styledText("COMPETITIVE", InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR, true));
+                case MATCHED -> merger.add(styledText("MATCHED", InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR, true));
+                case OUTBID -> {
+                    merger.add(styledText("OUTBID", InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, true));
+                    merger.add(styledText("Market Price: " + Util.getPrettyString(order.getMarketPrice(order.getTransactionType().getSide())), InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, false));
+                }
+            }
+
+            if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
+                merger.add(Component.literal("[BU] Buy: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.BUY)) + " coins"));
+                merger.add(Component.literal("[BU] Sell: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.SELL)) + " coins"));
+            }
+
+            return Result.MODIFIED;
+        });
+    }
+
+    private static int getArgbFromPricingPosition(PricingPosition position) {
+        return switch (position) {
             case COMPETITIVE -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR;
             case MATCHED -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR;
             case OUTBID -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR;
         };
     }
 
-    private static List<Component> buildTooltipLines(Order order, PricingPosition pos) {
-        List<Component> lines = new ArrayList<>();
+    private static int findSlotIndex(ItemStack stack) {
+        AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
+        if (screen == null) return -1;
 
-        switch (pos) {
-            case COMPETITIVE -> lines.add(styledText("COMPETITIVE", InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR, true));
-            case MATCHED -> lines.add(styledText("MATCHED", InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR,     true));
-            case OUTBID -> {
-                lines.add(styledText("OUTBID", InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, true));
-                lines.add(styledText("Market Price: " + Util.getPrettyString(order.getMarketPrice(order.getTransactionType().getSide())), InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, false));
-            }
+        for (Slot slot : screen.getMenu().slots) {
+            ItemStack item = slot.getItem();
+            if (item == stack || VisualItemAccessorKt.getVisualItem(item) == stack) return slot.getContainerSlot();
         }
 
-        if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-            lines.add(Component.literal("[BU] Buy: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.BUY))  + " coins"));
-            lines.add(Component.literal("[BU] Sell: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.SELL)) + " coins"));
-        }
-
-        return lines;
+        return -1;
     }
 
     private static Component styledText(String content, int rgb, boolean bold) {
