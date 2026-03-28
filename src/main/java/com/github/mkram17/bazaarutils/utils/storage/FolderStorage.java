@@ -1,25 +1,24 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
+import com.mojang.serialization.Codec;
 import com.github.mkram17.bazaarutils.utils.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
 public class FolderStorage<T> {
-
     private final String folder;
-    private final Type dataType;
+    private final Codec<T> codec;
     private final Map<String, DataStorage<T>> storages = new LinkedHashMap<>();
     private final Path folderPath;
 
-    public FolderStorage(String folder, Type dataType) {
+    public FolderStorage(String folder, Codec<T> codec) {
         this.folder = folder;
-        this.dataType = dataType;
+        this.codec = codec;
         this.folderPath = DataStorage.DEFAULT_PATH.resolve(folder);
         load();
     }
@@ -27,10 +26,10 @@ public class FolderStorage<T> {
     public void add(T value) { set(String.valueOf(value.hashCode()), value); }
 
     public void set(String id, T value) {
-        DataStorage<T> storage = storages.computeIfAbsent(id,
-                k -> new DataStorage<>(() -> value, folder + "/" + id, dataType));
-        storage.set(value);
-        storage.save();
+        final T captured = value;
+        storages.computeIfAbsent(id, k -> new DataStorage<>(
+                () -> captured, folder + "/" + id, codec
+        )).save();
     }
 
     @Nullable
@@ -65,7 +64,8 @@ public class FolderStorage<T> {
                         try {
                             storages.put(id, new DataStorage<>(
                                     () -> { throw new IllegalStateException("No default for folder entry: " + id); },
-                                    folder + "/" + id, dataType));
+                                    folder + "/" + id, codec
+                            ));
                         } catch (Exception e) {
                             Util.logError("Failed to load folder entry: " + file, e);
                         }
