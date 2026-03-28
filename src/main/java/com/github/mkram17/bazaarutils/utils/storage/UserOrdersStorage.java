@@ -1,15 +1,17 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class UserOrdersStorage {
-    private static final Type TYPE = new TypeToken<List<Order>>(){}.getType();
-
-    public static final DataStorage<List<Order>> INSTANCE = new DataStorage<>(ArrayList::new, "user_orders", TYPE);
+    public static final ProfileStorage<List<Order>> INSTANCE = new ProfileStorage<>(
+            0,
+            ArrayList::new,
+            "user_orders",
+            v -> Codec.list(Order.CODEC).xmap(ArrayList::new, list -> list)
+    );
 
     private UserOrdersStorage() {}
 }

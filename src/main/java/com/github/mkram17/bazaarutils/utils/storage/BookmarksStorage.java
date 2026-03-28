@@ -1,15 +1,17 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
 import com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks.Bookmark;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class BookmarksStorage {
-    private static final Type TYPE = new TypeToken<List<Bookmark>>(){}.getType();
+    public static final ProfileStorage<List<Bookmark>> INSTANCE = new ProfileStorage<>(
+            0,
+            ArrayList::new,
+            "bookmarks",
+            v -> Codec.list(Bookmark.CODEC).xmap(ArrayList::new, list -> list)
+    );
 
-    public static final DataStorage<List<Bookmark>> INSTANCE = new DataStorage<>(ArrayList::new, "bookmarks", TYPE);
-
-    private BookmarksStorage() { }
+    private BookmarksStorage() {}
 }

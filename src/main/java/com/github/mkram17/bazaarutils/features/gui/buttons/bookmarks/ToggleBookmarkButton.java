@@ -79,10 +79,8 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
     }
 
     private void toggleBookmark(String name) {
-        List<Bookmark> list = BookmarkUtil.getBookmarks();
-
         if (BookmarkUtil.currentBookmarkOpt.isPresent()) {
-            list.remove(BookmarkUtil.currentBookmarkOpt.get());
+            BookmarkUtil.removeBookmark(BookmarkUtil.currentBookmarkOpt.get());
             BookmarkUtil.currentBookmarkOpt = Optional.empty();
         } else {
             ItemStack itemStack = ScreenManager.getInstance().current()
@@ -95,13 +93,11 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
                     .orElse(null);
 
             Bookmark newBookmark = new Bookmark(name, itemStack, productId);
-            list.add(newBookmark);
-
+            BookmarkUtil.addBookmark(newBookmark);
             BookmarkUtil.currentBookmarkOpt = Optional.of(newBookmark);
         }
 
         retriggerModifier();
-        BookmarkUtil.saveBookmarks();
     }
 
     private static Optional<String> resolveCurrentItemName() {

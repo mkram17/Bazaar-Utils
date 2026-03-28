@@ -26,6 +26,14 @@ public class BookmarkUtil {
         return BookmarksStorage.INSTANCE.get();
     }
 
+    public static void addBookmark(Bookmark bookmark) {
+        BookmarksStorage.INSTANCE.edit(list -> list.add(bookmark));
+    }
+
+    public static void removeBookmark(Bookmark bookmark) {
+        BookmarksStorage.INSTANCE.edit(list -> list.remove(bookmark));
+    }
+
     private BookmarkUtil() {}
 
     public static Optional<Bookmark> findMatchingBookmark(String itemName) {

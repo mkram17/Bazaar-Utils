@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
+import com.github.mkram17.bazaarutils.utils.codecs.ZonedDateTimeCodec;
 import com.github.mkram17.bazaarutils.utils.storage.BazaarLimitsStorage;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
@@ -21,6 +22,8 @@ import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
@@ -29,7 +32,12 @@ import net.minecraft.ChatFormatting;
 public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeature {
     private static final double COIN_LIMIT = 15_000_000_000d;
 
-    public record OrderLimitEntry(double price, ZonedDateTime time) {}
+    public record OrderLimitEntry(double price, ZonedDateTime time) {
+        public static final Codec<OrderLimitEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.DOUBLE.fieldOf("price").forGetter(OrderLimitEntry::price),
+                ZonedDateTimeCodec.CODEC.fieldOf("time").forGetter(OrderLimitEntry::time)
+        ).apply(instance, OrderLimitEntry::new));
+    }
 
     public static void saveLimits() {
         BazaarLimitsStorage.INSTANCE.save();
