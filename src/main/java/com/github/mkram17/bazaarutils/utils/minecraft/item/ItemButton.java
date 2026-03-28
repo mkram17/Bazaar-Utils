@@ -43,8 +43,8 @@ public interface ItemButton extends AbstractItemModifier {
     }
 
     @Override
-    default Optional<Item> itemOverride(ItemStack stack) {
-        return Optional.of(resolveItem());
+    default Optional<ItemStack> stackOverride(ItemStack stack) {
+        return Optional.of(resolveStack());
     }
 
     @Override
@@ -71,33 +71,33 @@ public interface ItemButton extends AbstractItemModifier {
                 });
     }
 
-    default Item resolveItem() {
+    default ItemStack resolveStack() {
         return switch (getItemRef()) {
-            case ItemRef.Direct(Item item) -> item;
-            case ItemRef.ById(var id) -> resolveId(id.get());
-            case ItemRef.Stateful<?> stateful -> resolveStateful(stateful);
+            case ItemRef.Direct(Item item) -> new ItemStack(item);
+            case ItemRef.ById(var id) -> resolveStackById(id.get());
+            case ItemRef.Stateful<?> stateful -> resolveStatefulStack(stateful);
         };
     }
 
-    private static Item resolveId(String rawId) {
-        Item resolved = ItemsData.resolveItem(rawId);
+    private static ItemStack resolveStackById(String rawId) {
+        ItemStack resolved = ItemsData.resolve(rawId);
 
-        return resolved != null ? resolved : DEFAULT_ITEM;
+        return resolved != null ? resolved.copy() : new ItemStack(DEFAULT_ITEM);
     }
 
-    private static <S> Item resolveStateful(ItemRef.Stateful<S> stateful) {
-        Item resolved = stateful.source()
+    private static <S> ItemStack resolveStatefulStack(ItemRef.Stateful<S> stateful) {
+        ItemStack resolved = stateful.source()
                 .map(source -> switch (source) {
-                    case ItemRef.Direct(Item item) -> item;
-                    case ItemRef.ById(var id) -> resolveId(id.get());
+                    case ItemRef.Direct(Item item) -> new ItemStack(item);
+                    case ItemRef.ById(var id) -> resolveStackById(id.get());
                     case ItemRef.Stateful<?> ignored -> throw new IllegalStateException("Stateful ItemRef cannot nest another Stateful as its source");
                 })
-                .orElse(DEFAULT_ITEM);
+                .orElse(new ItemStack(DEFAULT_ITEM));
 
         S state = stateful.state().get();
 
         for (StateItemGroup<S> group : stateful.groups()) {
-            if (group.contains(resolved)) return group.forState(state, resolved);
+            if (group.contains(resolved.getItem())) return new ItemStack(group.forState(state, resolved.getItem()));
         }
 
         return resolved;

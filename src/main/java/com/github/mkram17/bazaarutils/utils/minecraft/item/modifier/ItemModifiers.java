@@ -169,6 +169,11 @@ public class ItemModifiers extends BUListener {
             }
 
             for (AbstractItemModifier modifier : matching) {
+                modifier.stackOverride(stack).ifPresent(override -> {
+                    builder.applyFrom(override);
+                    anyModified[0] = true;
+                });
+
                 modifier.nameOverride(stack).ifPresent(name -> {
                     builder.name(name);
                     anyModified[0] = true;

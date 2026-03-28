@@ -75,6 +75,10 @@ public interface AbstractItemModifier extends ToggleableFeature {
         return Optional.empty();
     }
 
+    default Optional<ItemStack> stackOverride(ItemStack stack) {
+        return Optional.empty();
+    }
+
     default Optional<Component> nameOverride(ItemStack stack) {
         return Optional.empty();
     }
