@@ -1,7 +1,5 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
-import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
-import com.github.mkram17.bazaarutils.events.screen.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.StateItemGroup;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.ItemModifiers;
@@ -82,7 +80,7 @@ public interface ItemButton extends AbstractItemModifier {
     }
 
     private static Item resolveId(String rawId) {
-        Item resolved = ResourcefulConfigItems.resolve(rawId);
+        Item resolved = ItemsData.resolveItem(rawId);
 
         return resolved != null ? resolved : DEFAULT_ITEM;
     }

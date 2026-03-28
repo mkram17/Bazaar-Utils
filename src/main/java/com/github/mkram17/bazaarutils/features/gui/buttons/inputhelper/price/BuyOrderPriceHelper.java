@@ -17,6 +17,7 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
@@ -103,7 +104,7 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost impleme
 
     @Override
     public Component getDescription(int index) {
-        return Component.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
+        return Component.literal("Slot " + slotIndex + " · " + ChatFormatting.stripFormatting(resolveStack().getHoverName().getString()));
     }
 
     private static int getNextSlotIndex() {

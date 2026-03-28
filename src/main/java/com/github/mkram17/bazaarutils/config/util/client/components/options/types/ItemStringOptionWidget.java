@@ -1,12 +1,10 @@
 package com.github.mkram17.bazaarutils.config.util.client.components.options.types;
 
-import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsData;
 import com.teamresourceful.resourcefulconfig.client.components.options.types.ResetableWidget;
 import com.teamresourceful.resourcefulconfig.client.components.options.types.StringOptionWidget;
-import net.minecraft.world.item.Item;
+import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -22,9 +20,12 @@ public class ItemStringOptionWidget extends StringOptionWidget implements Reseta
     @Override
     public void updateIfFocused() {
         if (!isFocused()) {
-            Item resolved = ResourcefulConfigItems.resolve(getter.get());
+            ItemStack stack = ItemsData.resolve(getter.get());
+            String name = stack != null
+                    ? ChatFormatting.stripFormatting(stack.getHoverName().getString())
+                    : getter.get();
 
-            setValue(resolved != null ? resolved.getName(new ItemStack(resolved)).getString() : getter.get());
+            setValue(name);
             setCursorPosition(0);
             setHighlightPos(0);
             setTextColor(0xFFE0E0E0);

@@ -2,8 +2,9 @@ package com.github.mkram17.bazaarutils;
 
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsItemModifiers;
+import com.github.mkram17.bazaarutils.generated.*;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsData;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
 import lombok.Getter;
@@ -13,11 +14,13 @@ import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
+import tech.thatgravyboat.repolib.api.RepoAPI;
+import tech.thatgravyboat.repolib.api.RepoStatus;
 import tech.thatgravyboat.skyblockapi.api.SkyBlockAPI;
 import tech.thatgravyboat.skyblockapi.api.events.base.EventBus;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnRepoStatus;
+import tech.thatgravyboat.skyblockapi.api.events.misc.RepoStatusEvent;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,6 +40,8 @@ public class BazaarUtils implements ClientModInitializer {
     @Getter
     private static String updateNotes;
 
+    private static boolean repoReady = false;
+
     public static EventBus EVENT_BUS = SkyBlockAPI.getEventBus();
     public static ScheduledExecutorService BUExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -46,6 +51,8 @@ public class BazaarUtils implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        EVENT_BUS.register(this);
+
         BUCompatibilityHelper.initializePatches();
 
         getModProperties();
@@ -53,6 +60,23 @@ public class BazaarUtils implements ClientModInitializer {
         BazaarUtilsModules.init();
 
         BazaarUtilsItemModifiers.init();
+
+        if (RepoAPI.isInitialized()) {
+            onRepoReady();
+        }
+    }
+
+    @Subscription(event = RepoStatusEvent.class)
+    @OnRepoStatus(repoStatus = RepoStatus.SUCCESS)
+    private void onRepoReady(RepoStatusEvent event) {
+        onRepoReady();
+    }
+
+    private void onRepoReady() {
+        if (repoReady) return;
+        repoReady = true;
+
+        ItemsData.skyblockSourceReady();
 
         BazaarUtilsLateInitModules.init();
     }
