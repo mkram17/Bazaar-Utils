@@ -1,20 +1,22 @@
 package com.github.mkram17.bazaarutils.config.util.api;
 
-import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemBuilder;
+import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.TooltipDisplay;
+import tech.thatgravyboat.skyblockapi.utils.builders.ItemBuilder;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 public final class SlotProviders {
     private static final Map<String, SlotProvider> REGISTRY = new HashMap<>();
 
-    private SlotProviders() {}
+    private SlotProviders() {
+    }
 
     public static void register(String key, SlotProvider provider) {
         REGISTRY.put(key, provider);
@@ -31,11 +33,8 @@ public final class SlotProviders {
 
                 boolean isSelf = occupant.get().getSlotIndex() == selectedSlotIndex;
 
-                return stack(occupant.get().resolveItem())
-                        .named(isSelf
-                                ? "Currently selected slot"
-                                : "Slot taken by Button #" + occupantIndex
-                        )
+                return stack(occupant.get().resolveStack())
+                        .named(isSelf ? "Currently selected slot" : "Slot taken by Button #" + occupantIndex)
                         .locked()
                         .build();
             }
@@ -50,11 +49,64 @@ public final class SlotProviders {
         return REGISTRY.getOrDefault(key, (slotIndex, selectedSlotIndex) -> ItemStack.EMPTY);
     }
 
-    public static ItemBuilder stack(Item item) {
-        return ItemBuilder.of(item);
+    public static StackBuilder stack(Item item) {
+        return new StackBuilder(item, 1, null);
     }
 
-    public static ItemBuilder stack(Item item, int count) {
-        return ItemBuilder.of(item, count);
+    public static StackBuilder stack(Item item, int count) {
+        return new StackBuilder(item, count, null);
+    }
+
+    public static StackBuilder stack(ItemStack source) {
+        return new StackBuilder(null, 1, source);
+    }
+
+    public static final class StackBuilder {
+        private final Item item;
+        private final int count;
+        private final ItemStack source;
+        private String name = null;
+        private boolean locked = false;
+        private boolean hideTooltip = false;
+
+        private StackBuilder(Item item, int count, ItemStack source) {
+            this.item = item;
+            this.count = count;
+            this.source = source;
+        }
+
+        public StackBuilder named(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public StackBuilder locked() {
+            this.locked = true;
+            return this;
+        }
+
+        public StackBuilder hideTooltip() {
+            this.hideTooltip = true;
+            return this;
+        }
+
+        public ItemStack build() {
+            Item resolvedItem = source != null ? source.getItem() : item;
+
+            return ItemBuilder.Companion.invoke(resolvedItem, builder -> {
+                if (source != null) builder.applyFrom(source);
+
+                builder.setCount(count);
+
+                if (name != null) builder.name(name);
+                if (locked) builder.set(CustomDataComponents.SLOT_SELECTOR_LOCKED, true);
+                if (hideTooltip) {
+                    TooltipDisplay existing = source != null ? source.get(DataComponents.TOOLTIP_DISPLAY) : null;
+                    builder.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, existing != null ? existing.hiddenComponents() : new LinkedHashSet<>()));
+                }
+
+                return kotlin.Unit.INSTANCE;
+            });
+        }
     }
 }
