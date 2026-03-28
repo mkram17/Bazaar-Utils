@@ -62,7 +62,7 @@ public interface AbstractItemModifier extends ToggleableFeature {
     }
 
     default boolean appliesToScreen(Optional<ScreenContext> context) {
-        return true;
+        return false;
     }
 
     default boolean appliesTo(ItemStack stack, @Nullable Slot slot) {

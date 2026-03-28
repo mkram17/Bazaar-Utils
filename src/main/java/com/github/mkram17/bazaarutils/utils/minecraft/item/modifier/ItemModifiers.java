@@ -35,8 +35,10 @@ import tech.thatgravyboat.skyblockapi.api.events.base.predicates.MustBeContainer
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.*;
 import tech.thatgravyboat.skyblockapi.api.item.VisualItemAccessorKt;
+import tech.thatgravyboat.skyblockapi.utils.builders.ItemBuilder;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 @LateInitModule
@@ -104,21 +106,28 @@ public class ItemModifiers extends BUListener {
     @OnlyOnSkyBlock
     private void onChestLoaded(ChestLoadedEvent event) {
         for (Slot slot : event.getSlots()) {
-            if (!slot.hasItem() || MODIFIED_ITEMS.containsKey(slot.getItem())) continue;
+            if (!slot.hasItem()) continue;
+
+            ItemStack stack = slot.getItem();
+            if (MODIFIED_ITEMS.containsKey(stack)) continue;
+
+            ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
+            if (visual != null && MODIFIED_ITEMS.containsKey(visual)) continue;
 
             AbstractItemModifier.ModifierSource source = (slot.container instanceof Inventory)
                     ? slotToSource(slot.getContainerSlot())
                     : AbstractItemModifier.ModifierSource.INVENTORY;
 
-            tryModify(slot.getItem(), source, slot);
+            tryModify(stack, source, slot);
         }
     }
 
     private static void reapplyInventory(@NotNull LocalPlayer player) {
-        var inv = player.getInventory();
+        var inventory = player.getInventory();
 
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack stack = inv.getItem(i);
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+
             clear(stack);
             tryModify(stack, slotToSource(i));
         }
@@ -130,18 +139,25 @@ public class ItemModifiers extends BUListener {
                 : AbstractItemModifier.ModifierSource.PLAYER_INVENTORY;
     }
 
-    public static void tryModify(ItemStack stack) {
-        tryModify(stack, AbstractItemModifier.ModifierSource.PLAYER_INVENTORY, null);
+    public static void replace(ItemStack stack, Consumer<ItemBuilder> init) {
+        VisualItemAccessorKt.replaceVisually(stack, builder -> {
+            builder.copyFrom(stack);
+
+            TooltipDisplay existing = stack.get(DataComponents.TOOLTIP_DISPLAY);
+            if (existing != null) builder.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, existing.hiddenComponents()));
+
+            init.accept(builder);
+
+            return kotlin.Unit.INSTANCE;
+        });
     }
 
     public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source) {
         tryModify(stack, source, null);
     }
-    public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source, @Nullable Slot slot) {
-        if (stack.isEmpty()) return;
 
-        ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
-        if (MODIFIED_ITEMS.containsKey(stack) || (visual != null && MODIFIED_ITEMS.containsKey(visual))) return;
+    public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source, @Nullable Slot slot) {
+        if (stack.isEmpty() || MODIFIED_ITEMS.containsKey(stack)) return;
 
         List<AbstractItemModifier> candidates = Stream.concat(MODIFIERS.stream(), DYNAMIC_MODIFIERS.stream())
                 .sorted(Comparator.comparingInt(AbstractItemModifier::getPriority))
@@ -158,45 +174,40 @@ public class ItemModifiers extends BUListener {
 
         if (matching.isEmpty()) return;
 
-        boolean[] anyModified = {false};
+        List<AbstractItemModifier> applied = new ArrayList<>();
 
-        VisualItemAccessorKt.replaceVisually(stack, builder -> {
-            builder.copyFrom(stack);
-
-            TooltipDisplay existing = stack.get(DataComponents.TOOLTIP_DISPLAY);
-            if (existing != null) {
-                builder.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, existing.hiddenComponents()));
-            }
-
+        replace(stack, builder -> {
             for (AbstractItemModifier modifier : matching) {
+                boolean[] modified = {false};
+
                 modifier.stackOverride(stack).ifPresent(override -> {
                     builder.applyFrom(override);
-                    anyModified[0] = true;
+                    modified[0] = true;
                 });
 
                 modifier.nameOverride(stack).ifPresent(name -> {
                     builder.name(name);
-                    anyModified[0] = true;
+                    modified[0] = true;
                 });
 
                 modifier.itemOverride(stack).ifPresent(item -> {
                     builder.item = item;
-                    anyModified[0] = true;
+                    modified[0] = true;
                 });
 
                 modifier.backgroundItem(stack).ifPresent(bg -> {
                     builder.setBackgroundItem(bg);
-                    anyModified[0] = true;
+                    modified[0] = true;
                 });
 
                 modifier.itemCountOverride(stack).ifPresent(count -> {
                     builder.setCustomSlotComponent(count);
-                    anyModified[0] = true;
+                    modified[0] = true;
                 });
 
                 modifier.highlightColor(stack).ifPresent(color -> {
                     builder.setBackgroundColor(color);
-                    anyModified[0] = true;
+                    modified[0] = true;
                 });
 
                 Optional<DataComponentPatch> patch = modifier.patchComponents(stack);
@@ -206,11 +217,13 @@ public class ItemModifiers extends BUListener {
                         @SuppressWarnings("unchecked")
                         DataComponentType<Object> type = (DataComponentType<Object>) entry.getKey();
                         builder.set(type, value);
-                        anyModified[0] = true;
+                        modified[0] = true;
                     });
                 }));
 
-                if (modifier.modifyStack(builder.build()).modified()) anyModified[0] = true;
+                if (modifier.modifyStack(builder.build()).modified()) modified[0] = true;
+
+                if (modified[0]) applied.add(modifier);
             }
 
             builder.onClick(button -> {
@@ -223,14 +236,11 @@ public class ItemModifiers extends BUListener {
 
                 return result.modified() ? kotlin.Unit.INSTANCE : null;
             });
-
-            // No applyDefaults here — indicator is tooltip-time, not visual-item-time
-            return kotlin.Unit.INSTANCE;
         });
 
-        if (anyModified[0]) {
-            ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
-            MODIFIED_ITEMS.put(visual != null ? visual : stack, matching);
+        if (!applied.isEmpty()) {
+            ItemStack newVisual = VisualItemAccessorKt.getVisualItem(stack);
+            MODIFIED_ITEMS.put(newVisual != null ? newVisual : stack, applied);
         } else {
             VisualItemAccessorKt.replaceVisually(stack, (ItemStack) null);
         }
@@ -244,39 +254,17 @@ public class ItemModifiers extends BUListener {
         VisualItemAccessorKt.replaceVisually(stack, (ItemStack) null);
     }
 
-    // Used by buttons which own their stack directly — bypasses InventoryChangeEvent path
-    public static void applyToStack(AbstractItemModifier modifier, ItemStack stack) {
-        boolean anyModified = false;
-
-        if (modifier.nameOverride(stack).isPresent()) {
-            modifier.nameOverride(stack).ifPresent(name -> stack.set(DataComponents.CUSTOM_NAME, name));
-            anyModified = true;
-        }
-
-        var lore = new ArrayList<>(LoreParser.lines(stack));
-        var loreResult = modifier.modifyLore(stack, lore, null);
-        if (loreResult.modified()) {
-            stack.set(DataComponents.LORE, new ItemLore(lore));
-            anyModified = true;
-        }
-
-        var stackResult = modifier.modifyStack(stack);
-        if (stackResult.modified()) anyModified = true;
-
-        if (anyModified) applyDefaults(stack);
-    }
-
     @Subscription
     @OnlyOnSkyBlock
     private void onTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItem();
-        List<Component> lines = event.getTooltip();
 
+        List<Component> lines = event.getTooltip();
         if (lines.isEmpty()) return;
 
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
 
-        boolean anyModified = false;
+        List<AbstractItemModifier> applied = new ArrayList<>();
         AbstractItemModifier.Result result = null;
 
         for (AbstractItemModifier modifier : MODIFIERS) {
@@ -284,38 +272,17 @@ public class ItemModifiers extends BUListener {
             if (!modifier.appliesToScreen(context)) continue;
 
             result = modifier.modifyLore(stack, lines, result);
-            if (result.modified()) anyModified = true;
-
+            if (result.modified()) applied.add(modifier);
             if (!result.propagateFurther()) break;
         }
 
         List<AbstractItemModifier> standardModifiers = MODIFIED_ITEMS.getOrDefault(stack, List.of());
-        if (!anyModified && standardModifiers.isEmpty()) return;
+        if (applied.isEmpty() && standardModifiers.isEmpty()) return;
 
         applyDefaults(lines);
     }
 
-    public static void applyDefaults(ItemStack stack) {
-        switch (BUConfig.MODIFY_INDICATOR) {
-            case PREFIX -> {
-                Component current = stack.getOrDefault(DataComponents.CUSTOM_NAME, stack.getDisplayName());
-                stack.set(DataComponents.CUSTOM_NAME, Component.empty().append(AbstractItemModifier.INDICATOR_WITH_SPACE).append(current));
-            }
-            case SUFFIX -> {
-                Component current = stack.getOrDefault(DataComponents.CUSTOM_NAME, stack.getDisplayName());
-                stack.set(DataComponents.CUSTOM_NAME, Component.empty().append(current).append(AbstractItemModifier.SPACE_WITH_INDICATOR));
-            }
-            case LORE -> {
-                var lore = new ArrayList<>(LoreParser.lines(stack));
-                lore.add(Component.empty());
-                lore.add(AbstractItemModifier.INDICATOR_LABEL_LINE);
-                stack.set(DataComponents.LORE, new ItemLore(lore));
-            }
-            case DISABLED -> {}
-        }
-    }
-
-    public static void applyDefaults(List<Component> lines) {
+    private static void applyDefaults(List<Component> lines) {
         switch (BUConfig.MODIFY_INDICATOR) {
             case PREFIX -> lines.set(0, Component.empty().append(AbstractItemModifier.INDICATOR_WITH_SPACE).append(lines.getFirst()));
             case SUFFIX -> lines.set(0, Component.empty().append(lines.getFirst()).append(AbstractItemModifier.SPACE_WITH_INDICATOR));

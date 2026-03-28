@@ -13,6 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
+import tech.thatgravyboat.skyblockapi.api.remote.api.SkyBlockId;
+import tech.thatgravyboat.skyblockapi.api.remote.api.SkyBlockIdKt;
 
 public class ContainerCell extends BaseWidget {
     public static final int CELL_SIZE = 18;
