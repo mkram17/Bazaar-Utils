@@ -2,11 +2,11 @@ package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.Command;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
@@ -22,7 +22,7 @@ import net.minecraft.ChatFormatting;
 
 import java.util.List;
 
-@Module
+@Command
 public final class DeveloperCommands implements BUCommand {
     @Getter
     public final String commandName = "developer";
@@ -142,9 +142,7 @@ public final class DeveloperCommands implements BUCommand {
         public final Component description = Component.literal("Converts an item name to its product ID.").withStyle(ChatFormatting.GRAY);
 
         @Override
-        public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(
-                LiteralArgumentBuilder<FabricClientCommandSource> base
-        ) {
+        public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
             return base.then(ClientCommandManager.argument("item name", StringArgumentType.string()).executes(this::convertNameToId));
         }
 

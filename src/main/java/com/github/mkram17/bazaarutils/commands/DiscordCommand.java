@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.Command;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
@@ -13,7 +13,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-@Module
+@Command
 public final class DiscordCommand implements BUCommand {
     @Getter
     public final String commandName = "discord";

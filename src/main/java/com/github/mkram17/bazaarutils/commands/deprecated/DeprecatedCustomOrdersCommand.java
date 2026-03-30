@@ -2,12 +2,12 @@ package com.github.mkram17.bazaarutils.commands.deprecated;
 
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.Command;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-@Module
+@Command
 @Deprecated
 public final class DeprecatedCustomOrdersCommand implements BUCommand {
     @Getter

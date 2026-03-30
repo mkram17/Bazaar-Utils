@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -13,7 +13,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import java.util.List;
 
 @LateInitModule
-public final class BazaarUtilsCommands implements BUCommand {
+public final class BazaarUtilsCommand implements BUCommand {
     private static final List<String> PREFIXES = List.of("bazaarutils", "bu");
 
     @Getter
@@ -22,8 +22,8 @@ public final class BazaarUtilsCommands implements BUCommand {
     @Getter
     private final List<BUCommand> subcommands;
 
-    public BazaarUtilsCommands() {
-        this.subcommands = BazaarUtilsModules.collected.stream()
+    public BazaarUtilsCommand() {
+        this.subcommands = BazaarUtilsCommands.collected.stream()
                 .filter(it -> it instanceof BUCommand)
                 .map(it -> (BUCommand) it)
                 .toList();

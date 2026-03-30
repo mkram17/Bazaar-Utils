@@ -59,6 +59,7 @@ public class BazaarUtils implements ClientModInitializer {
 
         BazaarUtilsModules.init();
 
+        BazaarUtilsCommands.init();
         BazaarUtilsItemModifiers.init();
 
         if (RepoAPI.isInitialized()) {

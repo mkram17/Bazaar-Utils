@@ -19,7 +19,9 @@ public interface BUCommand {
         return List.of();
     }
 
-    default List<BUCommand> getSubcommands() { return List.of(); }
+    default List<BUCommand> getSubcommands() {
+        return List.of();
+    }
 
     LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base);
 

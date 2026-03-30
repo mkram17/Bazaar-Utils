@@ -1,10 +1,8 @@
 package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
@@ -13,13 +11,13 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 
-import java.util.List;
-
-@Module
+@Command
 public final class HelpCommand implements BUCommand {
+    @Getter
+    public final String commandName = "help";
 
-    @Getter public final String commandName = "help";
-    @Getter public final Component description = Component.literal("Lists all available commands.").withStyle(ChatFormatting.GRAY);
+    @Getter
+    public final Component description = Component.literal("Lists all available commands.").withStyle(ChatFormatting.GRAY);
 
     @Override
     public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
@@ -27,7 +25,7 @@ public final class HelpCommand implements BUCommand {
     }
 
     private int execute(CommandContext<FabricClientCommandSource> context) {
-        BazaarUtilsCommands root = BazaarUtilsLateInitModules.BazaarUtilsCommands;
+        BazaarUtilsCommand root = BazaarUtilsLateInitModules.BazaarUtilsCommand;
 
         MutableComponent message = Component.literal("BazaarUtils Commands\n").withStyle(ChatFormatting.GOLD);
 
