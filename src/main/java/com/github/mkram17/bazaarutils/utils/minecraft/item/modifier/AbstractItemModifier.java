@@ -4,6 +4,7 @@ package com.github.mkram17.bazaarutils.utils.minecraft.item.modifier;
 import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.teamresourceful.resourcefulconfig.api.types.info.Translatable;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -97,6 +98,10 @@ public interface AbstractItemModifier extends ToggleableFeature {
 
     default Optional<DataComponentPatch> patchComponents(ItemStack stack) {
         return Optional.empty();
+    }
+
+    default Result appendComponents(ItemStack stack, List<ClientTooltipComponent> components) {
+        return Result.UNMODIFIED;
     }
 
     default Result onClick(ItemStack stack, int button) {

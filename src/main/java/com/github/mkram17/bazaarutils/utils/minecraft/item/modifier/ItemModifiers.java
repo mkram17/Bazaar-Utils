@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.MustBeContainer;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.minecraft.ui.GatherItemTooltipComponentsEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.*;
 import tech.thatgravyboat.skyblockapi.api.item.VisualItemAccessorKt;
 import tech.thatgravyboat.skyblockapi.utils.builders.ItemBuilder;
@@ -265,7 +266,7 @@ public class ItemModifiers extends BUListener {
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
 
         List<AbstractItemModifier> applied = new ArrayList<>();
-        AbstractItemModifier.Result result = null;
+        AbstractItemModifier.Result result = AbstractItemModifier.Result.UNMODIFIED;
 
         for (AbstractItemModifier modifier : MODIFIERS) {
             if (!modifier.isEnabled() || !modifier.appliesTo(stack)) continue;
@@ -280,6 +281,21 @@ public class ItemModifiers extends BUListener {
         if (applied.isEmpty() && standardModifiers.isEmpty()) return;
 
         applyDefaults(lines);
+    }
+
+    @Subscription
+    @OnlyOnSkyBlock
+    private void onGatherTooltipComponents(GatherItemTooltipComponentsEvent event) {
+        ItemStack stack = event.getItem();
+        Optional<ScreenContext> context = ScreenManager.getInstance().current();
+
+        for (AbstractItemModifier modifier : MODIFIERS) {
+            if (!modifier.isEnabled() || !modifier.appliesTo(stack)) continue;
+            if (!modifier.appliesToScreen(context)) continue;
+
+            AbstractItemModifier.Result result = modifier.appendComponents(stack, event.getComponents());
+            if (!result.propagateFurther()) break;
+        }
     }
 
     private static void applyDefaults(List<Component> lines) {
