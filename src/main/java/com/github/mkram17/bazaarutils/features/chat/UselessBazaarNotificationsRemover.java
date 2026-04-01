@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.teamresourceful.resourcefulconfig.api.types.info.TooltipProvider;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import java.util.Arrays;
 
 @Module
-public class UselessBazaarNotificationsRemover extends BUListener implements BUToggleableFeature {
+public class UselessBazaarNotificationsRemover extends BUListener implements ToggleableFeature {
     public enum TransientBazaarMessages implements TooltipProvider {
         CANCELLING_ORDER("[Bazaar] Cancelling order..."),
         PUTTING_GOODS_IN_ESCROW("[Bazaar] Putting goods in escrow..."),

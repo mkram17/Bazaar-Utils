@@ -5,8 +5,7 @@ import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
@@ -16,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionState> extends BUListener implements BUToggleableFeature {
+public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionState> extends BUListener implements ToggleableFeature {
     public interface RestrictionState {
         @NotNull
         ItemInfo targetItem();

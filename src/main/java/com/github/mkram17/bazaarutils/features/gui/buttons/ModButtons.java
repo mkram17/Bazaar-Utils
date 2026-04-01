@@ -9,7 +9,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.Registe
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
 import net.minecraft.client.gui.components.WidgetSprites;
@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Module
-public class ModButtons implements BUToggleableFeature {
+public class ModButtons implements ToggleableFeature {
     private static final Identifier DEFAULT_ORDERS = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/generic_widget_base");
     private static final Identifier HOVERED_ORDERS = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/generic_widget_hover");
 

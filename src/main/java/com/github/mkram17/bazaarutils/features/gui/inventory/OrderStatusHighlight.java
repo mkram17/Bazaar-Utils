@@ -7,7 +7,7 @@ import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 //drawing done in MixinHandledScreen
 @Module
-public class OrderStatusHighlight extends BUListener implements BUToggleableFeature, SlotHighlight {
+public class OrderStatusHighlight extends BUListener implements ToggleableFeature, SlotHighlight {
     public static final Identifier IDENTIFIER = Identifier.tryBuild(BazaarUtils.MOD_ID, "highlights/standard_background");
 
     @Override

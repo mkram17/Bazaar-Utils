@@ -5,14 +5,14 @@ import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 @Module
-public class StashMessagesRemover extends BUListener implements BUToggleableFeature {
+public class StashMessagesRemover extends BUListener implements ToggleableFeature {
     private static final Map<String, Integer> REMOVE_MAP = Map.of(
             "materials stashed away", 0,
             "types of materials stashed", 1,

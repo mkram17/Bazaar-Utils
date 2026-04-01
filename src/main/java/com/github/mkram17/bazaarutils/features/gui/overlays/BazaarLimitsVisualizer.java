@@ -17,7 +17,7 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.TextDisplayWid
 import com.github.mkram17.bazaarutils.utils.TimeUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
@@ -26,7 +26,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 
 @Module
-public class BazaarLimitsVisualizer extends BUListener implements BUToggleableFeature {
+public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeature {
     private static final double COIN_LIMIT = 15_000_000_000d;
 
     public record OrderLimitEntry(double price, ZonedDateTime time) {}
