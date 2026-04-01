@@ -1,5 +1,6 @@
-package com.github.mkram17.bazaarutils.events.screen.predicates;
+package com.github.mkram17.bazaarutils.events.predicates;
 
+import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;

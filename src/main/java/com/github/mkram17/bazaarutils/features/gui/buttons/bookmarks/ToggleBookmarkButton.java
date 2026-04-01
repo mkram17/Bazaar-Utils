@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
-import com.github.mkram17.bazaarutils.events.screen.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
@@ -22,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
 
-import java.util.List;
 import java.util.Optional;
 
 @ItemModifier

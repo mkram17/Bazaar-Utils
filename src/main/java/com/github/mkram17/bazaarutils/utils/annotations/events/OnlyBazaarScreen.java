@@ -1,6 +1,7 @@
-package com.github.mkram17.bazaarutils.events.screen.predicates;
+package com.github.mkram17.bazaarutils.utils.annotations.events;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
