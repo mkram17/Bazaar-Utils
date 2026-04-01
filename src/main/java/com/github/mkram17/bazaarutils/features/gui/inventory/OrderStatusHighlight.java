@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.ItemModifier;
+import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
@@ -78,39 +79,34 @@ public class OrderStatusHighlight extends BUListener implements AbstractItemModi
     }
 
     @Subscription
+    @OnlyWhenEnabled
     @OnlyOnSkyBlock
     @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
     private void onChestLoaded(ChestLoadedEvent event) {
-        if (!isEnabled()) return;
-
         for (Slot slot : event.getContainerSlots()) {
             if (slot.hasItem()) resolve(slot.getItem(), slot.getContainerSlot());
         }
     }
 
     @Subscription
+    @OnlyWhenEnabled
     @OnlyOnSkyBlock
     @MustBeContainer
     @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
     @IgnoreFiller
     private void onInventoryChange(InventoryChangeEvent event) {
-        if (!isEnabled()) return;
-
         resolve(event.getItem(), event.getSlot().getContainerSlot());
     }
 
     @Subscription
     @OnlyOnSkyBlock
     private void onContainerInitialized(ContainerInitializedEvent ignored) {
-        if (!isEnabled()) return;
-
         clearAll();
     }
 
     @Subscription
+    @OnlyWhenEnabled
     private void onContainerClose(ContainerCloseEvent ignored) {
-        if (!isEnabled()) return;
-
         clearAll();
     }
 

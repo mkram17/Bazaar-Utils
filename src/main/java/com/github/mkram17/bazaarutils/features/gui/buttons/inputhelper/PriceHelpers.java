@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.ItemModifiers;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class PriceHelpers extends BUListener {
     }
 
     @Subscription(priority = Subscription.HIGH)
+    @OnlyOnSkyBlock
     private void onChestLoaded(ChestLoadedEvent event) {
         helpers().forEach(helper -> {
             ItemModifiers.registerDynamic(helper);

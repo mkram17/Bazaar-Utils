@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -22,6 +23,9 @@ import net.minecraft.ChatFormatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.IgnoreFiller;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.MustBeContainer;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 import tech.thatgravyboat.skyblockapi.api.item.VisualItemAccessorKt;
 
@@ -69,6 +73,8 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     }
 
     @Subscription(inherited = true)
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
     public void onChestLoaded(ChestLoadedEvent event) {
         if (!(isEnabled() && inCorrectScreen())) {
             resetState();
@@ -81,8 +87,12 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     }
 
     @Subscription(inherited = true)
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
+    @MustBeContainer
+    @IgnoreFiller
     public void onSlotClicked(SlotClickEvent event) {
-        if (!isEnabled() || !inCorrectScreen()) return;
+        if (!inCorrectScreen() || !isEnabled()) return;
 
         boolean isRestrictedSlot = state.map(RestrictionState::targetItem)
                 .map(info -> info.slotIndex() == event.getSlot().getContainerSlot())
