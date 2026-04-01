@@ -96,8 +96,6 @@ dependencies {
         capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${deps["skyblock_api_platform"]}-remapped") }
     }
 
-    modCompileOnly("net.hypixel:mod-api:1.0.1")
-
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
     modImplementation("net.fabricmc:fabric-language-kotlin:1.13.4+kotlin.2.2.0")
 

@@ -34,7 +34,6 @@
 		"java": ">=21",
 		"fabric-api": "*",
 		"resourcefulconfig": "*",
-		"hypixel-mod-api": ">=1.0.1",
 		"fabric-language-kotlin": ">=1.13.4+kotlin.2.2.0"
 	},
 	"suggests": {
