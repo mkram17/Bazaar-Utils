@@ -4,14 +4,17 @@ import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyWhenEnabled;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
+import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.AbstractItemModifier;
@@ -35,8 +38,71 @@ import tech.thatgravyboat.skyblockapi.api.item.VisualItemAccessorKt;
 
 import java.util.*;
 
-@ItemModifier
-public class OrderStatusHighlight extends BUListener implements AbstractItemModifier, LoreModifier {
+@Module
+public class OrderStatusHighlight extends BUListener implements ToggleableFeature {
+    // TODO: REVIEW THIS
+    // Hoisted as a member for the sake of readability (not to mangle the cache with the modifier/highlight api);
+    // once the bazaar-data comes in, it is likely that this highlight can become as small as InstantSellHighlight is.
+    @ItemModifier
+    public static final AbstractItemModifier MODIFIER = new LoreModifier() {
+        @Override
+        public boolean isEnabled() {
+            return InventoryConfig.ORDER_STATUS_HIGHLIGHT_TOGGLE;
+        }
+
+        @Override
+        public boolean appliesToScreen(Optional<ScreenContext> context) {
+            return context.map(it -> it.isAnyOf(BazaarScreens.ORDERS_PAGE)).orElse(false);
+        }
+
+        @Override
+        public boolean appliesTo(ItemStack stack) {
+            return cache.containsKey(stack);
+        }
+
+        @Override
+        public List<ModifierSource> getModifierSources() {
+            return List.of(ModifierSource.INVENTORY);
+        }
+
+        @Override
+        public Optional<Integer> highlightColor(ItemStack stack) {
+            return get(stack).map(OrderStatusHighlight::getArgbFromPricingPosition);
+        }
+
+        @Override
+        public Result modifyLore(ItemStack stack, List<Component> lore, @Nullable Result previous) {
+            Optional<PricingPosition> position = get(stack);
+            if (position.isEmpty()) return Result.UNMODIFIED;
+
+            int slotIndex = findSlotIndex(stack);
+            if (slotIndex == -1) return Result.UNMODIFIED;
+
+            Order order = OrderUtil.getUserOrderFromIndex(slotIndex).orElse(null);
+            if (order == null) return Result.UNMODIFIED;
+
+            return withMerger(lore, merger -> {
+                merger.copy(); // item name
+
+                switch (position.get()) {
+                    case COMPETITIVE -> merger.add(styledText("COMPETITIVE", InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR, true));
+                    case MATCHED -> merger.add(styledText("MATCHED", InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR, true));
+                    case OUTBID -> {
+                        merger.add(styledText("OUTBID", InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, true));
+                        merger.add(styledText("Market Price: " + Util.getPrettyString(order.getMarketPrice(order.getTransactionType().getSide())), InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, false));
+                    }
+                }
+
+                if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
+                    merger.add(Component.literal("[BU] Buy: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.BUY)) + " coins"));
+                    merger.add(Component.literal("[BU] Sell: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.SELL)) + " coins"));
+                }
+
+                return Result.MODIFIED;
+            });
+        }
+    };
+
     private static final Map<ItemStack, PricingPosition> cache = new MapMaker()
             .weakKeys()
             .concurrencyLevel(1)
@@ -66,12 +132,7 @@ public class OrderStatusHighlight extends BUListener implements AbstractItemModi
 
     @Override
     public boolean isEnabled() {
-        return InventoryConfig.ORDER_STATUS_HIGHLIGHT_TOGGLE;
-    }
-
-    @Override
-    public boolean appliesToScreen(Optional<ScreenContext> context) {
-        return context.map(it -> it.isAnyOf(BazaarScreens.ORDERS_PAGE)).orElse(false);
+        return MODIFIER.isEnabled();
     }
 
     public OrderStatusHighlight() {
@@ -108,53 +169,6 @@ public class OrderStatusHighlight extends BUListener implements AbstractItemModi
     @OnlyWhenEnabled
     private void onContainerClose(ContainerCloseEvent ignored) {
         clearAll();
-    }
-
-    @Override
-    public boolean appliesTo(ItemStack stack) {
-        return cache.containsKey(stack);
-    }
-
-    @Override
-    public List<ModifierSource> getModifierSources() {
-        return List.of(ModifierSource.INVENTORY);
-    }
-
-    @Override
-    public Optional<Integer> highlightColor(ItemStack stack) {
-        return get(stack).map(OrderStatusHighlight::getArgbFromPricingPosition);
-    }
-
-    @Override
-    public Result modifyLore(ItemStack stack, List<Component> lore, @Nullable Result previous) {
-        PricingPosition position = cache.get(stack);
-        if (position == null) return Result.UNMODIFIED;
-
-        int slotIndex = findSlotIndex(stack);
-        if (slotIndex == -1) return Result.UNMODIFIED;
-
-        Order order = OrderUtil.getUserOrderFromIndex(slotIndex).orElse(null);
-        if (order == null) return Result.UNMODIFIED;
-
-        return withMerger(lore, merger -> {
-            merger.copy(); // item name
-
-            switch (position) {
-                case COMPETITIVE -> merger.add(styledText("COMPETITIVE", InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR, true));
-                case MATCHED -> merger.add(styledText("MATCHED", InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR, true));
-                case OUTBID -> {
-                    merger.add(styledText("OUTBID", InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, true));
-                    merger.add(styledText("Market Price: " + Util.getPrettyString(order.getMarketPrice(order.getTransactionType().getSide())), InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, false));
-                }
-            }
-
-            if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-                merger.add(Component.literal("[BU] Buy: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.BUY)) + " coins"));
-                merger.add(Component.literal("[BU] Sell: " + Util.getPrettyString(order.getMarketPrice(TransactionType.Side.SELL)) + " coins"));
-            }
-
-            return Result.MODIFIED;
-        });
     }
 
     private static int getArgbFromPricingPosition(PricingPosition position) {
