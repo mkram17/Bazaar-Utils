@@ -35,6 +35,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import org.jetbrains.annotations.NotNull;
+import tech.thatgravyboat.skyblockapi.api.profile.CurrencyAPI;
 
 import java.util.List;
 import java.util.Optional;
@@ -156,53 +157,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (productId.isEmpty()) return Optional.empty();
 
-            Optional<Double> purse = Optional.ofNullable(Minecraft.getInstance())
-                    .flatMap(client -> Optional.ofNullable(client.level))
-                    .flatMap(world -> Optional.ofNullable(world.getScoreboard()))
-                    .flatMap(scoreboard -> {
-                        Objective objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
-
-                        if (objective == null) {
-                            return Optional.empty();
-                        }
-
-                        ObjectArrayList<String> scoreboardLines = new ObjectArrayList<>();
-
-                        for (ScoreHolder scoreHolder : scoreboard.getTrackedPlayers()) {
-                            if (scoreboard.listPlayerScores(scoreHolder).containsKey(objective)) {
-                                PlayerTeam team = scoreboard.getPlayersTeam(scoreHolder.getScoreboardName());
-
-                                if (team != null) {
-                                    String line = team.getPlayerPrefix().getString() + team.getPlayerSuffix().getString();
-
-                                    if (!line.trim().isEmpty()) {
-                                        scoreboardLines.add(ChatFormatting.stripFormatting(line));
-                                    }
-                                }
-                            }
-                        }
-
-                        return Optional.of(scoreboardLines);
-                    })
-                    .flatMap(lines -> {
-                        for (String line : lines) {
-                            if (line.contains("Purse:") || line.contains("Piggy:")) {
-                                Matcher matcher = PURSE_PATTERN.matcher(line);
-
-                                if (matcher.find()) {
-                                    try {
-                                        return Optional.of(Double.parseDouble(matcher.group("purse").replace(",", "")));
-                                    } catch (NumberFormatException e) {
-                                        Util.notifyError("Failed to parse purse from scoreboard", e);
-                                    }
-                                }
-                            }
-                        }
-
-                        return Optional.empty();
-                    });
-
-            if (purse.isEmpty()) return Optional.empty();
+            Double purse = CurrencyAPI.INSTANCE.getPurse();
 
             Optional<Inventory> playerInventory = Optional.ofNullable(Minecraft.getInstance())
                     .flatMap(client -> Optional.ofNullable(client.player))
@@ -210,7 +165,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (playerInventory.isEmpty()) return Optional.empty();
 
-            return Optional.of(new TransactionState(purse.get(), productId.get(), productItem.get(), inputSign.get(), playerInventory.get(), container.get()));
+            return Optional.of(new TransactionState(purse, productId.get(), productItem.get(), inputSign.get(), playerInventory.get(), container.get()));
         }
 
         public TransactionAmount(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
