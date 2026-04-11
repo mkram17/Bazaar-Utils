@@ -7,7 +7,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductData;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductOrder;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
-import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
 import java.util.List;
 import java.util.Locale;
@@ -50,8 +49,8 @@ public class BazaarDataUtil {
             }
 
             for (ProductOrder s : list) {
-                if (Double.compare(s.getPricePerUnit(), price) == 0) {
-                    return OptionalInt.of(s.getNumOrders());
+                if (Double.compare(s.pricePerUnit(), price) == 0) {
+                    return OptionalInt.of((int) s.volume());
                 }
             }
 
@@ -100,7 +99,7 @@ public class BazaarDataUtil {
                         yield OptionalDouble.of(0.0);
                     }
 
-                    yield OptionalDouble.of(buySummary.getFirst().getPricePerUnit());
+                    yield OptionalDouble.of(buySummary.getFirst().pricePerUnit());
                 }
                 case INSTASELL -> {
                     List<ProductOrder> sellSummary = product.getSellOrders();
@@ -109,7 +108,7 @@ public class BazaarDataUtil {
                         yield OptionalDouble.of(0.0);
                     }
 
-                    yield OptionalDouble.of(sellSummary.getFirst().getPricePerUnit());
+                    yield OptionalDouble.of(sellSummary.getFirst().pricePerUnit());
                 }
             };
         } catch (Exception e) {
