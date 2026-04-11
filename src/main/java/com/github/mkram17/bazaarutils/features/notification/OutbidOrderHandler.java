@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.notification;
 
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
-import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
+import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;

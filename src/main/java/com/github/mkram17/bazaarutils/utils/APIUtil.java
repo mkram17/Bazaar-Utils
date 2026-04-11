@@ -1,11 +1,11 @@
-package com.github.mkram17.bazaarutils.data;
+package com.github.mkram17.bazaarutils.utils;
 
 import net.hypixel.api.HypixelAPI;
 import net.hypixel.api.apache.ApacheHttpClient;
 
 import java.util.UUID;
 
-public class APIUtils {
+public class APIUtil {
 
     public static String getApiKey() {
         String apiKey = System.getenv("HYPIXEL_API_KEY");

@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
-import com.github.mkram17.bazaarutils.data.BazaarLimitsStorage;
+import com.github.mkram17.bazaarutils.utils.storage.BazaarLimitsStorage;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;

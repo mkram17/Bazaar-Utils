@@ -2,9 +2,9 @@ package com.github.mkram17.bazaarutils.features.gui.overlays;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.config.BUToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
@@ -78,7 +78,7 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, BUTo
             return;
         }
 
-        String productID = BazaarDataManager.findProductIdOptional(itemName).get(); // All cached items are safe
+        String productID = BazaarDataUtil.findProductIdOptional(itemName).get(); // All cached items are safe
         String link = "https://skyblock.finance/items/" + productID;
 
         MinecraftClient.getInstance().setScreen(new ConfirmLinkScreen(confirmed -> {

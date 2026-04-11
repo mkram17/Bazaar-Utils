@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -27,7 +27,7 @@ public final class PlayerSlots {
                         ItemStack stack = mainStacks.get(i);
 
                         boolean matches = !stack.isEmpty()
-                                && BazaarDataManager.findProductIdOptional(stack.getName().getString())
+                                && BazaarDataUtil.findProductIdOptional(stack.getName().getString())
                                 .map(id -> id.equals(productId))
                                 .orElse(false);
 

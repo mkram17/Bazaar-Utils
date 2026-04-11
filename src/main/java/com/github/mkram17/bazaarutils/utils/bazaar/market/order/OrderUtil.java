@@ -1,11 +1,11 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
+import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -74,8 +74,8 @@ public final class OrderUtil {
             return -1;
         }
 
-        OptionalDouble marketSellPriceOpt = BazaarDataManager.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER));
-        OptionalDouble marketBuyPriceOpt = BazaarDataManager.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
+        OptionalDouble marketSellPriceOpt = BazaarDataUtil.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER));
+        OptionalDouble marketBuyPriceOpt = BazaarDataUtil.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
 
         if(marketBuyPriceOpt.isEmpty() || marketSellPriceOpt.isEmpty()) {
             Util.notifyError("Could not resolve market prices for " + productID + " when calculating price for position. Buy price present: " + marketBuyPriceOpt.isPresent() + " Sell price present: " + marketSellPriceOpt.isPresent(), new Exception("Price resolution error"));
