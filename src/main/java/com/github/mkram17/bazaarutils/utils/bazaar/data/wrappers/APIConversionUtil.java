@@ -1,8 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers;
 
 import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
 import java.util.ArrayList;
@@ -37,30 +36,30 @@ public final class APIConversionUtil {
         List<ProductOrder> buy = new ArrayList<>();
 
         if (apiProduct.getSellSummary() != null) {
-            var convertedSellSummaries = convertAPIProductSummaries(apiProduct.getSellSummary(), PriceType.INSTASELL);
+            var convertedSellSummaries = convertAPIProductSummaries(apiProduct.getSellSummary(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
             sell.addAll(convertedSellSummaries);
         }
 
         if (apiProduct.getBuySummary() != null) {
-            var convertedBuySummaries = convertAPIProductSummaries(apiProduct.getBuySummary(), PriceType.INSTABUY);
+            var convertedBuySummaries = convertAPIProductSummaries(apiProduct.getBuySummary(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT));
             buy.addAll(convertedBuySummaries);
         }
 
         return new ProductData(productId, sell, buy);
     }
 
-    public static List<ProductOrder> convertAPIProductSummaries(List<SkyBlockBazaarReply.Product.Summary> apiSummaries, PriceType priceType) {
+    public static List<ProductOrder> convertAPIProductSummaries(List<SkyBlockBazaarReply.Product.Summary> apiSummaries, TransactionType transactionType) {
         if (apiSummaries == null || apiSummaries.isEmpty()) {
             return List.of();
         }
         return apiSummaries.stream()
-                .map(s -> fromAPIProductSummary(s, priceType))
+                .map(s -> fromAPIProductSummary(s, transactionType))
                 .toList();
     }
 
-    public static ProductOrder fromAPIProductSummary(SkyBlockBazaarReply.Product.Summary apiSummary, PriceType priceType) {
+    public static ProductOrder fromAPIProductSummary(SkyBlockBazaarReply.Product.Summary apiSummary, TransactionType transactionType) {
         return new ProductOrder(
-                priceType,
+                transactionType.getPriceType(),
                 apiSummary.getPricePerUnit(),
                 apiSummary.getAmount(),
                 apiSummary.getOrders()
