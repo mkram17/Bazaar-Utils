@@ -5,14 +5,15 @@ import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.SellTarget;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.google.common.collect.MapMaker;
-import kotlin.text.Regex;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.Slot;
@@ -25,7 +26,6 @@ import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.PlayerInventoryChangeEvent;
-import tech.thatgravyboat.skyblockapi.utils.regex.RegexSwitch;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -126,6 +126,36 @@ public class SellParser extends BUListener {
                 if (name != null && names.contains(name)) stamp(slot.getItem(), type);
             }
         }
+
+        public static void parseOtherItems(ChestLoadedEvent event, int volumeBound, SellTarget type) {
+            Minecraft client = Minecraft.getInstance();
+            if (client.player == null) return;
+
+            int remaining = volumeBound;
+
+            for (Slot slot : event.getSlots()) {
+                if (remaining <= 0) break;
+                if (!slot.hasItem() || slot.container != client.player.getInventory()) continue;
+                if (cache.containsKey(slot.getItem())) continue;
+
+                String name = DataTypeItemStackKt.getData(slot.getItem(), DataTypes.INSTANCE.getCLEAN_NAME());
+                if (name == null || !hasActiveBuyOrders(name)) continue;
+
+                stamp(slot.getItem(), type);
+                remaining -= slot.getItem().getCount();
+            }
+        }
+
+        private static boolean hasActiveBuyOrders(String name) {
+            Optional<String> productId = BazaarDataUtil.findProductIdOptional(name);
+            if (productId.isEmpty()) return false;
+
+            OptionalDouble topPrice = BazaarDataUtil.findItemPriceOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
+            if (topPrice.isEmpty() || topPrice.getAsDouble() == 0.0) return false;
+
+            OptionalInt orderCount = BazaarDataUtil.getOrderCountOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER), topPrice.getAsDouble());
+            return orderCount.isPresent() && orderCount.getAsInt() > 0;
+        }
     }
 
     @Subscription
@@ -136,6 +166,10 @@ public class SellParser extends BUListener {
             BazaarScreenHandler.getInstantSellItem(context).ifPresent(info -> {
                 InstantSell.parse(info.itemStack(), context);
                 Targets.parse(event, InstantSell.orders(), SellTarget.INSTANT_SELL);
+
+                if (context.isAnyOf(BazaarScreens.MAIN_PAGE)) {
+                    InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), SellTarget.INSTANT_SELL));
+                }
             });
 
             BazaarScreenHandler.getSellSacksItem(context).ifPresent(info -> {
@@ -156,7 +190,12 @@ public class SellParser extends BUListener {
         String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
         if (name == null) return;
 
-        if (InstantSell.orders().stream().anyMatch(o -> o.getName().equalsIgnoreCase(name))) {
+        if (InstantSell.orders().stream().anyMatch(order -> order.getName().equalsIgnoreCase(name))) {
+            Targets.stamp(item, SellTarget.INSTANT_SELL);
+            return;
+        }
+
+        if (InstantSell.otherItems().isPresent() && Targets.hasActiveBuyOrders(name)) {
             Targets.stamp(item, SellTarget.INSTANT_SELL);
         }
     }
