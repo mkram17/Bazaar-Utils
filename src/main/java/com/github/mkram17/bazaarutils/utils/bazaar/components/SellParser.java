@@ -12,6 +12,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.google.common.collect.MapMaker;
+import kotlin.text.Regex;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.Slot;
@@ -24,6 +25,7 @@ import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.PlayerInventoryChangeEvent;
+import tech.thatgravyboat.skyblockapi.utils.regex.RegexSwitch;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,9 +49,13 @@ public class SellParser extends BUListener {
             return result != null ? result.items() : List.of();
         }
 
+        public static Optional<InstantSellParser.InstantSellResult.OtherItems> otherItems() {
+            return result != null ? result.otherItems() : Optional.empty();
+        }
+
         public static void parse(ItemStack stack, ScreenContext context) {
             result = context.isAnyOf(BazaarScreens.ITEM_PAGE)
-                    ? InstantSellParser.parseItemPageOrder(stack).orElse(new InstantSellParser.InstantSellResult(List.of()))
+                    ? InstantSellParser.parseItemPageOrder(stack).orElse(new InstantSellParser.InstantSellResult(List.of(), Optional.empty()))
                     : InstantSellParser.parseOrders(stack);
         }
 
@@ -69,6 +75,10 @@ public class SellParser extends BUListener {
 
         public static List<OrderInfo> orders() {
             return result != null ? result.items() : List.of();
+        }
+
+        public static Optional<SellSacksParser.SellSacksResult.OtherItems> otherItems() {
+            return result != null ? result.otherItems() : Optional.empty();
         }
 
         public static void parse(ItemStack stack) {
