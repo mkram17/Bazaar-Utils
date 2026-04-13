@@ -14,9 +14,6 @@ repositories {
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1") {
         name = "Dev Auth"
     }
-    maven("https://maven.meteordev.org/releases") {
-        name = "meteor-maven"
-    }
     maven("https://repo.hypixel.net/repository/Hypixel/") {
         name = "Hypixel"
     }
@@ -85,9 +82,6 @@ dependencies {
 
     modLocalRuntime("maven.modrinth:hypixel-mod-api:1.0.1+build.1+mc1.21")
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
-
-    implementation("meteordevelopment:orbit:0.2.4")
-    include("meteordevelopment:orbit:0.2.4")
 
     modImplementation("tech.thatgravyboat:skyblock-api:${deps["skyblock_api_version"]}") {
         capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${deps["skyblock_api_platform"]}") }
