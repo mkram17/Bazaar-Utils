@@ -1,36 +1,41 @@
 package com.github.mkram17.bazaarutils.features.gui.overlays;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyWhenEnabled;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
-import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.Util;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.AbstractItemModifier;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.LoreModifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
+import org.jetbrains.annotations.Nullable;
+import tech.thatgravyboat.skyblockapi.api.datatype.DataTypeItemStackKt;
+import tech.thatgravyboat.skyblockapi.api.datatype.DataTypes;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.IgnoreFiller;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
+import tech.thatgravyboat.skyblockapi.impl.tagkey.ItemTag;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Module
-public class PriceCharts extends BUListener implements ItemTooltipCallback, ToggleableFeature {
-    // Cache: sanitized item name -> should show tooltip
+public class PriceCharts extends BUListener implements AbstractItemModifier, LoreModifier {
     private static final Map<String, Boolean> SHOW_CACHE = new ConcurrentHashMap<>();
 
     @Override
@@ -38,48 +43,58 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, Togg
         return OverlaysConfig.PRICE_CHARTS_TOGGLE;
     }
 
-    public PriceCharts() {}
+    @Override
+    public boolean appliesToScreen(Optional<ScreenContext> context) {
+        return OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR || ScreenManager.getInstance().isCurrent(BazaarScreens.ALL.toArray(ScreenType[]::new));
+    }
+
+    public PriceCharts() {
+        super();
+    }
 
     @Override
-    public void getTooltip(ItemStack stack, Item.TooltipContext ctx, TooltipFlag type, List<Component> lines) {
-        if (!isEnabled() || stack == null || stack.isEmpty() || !shouldShow()) return;
-        if (stack.getItem().getName().getString().contains("GLASS_PANE")) return;
+    public boolean appliesTo(ItemStack stack) {
+        return !stack.isEmpty() && !ItemTag.GLASS_PANES.contains(stack);
+    }
 
-        String key = sanitizeName(stack.getHoverName().getString());
+    @Override
+    public Result modifyLore(ItemStack stack, List<Component> lore, @Nullable Result previous) {
+        String key = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
 
-        // Lazily populate cache if a synced/replaced stack appears later
-        if (!SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName)) {
-            return;
-        }
+        if (!SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName)) return Result.UNMODIFIED;
 
-        MutableComponent text = Component.literal("CTRL+SHIFT click for price charts & other info")
-                .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-        MutableComponent poweredBy = Component.literal("Powered by skyblock.finance")
-                .withStyle(ChatFormatting.GRAY);
+        return withMerger(lore, merger -> {
+            copyAll(merger);
 
-        lines.add(Component.literal(""));
-        lines.add(text);
-        lines.add(poweredBy);
+            space(merger);
+
+            merger.add(Component.literal("CTRL+SHIFT click for price charts & other info").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+            merger.add(Component.literal("Powered by skyblock.finance").withStyle(ChatFormatting.GRAY));
+
+            return Result.MODIFIED;
+        });
     }
 
     @Subscription
-    private void onClick(SlotClickEvent event) {
-        if (!isEnabled() || !shouldShow() || event.isCancelled()) {
-            return;
-        }
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
+    @IgnoreFiller
+    public void onSlotClick(SlotClickEvent event) {
+        if (!Minecraft.getInstance().hasShiftDown() || !Minecraft.getInstance().hasControlDown()) return;
 
-        if (!Minecraft.getInstance().hasShiftDown() || !Minecraft.getInstance().hasControlDown()) {
-            return;
-        }
+        ItemStack stack = event.getItem();
+        if (!appliesTo(stack)) return;
 
-        String itemName = sanitizeName(event.getSlot().getItem().getHoverName().getString());
+        String itemName = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
+        if (!SHOW_CACHE.getOrDefault(itemName, false)) return;
 
-        if (!SHOW_CACHE.getOrDefault(itemName, false)) {
-            return;
-        }
+        Optional<String> productID = BazaarDataUtil.findProductIdOptional(itemName);
 
-        String productID = BazaarDataUtil.findProductIdOptional(itemName).get(); // All cached items are safe
-        String link = "https://skyblock.finance/items/" + productID;
+        if (productID.isEmpty()) return;
+
+        String link = "https://skyblock.finance/items/" + productID.get();
+
+        event.cancel();
 
         Minecraft.getInstance().setScreen(new ConfirmLinkScreen(confirmed -> {
             if (confirmed) {
@@ -91,29 +106,10 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, Togg
             }
             Minecraft.getInstance().setScreen(null);
         }, link, true));
-
-        event.cancel();
     }
 
     @Override
-    protected void registerFabricEvents() {
-        ItemTooltipCallback.EVENT.register(this);
-        // Clear cache when (re)subscribing to avoid stale bazaar state leakage
-        SHOW_CACHE.clear();
-    }
-
-    private boolean shouldShow() {
-        return (ScreenManager.getInstance().isCurrent(BazaarScreens.ALL.toArray(ScreenType[]::new)) || OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR) && !ScreenManager.getInstance().isCurrent(BazaarScreens.MAIN_PAGE);
-    }
-
-    private static String sanitizeName(String raw){
-        int len = raw.length();
-
-        if (len > 3 && raw.charAt(len - 2) == 'x' && Character.isDigit(raw.charAt(len - 1))) {
-            int idx = raw.lastIndexOf('x');
-            if (idx > 0) return raw.substring(0, idx - 1);
-        }
-
-        return raw;
+    public List<ModifierSource> getModifierSources() {
+        return List.of(ModifierSource.INVENTORY, ModifierSource.PLAYER_INVENTORY);
     }
 }
