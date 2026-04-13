@@ -8,7 +8,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.SellTarget;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -54,7 +53,7 @@ public class SellParser extends BUListener {
         }
 
         public static void parse(ItemStack stack, ScreenContext context) {
-            result = context.isAnyOf(BazaarScreens.ITEM_PAGE)
+            result = context.isAnyOf(BazaarScreenType.ITEM_PAGE)
                     ? InstantSellParser.parseItemPageOrder(stack).orElse(new InstantSellParser.InstantSellResult(List.of(), Optional.empty()))
                     : InstantSellParser.parseOrders(stack);
         }
@@ -167,7 +166,7 @@ public class SellParser extends BUListener {
                 InstantSell.parse(info.itemStack(), context);
                 Targets.parse(event, InstantSell.orders(), SellTarget.INSTANT_SELL);
 
-                if (context.isAnyOf(BazaarScreens.MAIN_PAGE)) {
+                if (context.isAnyOf(BazaarScreenType.MAIN_PAGE)) {
                     InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), SellTarget.INSTANT_SELL));
                 }
             });

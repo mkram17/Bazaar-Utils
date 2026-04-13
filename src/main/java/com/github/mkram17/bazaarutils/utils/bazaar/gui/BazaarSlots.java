@@ -182,7 +182,7 @@ public class BazaarSlots {
         )
         ),
 
-        CANCEL_SELL_ORDER (new BazaarSlot(
+        CANCEL_SELL_OFFER(new BazaarSlot(
                 new SlotLookup.IndexReference.FixedIndex(13),
                 (query) -> query
                         .itemType(Items.GREEN_TERRACOTTA)

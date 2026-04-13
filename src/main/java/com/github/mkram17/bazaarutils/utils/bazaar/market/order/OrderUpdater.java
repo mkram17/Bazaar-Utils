@@ -2,17 +2,16 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
@@ -41,7 +40,7 @@ public class OrderUpdater extends BUListener {
 
     @Subscription(priority = Subscription.HIGH)
     public void onGUI(ChestLoadedEvent event) {
-        if (!ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) return;
+        if (!ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) return;
 
         containerSlots = event.getContainerSlots();
         List<ItemStack> orderStacks = extractOrderStacks(event.getContainerItems());

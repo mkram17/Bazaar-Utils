@@ -19,33 +19,33 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public final class BazaarScreenHandler {
-    public static final Pattern AMOUNT_PATTERN         = Pattern.compile("Amount: (?<amount>[0-9,.]+)x");
-    public static final Pattern SELL_LIMIT_PATTERN     = Pattern.compile("Inventory: (?<amount>[0-9,.]+) items");
+    public static final Pattern AMOUNT_PATTERN = Pattern.compile("Amount: (?<amount>[0-9,.]+)x");
+    public static final Pattern SELL_LIMIT_PATTERN = Pattern.compile("Inventory: (?<amount>[0-9,.]+) items");
     public static final Pattern PURCHASE_LIMIT_PATTERN = Pattern.compile("Buy up to (?<amount>[0-9,.]+)x.");
 
     private BazaarScreenHandler() {}
 
     public static Optional<ItemInfo> getInstantSellItem(@NotNull ScreenContext context) {
-        if (context.isAnyOf(BazaarScreens.MAIN_PAGE))
+        if (context.isAnyOf(BazaarScreenType.MAIN_PAGE))
             return getItemFromSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot);
 
-        if (context.isAnyOf(BazaarScreens.ITEM_PAGE))
+        if (context.isAnyOf(BazaarScreenType.ITEM_PAGE))
             return getItemFromSlot(context, BazaarSlots.ITEM_PAGE.SELL_INSTANTLY.slot);
 
-        if (context.isAnyOf(BazaarScreens.ITEMS_GROUP_PAGE))
+        if (context.isAnyOf(BazaarScreenType.ITEMS_GROUP_PAGE))
             return getItemFromSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_INVENTORY.slot);
 
         return Optional.empty();
     }
 
     public static Optional<ItemInfo> getSellSacksItem(@NotNull ScreenContext context) {
-        if (context.isAnyOf(BazaarScreens.MAIN_PAGE))
+        if (context.isAnyOf(BazaarScreenType.MAIN_PAGE))
             return getItemFromSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot);
 
-        if (context.isAnyOf(BazaarScreens.ITEM_PAGE))
+        if (context.isAnyOf(BazaarScreenType.ITEM_PAGE))
             return getItemFromSlot(context, BazaarSlots.ITEM_PAGE.SELL_SACKS.slot);
 
-        if (context.isAnyOf(BazaarScreens.ITEMS_GROUP_PAGE))
+        if (context.isAnyOf(BazaarScreenType.ITEMS_GROUP_PAGE))
             return getItemFromSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_SACKS.slot);
 
         return Optional.empty();
@@ -54,7 +54,7 @@ public final class BazaarScreenHandler {
     public static Optional<ItemInfo> getDisplayItem(@NotNull ScreenContext context) {
         // #isAnyOf rather than #matches — likely to hit computation cache from the
         // preceding isCurrent call in the same stack.
-        if (!context.isAnyOf(BazaarScreens.ITEM_PAGE)) return Optional.empty();
+        if (!context.isAnyOf(BazaarScreenType.ITEM_PAGE)) return Optional.empty();
 
         return getItemFromSlot(context, BazaarSlots.ITEM_PAGE.ITEM_DISPLAY.slot);
     }
@@ -79,7 +79,7 @@ public final class BazaarScreenHandler {
     public static String getItemNameFromTitle() {
         String containerName = ContainerManager.getContainerName();
 
-        if (ScreenManager.getInstance().isCurrent(BazaarScreens.INSTANT_BUY_AMOUNT)) {
+        if (ScreenManager.getInstance().isCurrent(BazaarScreenType.INSTANT_BUY)) {
             return containerName.substring(0, containerName.indexOf("➜") - 1);
         }
 

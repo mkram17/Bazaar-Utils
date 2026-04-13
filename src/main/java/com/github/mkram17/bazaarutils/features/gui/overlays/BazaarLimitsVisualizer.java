@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.codecs.ZonedDateTimeCodec;
 import com.github.mkram17.bazaarutils.utils.storage.BazaarLimitsStorage;
 import com.github.mkram17.bazaarutils.events.BUListener;
@@ -17,7 +18,6 @@ import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnIn
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.TextDisplayWidget;
 import com.github.mkram17.bazaarutils.utils.TimeUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
@@ -57,7 +57,7 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
     @RunOnInit
     public static void registerBazaarOpen() {
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
-            if (!ScreenManager.getInstance().isCurrent(BazaarScreens.ALL.toArray(ScreenType[]::new))) {
+            if (!ScreenManager.getInstance().isCurrent(BazaarScreenType.values())) {
                 return;
             }
 
@@ -103,7 +103,7 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
             return Collections.emptyList();
         }
 
-        var dimensions = WidgetManager.getScreenDimensions(BazaarScreens.MAIN_PAGE);
+        var dimensions = WidgetManager.getScreenDimensions(BazaarScreenType.MAIN_PAGE);
         if (dimensions.isEmpty()) return Collections.emptyList();
 
         return List.of(createLimitWidget(dimensions.get()), createTimeUntilResetWidget(dimensions.get()));

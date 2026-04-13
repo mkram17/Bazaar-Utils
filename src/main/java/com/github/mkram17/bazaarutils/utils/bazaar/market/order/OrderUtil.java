@@ -1,15 +1,14 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +34,7 @@ public final class OrderUtil {
      * Opens the Bazaar order management screen after a short countdown if the player is not already there.
      */
     public static void openBazaar() {
-        if (ScreenManager.getInstance().isCurrent(BazaarScreens.ALL.toArray(ScreenType[]::new))) {
+        if (ScreenManager.getInstance().isCurrent(BazaarScreenType.values())) {
             return;
         }
 
