@@ -25,7 +25,8 @@ public final class ItemsData {
     private ItemsData() {}
 
     public static void skyblockSourceReady() {
-        SKYBLOCK_REPO_READY = true;
+        if (SKYBLOCK_REPO_READY) return;
+        else SKYBLOCK_REPO_READY = true;
 
         CompletableFuture.runAsync(() -> {
             SKYBLOCK_ITEMS_CACHE = buildSkyBlockItems();

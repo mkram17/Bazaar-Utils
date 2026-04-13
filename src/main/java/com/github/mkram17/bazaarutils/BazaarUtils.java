@@ -69,13 +69,13 @@ public class BazaarUtils implements ClientModInitializer {
 
     @Subscription(event = RepoStatusEvent.class)
     @OnRepoStatus(repoStatus = RepoStatus.SUCCESS)
-    private void onRepoReady(RepoStatusEvent event) {
+    public void onRepoReady(RepoStatusEvent event) {
         onRepoReady();
     }
 
     private void onRepoReady() {
         if (repoReady) return;
-        repoReady = true;
+        else repoReady = true;
 
         ItemsData.skyblockSourceReady();
 
