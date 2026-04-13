@@ -61,33 +61,47 @@ public final class BazaarDataManager {
 
     private static void fetchOnce() {
         APIUtil.API.getSkyBlockBazaar().whenComplete((reply, throwable) -> {
-            if (throwable != null || !reply.isSuccess()) {
-                handleFetchFailure(
-                    "Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms",
-                    true
-                );
-                return;
+            try {
+                if (throwable != null) {
+                    handleFetchFailure(
+                        "Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms",
+                        throwable,
+                        true
+                    );
+                    return;
+                }
+
+                if (reply == null || !reply.isSuccess()) {
+                    handleFetchFailure(
+                        "Fetch failure (Unsuccessful Reply). Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms",
+                        new RuntimeException("API reply was null or not successful"),
+                        true
+                    );
+                    return;
+                }
+
+                CustomBazaarReply customReply = APIConversionUtil.fromSkyBlockReply(reply);
+
+                long snapshotTs = customReply.getLastUpdated();
+                if (snapshotTs <= 0) {
+                    handleFetchFailure("Invalid lastUpdated <= 0. Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms", new RuntimeException("lastUpdated <= 0"), false);
+                    return;
+                }
+
+                consecutiveFailures.set(0);
+
+                handleSnapshotResult(customReply, snapshotTs);
+                scheduleNextFromSnapshot(snapshotTs);
+            } catch (Throwable t) {
+                handleFetchFailure("Unexpected error in fetch completion. Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms", t, true);
             }
-
-            CustomBazaarReply customReply = APIConversionUtil.fromSkyBlockReply(reply);
-
-            long snapshotTs = customReply.getLastUpdated();
-            if (snapshotTs <= 0) {
-                handleFetchFailure("Invalid lastUpdated <= 0. Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms", false);
-                return;
-            }
-
-            consecutiveFailures.set(0);
-
-            handleSnapshotResult(customReply, snapshotTs);
-            scheduleNextFromSnapshot(snapshotTs);
         });
     }
 
-    private static void handleFetchFailure(String messagePrefix, boolean includeFailureCount) {
+    private static void handleFetchFailure(String messagePrefix, Throwable cause, boolean includeFailureCount) {
         int failureCount = includeFailureCount ? consecutiveFailures.incrementAndGet() : consecutiveFailures.get();
         String message = includeFailureCount ? messagePrefix + " (failures=" + failureCount + ")" : messagePrefix;
-        Util.notifyError(message, new Throwable());
+        Util.notifyError(message, cause);
         scheduleFailureRetry();
     }
 
