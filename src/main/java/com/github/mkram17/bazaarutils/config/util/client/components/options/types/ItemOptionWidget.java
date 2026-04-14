@@ -8,18 +8,18 @@ import com.github.mkram17.bazaarutils.config.util.client.components.options.type
 import com.teamresourceful.resourcefulconfig.client.components.ModSprites;
 import com.teamresourceful.resourcefulconfig.client.components.options.text.TextBox;
 import com.teamresourceful.resourcefulconfig.client.utils.ListenableState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.input.AbstractInput;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ItemOptionWidget extends SelectorOptionWidget {
-    protected static final Text SEARCH = Text.translatable("bazaarutils.rconfig.ui.constant.search");
+    protected static final Component SEARCH = Component.translatable("bazaarutils.rconfig.ui.constant.search");
 
     private final List<Item> items;
     private final Supplier<String> getter;
@@ -43,19 +43,19 @@ public class ItemOptionWidget extends SelectorOptionWidget {
     }
 
     @Override
-    protected void drawIcon(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.drawIcon(context, mouseX, mouseY, delta);
+    protected void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        super.renderContents(context, mouseX, mouseY, delta);
 
         Item item = ResourcefulConfigItems.resolve(getter.get());
 
         if (item != null) {
-            context.drawItem(new ItemStack(item), getX(), getY());
+            context.renderItem(new ItemStack(item), getX(), getY());
         }
     }
 
     @Override
-    public void onPress(@NotNull AbstractInput modifiers) {
-        MinecraftClient.getInstance().setScreen(new ItemSelector(this));
+    public void onPress(@NotNull InputWithModifiers modifiers) {
+        Minecraft.getInstance().setScreen(new ItemSelector(this));
     }
 
     public static class ItemSelector extends AbstractSelectorOverlay {
@@ -77,7 +77,7 @@ public class ItemOptionWidget extends SelectorOptionWidget {
 
         private int scrollOffset = 0;
 
-        private final List<ClickableWidget> cellWidgets = new ArrayList<>();
+        private final List<AbstractWidget> cellWidgets = new ArrayList<>();
 
         private TextBox searchBox;
 
@@ -105,10 +105,10 @@ public class ItemOptionWidget extends SelectorOptionWidget {
         }
 
         private void rebuildCells() {
-            cellWidgets.forEach(this::remove);
+            cellWidgets.forEach(this::removeWidget);
             cellWidgets.clear();
 
-            scrollOffset = MathHelper.clamp(scrollOffset, 0, maxScroll());
+            scrollOffset = Mth.clamp(scrollOffset, 0, maxScroll());
             oh = overlayHeight();
 
             int startX = ox + PADDING;
@@ -128,12 +128,12 @@ public class ItemOptionWidget extends SelectorOptionWidget {
                         startY + row * ContainerCell.CELL_SIZE,
                         item,
                         selected -> {
-                            this.setter.accept(Registries.ITEM.getId(selected).toString());
-                            close();
+                            this.setter.accept(BuiltInRegistries.ITEM.getKey(selected).toString());
+                            onClose();
                         }
                 );
                 cellWidgets.add(cell);
-                addDrawableChild(cell);
+                addRenderableWidget(cell);
             }
         }
 
@@ -145,7 +145,7 @@ public class ItemOptionWidget extends SelectorOptionWidget {
                 if (q.isEmpty()) return true;
 
                 String name = item.getName(new ItemStack(item)).getString().toLowerCase();
-                String key = Registries.ITEM.getId(item).toString().toLowerCase();
+                String key = BuiltInRegistries.ITEM.getKey(item).toString().toLowerCase();
 
                 return name.contains(q) || key.contains(q);
             }).toList();
@@ -161,7 +161,7 @@ public class ItemOptionWidget extends SelectorOptionWidget {
                     : source.getY() - oh - SPACING;
 
             int centerX = source.getX() + source.getWidth() / 2;
-            ox = MathHelper.clamp(centerX - ow / 2, 0, this.width - ow);
+            ox = Mth.clamp(centerX - ow / 2, 0, this.width - ow);
 
             ListenableState<String> searchState = ListenableState.of("");
             searchState.registerListener(q -> {
@@ -171,21 +171,21 @@ public class ItemOptionWidget extends SelectorOptionWidget {
 
             this.searchBox = new TextBox(ow - PADDING * 2, SEARCH_HEIGHT, searchState) {
                 @Override
-                public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-                    context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, ModSprites.BUTTON, getX(), getY(), getWidth(), getHeight());
+                public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+                    context.blitSprite(RenderPipelines.GUI_TEXTURED, ModSprites.BUTTON, getX(), getY(), getWidth(), getHeight());
                     super.renderWidget(context, mouseX, mouseY, delta);
                     this.applyCursor(context);
                 }
             };
             this.searchBox.setPosition(ox + PADDING, oy + PADDING);
             this.searchBox.setPlaceholder(SEARCH.getString(), 0xFF808080);
-            addDrawableChild(this.searchBox);
+            addRenderableWidget(this.searchBox);
 
             rebuildCells();
         }
 
         @Override
-        public void renderBackground(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
+        public void renderBackground(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
             super.renderBackground(context, mouseX, mouseY, delta);
 
             if (maxScroll() > 0) {
@@ -202,7 +202,7 @@ public class ItemOptionWidget extends SelectorOptionWidget {
         public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
             if (!isOverOverlay(mouseX, mouseY)) return false;
 
-            int newOffset = MathHelper.clamp(scrollOffset - (int) Math.signum(scrollY), 0, maxScroll());
+            int newOffset = Mth.clamp(scrollOffset - (int) Math.signum(scrollY), 0, maxScroll());
 
             if (newOffset != scrollOffset) {
                 scrollOffset = newOffset;
@@ -213,7 +213,7 @@ public class ItemOptionWidget extends SelectorOptionWidget {
         }
 
         @Override
-        public boolean charTyped(CharInput input) {
+        public boolean charTyped(CharacterEvent input) {
             if (searchBox != null && !searchBox.isFocused()) {
                 setInitialFocus(searchBox);
                 return searchBox.charTyped(input);

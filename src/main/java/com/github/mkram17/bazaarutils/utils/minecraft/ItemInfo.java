@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Encapsulates lightweight UI metadata for an item shown in the Bazaar orders screen,
@@ -21,6 +21,6 @@ public record ItemInfo(Integer slotIndex, ItemStack itemStack) {
             return false;
         }
 
-        return this.slotIndex.equals(index) && ItemStack.areEqual(this.itemStack, stack);
+        return this.slotIndex.equals(index) && ItemStack.matches(this.itemStack, stack);
     }
 }

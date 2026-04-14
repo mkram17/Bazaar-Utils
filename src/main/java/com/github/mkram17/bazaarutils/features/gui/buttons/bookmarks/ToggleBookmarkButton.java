@@ -14,10 +14,10 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.ItemGroups;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,8 +53,8 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
         ItemStack stack = ItemButton.super.getReplacementItem(size);
 
         stack.set(
-                DataComponentTypes.CUSTOM_NAME,
-                Text.literal(bookmarked
+                DataComponents.CUSTOM_NAME,
+                Component.literal(bookmarked
                         ? "Remove " + BookmarkUtil.currentBookmarkOpt.get().name() + " Bookmark"
                         : "Bookmark " + resolveCurrentItemName().orElse("?")));
 
@@ -91,7 +91,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
             ItemStack itemStack = ScreenManager.getInstance().current()
                     .flatMap(BazaarScreenHandler::getDisplayItem)
                     .map(ItemInfo::itemStack)
-                    .orElse(Items.DIAMOND.getDefaultStack());
+                    .orElse(Items.DIAMOND.getDefaultInstance());
 
             String productId = ScreenManager.getInstance().current()
                     .flatMap(BazaarScreenHandler::getDisplayProductId)

@@ -4,7 +4,7 @@ import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
+import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.mixin.AccessorScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
@@ -13,10 +13,10 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +37,7 @@ public class WidgetManager {
 
         // causes a flash when onChestLoaded removes and re-adds immediately after.
         Screen next = event.getNewScreen();
-        if (next == null || next instanceof GenericContainerScreen) return;
+        if (next == null || next instanceof ContainerScreen) return;
 
         addWidgetsTo(next);
     }
@@ -52,7 +52,7 @@ public class WidgetManager {
     private static void addWidgetsTo(Screen screen) {
         if (!(screen instanceof AccessorScreen accessor)) return;
 
-        List<ClickableWidget> widgets = ConfigUtil.getWidgets();
+        List<AbstractWidget> widgets = ConfigUtil.getWidgets();
         if (widgets.isEmpty()) return;
 
         widgets.forEach(accessor::registerWidget);
@@ -68,7 +68,7 @@ public class WidgetManager {
     }
 
     public static Optional<ScreenWidgetDimensions> getScreenDimensions(ScreenType... required) {
-        if (!(MinecraftClient.getInstance().currentScreen instanceof AccessorHandledScreen screen)) {
+        if (!(Minecraft.getInstance().screen instanceof AccessorAbstractContainerScreen screen)) {
             return Optional.empty();
         }
 
@@ -76,9 +76,9 @@ public class WidgetManager {
             return Optional.empty();
         }
 
-        int x = screen.getX();
-        int y = screen.getY();
-        int backgroundWidth = screen.getBackgroundWidth();
+        int x = screen.getLeftPos();
+        int y = screen.getTopPos();
+        int backgroundWidth = screen.getImageWidth();
 
         if (backgroundWidth <= 0) {
             PlayerActionUtil.notifyAll("BackgroundWidth not yet initialized for " + ContainerManager.getContainerName(), NotificationType.GUI);

@@ -21,19 +21,19 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerMan
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.scoreboard.ScoreHolder;
-import net.minecraft.scoreboard.ScoreboardDisplaySlot;
-import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.scores.ScoreHolder;
+import net.minecraft.world.scores.DisplaySlot;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -77,7 +77,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         this.inputSignRef = inputSignRef;
     }
 
-    protected Optional<ItemInfo> getInputSign(Inventory inventory) {
+    protected Optional<ItemInfo> getInputSign(Container inventory) {
         int slot = inputSignRef.resolve(inventory);
 
         return inputSignRef.query(inventory).first(inventory).map(stack -> new ItemInfo(slot, stack));
@@ -111,10 +111,10 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 ItemInfo inputSign,
 
                 @NotNull
-                PlayerInventory playerInventory,
+                Inventory playerInventory,
 
                 @NotNull
-                GenericContainerScreen containerScreen
+                ContainerScreen containerScreen
         ) implements SignInputState {
         }
 
@@ -130,13 +130,13 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected Optional<TransactionState> makeState(ChestLoadedEvent event) {
-            Optional<GenericContainerScreen> container = ScreenManager.getInstance()
+            Optional<ContainerScreen> container = ScreenManager.getInstance()
                     .current()
-                    .flatMap(context -> context.as(GenericContainerScreen.class));
+                    .flatMap(context -> context.as(ContainerScreen.class));
 
-            Optional<Inventory> inventory = container
-                    .map(GenericContainerScreen::getScreenHandler)
-                    .map(GenericContainerScreenHandler::getInventory);
+            Optional<Container> inventory = container
+                    .map(ContainerScreen::getMenu)
+                    .map(ChestMenu::getContainer);
 
             if (container.isEmpty() || inventory.isEmpty()) return Optional.empty();
 
@@ -156,11 +156,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (productId.isEmpty()) return Optional.empty();
 
-            Optional<Double> purse = Optional.ofNullable(MinecraftClient.getInstance())
-                    .flatMap(client -> Optional.ofNullable(client.world))
+            Optional<Double> purse = Optional.ofNullable(Minecraft.getInstance())
+                    .flatMap(client -> Optional.ofNullable(client.level))
                     .flatMap(world -> Optional.ofNullable(world.getScoreboard()))
                     .flatMap(scoreboard -> {
-                        ScoreboardObjective objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
+                        Objective objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
 
                         if (objective == null) {
                             return Optional.empty();
@@ -168,15 +168,15 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
                         ObjectArrayList<String> scoreboardLines = new ObjectArrayList<>();
 
-                        for (ScoreHolder scoreHolder : scoreboard.getKnownScoreHolders()) {
-                            if (scoreboard.getScoreHolderObjectives(scoreHolder).containsKey(objective)) {
-                                Team team = scoreboard.getScoreHolderTeam(scoreHolder.getNameForScoreboard());
+                        for (ScoreHolder scoreHolder : scoreboard.getTrackedPlayers()) {
+                            if (scoreboard.listPlayerScores(scoreHolder).containsKey(objective)) {
+                                PlayerTeam team = scoreboard.getPlayersTeam(scoreHolder.getScoreboardName());
 
                                 if (team != null) {
-                                    String line = team.getPrefix().getString() + team.getSuffix().getString();
+                                    String line = team.getPlayerPrefix().getString() + team.getPlayerSuffix().getString();
 
                                     if (!line.trim().isEmpty()) {
-                                        scoreboardLines.add(Formatting.strip(line));
+                                        scoreboardLines.add(ChatFormatting.stripFormatting(line));
                                     }
                                 }
                             }
@@ -204,9 +204,9 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (purse.isEmpty()) return Optional.empty();
 
-            Optional<PlayerInventory> playerInventory = Optional.ofNullable(MinecraftClient.getInstance())
+            Optional<Inventory> playerInventory = Optional.ofNullable(Minecraft.getInstance())
                     .flatMap(client -> Optional.ofNullable(client.player))
-                    .map(ClientPlayerEntity::getInventory);
+                    .map(LocalPlayer::getInventory);
 
             if (playerInventory.isEmpty()) return Optional.empty();
 
@@ -249,14 +249,14 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 case INSTANT -> {
                     if (getTransactionType().isBuy()) {
                         yield Optional.of(state.containerScreen())
-                            .map(GenericContainerScreen::getScreenHandler)
-                            .map(GenericContainerScreenHandler::getInventory)
+                            .map(ContainerScreen::getMenu)
+                            .map(ChestMenu::getContainer)
                             .map(inventory -> SlotLookup.getInventoryItem(inventory, BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot))
                             .map(ItemInfo::itemStack)
                             .flatMap(BazaarScreens::findOptionAmount)
                             .map(value -> (int) Math.floor(value))
                             .orElse((int) state.playerInventory()
-                                    .getMainStacks()
+                                    .getNonEquipmentItems()
                                     .stream()
                                     .filter(ItemStack::isEmpty)
                                     .count()
@@ -274,10 +274,10 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                                 .map(limit -> Math.min(amountCanAfford, limit))
                                 .orElse(amountCanAfford);
                     }
-                    yield state.playerInventory().getMainStacks().stream()
+                    yield state.playerInventory().getNonEquipmentItems().stream()
                             .filter(stack -> !stack.isEmpty())
                             .filter(stack -> Optional.ofNullable(stack.getCustomName())
-                                    .map(Text::getString)
+                                    .map(Component::getString)
                                     .flatMap(BazaarDataUtil::findProductIdOptional)
                                     .map(productId -> productId.equals(state.productId()))
                                     .orElse(false))
@@ -297,7 +297,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 ItemInfo inputSign,
 
                 @NotNull
-                GenericContainerScreen containerScreen
+                ContainerScreen containerScreen
         ) implements SignInputState {
         }
 
@@ -314,13 +314,13 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected Optional<TransactionState> makeState(ChestLoadedEvent event) {
-            Optional<GenericContainerScreen> container = ScreenManager.getInstance()
+            Optional<ContainerScreen> container = ScreenManager.getInstance()
                     .current()
-                    .flatMap(context -> context.as(GenericContainerScreen.class));
+                    .flatMap(context -> context.as(ContainerScreen.class));
 
-            Optional<Inventory> inventory = container
-                    .map(GenericContainerScreen::getScreenHandler)
-                    .map(GenericContainerScreenHandler::getInventory);
+            Optional<Container> inventory = container
+                    .map(ContainerScreen::getMenu)
+                    .map(ChestMenu::getContainer);
 
             if (container.isEmpty() || inventory.isEmpty()) return Optional.empty();
 
@@ -373,12 +373,12 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected Optional<String> getItemProductId(ItemInfo inputSign) {
-            List<Text> loreLines = LoreParser.lines(inputSign.itemStack());
+            List<Component> loreLines = LoreParser.lines(inputSign.itemStack());
             if (loreLines.isEmpty()) return Optional.empty();
             return matchToUserOrder(loreLines).map(Order::getProductID);
         }
 
-        private Optional<Order> matchToUserOrder(List<Text> loreLines) {
+        private Optional<Order> matchToUserOrder(List<Component> loreLines) {
             Optional<PriceInfo> priceInfo = getOrderPriceInfo(loreLines);
             Optional<Integer> volume = getVolumeUnclaimed(loreLines);
 
@@ -396,7 +396,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             return tempOrder.findOrderInList(UserOrdersStorage.INSTANCE.get());
         }
 
-        private Optional<PriceInfo> getOrderPriceInfo(List<Text> loreLines) {
+        private Optional<PriceInfo> getOrderPriceInfo(List<Component> loreLines) {
             if (loreLines.size() <= INPUT_LORE_LINE_PRICE) return Optional.empty();
 
             Matcher matcher = PRICE_PATTERN.matcher(loreLines.get(INPUT_LORE_LINE_PRICE).getString());
@@ -412,7 +412,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             return Optional.empty();
         }
 
-        private Optional<Integer> getVolumeUnclaimed(List<Text> loreLines) {
+        private Optional<Integer> getVolumeUnclaimed(List<Component> loreLines) {
             if (loreLines.size() <= INPUT_LORE_LINE_VOLUME) return Optional.empty();
 
             Matcher matcher = VOLUME_PATTERN.matcher(loreLines.get(INPUT_LORE_LINE_VOLUME).getString());

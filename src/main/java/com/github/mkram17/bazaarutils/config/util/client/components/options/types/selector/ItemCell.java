@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.config.util.client.components.options.types.selector;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Consumer;
 

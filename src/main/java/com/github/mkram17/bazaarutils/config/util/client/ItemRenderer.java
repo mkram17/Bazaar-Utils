@@ -7,27 +7,27 @@ import com.github.mkram17.bazaarutils.config.util.client.components.options.type
 import com.github.mkram17.bazaarutils.config.util.client.components.options.ResetOptionWidget;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigElementRenderer;
 import com.teamresourceful.resourcefulconfig.api.types.entries.ResourcefulConfigValueEntry;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.world.item.Item;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
 public record ItemRenderer(ItemElement element) implements ResourcefulConfigElementRenderer {
     @Override
-    public Text title() {
+    public Component title() {
         return element.title();
     }
 
     @Override
-    public Text description() {
+    public Component description() {
         return element.description();
     }
 
     @Override
-    public List<ClickableWidget> widgets() {
+    public List<AbstractWidget> widgets() {
         ResourcefulConfigValueEntry entry = element.valueEntry();
 
         List<Item> items = ResourcefulConfigItems.getItems(element.tag());

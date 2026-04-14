@@ -11,9 +11,9 @@ import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -65,7 +65,7 @@ public final class BazaarScreenHandler {
         return getDisplayItem(context)
                 .map(ItemInfo::itemStack)
                 .map(ItemStack::getCustomName)
-                .map(Text::getString);
+                .map(Component::getString);
     }
 
     public static Optional<String> getDisplayProductId(@NotNull ScreenContext context) {
@@ -99,7 +99,7 @@ public final class BazaarScreenHandler {
     private static String getItemNameFromStacks(List<ItemStack> stacks, String nameFromTitle) {
         for (ItemStack stack : stacks) {
             if (stack == null || stack.isEmpty()) continue;
-            if (stack.getName().getString().startsWith(nameFromTitle)) {
+            if (stack.getHoverName().getString().startsWith(nameFromTitle)) {
                 return stack.getCustomName().getString();
             }
         }
@@ -107,8 +107,8 @@ public final class BazaarScreenHandler {
     }
 
     private static Optional<ItemInfo> getItemFromSlot(@NotNull ScreenContext context, BazaarSlots.BazaarSlot slot) {
-        return context.as(GenericContainerScreen.class)
-                .map(screen -> SlotLookup.getInventoryItem(screen.getScreenHandler().getInventory(), slot));
+        return context.as(ContainerScreen.class)
+                .map(screen -> SlotLookup.getInventoryItem(screen.getMenu().getContainer(), slot));
     }
 
     public static Optional<Double> findOptionAmount(ItemStack option) {

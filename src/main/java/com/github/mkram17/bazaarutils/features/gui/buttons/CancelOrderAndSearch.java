@@ -7,8 +7,8 @@ import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import lombok.Getter;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 @ConfigObject
 public class CancelOrderAndSearch extends BUListener implements ItemButton {
@@ -26,7 +26,7 @@ public class CancelOrderAndSearch extends BUListener implements ItemButton {
     private transient ItemStack replacementItem;
 
     public CancelOrderAndSearch() {
-        this.replacementItem = Items.BLUE_TERRACOTTA.getDefaultStack();
+        this.replacementItem = Items.BLUE_TERRACOTTA.getDefaultInstance();
     }
 
     private transient OrderInfo orderInfo;

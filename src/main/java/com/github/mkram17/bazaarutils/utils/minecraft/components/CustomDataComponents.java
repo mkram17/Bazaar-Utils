@@ -3,24 +3,24 @@ package com.github.mkram17.bazaarutils.utils.minecraft.components;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
 import com.mojang.serialization.Codec;
-import net.minecraft.component.ComponentType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 
 @PreInitModule
 public final class CustomDataComponents {
-    public static ComponentType<String> CUSTOM_SIZE;
-    public static ComponentType<Boolean> SHOW_PRICE_CHART;
-    public static ComponentType<Boolean> SLOT_SELECTOR_LOCKED;
+    public static DataComponentType<String> CUSTOM_SIZE;
+    public static DataComponentType<Boolean> SHOW_PRICE_CHART;
+    public static DataComponentType<Boolean> SLOT_SELECTOR_LOCKED;
 
     public CustomDataComponents() {
-        CUSTOM_SIZE = register("custom_size", ComponentType.<String>builder().codec(Codec.STRING).build());
-        SHOW_PRICE_CHART = register("has_price_chart", ComponentType.<Boolean>builder().codec(Codec.BOOL).build());
-        SLOT_SELECTOR_LOCKED = register("slot_selector_locked", ComponentType.<Boolean>builder().codec(Codec.BOOL).build());
+        CUSTOM_SIZE = register("custom_size", DataComponentType.<String>builder().persistent(Codec.STRING).build());
+        SHOW_PRICE_CHART = register("has_price_chart", DataComponentType.<Boolean>builder().persistent(Codec.BOOL).build());
+        SLOT_SELECTOR_LOCKED = register("slot_selector_locked", DataComponentType.<Boolean>builder().persistent(Codec.BOOL).build());
     }
 
-    private static <T> ComponentType<T> register(String id, ComponentType<T> type) {
-        return Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(BazaarUtils.MOD_ID, id), type);
+    private static <T> DataComponentType<T> register(String id, DataComponentType<T> type) {
+        return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Identifier.fromNamespaceAndPath(BazaarUtils.MOD_ID, id), type);
     }
 }

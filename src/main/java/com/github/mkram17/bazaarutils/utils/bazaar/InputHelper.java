@@ -9,9 +9,9 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import lombok.Getter;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -61,7 +61,7 @@ public abstract class InputHelper<T> implements ItemButton {
         ItemStack stack = getReplacementItem();
 
         stack.set(CustomDataComponents.CUSTOM_SIZE, String.valueOf(getButtonItemStackSize(state.get())));
-        stack.set(DataComponentTypes.CUSTOM_NAME, getButtonItemText(state.get()));
+        stack.set(DataComponents.CUSTOM_NAME, getButtonItemText(state.get()));
 
         event.setReplacement(stack);
     }
@@ -89,7 +89,7 @@ public abstract class InputHelper<T> implements ItemButton {
 
     //    Button stuff
 
-    protected abstract Text getButtonItemText(T state);
+    protected abstract Component getButtonItemText(T state);
 
     protected abstract String getButtonItemStackSize(T state);
 

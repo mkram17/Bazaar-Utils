@@ -4,7 +4,7 @@ import com.github.mkram17.bazaarutils.config.util.api.SlotElement;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.teamresourceful.resourcefulconfig.client.components.options.types.NumberOptionWidget;
 import com.teamresourceful.resourcefulconfig.client.components.options.types.ResetableWidget;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class SlotNumberOptionWidget extends NumberOptionWidget<Integer> implements ResetableWidget {
     private final int maxSlot;
@@ -26,7 +26,7 @@ public class SlotNumberOptionWidget extends NumberOptionWidget<Integer> implemen
                     // not the last saved/valid value. This is a implementation detail of NumberOptionWidget,
                     // and although we may override and fix it with a custom setChangedListener(...) call,
                     // it'd be better off if upstream fixes this behavior. 
-                    if (!stack.isEmpty() && stack.contains(CustomDataComponents.SLOT_SELECTOR_LOCKED)) throw new NumberFormatException();
+                    if (!stack.isEmpty() && stack.has(CustomDataComponents.SLOT_SELECTOR_LOCKED)) throw new NumberFormatException();
                     return value;
                 },
                 NumberOptionWidget.INTEGER_FILTER

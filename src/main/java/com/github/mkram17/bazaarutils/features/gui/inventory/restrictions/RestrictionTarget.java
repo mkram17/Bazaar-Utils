@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.teamresourceful.resourcefulconfig.api.types.info.TooltipProvider;
 import com.teamresourceful.resourcefulconfig.api.types.info.Translatable;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public enum RestrictionTarget implements TooltipProvider, Translatable {
     INSTANT_SELL {
@@ -13,8 +13,8 @@ public enum RestrictionTarget implements TooltipProvider, Translatable {
         }
 
         @Override
-        public Text getTooltip() {
-            return Text.translatable("bazaarutils.config.inventory.restrictions.features.target.instant_sell.label");
+        public Component getTooltip() {
+            return Component.translatable("bazaarutils.config.inventory.restrictions.features.target.instant_sell.label");
         }
     },
     SELL_SACKS {
@@ -24,8 +24,8 @@ public enum RestrictionTarget implements TooltipProvider, Translatable {
         }
 
         @Override
-        public Text getTooltip() {
-            return Text.translatable("bazaarutils.config.inventory.restrictions.features.target.sell_sacks.label");
+        public Component getTooltip() {
+            return Component.translatable("bazaarutils.config.inventory.restrictions.features.target.sell_sacks.label");
         }
     };
 

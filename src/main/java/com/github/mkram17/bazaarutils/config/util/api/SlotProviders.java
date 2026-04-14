@@ -2,8 +2,8 @@ package com.github.mkram17.bazaarutils.config.util.api;
 
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemBuilder;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.HashMap;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.mixin;
 
-import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -11,13 +11,13 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface AccessorSignEditScreen {
 
     // Expose the private setCurrentRowMessage method
-    @Invoker("setCurrentRowMessage")
-    void callSetCurrentRowMessage(String message);
+    @Invoker("setMessage")
+    void callSetMessage(String message);
 
     // Accessors for currentRow (private field)
-    @Accessor("currentRow")
-    int getCurrentRow();
+    @Accessor("line")
+    int getLine();
 
-    @Accessor("currentRow")
-    void setCurrentRow(int row);
+    @Accessor("line")
+    void setLine(int row);
 }

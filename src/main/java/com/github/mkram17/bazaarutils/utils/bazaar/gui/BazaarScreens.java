@@ -4,10 +4,10 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.InputHelper;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -166,10 +166,10 @@ public class BazaarScreens {
     );
 
     public static Optional<Double> findOptionAmount(ItemStack option) {
-        LoreComponent lore = option.getComponents().get(DataComponentTypes.LORE);
+        ItemLore lore = option.getComponents().get(DataComponents.LORE);
 
         if (lore != null) {
-            String joined = lore.lines().stream().map(Text::getString).collect(Collectors.joining((" ")));
+            String joined = lore.lines().stream().map(Component::getString).collect(Collectors.joining((" ")));
             Matcher matcher = AMOUNT_PATTERN.matcher(joined);
 
             if (matcher.find()) {
@@ -185,10 +185,10 @@ public class BazaarScreens {
     }
 
     public static Optional<Integer> findBuyOrderAmountLimit(ItemStack inputSign) {
-        LoreComponent lore = inputSign.getComponents().get(DataComponentTypes.LORE);
+        ItemLore lore = inputSign.getComponents().get(DataComponents.LORE);
 
         if (lore != null) {
-            String joined = lore.lines().stream().map(Text::getString).collect(Collectors.joining((" ")));
+            String joined = lore.lines().stream().map(Component::getString).collect(Collectors.joining((" ")));
             Matcher matcher = PURCHASE_LIMIT_PATTERN.matcher(joined);
 
             if (matcher.find()) {
@@ -205,10 +205,10 @@ public class BazaarScreens {
 
     // Could be of use, but is not, as generally you cannot hold any further than what the Bazaar would allow you to sell order.
     public static Optional<Integer> findSellAmountLimit(ItemStack inputSign) {
-        LoreComponent lore = inputSign.getComponents().get(DataComponentTypes.LORE);
+        ItemLore lore = inputSign.getComponents().get(DataComponents.LORE);
 
         if (lore != null) {
-            String joined = lore.lines().stream().map(Text::getString).collect(Collectors.joining((" ")));
+            String joined = lore.lines().stream().map(Component::getString).collect(Collectors.joining((" ")));
             Matcher matcher = SELL_LIMIT_PATTERN.matcher(joined);
 
             if (matcher.find()) {

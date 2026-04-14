@@ -6,12 +6,12 @@ import com.google.gson.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import java.util.List;
 
 public record AddListPatch(String path, List<JsonElement> inserts) implements Patch {
 
-    public static final Identifier ID = Identifier.of("bazaarutils", "add_list");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("bazaarutils", "add_list");
     public static final MapCodec<AddListPatch> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.STRING.fieldOf("path").forGetter(AddListPatch::path),
             JsonUtils.JSON_ELEMENT_CODEC.listOf().fieldOf("inserts").forGetter(AddListPatch::inserts)

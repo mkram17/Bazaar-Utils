@@ -3,10 +3,10 @@ package com.github.mkram17.bazaarutils.config.util.client.components.options.typ
 import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
 import com.teamresourceful.resourcefulconfig.client.components.options.types.ResetableWidget;
 import com.teamresourceful.resourcefulconfig.client.components.options.types.StringOptionWidget;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Function;
 import java.util.function.Supplier;

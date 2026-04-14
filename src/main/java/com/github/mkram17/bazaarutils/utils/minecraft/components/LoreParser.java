@@ -1,10 +1,10 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.components;
 
 import com.github.mkram17.bazaarutils.utils.Util;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,8 +16,8 @@ public final class LoreParser {
 
     private LoreParser() {}
 
-    public static List<Text> lines(ItemStack stack) {
-        LoreComponent lore = stack.getComponents().get(DataComponentTypes.LORE);
+    public static List<Component> lines(ItemStack stack) {
+        ItemLore lore = stack.getComponents().get(DataComponents.LORE);
         return lore != null ? lore.lines() : List.of();
     }
 

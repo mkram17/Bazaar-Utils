@@ -16,9 +16,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -105,20 +105,20 @@ public class Order extends OrderInfo implements AbstractListener {
             return;
         }
 
-        MutableText message;
+        MutableComponent message;
 
         if (isOutbid) {
             message = OutbidOrderHandler.getOutbidMessage(this);
 
             if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-                message.append(Text.literal(". Market Price: " + this.getMarketPrice(this.getTransactionType().getSide()) + " Order Price: " + this.getPricePerItem()));
+                message.append(Component.literal(". Market Price: " + this.getMarketPrice(this.getTransactionType().getSide()) + " Order Price: " + this.getPricePerItem()));
             }
 
             if (shouldAutoOpenBazaar) {
                 OrderUtil.openBazaar();
             }
 
-            MinecraftClient client = MinecraftClient.getInstance();
+            Minecraft client = Minecraft.getInstance();
 
             var player = client.player;
 

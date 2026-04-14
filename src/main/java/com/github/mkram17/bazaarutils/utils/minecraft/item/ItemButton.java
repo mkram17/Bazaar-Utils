@@ -4,18 +4,18 @@ import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
 import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.StateItemGroup;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.core.Holder;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 
 public interface ItemButton {
     Item DEFAULT_ITEM = Items.BARRIER;
 
     float BUTTON_VOLUME = 0.2f;
-    RegistryEntry<SoundEvent> BUTTON_SOUND = SoundEvents.UI_BUTTON_CLICK;
+    Holder<SoundEvent> BUTTON_SOUND = SoundEvents.UI_BUTTON_CLICK;
 
     int getSlotIndex();
     ItemRef getItemRef();

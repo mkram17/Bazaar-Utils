@@ -10,9 +10,9 @@ import com.google.gson.JsonObject;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.AbstractWidget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +35,9 @@ public class ConfigUtil {
     }
 
     public static void openGUI() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        Screen parent = client.currentScreen;
-        client.send(() -> client.setScreen(createGUI(parent)));
+        Minecraft client = Minecraft.getInstance();
+        Screen parent = client.screen;
+        client.schedule(() -> client.setScreen(createGUI(parent)));
     }
 
     public static void scheduleConfigSave() {
@@ -51,8 +51,8 @@ public class ConfigUtil {
         }
     }
 
-    public static List<ClickableWidget> getWidgets(){
-        List<ClickableWidget> widgets = new ArrayList<>();
+    public static List<AbstractWidget> getWidgets(){
+        List<AbstractWidget> widgets = new ArrayList<>();
         //automatically added using @RegisterWidget annotation
         return widgets;
     }

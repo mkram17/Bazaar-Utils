@@ -1,10 +1,10 @@
 package com.github.mkram17.bazaarutils.config.util.api;
 
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -25,14 +25,14 @@ public final class ResourcefulConfigItems {
             if (identifier == null) return null;
 
             return source.get().stream()
-                    .filter(item -> Registries.ITEM.getId(item).equals(identifier))
+                    .filter(item -> BuiltInRegistries.ITEM.getKey(item).equals(identifier))
                     .findFirst()
                     .orElse(null);
         });
     }
 
 
-    private static Supplier<List<Item>> source = () -> Registries.ITEM.stream().toList();
+    private static Supplier<List<Item>> source = () -> BuiltInRegistries.ITEM.stream().toList();
 
     public static void setSource(Supplier<List<Item>> source) {
         ResourcefulConfigItems.source = source;
@@ -53,8 +53,8 @@ public final class ResourcefulConfigItems {
         if (tag == null || tag.isEmpty()) return base;
         Identifier tagId = Identifier.tryParse(tag);
         if (tagId == null) return base;
-        TagKey<Item> tagKey = TagKey.of(RegistryKeys.ITEM, tagId);
-        return base.stream().filter(item -> item.getRegistryEntry().isIn(tagKey)).toList();
+        TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagId);
+        return base.stream().filter(item -> item.builtInRegistryHolder().is(tagKey)).toList();
     }
 
     public static List<Item> getItems() {

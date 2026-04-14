@@ -8,25 +8,25 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 @Module
 public final class JoinMessages extends BUListener {
 
-    private static final Text WELCOME_MESSAGE = Text.literal("Thanks for installing! Use /bu or /bazaarutils help to configure the mod.").formatted(Formatting.GREEN);
+    private static final Component WELCOME_MESSAGE = Component.literal("Thanks for installing! Use /bu or /bazaarutils help to configure the mod.").withStyle(ChatFormatting.GREEN);
 
-    private static final Text DISCORD_MESSAGE = Text.literal("For more help or to report a bug, join the ")
-            .formatted(Formatting.GREEN)
+    private static final Component DISCORD_MESSAGE = Component.literal("For more help or to report a bug, join the ")
+            .withStyle(ChatFormatting.GREEN)
             .append(Util.DISCORD_TEXT)
-            .append(Text.literal("!").formatted(Formatting.GREEN));
+            .append(Component.literal("!").withStyle(ChatFormatting.GREEN));
 
-    private final Text updateMessage;
+    private final Component updateMessage;
 
     public JoinMessages() {
         super();
 
-        this.updateMessage = Text.literal(BazaarUtils.getUpdateNotes()).formatted(Formatting.DARK_GREEN);
+        this.updateMessage = Component.literal(BazaarUtils.getUpdateNotes()).withStyle(ChatFormatting.DARK_GREEN);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.config.util.api;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 @FunctionalInterface
 public interface SlotProvider {

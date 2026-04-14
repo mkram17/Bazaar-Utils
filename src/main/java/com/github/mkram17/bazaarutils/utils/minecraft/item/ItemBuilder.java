@@ -2,16 +2,16 @@ package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import it.unimi.dsi.fastutil.objects.ReferenceSortedSets;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 
 public final class ItemBuilder {
     private final Item item;
     private int count = 1;
-    private Text name = null;
+    private Component name = null;
     private boolean locked = false;
     private boolean hideTooltip = false;
 
@@ -33,10 +33,10 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder named(String name) {
-        return named(Text.literal(name));
+        return named(Component.literal(name));
     }
 
-    public ItemBuilder named(Text name) {
+    public ItemBuilder named(Component name) {
         this.name = name;
         return this;
     }
@@ -55,17 +55,17 @@ public final class ItemBuilder {
         var stack = new ItemStack(item, count);
 
         if (name != null) {
-            stack.set(DataComponentTypes.CUSTOM_NAME, name);
+            stack.set(DataComponents.CUSTOM_NAME, name);
         }
         if (locked) {
             stack.set(CustomDataComponents.SLOT_SELECTOR_LOCKED, true);
         }
 
-        TooltipDisplayComponent tooltip = hideTooltip
-                ? new TooltipDisplayComponent(true, ReferenceSortedSets.emptySet())
-                : stack.getOrDefault(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT);
+        TooltipDisplay tooltip = hideTooltip
+                ? new TooltipDisplay(true, ReferenceSortedSets.emptySet())
+                : stack.getOrDefault(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT);
 
-        stack.set(DataComponentTypes.TOOLTIP_DISPLAY, tooltip.with(DataComponentTypes.ATTRIBUTE_MODIFIERS, true));
+        stack.set(DataComponents.TOOLTIP_DISPLAY, tooltip.withHidden(DataComponents.ATTRIBUTE_MODIFIERS, true));
 
         return stack;
     }

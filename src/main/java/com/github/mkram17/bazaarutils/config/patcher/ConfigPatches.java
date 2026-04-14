@@ -12,7 +12,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.JsonOps;
 import lombok.extern.slf4j.Slf4j;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;

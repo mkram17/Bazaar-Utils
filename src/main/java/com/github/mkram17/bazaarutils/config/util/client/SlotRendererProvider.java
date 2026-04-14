@@ -4,16 +4,16 @@ import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.config.util.api.SlotElement;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigUI;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.resources.Identifier;
 
 public final class SlotRendererProvider {
     private SlotRendererProvider() {}
 
     public static void register() {
         ResourcefulConfigUI.registerElementRenderer(
-                Identifier.of("bazaarutils", "slot"),
+                Identifier.fromNamespaceAndPath("bazaarutils", "slot"),
                 element -> {
                     SlotElement se = SlotElement.wrap(element);
                     return se != null ? new SlotRenderer(se) : null;

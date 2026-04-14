@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.StateItemGroup;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 import java.util.List;
 import java.util.Optional;
