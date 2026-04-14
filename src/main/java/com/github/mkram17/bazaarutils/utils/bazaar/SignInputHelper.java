@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
@@ -97,7 +98,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 Double purse,
 
                 @NotNull
-                String productId,
+                ProductInfo productInfo,
 
                 @NotNull
                 ItemInfo productItem,
@@ -145,11 +146,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (productItem.isEmpty()) return Optional.empty();
 
-            Optional<String> productId = ScreenManager.getInstance()
+            Optional<ProductInfo> productInfo = ScreenManager.getInstance()
                     .findBack(BazaarScreenType.ITEM_PAGE)
-                    .flatMap(BazaarScreenHandler::getDisplayProductId);
+                    .flatMap(BazaarScreenHandler::getDisplayProductInfo);
 
-            if (productId.isEmpty()) return Optional.empty();
+            if (productInfo.isEmpty()) return Optional.empty();
 
             Double purse = CurrencyAPI.INSTANCE.getPurse();
 
@@ -159,7 +160,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (playerInventory.isEmpty()) return Optional.empty();
 
-            return Optional.of(new TransactionState(purse, productId.get(), productItem.get(), inputSign.get(), playerInventory.get(), container.get()));
+            return Optional.of(new TransactionState(purse, productInfo.get(), productItem.get(), inputSign.get(), playerInventory.get(), container.get()));
         }
 
         public TransactionAmount(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
@@ -240,7 +241,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     public abstract static class TransactionCost extends SignInputHelper<TransactionCost.TransactionState> {
         public record TransactionState(
                 @NotNull
-                String productId,
+                ProductInfo productInfo,
 
                 @NotNull
                 ItemInfo inputSign,
@@ -255,10 +256,10 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
          */
         protected abstract PricingPosition getPricingPosition();
 
-        protected Optional<String> getItemProductId(ItemInfo inputSign) {
+        protected Optional<ProductInfo> getItemProductId(ItemInfo inputSign) {
             return ScreenManager.getInstance()
                     .findBack(BazaarScreenType.ITEM_PAGE)
-                    .flatMap(BazaarScreenHandler::getDisplayProductId);
+                    .flatMap(BazaarScreenHandler::getDisplayProductInfo);
         }
 
         @Override
@@ -277,11 +278,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (inputSign.isEmpty()) return Optional.empty();
 
-            Optional<String> productId = getItemProductId(inputSign.get());
+            Optional<ProductInfo> productInfo = getItemProductId(inputSign.get());
 
-            if (productId.isEmpty()) return Optional.empty();
+            if (productInfo.isEmpty()) return Optional.empty();
 
-            return Optional.of(new TransactionState(productId.get(), inputSign.get(), container.get()));
+            return Optional.of(new TransactionState(productInfo.get(), inputSign.get(), container.get()));
         }
 
         public TransactionCost(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {

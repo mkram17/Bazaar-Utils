@@ -1,8 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
@@ -24,6 +22,18 @@ public final class BazaarScreenHandler {
     public static final Pattern PURCHASE_LIMIT_PATTERN = Pattern.compile("Buy up to (?<amount>[0-9,.]+)x.");
 
     private BazaarScreenHandler() {}
+
+    public static Optional<ItemInfo> getCreateBuyOrderItem(@NotNull ScreenContext context) {
+        if (!context.isAnyOf(BazaarScreenType.ITEM_PAGE)) return Optional.empty();
+
+        return getItemFromSlot(context, BazaarSlots.ITEM_PAGE.CREATE_BUY_ORDER.slot);
+    }
+
+    public static Optional<ItemInfo> getCreateSellOfferItem(@NotNull ScreenContext context) {
+        if (!context.isAnyOf(BazaarScreenType.ITEM_PAGE)) return Optional.empty();
+
+        return getItemFromSlot(context, BazaarSlots.ITEM_PAGE.CREATE_SELL_OFFER.slot);
+    }
 
     public static Optional<ItemInfo> getInstantSellItem(@NotNull ScreenContext context) {
         if (context.equals(BazaarScreenType.MAIN_PAGE))
@@ -64,14 +74,9 @@ public final class BazaarScreenHandler {
                 .map(Component::getString);
     }
 
-    public static Optional<String> getDisplayProductId(@NotNull ScreenContext context) {
+    public static Optional<ProductInfo> getDisplayProductInfo(@NotNull ScreenContext context) {
         return getDisplayItemName(context)
-                .flatMap(BazaarDataUtil::findProductIdOptional);
-    }
-
-    public static Optional<OrderInfo> getDisplayOrderInfo(@NotNull ScreenContext context) {
-        return getDisplayItemName(context)
-                .map(name -> new OrderInfo(name, TransactionType.Side.SELL, null, null, null, null));
+                .flatMap(ProductInfo::fromDisplayName);
     }
 
     public static String getItemNameFromTitle() {
@@ -86,9 +91,11 @@ public final class BazaarScreenHandler {
 
     public static String getItemName(List<ItemStack> containerItems) {
         String nameFromTitle = getItemNameFromTitle();
-        if (!OrderInfo.isValidName(nameFromTitle) || nameFromTitle.length() >= 30) {
+
+        if (!ProductInfo.isValidDisplayName(nameFromTitle) || nameFromTitle.length() >= 30) {
             return getItemNameFromStacks(containerItems, nameFromTitle);
         }
+
         return nameFromTitle;
     }
 

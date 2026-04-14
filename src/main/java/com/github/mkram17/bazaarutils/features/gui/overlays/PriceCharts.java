@@ -4,12 +4,12 @@ import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.AbstractItemModifier;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.LoreModifier;
@@ -56,14 +56,14 @@ public class PriceCharts extends BUListener implements AbstractItemModifier, Lor
     public boolean appliesTo(ItemStack stack) {
         String key = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
 
-        return !stack.isEmpty() && !ItemTag.GLASS_PANES.contains(stack) && SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName);
+        return !stack.isEmpty() && !ItemTag.GLASS_PANES.contains(stack) && SHOW_CACHE.computeIfAbsent(key, ProductInfo::isValidDisplayName);
     }
 
     @Override
     public Result modifyLore(ItemStack stack, List<Component> lore, @Nullable Result previous) {
         String key = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
 
-        if (!SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName)) return Result.UNMODIFIED;
+        if (!SHOW_CACHE.computeIfAbsent(key, ProductInfo::isValidDisplayName)) return Result.UNMODIFIED;
 
         return withMerger(lore, merger -> {
             copyAll(merger);
@@ -90,11 +90,11 @@ public class PriceCharts extends BUListener implements AbstractItemModifier, Lor
         String itemName = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
         if (!SHOW_CACHE.getOrDefault(itemName, false)) return;
 
-        Optional<String> productID = BazaarDataUtil.findProductIdOptional(itemName);
+        Optional<ProductInfo> info = ProductInfo.fromDisplayName(itemName);
 
-        if (productID.isEmpty()) return;
+        if (info.isEmpty()) return;
 
-        String link = "https://skyblock.finance/items/" + productID.get();
+        String link = "https://skyblock.finance/items/" + info.get().getProductId();
 
         event.cancel();
 

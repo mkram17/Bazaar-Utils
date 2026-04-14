@@ -1,11 +1,13 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -86,11 +88,16 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
                     .map(ItemInfo::itemStack)
                     .orElse(Items.DIAMOND.getDefaultInstance());
 
-            String productId = ScreenManager.getInstance().current()
-                    .flatMap(BazaarScreenHandler::getDisplayProductId)
-                    .orElse(null);
+            Optional<ProductInfo> info = ScreenManager.getInstance().current()
+                    .flatMap(BazaarScreenHandler::getDisplayProductInfo);
 
-            Bookmark newBookmark = new Bookmark(name, itemStack, productId);
+            if (info.isEmpty()) {
+                Util.notifyError("Failed to toggle the bookmark %s; could not retrieve product data from screen".formatted(name), new Throwable());
+
+                return;
+            }
+
+            Bookmark newBookmark = new Bookmark(name, itemStack, info.get().getProductId());
             BookmarkUtil.addBookmark(newBookmark);
             BookmarkUtil.currentBookmarkOpt = Optional.of(newBookmark);
         }

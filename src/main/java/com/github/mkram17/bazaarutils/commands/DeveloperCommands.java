@@ -9,6 +9,7 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -149,11 +150,14 @@ public final class DeveloperCommands implements BUCommand {
         private int convertNameToId(CommandContext<FabricClientCommandSource> context) {
             if (!isEnabled()) return 0;
 
-            String name = StringArgumentType.getString(context, "item name").replaceAll("_", " ");
-            BazaarDataUtil.findProductIdOptional(name).ifPresentOrElse(
-                    id -> PlayerActionUtil.notifyAll(name + ": " + id),
-                    () -> PlayerActionUtil.notifyAll("Could not find product ID for " + name)
-            );
+            String name = StringArgumentType.getString(context, "item name").replace("_", " ");
+
+            ProductInfo.fromDisplayName(name)
+                    .map(ProductInfo::getProductId)
+                    .ifPresentOrElse(
+                            id  -> PlayerActionUtil.notifyAll(name + " → " + id),
+                            ()  -> PlayerActionUtil.notifyAll("Could not find product ID for: " + name)
+                    );
 
             return 1;
         }
