@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+
 /**
  * Bazaar API price buckets used to quote the current market side.
  */

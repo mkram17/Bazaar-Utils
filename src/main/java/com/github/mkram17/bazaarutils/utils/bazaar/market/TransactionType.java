@@ -1,5 +1,6 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
+package com.github.mkram17.bazaarutils.utils.bazaar.market;
 
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
 import lombok.Getter;
 
 /**
@@ -68,10 +69,10 @@ public class TransactionType {
 
     /**
      * Resolves the {@link PriceType} for this side+method pair.
-     * Instant transactions use the same side; orders use the opposite side.
+     * Instant transactions use the opposite side; orders use the same side.
      */
     public static PriceType resolvePriceType(Side side, Method method) {
-        if(method == Method.INSTANT) return side.asPriceType();
+        if (method == Method.INSTANT) return side.asPriceType();
         else return side.asPriceType().opposite();
     }
 

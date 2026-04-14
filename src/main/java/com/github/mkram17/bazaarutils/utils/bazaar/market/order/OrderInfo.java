@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
