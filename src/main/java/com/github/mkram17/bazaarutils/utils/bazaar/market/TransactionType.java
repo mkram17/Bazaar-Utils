@@ -76,6 +76,10 @@ public class TransactionType {
         else return side.asPriceType().opposite();
     }
 
+    public boolean higherIsBetter() {
+        return priceType == PriceType.INSTASELL;
+    }
+
     public boolean isInstant() {
         return method == Method.INSTANT;
     }
