@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
@@ -48,8 +48,8 @@ public class BookmarkSearchWidget {
             MutableComponent text = Component.literal(bookmark.name()).withStyle(ChatFormatting.BOLD);
 
             Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withBold(false);
-            text.append(Component.literal("\nInsta Buy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT))) + " coins").setStyle(style));
-            text.append(Component.literal("\nInsta Sell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT))) + " coins").setStyle(style));
+            text.append(Component.literal("\nInsta Buy: " + Util.getPrettyString(PriceInfo.priceForPosition(bookmark.productID(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT), PricingPosition.MATCHED).getAsDouble()) + " coins").setStyle(style));
+            text.append(Component.literal("\nInsta Sell: " + Util.getPrettyString(PriceInfo.priceForPosition(bookmark.productID(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT), PricingPosition.MATCHED).getAsDouble()) + " coins").setStyle(style));
 
             ItemSlotButtonWidget button = new ItemSlotButtonWidget(
                     buttonX,

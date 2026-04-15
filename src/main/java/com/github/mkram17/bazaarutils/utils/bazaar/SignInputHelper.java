@@ -176,7 +176,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            OptionalDouble price = BazaarDataUtil.findItemPriceOptional(state.productId(), getTransactionType());
+            OptionalDouble price = PriceInfo.marketPrice(state.productInfo().getProductId(), getTransactionType());
 
             if (price.isEmpty()) {
                 Util.logMessage("Could not retrieve relevant item pricing for " + name + "'s resolved value.");
@@ -218,7 +218,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 }
                 case ORDER -> {
                     if (getTransactionType().isBuy()) {
-                        int amountCanAfford = (int) Math.min(state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()), 71680);
+                        int amountCanAfford = (int) Math.min(state.purse() / PriceInfo.priceForPosition(state.productInfo().getProductId(), getTransactionType(), PricingPosition.COMPETITIVE).getAsDouble(), 71680);
 
                         yield BazaarScreenHandler.findBuyOrderAmountLimit(state.inputSign().itemStack())
                                 .map(limit -> Math.min(amountCanAfford, limit))
@@ -228,8 +228,8 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                             .filter(stack -> !stack.isEmpty())
                             .filter(stack -> Optional.ofNullable(stack.getCustomName())
                                     .map(Component::getString)
-                                    .flatMap(BazaarDataUtil::findProductIdOptional)
-                                    .map(productId -> productId.equals(state.productId()))
+                                    .flatMap(ProductInfo::fromDisplayName)
+                                    .map(info -> info.getProductId().equals(state.productInfo().getProductId()))
                                     .orElse(false))
                             .mapToInt(ItemStack::getCount)
                             .sum();
@@ -298,7 +298,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            OptionalDouble price = BazaarDataUtil.findItemPriceOptional(state.productId(), getTransactionType());
+            OptionalDouble price = PriceInfo.priceForPosition(state.productInfo().getProductId(), getTransactionType(), getPricingPosition());
 
             if (price.isEmpty()) {
                 Util.logMessage("Could not retrieve relevant item pricing for " + name + "'s resolved value.");
@@ -306,7 +306,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 return new ResolvedInput.Value(0);
             }
 
-            return new ResolvedInput.Value(OrderUtil.getPriceForPosition(state.productId(), getPricingPosition(), getTransactionType()));
+            return new ResolvedInput.Value(price.getAsDouble());
         }
     }
 

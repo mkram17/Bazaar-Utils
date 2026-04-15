@@ -5,11 +5,12 @@ import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.SellTarget;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.google.common.collect.MapMaker;
@@ -146,13 +147,13 @@ public class SellParser extends BUListener {
         }
 
         private static boolean hasActiveBuyOrders(String name) {
-            Optional<String> productId = BazaarDataUtil.findProductIdOptional(name);
-            if (productId.isEmpty()) return false;
+            Optional<ProductInfo> productInfo = ProductInfo.fromDisplayName(name);
+            if (productInfo.isEmpty()) return false;
 
-            OptionalDouble topPrice = BazaarDataUtil.findItemPriceOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
+            OptionalDouble topPrice = PriceInfo.marketPrice(productInfo.get().getProductId(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
             if (topPrice.isEmpty() || topPrice.getAsDouble() == 0.0) return false;
 
-            OptionalInt orderCount = BazaarDataUtil.getOrderCountOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER), topPrice.getAsDouble());
+            OptionalInt orderCount = PriceInfo.orderCount(productInfo.get().getProductId(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER), topPrice.getAsDouble());
             return orderCount.isPresent() && orderCount.getAsInt() > 0;
         }
     }
