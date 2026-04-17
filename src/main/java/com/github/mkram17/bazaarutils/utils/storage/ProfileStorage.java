@@ -31,12 +31,12 @@ public class ProfileStorage<T> {
 
     @Module
     public static final class Listener extends BUListener {
-        @Subscription
+        @Subscription(priority = Integer.MIN_VALUE)
         public void onProfileSwitch(ProfileChangeEvent event) {
             currentProfile = event.getName();
         }
 
-        @Subscription
+        @Subscription(priority = Integer.MAX_VALUE)
         @TimePassed(duration = "5s")
         public void onTick(TickEvent event) {
             if (REQUIRES_SAVE.isEmpty()) return;
@@ -59,16 +59,22 @@ public class ProfileStorage<T> {
     @Nullable private T data;
     @Nullable private Path lastPath;
     @Nullable private String lastProfile;
+    @Nullable private final Consumer<ProfileStorage<T>> onProfileSwitch;
 
-    public ProfileStorage(int version, Supplier<@NotNull T> defaultData, String fileName, Function<Integer, Codec<T>> codec) {
+    public ProfileStorage(int version, Supplier<@NotNull T> defaultData, String fileName, Function<Integer, Codec<T>> codec, @Nullable Consumer<ProfileStorage<T>> onProfileSwitch) {
         this.version = version;
         this.defaultData = defaultData;
         this.fileName = fileName;
         this.codec = codec;
+        this.onProfileSwitch = onProfileSwitch;
+    }
+
+    public ProfileStorage(int version, Supplier<T> defaultData, String fileName, Function<Integer, Codec<T>> codec) {
+        this(version, defaultData, fileName, codec, null);
     }
 
     public ProfileStorage(Supplier<T> defaultData, String fileName, Codec<T> codec) {
-        this(0, defaultData, fileName, v -> codec);
+        this(0, defaultData, fileName, v -> codec, null);
     }
 
     private boolean isCurrentlyActive() {
@@ -147,6 +153,8 @@ public class ProfileStorage<T> {
             data = defaultData.get();
             saveToSystem();
         }
+
+        if (onProfileSwitch != null) onProfileSwitch.accept(this);
     }
 
     private void saveToSystem() {
