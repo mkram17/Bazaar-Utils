@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
@@ -129,6 +130,7 @@ public final class DeveloperCommands implements BUCommand {
             for (Order item : OutbidOrderHandler.getOutbidOrders()) {
                 PlayerActionUtil.notifyAll(item.getName() + " is outdated. Market Price: "
                         + item.getMarketPrice(TransactionType.Side.BUY) + " Order Price: " + item.getPricePerItem());
+                String name = ResourceManager.getProductIdtoNameCache().getOrDefault(order.productId(), order.productId());
             }
 
             return 1;
@@ -179,6 +181,8 @@ public final class DeveloperCommands implements BUCommand {
             if (!isEnabled()) return 0;
 
             PlayerActionUtil.notifyAll(Order.getVariables(Order::getName).toString());
+                String name = ResourceManager.getProductIdtoNameCache().getOrDefault(order.productId(), order.productId());
+                PlayerActionUtil.notifyAll("[" + i + "] " + name + " | " + order.side() + " | " + order.pricePerItem() + " x" + order.originalAmount() + " | " + order.status());
 
             return 1;
         }

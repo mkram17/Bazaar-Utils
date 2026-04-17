@@ -1,11 +1,10 @@
 package com.github.mkram17.bazaarutils.utils;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.remote.BazaarApiFetcher;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -35,12 +34,15 @@ public class ResourceManager {
     private static final Path LOCAL_RESOURCES_PATH = MOD_CONFIG_DIR.resolve("bazaar-resources.json");
     private static final Identifier BUNDLED_RESOURCES_ID = Identifier.fromNamespaceAndPath(BazaarUtils.MOD_ID, "bazaar-resources.json");
     private static final String GITHUB_API_URL = "https://api.github.com/repos/mkram17/Skyblock-Bazaar-Conversions/contents/conversionupdating/bazaar-conversions.json?ref=main";
-    /* Cached conversions: lowercase name -> productId */
+    /* Cached conversions: lowercase name -> productInfo */
     @Getter
     private static volatile Map<String, String> nameToProductIdCache = Map.of();
+    /* Cached known values to not have to call .containsValue when testing for product ids */
+    @Getter
+    private static volatile Map<String, String> productIdtoNameCache = Map.of();
+
     @Setter
     private static volatile boolean conversionsLoaded = false;
-
 
     public static void initialize() {
         CompletableFuture.runAsync(() -> {
@@ -50,6 +52,7 @@ public class ResourceManager {
                 }
                 copyDefaultResourcesIfMissing();
                 checkForUpdates(false); // Automatic check on startup
+                ensureConversionsLoaded();
             } catch (IOException e) {
                 Util.notifyError("Failed to initialize resource manager", e);
             }
@@ -126,6 +129,7 @@ public class ResourceManager {
             MetadataConfig.RESOURCES_SHA = latestSha;
             ConfigUtil.scheduleConfigSave();
             ResourceManager.setConversionsLoaded(false);
+            ensureConversionsLoaded();
             PlayerActionUtil.notifyAll("Successfully updated Bazaar resources!");
         } catch (Exception e) {
             Util.notifyError("Failed to download resources", e);
@@ -175,13 +179,14 @@ public class ResourceManager {
         }
 
         // Double-checked guard avoids repeated JSON parsing on the hot path.
-        synchronized (BazaarDataManager.class) {
+        synchronized (ResourceManager.class) {
             if (conversionsLoaded) {
                 return;
             }
 
             try {
-                Map<String, String> mutable = new HashMap<>();
+                Map<String, String> nameToId = new HashMap<>();
+                Map<String, String> idToName = new HashMap<>();
 
                 var resources = getResourceJson();
                 var conversions = resources.getAsJsonObject();
@@ -189,11 +194,13 @@ public class ResourceManager {
                 for (String key : conversions.keySet()) {
                     String value = conversions.get(key).getAsString();
                     if (value != null) {
-                        mutable.put(value.toLowerCase(Locale.ROOT), key);
+                        nameToId.put(value.toLowerCase(Locale.ROOT), key);
+                        idToName.put(key, value);
                     }
                 }
 
-                nameToProductIdCache = Collections.unmodifiableMap(mutable);
+                nameToProductIdCache = Collections.unmodifiableMap(nameToId);
+                productIdtoNameCache = Collections.unmodifiableMap(idToName);
                 conversionsLoaded = true;
 
                 PlayerActionUtil.notifyAll("Loaded bazaarConversions cache: " + nameToProductIdCache.size() + " entries.", NotificationType.BAZAARDATA);
