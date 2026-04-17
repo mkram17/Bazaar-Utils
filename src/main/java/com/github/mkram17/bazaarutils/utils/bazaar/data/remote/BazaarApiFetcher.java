@@ -1,16 +1,15 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.data;
+package com.github.mkram17.bazaarutils.utils.bazaar.data.remote;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.events.bazaar.BazaarApiSnapshotEvent;
 import com.github.mkram17.bazaarutils.utils.APIUtil;
-import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.APIConversionUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
+import com.mojang.authlib.minecraft.client.MinecraftClient;
 import lombok.Getter;
-import tech.thatgravyboat.skyblockapi.api.SkyBlockAPI;
+import net.minecraft.client.Minecraft;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -18,28 +17,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
-public final class BazaarDataManager {
+public final class BazaarApiFetcher {
+    private static final BazaarApiFetcherSettings FETCH_SETTINGS = new BazaarApiFetcherSettings();
 
-    @Getter
-    private static volatile CustomBazaarReply currentReply;
+    // Serializes schedule/cancel so only one pending fetch task exists at a time.
+    private static final Object SCHED_LOCK = new Object();
+    private static volatile ScheduledFuture<?> scheduledTask;
+
+    private static final AtomicInteger consecutiveFailures = new AtomicInteger(0);
+    private static final AtomicInteger consecutiveIdenticalSnapshots = new AtomicInteger(0);
 
     @Getter
     private static volatile long lastSnapshotTs = -1;
 
-    private static final BazaarDataSettings BAZAAR_DATA_SETTINGS = new BazaarDataSettings();
-
-    private static volatile ScheduledFuture<?> scheduledTask;
-    // Serializes schedule/cancel so only one pending fetch task exists at a time.
-    private static final Object SCHED_LOCK = new Object();
-
-    private static final AtomicInteger consecutiveIdenticalSnapshots = new AtomicInteger(0);
-
-    private static final AtomicInteger consecutiveFailures = new AtomicInteger(0);
-
     @RunOnInit
     public static void init() {
         scheduleFetch(0);
-        PlayerActionUtil.notifyAll("BazaarDataManager initialized (simple fixed-interval poller). Base=" + BAZAAR_DATA_SETTINGS.BASE_INTERVAL_MS + "ms", NotificationType.BAZAARDATA);
+        PlayerActionUtil.notifyAll("BazaarApiFetcher initialized (simple fixed-interval poller). Base=" + FETCH_SETTINGS.BASE_INTERVAL_MS + "ms", NotificationType.BAZAARDATA);
     }
 
     private static void scheduleFetch(long delayMs) {
@@ -47,7 +41,8 @@ public final class BazaarDataManager {
             if (scheduledTask != null && !scheduledTask.isDone()) {
                 scheduledTask.cancel(false);
             }
-            scheduledTask = BazaarUtils.BUExecutorService.schedule(BazaarDataManager::fetchOnceSafely, delayMs, TimeUnit.MILLISECONDS);
+
+            scheduledTask = BazaarUtils.BUExecutorService.schedule(BazaarApiFetcher::fetchOnceSafely, delayMs, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -55,7 +50,7 @@ public final class BazaarDataManager {
         try {
             fetchOnce();
         } catch (Throwable throwable) {
-            Util.notifyError("Unexpected error in BazaarDataManager fetch loop", throwable);
+            Util.notifyError("Unexpected error in BazaarApiFetcher fetch loop", throwable);
             scheduleFailureRetry();
         }
     }
@@ -65,7 +60,7 @@ public final class BazaarDataManager {
             try {
                 if (throwable != null) {
                     handleFetchFailure(
-                        "Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms",
+                        "Fetch failure (" + throwable.getClass().getSimpleName() + "). Retry in " + FETCH_SETTINGS.FAILURE_RETRY_MS + "ms",
                         throwable,
                         true
                     );
@@ -74,27 +69,27 @@ public final class BazaarDataManager {
 
                 if (reply == null || !reply.isSuccess()) {
                     handleFetchFailure(
-                        "Fetch failure (Unsuccessful Reply). Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms",
+                        "Fetch failure (Unsuccessful Reply). Retry in " + FETCH_SETTINGS.FAILURE_RETRY_MS + "ms",
                         new RuntimeException("API reply was null or not successful"),
                         true
                     );
                     return;
                 }
 
-                CustomBazaarReply customReply = APIConversionUtil.fromSkyBlockReply(reply);
+                BazaarApiSnapshotEvent event = BazaarApiConverter.convert(reply);
+                long snapshotTs = event.getTimestamp(); // or however your event exposes it
 
-                long snapshotTs = customReply.getLastUpdated();
                 if (snapshotTs <= 0) {
-                    handleFetchFailure("Invalid lastUpdated <= 0. Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms", new RuntimeException("lastUpdated <= 0"), false);
+                    handleFetchFailure("Invalid lastUpdated <= 0. Retry in " + FETCH_SETTINGS.FAILURE_RETRY_MS + "ms", new RuntimeException("lastUpdated <= 0"), false);
                     return;
                 }
 
                 consecutiveFailures.set(0);
 
-                handleSnapshotResult(customReply, snapshotTs);
+                handleSnapshotResult(event, snapshotTs);
                 scheduleNextFromSnapshot(snapshotTs);
             } catch (Throwable t) {
-                handleFetchFailure("Unexpected error in fetch completion. Retry in " + BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS + "ms", t, true);
+                handleFetchFailure("Unexpected error in fetch completion. Retry in " + FETCH_SETTINGS.FAILURE_RETRY_MS + "ms", t, true);
             }
         });
     }
@@ -107,31 +102,35 @@ public final class BazaarDataManager {
     }
 
     private static void scheduleFailureRetry() {
-        scheduleFetch(BAZAAR_DATA_SETTINGS.FAILURE_RETRY_MS);
+        scheduleFetch(FETCH_SETTINGS.FAILURE_RETRY_MS);
     }
 
-    private static void handleSnapshotResult(CustomBazaarReply reply, long snapshotTs) {
+    private static void handleSnapshotResult(BazaarApiSnapshotEvent event, long snapshotTs) {
         if (snapshotTs != lastSnapshotTs) {
-            handleNewSnapshot(reply, snapshotTs);
+            handleNewSnapshot(event, snapshotTs);
+
             return;
         }
 
         handleUnchangedSnapshot(snapshotTs);
     }
 
-    private static void handleNewSnapshot(CustomBazaarReply reply, long snapshotTs) {
+    private static void handleNewSnapshot(BazaarApiSnapshotEvent event, long snapshotTs) {
         long previousSnapshotTs = lastSnapshotTs;
+
         lastSnapshotTs = snapshotTs;
-        currentReply = reply;
         consecutiveIdenticalSnapshots.set(0);
 
-        new BazaarDataUpdateEvent(reply).post(EVENT_BUS);
+        // Marshall to game thread before posting — the event bus has no thread
+        // safety guarantees and all subscribers expect to run on the game thread.
+        Minecraft.getInstance().execute(() -> event.post(EVENT_BUS));
 
         if (previousSnapshotTs != -1) {
             PlayerActionUtil.notifyAll(
                 "New snapshot " + snapshotTs + " (Δ " + (snapshotTs - previousSnapshotTs) + " ms). Scheduling next predicted fetch.",
                 NotificationType.BAZAARDATA
             );
+
             return;
         }
 
@@ -140,9 +139,10 @@ public final class BazaarDataManager {
 
     private static void handleUnchangedSnapshot(long snapshotTs) {
         int identicalSnapshotCount = consecutiveIdenticalSnapshots.incrementAndGet();
+
         PlayerActionUtil.notifyAll("Snapshot unchanged (" + snapshotTs + ") x" + identicalSnapshotCount, NotificationType.BAZAARDATA);
 
-        if (identicalSnapshotCount == BAZAAR_DATA_SETTINGS.STALE_WARNING_THRESHOLD) {
+        if (identicalSnapshotCount == FETCH_SETTINGS.STALE_WARNING_THRESHOLD) {
             PlayerActionUtil.notifyAll(
                 "WARNING: " + identicalSnapshotCount + " identical snapshots in a row. Server might be lagging or BASE_INTERVAL_MS too short.",
                 NotificationType.BAZAARDATA
@@ -152,15 +152,15 @@ public final class BazaarDataManager {
 
     private static void scheduleNextFromSnapshot(long snapshotTs) {
         long nowMs = System.currentTimeMillis();
-        long expectedNextFetchAtMs = snapshotTs + BAZAAR_DATA_SETTINGS.BASE_INTERVAL_MS + BAZAAR_DATA_SETTINGS.POST_OFFSET_MS;
+        long expectedNextFetchAtMs = snapshotTs + FETCH_SETTINGS.BASE_INTERVAL_MS + FETCH_SETTINGS.POST_OFFSET_MS;
 
         long nextDelayMs;
         if (nowMs >= expectedNextFetchAtMs) {
             // Past the ideal fetch time; server has not advanced snapshot yet, so back off.
-            nextDelayMs = BAZAAR_DATA_SETTINGS.STALE_BACKOFF_MS;
+            nextDelayMs = FETCH_SETTINGS.STALE_BACKOFF_MS;
         } else {
             long idealDelayMs = expectedNextFetchAtMs - nowMs;
-            nextDelayMs = Math.max(idealDelayMs, BAZAAR_DATA_SETTINGS.STALE_BACKOFF_MS);
+            nextDelayMs = Math.max(idealDelayMs, FETCH_SETTINGS.STALE_BACKOFF_MS);
         }
 
         scheduleFetch(nextDelayMs);
