@@ -59,6 +59,7 @@ public class BazaarUtils implements ClientModInitializer {
 
         BazaarUtilsModules.init();
 
+        BazaarUtilsDataSources.init();
         BazaarUtilsCommands.init();
         BazaarUtilsItemModifiers.init();
 
