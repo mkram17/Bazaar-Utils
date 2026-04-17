@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.PriceType;
+import com.mojang.serialization.Codec;
 import lombok.Getter;
 
 /**
@@ -17,6 +18,8 @@ public class TransactionType {
     public enum Side {
         BUY,
         SELL;
+
+        public static final Codec<Side> CODEC = Codec.STRING.xmap(TransactionType.Side::valueOf, Enum::name);
 
         /**
          * Returns the opposite player intent side.
