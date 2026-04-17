@@ -1,20 +1,24 @@
 package com.github.mkram17.bazaarutils.features.notification;
 
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
-import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.bazaar.UserOrderPositionEvent;
+import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Component;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
+import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
-import java.util.List;
-
+/**
+ * Consumes {@link UserOrderPositionEvent} and notifies the player on each position transition.
+ */
 @Module
-public class OutbidOrderHandler implements ToggleableFeature {
+public class OutbidOrderHandler extends BUListener implements ToggleableFeature {
     @Override
     public boolean isEnabled() {
         return NotificationsConfig.ORDER_NOTIFICATIONS_OUTBID.isEnabled();
@@ -22,32 +26,43 @@ public class OutbidOrderHandler implements ToggleableFeature {
 
     public OutbidOrderHandler() {}
 
-    public static MutableComponent getOutbidMessage(Order order) {
-        return createYourOrderForText(order)
-                .append(Component.literal(" is now outdated.").withStyle(ChatFormatting.WHITE))
-                .append(Component.literal(" Click to open bazaar orders").withStyle(ChatFormatting.GOLD));
+    @Subscription
+    @OnlyWhenEnabled
+    public void onPositionChange(UserOrderPositionEvent event) {
+        MutableComponent message = switch (event.getPosition()) {
+            case OUTBID -> getOutbidMessage(event.getOrder());
+            case COMPETITIVE -> getCompetitiveMessage(event.getOrder());
+            case MATCHED -> getMatchedMessage(event.getOrder());
+        };
+
+        PlayerActionUtil.notifyAll(message);
     }
 
-    public static MutableComponent getCompetitiveMessage(Order order) {
-        return createYourOrderForText(order)
-                .append(Component.literal(" is no longer outdated.").withStyle(ChatFormatting.DARK_PURPLE));
+    // ── Message builders ──────────────────────────────────────────────────────
+
+    private static MutableComponent getOutbidMessage(Order order) {
+        return buildPrefix(order)
+                .append(Component.literal(" is now outbid.").withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(" Click to open bazaar orders.").withStyle(ChatFormatting.GOLD));
     }
 
-    public static MutableComponent getMatchedMessage(Order order) {
-        return createYourOrderForText(order)
+    private static MutableComponent getCompetitiveMessage(Order order) {
+        return buildPrefix(order)
+                .append(Component.literal(" is no longer outbid.").withStyle(ChatFormatting.DARK_PURPLE));
+    }
+
+    private static MutableComponent getMatchedMessage(Order order) {
+        return buildPrefix(order)
                 .append(Component.literal(" has been matched.").withStyle(ChatFormatting.YELLOW));
     }
 
-    private static MutableComponent createYourOrderForText(Order order) {
-        return Component.literal("Your " + order.getTransactionType().getSide().toString().toLowerCase() + " order for ").withStyle(ChatFormatting.WHITE)
-                .append(Component.literal(order.getVolume().toString() + " ").withStyle(ChatFormatting.DARK_PURPLE))
-                .append(Component.literal(order.getName()).withStyle(ChatFormatting.GOLD));
-    }
-
-    public static List<Order> getOutbidOrders() {
-        return UserOrdersStorage.INSTANCE.get()
-                .stream()
-                .filter(order -> order.getPricingPosition() == PricingPosition.OUTBID && order.getStatus() != OrderStatus.FILLED)
-                .toList();
+    private static MutableComponent buildPrefix(Order order) {
+        return OrderInfo.of(order)
+                .map(info ->
+                        Component.literal("Your " + order.side().toString().toLowerCase() + " order for ")
+                                .withStyle(ChatFormatting.WHITE)
+                                .append(Component.literal(order.originalAmount() + "x ").withStyle(ChatFormatting.DARK_PURPLE))
+                                .append(Component.literal(info.getName()).withStyle(ChatFormatting.GOLD)))
+                .orElse(Component.empty());
     }
 }
