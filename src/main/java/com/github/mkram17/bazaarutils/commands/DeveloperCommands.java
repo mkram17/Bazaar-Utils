@@ -3,15 +3,16 @@ package com.github.mkram17.bazaarutils.commands;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.Command;
-import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -23,6 +24,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
 
 @Command
 public final class DeveloperCommands implements BUCommand {
@@ -80,12 +83,17 @@ public final class DeveloperCommands implements BUCommand {
         private int removeByIndex(CommandContext<FabricClientCommandSource> context) {
             if (!isEnabled()) return 0;
 
+            List<Order> orders = UserOrdersStorage.INSTANCE.get();
             int index = IntegerArgumentType.getInteger(context, "index");
 
-            Order order = UserOrdersStorage.INSTANCE.get().get(index);
-            order.removeFromUserOrders();
-            PlayerActionUtil.notifyAll("Removed " + order, NotificationType.COMMAND);
+            if (orders == null || index >= orders.size()) {
+                PlayerActionUtil.notifyAll("No order at index " + index + ".", NotificationType.COMMAND);
+                return 0;
+            }
 
+            Order order = orders.get(index);
+            UserOrdersStorage.cancelAndReindex(order);
+            PlayerActionUtil.notifyAll("Removed " + order, NotificationType.COMMAND);
             return 1;
         }
     }
@@ -105,9 +113,15 @@ public final class DeveloperCommands implements BUCommand {
         private int queryByIndex(CommandContext<FabricClientCommandSource> context) {
             if (!isEnabled()) return 0;
 
+            List<Order> orders = UserOrdersStorage.INSTANCE.get();
             int index = IntegerArgumentType.getInteger(context, "index");
-            PlayerActionUtil.notifyAll(UserOrdersStorage.INSTANCE.get().get(index).toString());
 
+            if (orders == null || index >= orders.size()) {
+                PlayerActionUtil.notifyAll("No order at index " + index + ".");
+                return 0;
+            }
+
+            PlayerActionUtil.notifyAll(orders.get(index).toString());
             return 1;
         }
     }
@@ -127,10 +141,24 @@ public final class DeveloperCommands implements BUCommand {
         private int queryOutdated(CommandContext<FabricClientCommandSource> context) {
             if (!isEnabled()) return 0;
 
-            for (Order item : OutbidOrderHandler.getOutbidOrders()) {
-                PlayerActionUtil.notifyAll(item.getName() + " is outdated. Market Price: "
-                        + item.getMarketPrice(TransactionType.Side.BUY) + " Order Price: " + item.getPricePerItem());
-                String name = ResourceManager.getProductIdtoNameCache().getOrDefault(order.productId(), order.productId());
+            List<Order> orders = UserOrdersStorage.INSTANCE.get();
+            if (orders == null || orders.isEmpty()) {
+                PlayerActionUtil.notifyAll("No orders loaded.");
+
+                return 1;
+            }
+
+            for (Order order : orders) {
+                if (!(order.status() instanceof OrderStatus.Set || order.status() instanceof OrderStatus.Partial)) continue;
+
+                Optional<PricingPosition> position = PriceInfo.position(order.productId(), TransactionType.of(order.side(), TransactionType.Method.ORDER), order.pricePerItem());
+                if (position.isEmpty()) continue;
+
+                OptionalDouble price = PriceInfo.marketPrice(order.productId(), TransactionType.of(order.side(), TransactionType.Method.ORDER));
+                if (price.isEmpty()) continue;
+
+                PlayerActionUtil.notifyAll("Outbidded: " + order.describe()
+                        + " | Market Price: %.1f".formatted(price.getAsDouble()) );
             }
 
             return 1;
@@ -180,9 +208,17 @@ public final class DeveloperCommands implements BUCommand {
         private int queryAll(CommandContext<FabricClientCommandSource> context) {
             if (!isEnabled()) return 0;
 
-            PlayerActionUtil.notifyAll(Order.getVariables(Order::getName).toString());
+            List<Order> orders = UserOrdersStorage.INSTANCE.get();
+            if (orders == null || orders.isEmpty()) {
+                PlayerActionUtil.notifyAll("No tracked orders.");
+                return 1;
+            }
+
+            for (int i = 0; i < orders.size(); i++) {
+                Order order = orders.get(i);
                 String name = ResourceManager.getProductIdtoNameCache().getOrDefault(order.productId(), order.productId());
                 PlayerActionUtil.notifyAll("[" + i + "] " + name + " | " + order.side() + " | " + order.pricePerItem() + " x" + order.originalAmount() + " | " + order.status());
+            }
 
             return 1;
         }
