@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.components;
+package com.github.mkram17.bazaarutils.data;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
@@ -6,6 +6,8 @@ import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.SellTarget;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
  * the current bazaar screen can sell. Pure data concern.
  */
 @Module
-public class SellParser extends BUListener {
+public class CurrentSellData extends BUListener {
     public static final class InstantSell {
         @Getter
         @Nullable

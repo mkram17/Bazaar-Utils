@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.config.features.gui;
 
+import com.github.mkram17.bazaarutils.data.BookmarksStorage;
 import com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks.BookmarkUtil;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount.BuyOrderAmountHelper;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount.InstantBuyAmountHelper;
@@ -103,10 +104,7 @@ public final class ButtonsConfig {
                 text = "bazaarutils.config.buttons.bookmarks.reset_bookmarks.runnable",
                 title = "bazaarutils.config.buttons.bookmarks.reset_bookmarks.label"
         )
-        public static final Runnable RESET_BOOKMARKS_BUTTON = () -> {
-            BookmarkUtil.getBookmarks().clear();
-            BookmarkUtil.saveBookmarks();
-        };
+        public static final Runnable RESET_BOOKMARKS_BUTTON = BookmarksStorage::clear;
     }
 
     @Category(value = "helpers")

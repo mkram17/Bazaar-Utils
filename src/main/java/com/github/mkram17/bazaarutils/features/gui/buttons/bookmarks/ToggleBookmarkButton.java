@@ -1,32 +1,22 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
-import com.github.mkram17.bazaarutils.events.BUListener;
-import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.data.BookmarksStorage;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.ItemModifier;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.ItemGroups;
 import net.minecraft.core.component.DataComponentPatch;
-import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
-import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
-import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
 
 import java.util.Optional;
 
 @ItemModifier
-public class ToggleBookmarkButton extends BUListener implements ItemButton {
+public class ToggleBookmarkButton implements ItemButton {
     @Override
     public int getSlotIndex() {
         return 0;
@@ -34,7 +24,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
 
     @Override
     public ItemRef getItemRef() {
-        return ItemRef.of(BookmarkUtil.currentBookmarkOpt::isEmpty, ItemGroups.BOOKMARKED_STATE_GROUP);
+        return ItemRef.of(() -> BookmarkUtil.currentPage().map(BookmarkUtil.PageContext::isBookmarked).orElse(false), ItemGroups.BOOKMARKED_STATE_GROUP);
     }
 
     @Override
@@ -45,20 +35,22 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
     public ToggleBookmarkButton() {}
 
     @Override
-    public Optional<Component> nameOverride(ItemStack stack) {
-        boolean bookmarked = BookmarkUtil.currentBookmarkOpt.isPresent();
+    public boolean appliesTo(ItemStack stack) {
+        return BookmarkUtil.currentPage().isPresent() && ItemButton.super.appliesTo(stack);
+    }
 
-        return Optional.of(Component.literal(bookmarked
-                ? "Remove " + BookmarkUtil.currentBookmarkOpt.get().name() + " Bookmark"
-                : "Bookmark " + resolveCurrentItemName().orElse("?")));
+    @Override
+    public Optional<Component> nameOverride(ItemStack stack) {
+        return BookmarkUtil.currentPage().map(page -> Component.literal(
+                page.isBookmarked()
+                        ? "Remove " + page.name() + " Bookmark"
+                        : "Bookmark " + page.name()));
     }
 
     @Override
     public Optional<DataComponentPatch> patchComponents(ItemStack stack) {
-        boolean bookmarked = BookmarkUtil.currentBookmarkOpt.isPresent();
-
-        return Optional.of(DataComponentPatch.builder()
-                .set(CustomDataComponents.CUSTOM_SIZE, bookmarked ? "⃠ " : "★")
+        return BookmarkUtil.currentPage().map(page -> DataComponentPatch.builder()
+                .set(CustomDataComponents.CUSTOM_SIZE, page.isBookmarked() ? "⃠ " : "★")
                 .build());
     }
 
@@ -66,48 +58,21 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
     public Result onButtonClicked(int button) {
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
 
-        resolveCurrentItemName().ifPresent(this::toggleBookmark);
+        BookmarkUtil.currentPage().ifPresent(this::toggleBookmark);
 
         return Result.CONSUME;
     }
 
-    @Subscription
-    @OnlyOnSkyBlock
-    @OnlyBazaarScreen(BazaarScreenType.ITEM_PAGE)
-    private void onContainerInitialized(ContainerInitializedEvent event) {
-        resolveCurrentItemName().ifPresent(name -> BookmarkUtil.currentBookmarkOpt = BookmarkUtil.findMatchingBookmark(name));
-    }
-
-    private void toggleBookmark(String name) {
-        if (BookmarkUtil.currentBookmarkOpt.isPresent()) {
-            BookmarkUtil.removeBookmark(BookmarkUtil.currentBookmarkOpt.get());
-            BookmarkUtil.currentBookmarkOpt = Optional.empty();
+    private void toggleBookmark(BookmarkUtil.PageContext page) {
+        if (page.isBookmarked()) {
+            BookmarksStorage.remove(page.bookmark());
+            BookmarkUtil.setCurrentBookmark(null);
         } else {
-            ItemStack itemStack = ScreenManager.getInstance().current()
-                    .flatMap(BazaarScreenHandler::getDisplayItem)
-                    .map(ItemInfo::itemStack)
-                    .orElse(Items.DIAMOND.getDefaultInstance());
-
-            Optional<ProductInfo> info = ScreenManager.getInstance().current()
-                    .flatMap(BazaarScreenHandler::getDisplayProductInfo);
-
-            if (info.isEmpty()) {
-                Util.notifyError("Failed to toggle the bookmark %s; could not retrieve product data from screen".formatted(name), new Throwable());
-
-                return;
-            }
-
-            Bookmark newBookmark = new Bookmark(name, itemStack, info.get().getProductId());
-            BookmarkUtil.addBookmark(newBookmark);
-            BookmarkUtil.currentBookmarkOpt = Optional.of(newBookmark);
+            Bookmark bookmark = page.toBookmark();
+            BookmarksStorage.add(bookmark);
+            BookmarkUtil.setCurrentBookmark(bookmark);
         }
 
         retriggerModifier();
-    }
-
-    private static Optional<String> resolveCurrentItemName() {
-        return ScreenManager.getInstance()
-                .current()
-                .flatMap(BazaarScreenHandler::getDisplayItemName);
     }
 }

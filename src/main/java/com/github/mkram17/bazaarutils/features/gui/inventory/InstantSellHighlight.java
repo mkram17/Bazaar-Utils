@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.utils.bazaar.components.SellParser;
+import com.github.mkram17.bazaarutils.data.CurrentSellData;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.bazaar.SellTarget;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -29,7 +29,7 @@ public class InstantSellHighlight implements AbstractItemModifier {
 
     @Override
     public boolean appliesTo(ItemStack stack) {
-        return SellParser.Targets.get(stack)
+        return CurrentSellData.Targets.get(stack)
                 .map(target -> target == SellTarget.INSTANT_SELL)
                 .orElse(false);
     }
