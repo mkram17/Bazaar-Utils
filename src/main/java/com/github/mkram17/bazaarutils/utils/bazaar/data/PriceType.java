@@ -1,9 +1,9 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
+package com.github.mkram17.bazaarutils.utils.bazaar.data;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 
 /**
- * Bazaar API price buckets used to quote the current market side.
+ * Bazaar API pricePerUnit buckets used to quote the current market side.
  */
 public enum PriceType {
     INSTABUY,
