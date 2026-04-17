@@ -36,7 +36,15 @@ public final class SellSacksParser {
                 if (name.equals("Other items")) {
                     otherItems = Optional.of(new SellSacksResult.OtherItems(volume, totalPrice));
                 } else {
-                    items.add(new OrderInfo(name, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
+                    Optional<OrderInfo> result = OrderInfo.of(name, TransactionType.Side.BUY, pricePerUnit, volume);
+
+                    if (result.isEmpty()) {
+                        Util.notifyError("Failed to source sell sacks data; \"%s\" could not be built to a OrderInfo.".formatted(name), new Throwable());
+
+                        continue;
+                    }
+
+                    items.add(result.get());
                 }
             } catch (Exception ignored) {}
         }

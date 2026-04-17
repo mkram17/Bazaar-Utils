@@ -36,7 +36,15 @@ public final class InstantSellParser {
                 if (name.equals("Other items")) {
                     otherItems = Optional.of(new InstantSellResult.OtherItems(volume, totalPrice));
                 } else {
-                    items.add(new OrderInfo(name, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
+                    Optional<OrderInfo> result = OrderInfo.of(name, TransactionType.Side.BUY, pricePerUnit, volume);
+
+                    if (result.isEmpty()) {
+                        Util.notifyError("Failed to source instant sell data; \"%s\" could not be built to a OrderInfo.".formatted(name), new Throwable());
+
+                        continue;
+                    }
+
+                    items.add(result.get());
                 }
             } catch (Exception ignored) {}
         }
@@ -53,7 +61,16 @@ public final class InstantSellParser {
             int volume = Util.parseNumber(lines.get(4).getSiblings().get(1).getString());
             double totalPrice = Double.parseDouble(lines.get(5).getSiblings().get(1).getString().replace(" coins", "").replace(",", ""));
             double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
-            return Optional.of(new InstantSellResult(List.of(new OrderInfo(name, TransactionType.Side.BUY, null, volume, pricePerUnit, null)), Optional.empty()));
+
+            Optional<OrderInfo> result = OrderInfo.of(name, TransactionType.Side.BUY, pricePerUnit, volume);
+
+            if (result.isEmpty()) {
+                Util.notifyError("Failed to source instant sell data; \"%s\" could not be built to a OrderInfo.".formatted(name), new Throwable());
+
+                return Optional.empty();
+            }
+
+            return Optional.of(new InstantSellResult(List.of(result.get()), Optional.empty()));
         } catch (Exception ignored) {
             return Optional.empty();
         }
