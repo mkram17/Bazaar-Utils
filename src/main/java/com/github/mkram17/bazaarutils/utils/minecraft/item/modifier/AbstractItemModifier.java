@@ -66,38 +66,66 @@ public interface AbstractItemModifier extends ToggleableFeature {
         return false;
     }
 
+    boolean appliesTo(ItemStack stack);
+
     default boolean appliesTo(ItemStack stack, @Nullable Slot slot) {
         return appliesTo(stack);
     }
 
-    boolean appliesTo(ItemStack stack);
-
     default Optional<Item> itemOverride(ItemStack stack) {
         return Optional.empty();
+    }
+
+    default Optional<Item> itemOverride(ItemStack stack, @Nullable Slot slot) {
+        return itemOverride(stack);
     }
 
     default Optional<ItemStack> stackOverride(ItemStack stack) {
         return Optional.empty();
     }
 
+    default Optional<ItemStack> stackOverride(ItemStack stack, @Nullable Slot slot) {
+        return stackOverride(stack);
+    }
+
     default Optional<Component> nameOverride(ItemStack stack) {
         return Optional.empty();
+    }
+
+    default Optional<Component> nameOverride(ItemStack stack, @Nullable Slot slot) {
+        return nameOverride(stack);
     }
 
     default Optional<ItemStack> backgroundItem(ItemStack stack) {
         return Optional.empty();
     }
 
+    default Optional<ItemStack> backgroundItem(ItemStack stack, @Nullable Slot slot) {
+        return backgroundItem(stack);
+    }
+
     default Optional<Component> itemCountOverride(ItemStack stack) {
         return Optional.empty();
+    }
+
+    default Optional<Component> itemCountOverride(ItemStack stack, @Nullable Slot slot) {
+        return itemCountOverride(stack);
     }
 
     default Optional<Integer> highlightColor(ItemStack stack) {
         return Optional.empty();
     }
 
+    default Optional<Integer> highlightColor(ItemStack stack, @Nullable Slot slot) {
+        return highlightColor(stack);
+    }
+
     default Optional<DataComponentPatch> patchComponents(ItemStack stack) {
         return Optional.empty();
+    }
+
+    default Optional<DataComponentPatch> patchComponents(ItemStack stack, @Nullable Slot slot) {
+        return patchComponents(stack);
     }
 
     default Result appendComponents(ItemStack stack, List<ClientTooltipComponent> components) {
@@ -108,8 +136,16 @@ public interface AbstractItemModifier extends ToggleableFeature {
         return Result.UNMODIFIED;
     }
 
+    default Result onClick(ItemStack stack, int button, @Nullable Slot slot) {
+        return Result.UNMODIFIED;
+    }
+
     default Result modifyStack(ItemStack stack) {
         return Result.UNMODIFIED;
+    }
+
+    default Result modifyStack(ItemStack stack, @Nullable Slot slot) {
+        return modifyStack(stack);
     }
 
     default Result modifyLore(ItemStack stack, List<Component> lore, @Nullable Result previous) {

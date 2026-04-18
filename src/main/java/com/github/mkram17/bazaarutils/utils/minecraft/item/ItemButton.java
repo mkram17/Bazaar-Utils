@@ -57,6 +57,11 @@ public interface ItemButton extends AbstractItemModifier {
         return onButtonClicked(button);
     }
 
+    @Override
+    default Result onClick(ItemStack stack, int button, @Nullable Slot slot) {
+        return onButtonClicked(button);
+    }
+
     // Simple helper such that state changes on consumers may recompute the modifier
     default void retriggerModifier() {
         AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);

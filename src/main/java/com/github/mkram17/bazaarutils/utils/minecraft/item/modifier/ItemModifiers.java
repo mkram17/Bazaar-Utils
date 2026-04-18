@@ -181,37 +181,37 @@ public class ItemModifiers extends BUListener {
             for (AbstractItemModifier modifier : matching) {
                 boolean[] modified = {false};
 
-                modifier.stackOverride(stack).ifPresent(override -> {
+                modifier.stackOverride(stack, slot).ifPresent(override -> {
                     builder.applyFrom(override);
                     modified[0] = true;
                 });
 
-                modifier.nameOverride(stack).ifPresent(name -> {
+                modifier.nameOverride(stack, slot).ifPresent(name -> {
                     builder.name(name);
                     modified[0] = true;
                 });
 
-                modifier.itemOverride(stack).ifPresent(item -> {
+                modifier.itemOverride(stack, slot).ifPresent(item -> {
                     builder.item = item;
                     modified[0] = true;
                 });
 
-                modifier.backgroundItem(stack).ifPresent(bg -> {
+                modifier.backgroundItem(stack, slot).ifPresent(bg -> {
                     builder.setBackgroundItem(bg);
                     modified[0] = true;
                 });
 
-                modifier.itemCountOverride(stack).ifPresent(count -> {
+                modifier.itemCountOverride(stack, slot).ifPresent(count -> {
                     builder.setCustomSlotComponent(count);
                     modified[0] = true;
                 });
 
-                modifier.highlightColor(stack).ifPresent(color -> {
+                modifier.highlightColor(stack, slot).ifPresent(color -> {
                     builder.setBackgroundColor(color);
                     modified[0] = true;
                 });
 
-                Optional<DataComponentPatch> patch = modifier.patchComponents(stack);
+                Optional<DataComponentPatch> patch = modifier.patchComponents(stack, slot);
 
                 patch.ifPresent(dataComponentPatch -> dataComponentPatch.entrySet().forEach(entry -> {
                     entry.getValue().ifPresent(value -> {
@@ -231,7 +231,7 @@ public class ItemModifiers extends BUListener {
                 AbstractItemModifier.Result result = AbstractItemModifier.Result.UNMODIFIED;
 
                 for (AbstractItemModifier modifier : matching) {
-                    result = modifier.onClick(stack, button);
+                    result = modifier.onClick(stack, button, slot);
                     if (!result.propagateFurther()) break;
                 }
 
