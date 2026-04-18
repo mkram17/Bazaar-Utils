@@ -45,7 +45,6 @@ A Fabric client-side QoL mod for the Hypixel Bazaar.
 - [Resourceful Config](https://modrinth.com/mod/resourceful-config)
 - [owo-lib](https://modrinth.com/mod/owo-lib)
 - [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
-- [Hypixel Mod API](https://modrinth.com/mod/hypixel-mod-api)
 
 ### Optional
 
@@ -59,3 +58,4 @@ A Fabric client-side QoL mod for the Hypixel Bazaar.
 - Gson Extras
 - owo Sentinel
 - SkyBlock API
+- Hypixel Mod API
