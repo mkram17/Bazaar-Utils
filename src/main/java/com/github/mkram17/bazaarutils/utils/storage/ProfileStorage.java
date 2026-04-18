@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.TimePassed;
@@ -50,24 +51,8 @@ public class ProfileStorage<T> {
     @Nullable
     private static String currentProfile = null;
 
-    @Subscription()
-    public void onProfileSwitch(ProfileChangeEvent event) {
-        currentProfile = event.getName();
-    }
-
-    @Subscription()
-    @TimePassed(duration = "5s")
-    public void onTick(TickEvent event) {
-        if (REQUIRES_SAVE.isEmpty()) return;
-        ProfileStorage<?>[] toSave = REQUIRES_SAVE.toArray(new ProfileStorage<?>[0]);
-        REQUIRES_SAVE.clear();
-        CompletableFuture.runAsync(() -> {
-            for (ProfileStorage<?> s : toSave) s.saveToSystem();
-        });
-    }
-
     private final int version;
-    private final Supplier<T> defaultData;
+    private final Supplier<@NotNull T> defaultData;
     private final String fileName;
     private final Function<Integer, Codec<T>> codec;
 
@@ -75,7 +60,7 @@ public class ProfileStorage<T> {
     @Nullable private Path lastPath;
     @Nullable private String lastProfile;
 
-    public ProfileStorage(int version, Supplier<T> defaultData, String fileName, Function<Integer, Codec<T>> codec) {
+    public ProfileStorage(int version, Supplier<@NotNull T> defaultData, String fileName, Function<Integer, Codec<T>> codec) {
         this.version = version;
         this.defaultData = defaultData;
         this.fileName = fileName;
@@ -90,8 +75,7 @@ public class ProfileStorage<T> {
         return lastProfile != null && currentProfile != null && currentProfile.equals(lastProfile);
     }
 
-    @Nullable
-    public T get() {
+    public @Nullable T get() {
         if (isCurrentlyActive()) return data;
         saveToSystem();
         load();
