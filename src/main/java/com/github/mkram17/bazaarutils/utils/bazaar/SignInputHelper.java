@@ -1,22 +1,19 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
+import com.github.mkram17.bazaarutils.data.CurrentOrderData;
+import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
-import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
-import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
@@ -35,7 +32,6 @@ import tech.thatgravyboat.skyblockapi.api.profile.CurrencyAPI;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 interface SignInputState {
@@ -298,7 +294,14 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            OptionalDouble price = PriceInfo.priceForPosition(state.productInfo().getProductId(), getTransactionType(), getPricingPosition());
+            var storage = UserOrdersStorage.INSTANCE.get();
+            List<Order> userOrders = storage != null ? storage : List.of();
+
+            OptionalDouble price = PriceInfo.priceForPosition(
+                    state.productInfo().getProductId(),
+                    getTransactionType(),
+                    getPricingPosition(),
+                    userOrders);
 
             if (price.isEmpty()) {
                 Util.logMessage("Could not retrieve relevant item pricing for " + name + "'s resolved value.");
@@ -311,70 +314,15 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     }
 
     public abstract static class TransactionFlip extends TransactionCost {
-        public static final Pattern VOLUME_PATTERN = Pattern.compile("([\\d,]+)");
-        public static final int INPUT_LORE_LINE_VOLUME = 1;
-
-        public static final Pattern PRICE_PATTERN = Pattern.compile("([\\d,.]+) coins");
-        public static final int INPUT_LORE_LINE_PRICE = 3;
-
         public TransactionFlip(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
             super(name, inputSignRef);
         }
 
         @Override
-        protected Optional<String> getItemProductId(ItemInfo inputSign) {
-            List<Component> loreLines = LoreParser.lines(inputSign.itemStack());
-            if (loreLines.isEmpty()) return Optional.empty();
-            return matchToUserOrder(loreLines).map(Order::getProductID);
-        }
-
-        private Optional<Order> matchToUserOrder(List<Component> loreLines) {
-            Optional<PriceInfo> priceInfo = getOrderPriceInfo(loreLines);
-            Optional<Integer> volume = getVolumeUnclaimed(loreLines);
-
-            if (priceInfo.isEmpty() || volume.isEmpty()) return Optional.empty();
-
-            OrderInfo tempOrder = new OrderInfo(
-                    null,
-                    priceInfo.get().getTransactionType().getSide(),
-                    null,
-                    volume.get(),
-                    priceInfo.get().getPricePerItem(),
-                    null
-            );
-
-            return tempOrder.findOrderInList(UserOrdersStorage.INSTANCE.get());
-        }
-
-        private Optional<PriceInfo> getOrderPriceInfo(List<Component> loreLines) {
-            if (loreLines.size() <= INPUT_LORE_LINE_PRICE) return Optional.empty();
-
-            Matcher matcher = PRICE_PATTERN.matcher(loreLines.get(INPUT_LORE_LINE_PRICE).getString());
-            if (matcher.find()) {
-                try {
-                    // Flip orders are always on the buy side; the sell price is computed after matching
-                    return Optional.of(new PriceInfo(Double.parseDouble(matcher.group(1).replace(",", "")), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER)));
-                } catch (NumberFormatException e) {
-                    Util.notifyError("Error parsing order price in TransactionFlip", e);
-                }
-            }
-
-            return Optional.empty();
-        }
-
-        private Optional<Integer> getVolumeUnclaimed(List<Component> loreLines) {
-            if (loreLines.size() <= INPUT_LORE_LINE_VOLUME) return Optional.empty();
-
-            Matcher matcher = VOLUME_PATTERN.matcher(loreLines.get(INPUT_LORE_LINE_VOLUME).getString());
-            if (matcher.find()) {
-                try {
-                    return Optional.of(Integer.parseInt(matcher.group(1).replace(",", "")));
-                } catch (NumberFormatException e) {
-                    Util.notifyError("Error parsing order volume in TransactionFlip", e);
-                }
-            }
-
-            return Optional.empty();
+        protected Optional<ProductInfo> getItemProductId(ItemInfo inputSign) {
+            return CurrentOrderData.getForOptions()
+                    .flatMap(OrderInfo::of)
+                    .map((info) -> info);
         }
     }
 }
