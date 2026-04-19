@@ -279,6 +279,11 @@
         "label": "Order Status Highlight",
         "hint": "Highlights the status of your Bazaar Orders by coloring the items with representative colors.",
 
+        "filled_color.{}": {
+          "label": "Filled Color",
+          "hint": "The color to highlight orders which have been fully filled and are awaiting claim."
+        },
+
         "competitive_color.{}": {
           "label": "Competitive Color",
           "hint": "The highlight color for orders that are currently the best market offer."
