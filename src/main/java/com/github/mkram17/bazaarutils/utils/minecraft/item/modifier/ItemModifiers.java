@@ -269,8 +269,8 @@ public class ItemModifiers extends BUListener {
         AbstractItemModifier.Result result = AbstractItemModifier.Result.UNMODIFIED;
 
         for (AbstractItemModifier modifier : MODIFIERS) {
-            if (!modifier.isEnabled() || !modifier.appliesTo(stack)) continue;
-            if (!modifier.appliesToScreen(context)) continue;
+            if (!modifier.isEnabled() || !modifier.appliesToScreen(context)) continue;
+            if (!modifier.appliesTo(stack)) continue;
 
             result = modifier.modifyLore(stack, lines, result);
             if (result.modified()) applied.add(modifier);
@@ -290,8 +290,8 @@ public class ItemModifiers extends BUListener {
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
 
         for (AbstractItemModifier modifier : MODIFIERS) {
-            if (!modifier.isEnabled() || !modifier.appliesTo(stack)) continue;
-            if (!modifier.appliesToScreen(context)) continue;
+            if (!modifier.isEnabled() || !modifier.appliesToScreen(context)) continue;
+            if (!modifier.appliesTo(stack)) continue;
 
             AbstractItemModifier.Result result = modifier.appendComponents(stack, event.getComponents());
             if (!result.propagateFurther()) break;
