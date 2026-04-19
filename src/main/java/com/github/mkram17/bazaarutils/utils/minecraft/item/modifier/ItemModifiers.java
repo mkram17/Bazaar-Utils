@@ -106,7 +106,8 @@ public class ItemModifiers extends BUListener {
     @Subscription(priority = Subscription.LOW)
     @OnlyOnSkyBlock
     private void onChestLoaded(ChestLoadedEvent event) {
-        for (Slot slot : event.getSlots()) {
+        // We only aim to modify items of the container which may of been partialized.
+        for (Slot slot : event.getContainerSlots()) {
             if (!slot.hasItem()) continue;
 
             ItemStack stack = slot.getItem();
@@ -115,11 +116,7 @@ public class ItemModifiers extends BUListener {
             ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
             if (visual != null && MODIFIED_ITEMS.containsKey(visual)) continue;
 
-            AbstractItemModifier.ModifierSource source = (slot.container instanceof Inventory)
-                    ? slotToSource(slot.getContainerSlot())
-                    : AbstractItemModifier.ModifierSource.INVENTORY;
-
-            tryModify(stack, source, slot);
+            tryModify(slot.getItem(), AbstractItemModifier.ModifierSource.INVENTORY, slot);
         }
     }
 
