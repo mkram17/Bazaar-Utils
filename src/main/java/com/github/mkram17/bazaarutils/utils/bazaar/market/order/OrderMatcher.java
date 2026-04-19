@@ -35,10 +35,12 @@ public final class OrderMatcher {
 
     /**
      * SELL CANCEL — chat reports the count of items returned, which equals the
-     * unfilled remainder of the offer.
+     * unfilled remainder of the offer. Screen fill is k/M-truncated so stored
+     * filledAmount may be up to 99 units too high, making unfilledAmount up to
+     * 99 units too low. Tolerance absorbs that discrepancy.
      */
     public static boolean sellCancel(Order order, int refundedVolume) {
-        return order.unfilledAmount() == refundedVolume;
+        return Math.abs(order.unfilledAmount() - refundedVolume) <= SCREEN_TRUNCATION_TOLERANCE;
     }
 
     /**
