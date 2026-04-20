@@ -45,7 +45,7 @@ public class PriceCharts extends BUListener implements AbstractItemModifier, Lor
 
     @Override
     public boolean appliesToScreen(Optional<ScreenContext> context) {
-        return OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR || ScreenManager.getInstance().isCurrent(BazaarScreenType.values());
+        return OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR || context.map(it -> it.isAnyOf(BazaarScreenType.values())).orElse(false);
     }
 
     public PriceCharts() {
@@ -54,7 +54,9 @@ public class PriceCharts extends BUListener implements AbstractItemModifier, Lor
 
     @Override
     public boolean appliesTo(ItemStack stack) {
-        return !stack.isEmpty() && !ItemTag.GLASS_PANES.contains(stack);
+        String key = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
+
+        return !stack.isEmpty() && !ItemTag.GLASS_PANES.contains(stack) && SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName);
     }
 
     @Override
