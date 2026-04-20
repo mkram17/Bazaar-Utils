@@ -27,7 +27,8 @@ public class ChestLoadedEventHandler extends BUListener {
 
     private static final int MAX_ATTEMPTS = 50;
 
-    @Subscription
+    // < = higher priority (skyblockapi impl detail)
+    @Subscription(priority = Integer.MIN_VALUE)
     public void onScreenInit(ScreenInitializedEvent event) {
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> container)) return;
         if (!(container.getMenu() instanceof ChestMenu chest)) return;

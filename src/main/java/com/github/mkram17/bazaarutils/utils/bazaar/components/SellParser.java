@@ -157,7 +157,7 @@ public class SellParser extends BUListener {
         }
     }
 
-    @Subscription
+    @Subscription(priority = Subscription.HIGH)
     @OnlyOnSkyBlock
     @OnlyBazaarScreen({BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE})
     private void onChestLoaded(ChestLoadedEvent event) {

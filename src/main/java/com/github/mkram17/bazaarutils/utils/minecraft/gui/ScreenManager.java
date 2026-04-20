@@ -118,7 +118,8 @@ public class ScreenManager {
         return screen instanceof SignEditScreen;
     }
 
-    @Subscription(priority = Subscription.HIGHEST)
+    // < means higher priority, see: https://github.com/SkyblockAPI/SkyblockAPI/blob/4.0/src/main/kotlin/tech/thatgravyboat/skyblockapi/api/events/base/Subscription.kt
+    @Subscription(priority = Integer.MIN_VALUE)
     private void onChestLoaded(ChestLoadedEvent event) {
         ContainerManager.onChestLoaded(event);
 

@@ -103,7 +103,7 @@ public class ItemModifiers extends BUListener {
     // can assert their data. InventoryChangeEvent fires before ChestLoadedEvent,
     // so those stacks are skipped on first pass. This sweeps unmodified
     // slots at LOW priority — after all parsers have stamped their components.
-    @Subscription(priority = Subscription.LOW)
+    @Subscription(priority = Subscription.LOWEST)
     @OnlyOnSkyBlock
     private void onChestLoaded(ChestLoadedEvent event) {
         // We only aim to modify items of the container which may of been partialized.
