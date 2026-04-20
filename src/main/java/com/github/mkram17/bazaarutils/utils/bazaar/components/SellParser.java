@@ -166,7 +166,7 @@ public class SellParser extends BUListener {
                 InstantSell.parse(info.itemStack(), context);
                 Targets.parse(event, InstantSell.orders(), SellTarget.INSTANT_SELL);
 
-                if (context.isAnyOf(BazaarScreenType.MAIN_PAGE)) {
+                if (context.equals(BazaarScreenType.MAIN_PAGE)) {
                     InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), SellTarget.INSTANT_SELL));
                 }
             });

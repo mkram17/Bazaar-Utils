@@ -82,7 +82,7 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
 
     @Override
     public boolean appliesToScreen(Optional<ScreenContext> context) {
-        return context.map(it -> it.isAnyOf(BazaarScreenType.BUY_ORDER_AMOUNT)).orElse(false);
+        return context.map(it -> it.equals(BazaarScreenType.BUY_ORDER_AMOUNT)).orElse(false);
     }
 
     public BuyOrderAmountHelper(int slotIndex) {

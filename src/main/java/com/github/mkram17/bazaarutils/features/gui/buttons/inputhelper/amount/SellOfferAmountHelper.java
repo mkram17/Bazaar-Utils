@@ -82,7 +82,7 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
 
     @Override
     public boolean appliesToScreen(Optional<ScreenContext> context) {
-        return context.map(it -> it.isAnyOf(BazaarScreenType.SELL_OFFER_AMOUNT)).orElse(false);
+        return context.map(it -> it.equals(BazaarScreenType.SELL_OFFER_AMOUNT)).orElse(false);
     }
 
     public SellOfferAmountHelper(int slotIndex) {

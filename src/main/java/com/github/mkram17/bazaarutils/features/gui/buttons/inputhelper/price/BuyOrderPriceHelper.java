@@ -74,7 +74,7 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost impleme
 
     @Override
     public boolean appliesToScreen(Optional<ScreenContext> context) {
-        return context.map(it -> it.isAnyOf(BazaarScreenType.BUY_ORDER_PRICE)).orElse(false);
+        return context.map(it -> it.equals(BazaarScreenType.BUY_ORDER_PRICE)).orElse(false);
     }
 
     public BuyOrderPriceHelper(int slotIndex, PricingPosition pricingPosition) {

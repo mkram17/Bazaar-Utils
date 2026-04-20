@@ -26,35 +26,33 @@ public final class BazaarScreenHandler {
     private BazaarScreenHandler() {}
 
     public static Optional<ItemInfo> getInstantSellItem(@NotNull ScreenContext context) {
-        if (context.isAnyOf(BazaarScreenType.MAIN_PAGE))
+        if (context.equals(BazaarScreenType.MAIN_PAGE))
             return getItemFromSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot);
 
-        if (context.isAnyOf(BazaarScreenType.ITEM_PAGE))
+        if (context.equals(BazaarScreenType.ITEM_PAGE))
             return getItemFromSlot(context, BazaarSlots.ITEM_PAGE.SELL_INSTANTLY.slot);
 
-        if (context.isAnyOf(BazaarScreenType.ITEMS_GROUP_PAGE))
+        if (context.equals(BazaarScreenType.ITEMS_GROUP_PAGE))
             return getItemFromSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_INVENTORY.slot);
 
         return Optional.empty();
     }
 
     public static Optional<ItemInfo> getSellSacksItem(@NotNull ScreenContext context) {
-        if (context.isAnyOf(BazaarScreenType.MAIN_PAGE))
+        if (context.equals(BazaarScreenType.MAIN_PAGE))
             return getItemFromSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot);
 
-        if (context.isAnyOf(BazaarScreenType.ITEM_PAGE))
+        if (context.equals(BazaarScreenType.ITEM_PAGE))
             return getItemFromSlot(context, BazaarSlots.ITEM_PAGE.SELL_SACKS.slot);
 
-        if (context.isAnyOf(BazaarScreenType.ITEMS_GROUP_PAGE))
+        if (context.equals(BazaarScreenType.ITEMS_GROUP_PAGE))
             return getItemFromSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_SACKS.slot);
 
         return Optional.empty();
     }
 
     public static Optional<ItemInfo> getDisplayItem(@NotNull ScreenContext context) {
-        // #isAnyOf rather than #matches — likely to hit computation cache from the
-        // preceding isCurrent call in the same stack.
-        if (!context.isAnyOf(BazaarScreenType.ITEM_PAGE)) return Optional.empty();
+        if (!context.equals(BazaarScreenType.ITEM_PAGE)) return Optional.empty();
 
         return getItemFromSlot(context, BazaarSlots.ITEM_PAGE.ITEM_DISPLAY.slot);
     }

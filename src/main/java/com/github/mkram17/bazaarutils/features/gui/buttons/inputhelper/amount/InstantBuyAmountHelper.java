@@ -82,7 +82,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
 
     @Override
     public boolean appliesToScreen(Optional<ScreenContext> context) {
-        return context.map(it -> it.isAnyOf(BazaarScreenType.INSTANT_BUY)).orElse(false);
+        return context.map(it -> it.equals(BazaarScreenType.INSTANT_BUY)).orElse(false);
     }
 
     public InstantBuyAmountHelper(int slotIndex) {

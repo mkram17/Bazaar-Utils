@@ -74,7 +74,7 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip implem
 
     @Override
     public boolean appliesToScreen(Optional<ScreenContext> context) {
-        return context.map(it -> it.isAnyOf(BazaarScreenType.COMPLETED_BUY_ORDER_OPTIONS)).orElse(false);
+        return context.map(it -> it.equals(BazaarScreenType.COMPLETED_BUY_ORDER_OPTIONS)).orElse(false);
     }
 
     public FlipOrderPriceHelper(int slotIndex, PricingPosition pricingPosition) {

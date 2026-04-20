@@ -37,7 +37,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
 
     @Override
     public boolean appliesToScreen(Optional<ScreenContext> context) {
-        return context.map(it -> it.isAnyOf(BazaarScreenType.ITEM_PAGE)).orElse(false);
+        return context.map(it -> it.equals(BazaarScreenType.ITEM_PAGE)).orElse(false);
     }
 
     public ToggleBookmarkButton() {}
