@@ -42,6 +42,11 @@ public abstract class InputHelper<T> implements ItemButton {
     }
 
     @Override
+    public boolean appliesTo(ItemStack stack) {
+        return state.isPresent() && ItemButton.super.appliesTo(stack);
+    }
+
+    @Override
     public Optional<Component> nameOverride(ItemStack stack) {
         return state.map(this::getButtonItemText);
     }
