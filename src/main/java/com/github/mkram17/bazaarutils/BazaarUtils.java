@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.*;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsData;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
@@ -26,6 +27,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class BazaarUtils implements ClientModInitializer {
+    public static final BazaarLogger LOG = BazaarLogger.of(BazaarUtils.class);
+
     public static final String MOD_ID = "bazaarutils";
     public static final String MOD_NAME = "Bazaar Utils";
 
@@ -51,6 +54,8 @@ public class BazaarUtils implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        LOG.info("BazaarUtils initialising");
+
         EVENT_BUS.register(this);
 
         BUCompatibilityHelper.initializePatches();
@@ -78,6 +83,8 @@ public class BazaarUtils implements ClientModInitializer {
         if (repoReady) return;
         else repoReady = true;
 
+        LOG.info("Repo ready — initialising late modules");
+
         ItemsData.skyblockSourceReady();
 
         BazaarUtilsLateInitModules.init();
@@ -102,6 +109,12 @@ public class BazaarUtils implements ClientModInitializer {
 
             if (!oldVersionMajor.equals(currentVersionMajor)) {
                 updatedMajorVersion = true;
+            }
+
+            if (updatedMajorVersion) {
+                LOG.info("Major version update detected: {} → {}", oldVersion, currentVersion);
+            } else {
+                LOG.info("Version: {}", currentVersion);
             }
         });
     }
