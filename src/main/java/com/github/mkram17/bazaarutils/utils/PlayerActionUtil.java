@@ -18,11 +18,20 @@ public class PlayerActionUtil {
         }
     }
 
-    static void sendPlayerMessage(Component message){
-        if (Minecraft.getInstance().player != null) {
-            Minecraft.getInstance().player.displayClientMessage(message, false);
+    static void sendPlayerMessage(Component message) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.isSameThread()) {
+            doSend(mc, message);
         } else {
-            Util.logMessage("Could not send notification because player is null. Message: " + message);
+            mc.execute(() -> doSend(mc, message));
+        }
+    }
+
+    private static void doSend(Minecraft mc, Component message) {
+        if (mc.player != null) {
+            mc.player.displayClientMessage(message, false);
+        } else {
+            Util.logMessage("Could not send notification because player is null. Message: " + message.getString());
             Util.tickExecuteLater(100, () -> sendPlayerMessage(message));
         }
     }
