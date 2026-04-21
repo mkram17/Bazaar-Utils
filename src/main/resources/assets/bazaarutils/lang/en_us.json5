@@ -82,10 +82,31 @@
     }
   },
 
-  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
-    "not_upgraded.label": "Not Upgraded",
-    "first_tier.label": "Bazaar Flipper I",
-    "second_tier.label": "Bazaar Flipper II"
+  "bazaarutils.hypixel.{}": {
+    "account_upgrades.bazaar_flipper.{}": {
+      "not_upgraded.label": "Not Upgraded",
+      "first_tier.label": "Bazaar Flipper I",
+      "second_tier.label": "Bazaar Flipper II"
+    },
+
+    "commands.bazaar.{}": {
+      "none.{}": {
+        "label": "None",
+        "hint": "None",
+      },
+      "open_bazaar.{}": {
+        "label": "Open Bazaar",
+        "hint": "Opens the Bazaar"
+      },
+      "open_orders.{}": {
+        "label": "Open Orders",
+        "hint": "Open the Manage Orders page",
+      },
+      "search_item.{}": {
+        "label": "Search Item",
+        "hint": "Searches the item on the Bazaar"
+      },
+    }
   },
 
   "bazaarutils.config.{}": {
@@ -430,7 +451,8 @@
           "label": "Enabled",
           "hint": "Whether the notification will be produced."
         },
-        "auto_open_bazaar.label": "Auto Open Bazaar",
+        "run_chat_command.label": "Run Command",
+        "run_chat_command.hint": "Whether to run a command when the notification is triggered",
         "emit_chat_message.label": "Emit Chat Message",
         "emit_client_sound.label": "Emit Client Sound"
       }

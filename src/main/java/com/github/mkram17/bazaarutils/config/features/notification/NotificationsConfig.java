@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.config.features.notification;
 
+import com.github.mkram17.bazaarutils.utils.bazaar.BazaarChatCommand;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 
 @Category(value = "notifications_config")
@@ -31,7 +32,7 @@ public class NotificationsConfig {
             value = "Configure the notification to be produced when an order/offer of yours is outbidded.",
             translation = "bazaarutils.config.notifications.order_notifications.outbid.hint"
     )
-    public static final NotificationSettings ORDER_NOTIFICATIONS_OUTBID = new NotificationSettings(false, false, true, false);
+    public static final NotificationSettings ORDER_NOTIFICATIONS_OUTBID = new NotificationSettings(false, BazaarChatCommand.NONE, true, false);
 
     @ConfigEntry(
             id = "order_notifications:filled",
@@ -41,7 +42,7 @@ public class NotificationsConfig {
             value = "Configure the notification to be produced when an order/offer of yours is filled.",
             translation = "bazaarutils.config.notifications.order_notifications.filled.hint"
     )
-    public static final NotificationSettings ORDER_NOTIFICATIONS_FILLED = new NotificationSettings(false, false, true, false);
+    public static final NotificationSettings ORDER_NOTIFICATIONS_FILLED = new NotificationSettings(false, BazaarChatCommand.NONE, true, false);
 
     @ConfigObject
     public static final class NotificationSettings {
@@ -57,10 +58,14 @@ public class NotificationsConfig {
         public boolean enabled;
 
         @ConfigEntry(
-                id = "auto_open_bazaar",
-                translation = "bazaarutils.config.notifications.notification.auto_open_bazaar.label"
+                id = "run_chat_command",
+                translation = "bazaarutils.config.notifications.notification.run_chat_command.label"
         )
-        public boolean autoOpenBazaar;
+        @Comment(
+                value = "Whether to run a command when the notification is triggered",
+                translation = "bazaarutils.config.notifications.notification.run_chat_command.hint"
+        )
+        public BazaarChatCommand chatCommand;
 
         @ConfigEntry(
                 id = "emit_chat_message",
@@ -78,9 +83,9 @@ public class NotificationsConfig {
             return enabled && NotificationsConfig.ORDER_NOTIFICATIONS_TOGGLE;
         }
 
-        public NotificationSettings(boolean enabled, boolean autoOpenBazaar, boolean emitChatMessage, boolean emitClientSound) {
+        public NotificationSettings(boolean enabled, BazaarChatCommand chatCommand, boolean emitChatMessage, boolean emitClientSound) {
             this.enabled = enabled;
-            this.autoOpenBazaar = autoOpenBazaar;
+            this.chatCommand = chatCommand;
             this.emitChatMessage = emitChatMessage;
             this.emitClientSound = emitClientSound;
         }
