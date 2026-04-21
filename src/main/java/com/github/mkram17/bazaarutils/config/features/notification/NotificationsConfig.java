@@ -25,24 +25,55 @@ public class NotificationsConfig {
     public static boolean ORDER_NOTIFICATIONS_TOGGLE = false;
 
     @ConfigEntry(
-            id = "order_notifications:outbid",
-            translation = "bazaarutils.config.notifications.order_notifications.outbid.label"
+            id = "order_notifications:competitive",
+            translation = "bazaarutils.config.notifications.order_notifications.competitive.label"
     )
     @Comment(
-            value = "Configure the notification to be produced when an order/offer of yours is outbidded.",
-            translation = "bazaarutils.config.notifications.order_notifications.outbid.hint"
+            value = "Configures the notification shown when your order becomes fully competitive.",
+            translation = "bazaarutils.config.notifications.order_notifications.competitive.hint"
     )
-    public static final NotificationSettings ORDER_NOTIFICATIONS_OUTBID = new NotificationSettings(false, BazaarChatCommand.NONE, true, false);
+    public static final NotificationSettings ORDER_NOTIFICATIONS_COMPETITIVE = new NotificationSettings(true, BazaarChatCommand.NONE, true, false);
+
+    @ConfigEntry(
+            id = "order_notifications:matched",
+            translation = "bazaarutils.config.notifications.order_notifications.matched.label"
+    )
+    @Comment(
+            value = "Configures the notification shown when your order is matched at the highest bid.",
+            translation = "bazaarutils.config.notifications.order_notifications.matched.hint"
+    )
+    public static final NotificationSettings ORDER_NOTIFICATIONS_MATCHED = new NotificationSettings(false, BazaarChatCommand.NONE, true, false);
+
+    @ConfigEntry(
+            id = "order_notifications:outbidded",
+            translation = "bazaarutils.config.notifications.order_notifications.outbidded.label"
+    )
+    @Comment(
+            value = "Configures the notification shown when your order is outbid.",
+            translation = "bazaarutils.config.notifications.order_notifications.outbidded.hint"
+    )
+    public static final NotificationSettings ORDER_NOTIFICATIONS_OUTBIDDED = new NotificationSettings(true, BazaarChatCommand.NONE, true, false);
 
     @ConfigEntry(
             id = "order_notifications:filled",
             translation = "bazaarutils.config.notifications.order_notifications.filled.label"
     )
     @Comment(
-            value = "Configure the notification to be produced when an order/offer of yours is filled.",
+            value = "Configures the notification shown when your order is filled.",
             translation = "bazaarutils.config.notifications.order_notifications.filled.hint"
     )
     public static final NotificationSettings ORDER_NOTIFICATIONS_FILLED = new NotificationSettings(false, BazaarChatCommand.NONE, true, false);
+
+
+    @ConfigEntry(
+            id = "order_notifications:partial_fill",
+            translation = "bazaarutils.config.notifications.order_notifications.partial_fill.label"
+    )
+    @Comment(
+            value = "Configures the notification shown when your order receives some sales.",
+            translation = "bazaarutils.config.notifications.order_notifications.partial_fill.hint"
+    )
+    public static final NotificationSettings ORDER_NOTIFICATIONS_PARTIALLY_FILLED = new NotificationSettings(false, BazaarChatCommand.NONE, true, false);
 
     @ConfigObject
     public static final class NotificationSettings {

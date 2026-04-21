@@ -436,13 +436,25 @@
       "order_notifications.{}": {
         "label": "Order Notifications",
         "hint": "Enables notifications related to the status of your Bazaar orders.",
-        "outbid.{}": {
+        "competitive.{}": {
+          "label": "Order Competitive",
+          "hint": "Configures the notification shown when your order becomes fully competitive."
+        },
+        "matched.{}": {
+          "label": "Order Matched",
+          "hint": "Configures the notification shown when your order is matched at the highest bid."
+        },
+        "outbidded.{}": {
           "label": "Order Outbidded",
           "hint": "Configures the notification shown when your order is outbid."
         },
         "filled.{}": {
           "label": "Order Filled",
           "hint": "Configures the notification shown when your order is filled."
+        },
+        "partial_fill.{}": {
+          "label": "Order Partially Filled",
+          "hint": "Configures the notification shown when your order receives some sales."
         }
       },
 
