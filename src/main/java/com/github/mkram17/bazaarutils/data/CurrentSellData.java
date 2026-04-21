@@ -5,10 +5,10 @@ import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.SellTarget;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePagesLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -165,7 +165,7 @@ public class CurrentSellData extends BUListener {
     @OnlyBazaarScreen({BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE})
     private void onChestLoaded(ChestLoadedEvent event) {
         ScreenManager.getInstance().current().ifPresent(context -> {
-            BazaarScreenHandler.getInstantSellItem(context).ifPresent(info -> {
+            SellablePagesLayout.getInstantSellItem(context).ifPresent(info -> {
                 InstantSell.parse(info.itemStack(), context);
                 Targets.parse(event, InstantSell.orders(), SellTarget.INSTANT_SELL);
 
@@ -174,7 +174,7 @@ public class CurrentSellData extends BUListener {
                 }
             });
 
-            BazaarScreenHandler.getSellSacksItem(context).ifPresent(info -> {
+            SellablePagesLayout.getSellSacksItem(context).ifPresent(info -> {
                 SellSacks.parse(info.itemStack());
             });
         });

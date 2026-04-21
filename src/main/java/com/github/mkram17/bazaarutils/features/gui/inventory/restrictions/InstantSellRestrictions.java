@@ -8,8 +8,8 @@ import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePagesLayout;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -64,7 +64,7 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
         if (context.isEmpty()) return Optional.empty();
 
-        Optional<ItemInfo> instantSellItem = BazaarScreenHandler.getInstantSellItem(context.get());
+        Optional<ItemInfo> instantSellItem = SellablePagesLayout.getInstantSellItem(context.get());
         if (instantSellItem.isEmpty()) return Optional.empty();
 
         InstantSellParser.InstantSellResult result = CurrentSellData.InstantSell.getResult();

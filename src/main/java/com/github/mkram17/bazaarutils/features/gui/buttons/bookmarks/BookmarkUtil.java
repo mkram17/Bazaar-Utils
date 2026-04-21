@@ -6,8 +6,8 @@ import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.screen.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ItemPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -53,8 +53,8 @@ public final class BookmarkUtil extends BUListener {
 
         var screen  = ScreenManager.getInstance().current();
 
-        var info = screen.flatMap(BazaarScreenHandler::getDisplayProductInfo).orElse(null);
-        var stack = screen.flatMap(BazaarScreenHandler::getDisplayItem).map(ItemInfo::itemStack).orElse(null);
+        var info = screen.flatMap(ItemPageLayout::getDisplayProductInfo).orElse(null);
+        var stack = screen.flatMap(ItemPageLayout::getDisplayItem).map(ItemInfo::itemStack).orElse(null);
         var name = Optional.ofNullable(stack).map(ItemStack::getCustomName).map(Component::getString).orElse(null);
 
         if (info == null || name == null) {
