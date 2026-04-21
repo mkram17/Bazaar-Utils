@@ -78,4 +78,23 @@ public final class BUConfig {
             translation = "bazaarutils.config.modify_indicator.hint"
     )
     public static AbstractItemModifier.BazaarUtilsModifyIndicator MODIFY_INDICATOR = AbstractItemModifier.BazaarUtilsModifyIndicator.PREFIX;
+
+    @ConfigEntry(
+            id = "self_outbid",
+            translation = "bazaarutils.config.self_outbid.label"
+    )
+    @Comment(
+            value = """
+                    Controls how your own orders are treated when calculating competitive prices and reporting order status.
+
+                    When OFF (default): if you already have an active order at the top of book, input helpers will
+                    not outbid it — they return that price directly. Order status also treats your own volume at a 
+                    price level as non-competing, so a position with only your own orders reports as COMPETITIVE.
+
+                    When ON: your own orders are treated as external competitors. Price helpers will bid above your 
+                    existing top-of-book order, and multiple orders at the same price level report as MATCHED.
+                    """,
+            translation = "bazaarutils.config.self_outbid.hint"
+    )
+    public static boolean SELF_OUTBIDS = false;
 }

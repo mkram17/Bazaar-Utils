@@ -117,6 +117,15 @@
       "disabled.label": "No indicator"
     },
 
+    "self_outbid.{}": {
+      "label": "Self-Outbid",
+      "hint": [
+        "Controls how your own orders are treated when calculating competitive prices and reporting order status.\n\n",
+        "When OFF (default): if you already have an active order at the top of book, input helpers will not outbid it — they return that price directly. Order status also treats your own volume at a price level as non-competing, so a position with only your own orders reports as COMPETITIVE.\n\n",
+        "When ON: your own orders are treated as external competitors. Price helpers will bid above your existing top-of-book order, and multiple orders at the same price level report as MATCHED."
+      ]
+    },
+
     "chat.{}": {
       "category.label": "Chat",
       "category.hint": "Configurations for the chat features of the mod",
