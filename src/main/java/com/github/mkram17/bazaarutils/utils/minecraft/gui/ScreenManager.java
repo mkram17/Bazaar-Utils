@@ -3,8 +3,8 @@ package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.screen.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -22,7 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.jetbrains.annotations.NotNull;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.*;
@@ -31,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public class ScreenManager {
+    private static final BazaarLogger LOG = BazaarLogger.of(ScreenManager.class);
+
     @Getter
     private static final ScreenManager instance = new ScreenManager();
 
@@ -46,7 +47,7 @@ public class ScreenManager {
 
     public static void register(ScreenType type) {
         if (!types.add(type)) {
-            Util.notifyError("ScreenType registered twice: " + type, new Throwable());
+            LOG.error("ScreenType registered twice: " + type.name(), new Throwable());
         }
     }
 
@@ -54,18 +55,14 @@ public class ScreenManager {
         for (ScreenType type : types) {
             try {
                 if (type.test(screen)) return Optional.of(type);
-            } catch (Exception ignored) {
+            } catch (Exception exception) {
+                LOG.warn("ScreenType predicate threw for type [" + type.name() + "]", exception);
             }
         }
         return Optional.empty();
     }
 
-    public record ScreenSnapshot(Screen screen, ScreenType type) {
-        @Override
-        public @NotNull String toString() {
-            return typeLabel(type) + " " + (screen != null ? screen.getClass().getSimpleName() : "null");
-        }
-    }
+    public record ScreenSnapshot(Screen screen, ScreenType type) {}
 
     private static final int MAX_HISTORY = 8;
 
@@ -93,8 +90,8 @@ public class ScreenManager {
 
             // A screen closed. We check whether it is a known overlay which double nulls currentScreen
             instance.expectingServerFollowUp = isFollowUpScreen(prev);
-//            instance.logHistory("CLOSE  " + typeLabel(instance.history.isEmpty() ? null : instance.history.peekFirst().type()));
-            instance.logHistoryCompact("CLOSE");
+            instance.logHistory("CLOSE");
+
             return;
         }
 
@@ -102,8 +99,7 @@ public class ScreenManager {
         // we're starting fresh from the game world, or a server follow-up just arrived.
         if (prev == null && !instance.expectingServerFollowUp && !instance.history.isEmpty()) {
             instance.history.clear();
-//            instance.logHistory("CLEAR  (new session)");
-            instance.logHistoryCompact("CLEAR");
+            instance.logHistory("CLEAR");
         }
         instance.expectingServerFollowUp = false;
 
@@ -123,7 +119,7 @@ public class ScreenManager {
     private void onChestLoaded(ChestLoadedEvent event) {
         ContainerManager.onChestLoaded(event);
 
-        AbstractContainerScreen screen = event.getScreen();
+        AbstractContainerScreen<?> screen = event.getScreen();
         ScreenType resolved = matchType(screen).orElse(null);
 
         List<ScreenSnapshot> list = new ArrayList<>(instance.history);
@@ -133,8 +129,7 @@ public class ScreenManager {
                 list.set(i, new ScreenSnapshot(screen, resolved));
                 instance.history.clear();
                 instance.history.addAll(list);
-//                instance.logHistory("LOADED " + typeLabel(resolved));
-                instance.logHistoryCompact("LOADED");
+                instance.logHistory("LOADED");
                 return;
             }
         }
@@ -153,51 +148,18 @@ public class ScreenManager {
 
         if (history.size() >= MAX_HISTORY) history.removeLast();
         history.addFirst(snapshot);
-//        logHistory("PUSH   " + typeLabel(snapshot.type()));
-        logHistoryCompact("PUSH");
+        logHistory("PUSH");
     }
 
-//    Useful for debugging, too large as to stream it to the chat.
-//    public void logHistory(String trigger) {
-//        StringBuilder builder = new StringBuilder();
-//        String header = "── " + trigger + " ";
-//        builder.append(header).append("─".repeat(Math.max(0, 72 - header.length()))).append("\n");
-//
-//        if (history.isEmpty()) {
-//            builder.append("  (empty)\n");
-//        } else {
-//            int depth = 0;
-//            for (ScreenSnapshot snapshot : history) {
-//                String pointer = depth == 0 ? "▶" : " ";
-//                String typeStr = typeLabel(snapshot.type());
-//                String screenStr = snapshot.screen() != null
-//                        ? snapshot.screen().getClass().getSimpleName() + "@"
-//                        + Integer.toHexString(System.identityHashCode(snapshot.screen()))
-//                        : "null";
-//
-//                builder.append(String.format("  [%d] %s %-55s %s%n", depth, pointer, typeStr, screenStr));
-//                depth++;
-//            }
-//        }
-//
-//        builder.append("─".repeat(72));
-//        Util.logMessage(builder.toString());
-//    }
-
-    private void logHistoryCompact(String trigger) {
+    private void logHistory(String trigger) {
         if (!NotificationType.GUI.isEnabled()) return;
 
         StringJoiner breadcrumb = new StringJoiner(" › ");
-
         for (ScreenSnapshot snap : history) {
-            breadcrumb.add(snap.type() != null ? snap.type().shortName() : "???");
+            breadcrumb.add(snap.type() != null ? snap.type().name() : "???");
         }
 
-        PlayerActionUtil.notifyAll("[" + trigger.strip() + "] " + breadcrumb, NotificationType.GUI);
-    }
-
-    private static String typeLabel(ScreenType type) {
-        return type == null ? "???" : type.asString();
+        PlayerLogger.debug("[" + trigger.strip() + "] " + breadcrumb, NotificationType.GUI);
     }
 
     public Optional<ScreenContext> current() {
@@ -300,10 +262,10 @@ public class ScreenManager {
     }
 
     public static void closeHandledScreen() {
-        PlayerActionUtil.notifyAll("Closing GUI", NotificationType.GUI);
+        PlayerLogger.debug("Closing GUI", NotificationType.GUI);
 
         if (getCurrentlyHandledScreen(AbstractContainerScreen.class).isEmpty()) {
-            Util.notifyError("Current screen does not implement HandledScreen", new Throwable());
+            PlayerLogger.sendError("Current screen does not implement HandledScreen", new Throwable());
 
             return;
         }
@@ -313,7 +275,7 @@ public class ScreenManager {
 
             client.execute(ScreenManager::customCloseHandledScreen);
         } catch (Exception exception) {
-            Util.notifyError("Error closing GUI", exception);
+            PlayerLogger.sendError("Error closing GUI", exception);
         }
     }
 
@@ -322,7 +284,8 @@ public class ScreenManager {
             Minecraft client = Minecraft.getInstance();
 
             if (client.player == null) {
-                Util.notifyError("Player is null, cannot close screen", new Throwable());
+                PlayerLogger.sendError("Player is null, cannot close screen", new Throwable());
+
                 return;
             }
 
@@ -330,7 +293,8 @@ public class ScreenManager {
             client.setScreen(null);
             client.player.containerMenu = client.player.inventoryMenu;
         } catch (Exception exception) {
-            Util.notifyError("Error encountered while closing screen with custom method", exception);
+            PlayerLogger.sendError("Error encountered while closing screen with custom method", exception);
+
             throw new RuntimeException(exception);
         }
     }

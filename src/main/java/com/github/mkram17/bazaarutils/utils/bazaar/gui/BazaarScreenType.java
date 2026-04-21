@@ -137,16 +137,6 @@ public enum BazaarScreenType implements ScreenType {
         return delegate.test(screen);
     }
 
-    @Override
-    public String asString() {
-        return delegate.asString();
-    }
-
-    @Override
-    public String shortName() {
-        return delegate.shortName();
-    }
-
     public static void registerAll() {
         for (BazaarScreenType type : values()) {
             ScreenManager.register(type);
