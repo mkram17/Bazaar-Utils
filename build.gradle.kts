@@ -32,6 +32,9 @@ repositories {
     maven("https://jitpack.io") {
         name = "Jit Pack"
     }
+    maven("https://maven.fabricmc.net/") {
+        name = "FabricMC"
+    }
 
     exclusiveContent {
         forRepository {
@@ -80,10 +83,21 @@ dependencies {
 
     modImplementation("net.fabricmc.fabric-api:fabric-api:${deps["fabric_api"]}")
 
+    modLocalRuntime("maven.modrinth:hypixel-mod-api:1.0.1+build.1+mc1.21")
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
 
     implementation("meteordevelopment:orbit:0.2.4")
     include("meteordevelopment:orbit:0.2.4")
+
+    modImplementation("tech.thatgravyboat:skyblock-api:${deps["skyblock_api_version"]}") {
+        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${deps["skyblock_api_platform"]}") }
+    }
+    include("tech.thatgravyboat:skyblock-api:${deps["skyblock_api_version"]}") {
+        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${deps["skyblock_api_platform"]}-remapped") }
+    }
+
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.4+kotlin.2.2.0")
 
     modImplementation("net.hypixel:hypixel-api-transport-apache:4.4")
     include("net.hypixel:hypixel-api-transport-apache:4.4")
