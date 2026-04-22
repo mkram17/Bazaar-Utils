@@ -8,15 +8,14 @@ import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.DataSources;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderMatcher;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
@@ -33,6 +32,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @DataSource
 public final class OrderCancelledDataSource extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrderCancelledDataSource.class);
 
     @Subscription
     private void onBuyOrderCancelled(BazaarChatEvent.BuyOrderCancelled event) {
@@ -49,7 +49,8 @@ public final class OrderCancelledDataSource extends BUListener {
     private static void applyBuyCancel(double coinsRefunded, long receivedAt) {
         var storage = UserOrdersStorage.INSTANCE.get();
         if (storage == null) {
-            Util.notifyError("Failed to source order cancelling; Orders storage was not loaded.", new Throwable());
+            PlayerLogger.sendError("Order cancel skipped — profile storage not loaded", new Throwable());
+
             return;
         }
 
@@ -66,7 +67,7 @@ public final class OrderCancelledDataSource extends BUListener {
                 ).orElse(null);
 
         if (matched == null) {
-            PlayerActionUtil.notifyAll("Buy cancel skipped — screen already reconciled | coinsRefunded=" + coinsRefunded, NotificationType.BAZAARDATA);
+            LOG.info("Buy cancel skipped (screen already reconciled) — coinsRefunded={}", coinsRefunded);
 
             return;
         }
@@ -83,8 +84,7 @@ public final class OrderCancelledDataSource extends BUListener {
 
         UserOrdersStorage.persist();
 
-        PlayerActionUtil.notifyAll(source.describe()
-                + " | " + matched.describe(), NotificationType.BAZAARDATA);
+        PlayerLogger.debug("%s — Cancelled: %s".formatted(source.describe(), cancelled.describe()), NotificationType.ORDER_LIFECYCLE);
     }
 
     // ── Sell cancel ───────────────────────────────────────────────────────────
@@ -92,7 +92,8 @@ public final class OrderCancelledDataSource extends BUListener {
     private static void applySellCancel(OrderInfo info, long receivedAt) {
         var storage = UserOrdersStorage.INSTANCE.get();
         if (storage == null) {
-            Util.notifyError("Failed to source order cancelling; Orders storage was not loaded.", new Throwable());
+            PlayerLogger.sendError("Order cancel skipped — profile storage not loaded", new Throwable());
+
             return;
         }
 
@@ -112,7 +113,7 @@ public final class OrderCancelledDataSource extends BUListener {
                 ).orElse(null);
 
         if (matched == null) {
-            PlayerActionUtil.notifyAll("Sell cancel skipped — screen already reconciled | productId=" + info.getProductId(), NotificationType.BAZAARDATA);
+            LOG.info("Sell cancel skipped (screen already reconciled) — productId={}", info.getProductId());
 
             return;
         }
@@ -126,7 +127,6 @@ public final class OrderCancelledDataSource extends BUListener {
 
         UserOrdersStorage.persist();
 
-        PlayerActionUtil.notifyAll(source.describe()
-                + " | " + matched.describe(), NotificationType.BAZAARDATA);
+        PlayerLogger.debug("%s — Cancelled: %s".formatted(source.describe(), cancelled.describe()), NotificationType.ORDER_LIFECYCLE);
     }
 }
