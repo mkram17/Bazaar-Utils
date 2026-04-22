@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.data.BookmarksStorage;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
@@ -26,10 +27,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class SearchBookmarkWidget {
     public static final Identifier DEFAULT_WIDGET_TEXTURE = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/bookmark_widget_base");
@@ -58,9 +56,17 @@ public class SearchBookmarkWidget {
             final ItemStack itemForButton = (configuredItem == null) ? Items.BARRIER.getDefaultInstance() : configuredItem;
             MutableComponent text = Component.literal(bookmark.name()).withStyle(ChatFormatting.BOLD);
 
+            OptionalDouble instaBuy = PriceInfo.priceForPosition(bookmark.productID(),
+                    TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT),
+                    PricingPosition.MATCHED);
+            OptionalDouble instaSell = PriceInfo.priceForPosition(bookmark.productID(),
+                    TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT),
+                    PricingPosition.MATCHED);
+
             Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withBold(false);
-            text.append(Component.literal("\nInsta Buy: " + Util.getPrettyString(PriceInfo.priceForPosition(bookmark.productID(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT), PricingPosition.MATCHED).getAsDouble()) + " coins").setStyle(style));
-            text.append(Component.literal("\nInsta Sell: " + Util.getPrettyString(PriceInfo.priceForPosition(bookmark.productID(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT), PricingPosition.MATCHED).getAsDouble()) + " coins").setStyle(style));
+
+            text.append(Component.literal("\nInsta Buy: " + (instaBuy.isPresent() ? Util.getPrettyString(instaBuy.getAsDouble()) + " coins" : "N/A")).setStyle(style));
+            text.append(Component.literal("\nInsta Sell: " + (instaSell.isPresent() ? Util.getPrettyString(instaSell.getAsDouble()) + " coins" : "N/A")).setStyle(style));
 
             ItemSlotButtonWidget button = new ItemSlotButtonWidget(
                     buttonX,
@@ -69,7 +75,7 @@ public class SearchBookmarkWidget {
                     SLOT_BUTTON_TEXTURES,
                     (btn) -> {
                         if (Minecraft.getInstance().hasShiftDown()) {
-                            PlayerActionUtil.notifyAll("Removed " + bookmark.name() + " bookmark from shift-click. Open Bazaar again to display changes.");
+                            PlayerLogger.send("Removed bookmark: " + bookmark.name());
                             onWidgetShiftClick(bookmark);
                         } else {
                             onWidgetLeftClick(bookmark);

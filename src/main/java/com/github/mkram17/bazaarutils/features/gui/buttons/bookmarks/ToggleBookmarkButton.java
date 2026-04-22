@@ -1,6 +1,8 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.data.BookmarksStorage;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -72,6 +74,8 @@ public class ToggleBookmarkButton implements ItemButton {
             BookmarksStorage.add(bookmark);
             BookmarkUtil.setCurrentBookmark(bookmark);
         }
+
+        PlayerLogger.debug("%s bookmark: %s".formatted(page.isBookmarked() ? "removed" : "added", page.name()), NotificationType.FEATURE);
 
         retriggerModifier();
     }
