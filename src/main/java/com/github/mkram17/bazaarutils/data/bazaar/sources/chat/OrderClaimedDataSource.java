@@ -8,8 +8,8 @@ import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.ChatOrderParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.DataSources;
@@ -39,6 +39,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @DataSource
 public final class OrderClaimedDataSource extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrderClaimedDataSource.class);
 
     public OrderClaimedDataSource() {}
 
@@ -55,7 +56,8 @@ public final class OrderClaimedDataSource extends BUListener {
     private void applyClaim(OrderInfo info, long receivedAt) {
         var storage = UserOrdersStorage.INSTANCE.get();
         if (storage == null) {
-            Util.notifyError("Failed to source order claim; Orders storage was not loaded.", new Throwable());
+            PlayerLogger.sendError("Order claim skipped — profile storage not loaded", new Throwable());
+
             return;
         }
 
@@ -111,7 +113,6 @@ public final class OrderClaimedDataSource extends BUListener {
 
         UserOrdersStorage.persist();
 
-        PlayerActionUtil.notifyAll(source.describe()
-                + " | " + claimed.describe(), NotificationType.BAZAARDATA);
+        PlayerLogger.debug("%s — Claimed: %s".formatted(source.describe(), claimed.describe()), NotificationType.ORDER_LIFECYCLE);
     }
 }
