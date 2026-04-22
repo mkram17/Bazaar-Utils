@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts;
 
 import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
  * Logical position {@code n} maps to screen slot {@code 10 + (n/7)*9 + (n%7)}.
  */
 public final class OrdersPageLayout {
+
+    private static final BazaarLogger LOG = BazaarLogger.of(OrdersPageLayout.class);
 
     private static final int CONTENT_START = 10;
     private static final int ROW_STRIDE = 9;
@@ -59,9 +62,7 @@ public final class OrdersPageLayout {
                 .filter(Order::isLive)
                 .toList();
 
-        PlayerActionUtil.notifyAll(
-                "[Layout] reindexActive | total=" + orders.size() + " active=" + active.size(),
-                NotificationType.BAZAARDATA);
+        LOG.debug("reindexActive — {} orders ({} active)", orders.size(), active.size());
 
         return orders.stream()
                 .map(order -> {
@@ -72,15 +73,7 @@ public final class OrdersPageLayout {
                     boolean isFilled = order.status() instanceof OrderStatus.Filled;
                     int computed = computeScreenSlot(order.productId(), order.side(), order.pricePerItem(), order.placedAt(), isFilled, others);
 
-                    PlayerActionUtil.notifyAll(
-                            "[Layout] reindex " + order.productId()
-                                    + " " + order.side()
-                                    + " @" + order.pricePerItem()
-                                    + " filled=" + isFilled
-                                    + " placedAt=" + order.placedAt()
-                                    + " oldSlot=" + order.lastKnownIndex()
-                                    + " newSlot=" + computed,
-                            NotificationType.BAZAARDATA);
+                    LOG.debug("reindex {} {} @{} filled={} slot {} → {}", order.productId(), order.side(), order.pricePerItem(), isFilled, order.lastKnownIndex(), computed);
 
                     return order.reanchored(computed);
                 })

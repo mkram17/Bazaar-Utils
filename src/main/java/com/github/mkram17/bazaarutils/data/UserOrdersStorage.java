@@ -1,10 +1,8 @@
 package com.github.mkram17.bazaarutils.data;
 
-import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.OrdersPageLayout;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
 import com.github.mkram17.bazaarutils.utils.storage.ProfileStorage;
 import com.mojang.serialization.Codec;
 
@@ -13,6 +11,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public final class UserOrdersStorage {
+    private static final BazaarLogger LOG = BazaarLogger.of(UserOrdersStorage.class);
+
     public static final ProfileStorage<List<Order>> INSTANCE = new ProfileStorage<>(
             0,
             ArrayList::new,
@@ -26,6 +26,7 @@ public final class UserOrdersStorage {
     private static void rebuildSlotIndex(List<Order> orders) {
         if (orders == null) {
             slotIndex = Map.of();
+            LOG.info("rebuildSlotIndex: orders null — cleared index");
             return;
         }
 
@@ -36,8 +37,8 @@ public final class UserOrdersStorage {
                 indexes.put(order.lastKnownIndex(), order);
             }
         }
-
         slotIndex = Collections.unmodifiableMap(indexes);
+        LOG.info("rebuildSlotIndex: {} anchored entries from {} orders", indexes.size(), orders.size());
     }
 
     public static Optional<Order> getOrderFromSlotIndex(int slotIndex) {
@@ -75,6 +76,8 @@ public final class UserOrdersStorage {
         List<Order> filtered = loaded.stream()
                 .filter(Order::isLive)
                 .collect(Collectors.toCollection(ArrayList::new));
+
+        LOG.info("Persist: {} → {} orders (dropped {} terminal)", loaded.size(), filtered.size(), loaded.size() - filtered.size());
 
         INSTANCE.set(filtered);
         rebuildSlotIndex(filtered);
