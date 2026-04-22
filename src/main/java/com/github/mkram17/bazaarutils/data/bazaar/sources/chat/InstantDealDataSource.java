@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.DataSources;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.PriceType;
@@ -58,8 +58,7 @@ public final class InstantDealDataSource extends BUListener {
         }
 
         new BazaarDataUpdateEvent(info.getProductId(), source).post(EVENT_BUS);
-        PlayerActionUtil.notifyAll(source.describe()
-                + " | " + (info.getTransaction().is(PriceType.INSTABUY) ? "BUY" : "SELL")
-                + " | " + info.getVolume() + "x @ " + info.getPricePerItem(), NotificationType.BAZAARDATA);
+
+        PlayerLogger.debug("%s — Instant %s %dx @ %.4f: %s".formatted(source.describe(), info.getTransaction().is(PriceType.INSTABUY) ? "BUY" : "SELL", info.getVolume(), info.getPricePerItem(), info.getProductId()), NotificationType.ORDER_LIFECYCLE);
     }
 }
