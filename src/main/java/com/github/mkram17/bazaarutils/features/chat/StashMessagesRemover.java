@@ -2,98 +2,52 @@ package com.github.mkram17.bazaarutils.features.chat;
 
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-
-import java.util.ArrayList;
-import java.util.Map;
+import com.github.mkram17.bazaarutils.utils.minecraft.SequenceChatFilter;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.chat.ChatReceivedEvent;
 
 @Module
 public class StashMessagesRemover extends BUListener implements ToggleableFeature {
-    private static final Map<String, Integer> REMOVE_MAP = Map.of(
-            "materials stashed away", 0,
-            "types of materials stashed", 1,
-            "to pick them up", 2
-    );
 
-    private static final int SEQUENCE_LENGTH = REMOVE_MAP.size();
+    private static final SequenceChatFilter STASH_FILTER = new SequenceChatFilter(
+            "materials stashed away",
+            "types of materials stashed",
+            "to pick them up"
+    );
 
     @Override
     public boolean isEnabled() {
         return ChatConfig.STASH_MESSAGES_REMOVER_TOGGLE;
     }
 
-//    We need to consider whether we store this to a DataStorage interface or just keep it to a per-boot level
+    // We need to consider whether we store this to a DataStorage interface or just keep it to a per-boot level
     public boolean stashPreviouslyClaimed = false;
-
-    private transient ArrayList<String> pastMessages = new ArrayList<>();
 
     public StashMessagesRemover() {}
 
-    private void registerStashClaimDetector() {
-        ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
-            if (message.getString().contains("You picked up")
-                    && message.getString().contains("from your material stash")
-                    && !stashPreviouslyClaimed) {
-                stashPreviouslyClaimed = true;
-                Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyAll(
-                        "TIP - To claim stash more easily and quickly, use the Stash Helper keybind, " +
-                                "which closes the bazaar and claims your stash! To disable stash messages, " +
-                                "enable the \"Disable Stash Messages\" option in the Bazaar Utils config."));
-            }
-        });
-    }
+    @Subscription
+    @OnlyOnSkyBlock
+    public void onChat(ChatReceivedEvent.Pre event) {
+        String message = event.getText();
 
-    private void registerStashRemover() {
-        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
-            if (!isEnabled() || message.getString().contains("Mana")) {
-                return true;
-            }
+        if (message.contains("You picked up") && message.contains("from your material stash") && !stashPreviouslyClaimed) {
+            stashPreviouslyClaimed = true;
 
-            String currentMessageString = message.getString();
-            int currentMessageRoleIndex = indexOfMessage(currentMessageString);
-            boolean removeCurrentMessage;
-
-            if (currentMessageRoleIndex == -1) {
-                pastMessages.clear();
-                removeCurrentMessage = false;
-            } else if (currentMessageRoleIndex == pastMessages.size()) {
-                pastMessages.add(currentMessageString);
-                removeCurrentMessage = true;
-
-                if (pastMessages.size() == SEQUENCE_LENGTH) {
-                    pastMessages.clear();
-                }
-            } else {
-                pastMessages.clear();
-                removeCurrentMessage = false;
-
-                if (currentMessageRoleIndex == 0) {
-                    pastMessages.add(currentMessageString);
-                    removeCurrentMessage = true;
-                }
-            }
-
-            return !removeCurrentMessage;
-        });
-    }
-
-    private static int indexOfMessage(String messageContent) {
-        for (Map.Entry<String, Integer> entry : REMOVE_MAP.entrySet()) {
-            if (messageContent.contains(entry.getKey())) {
-                return entry.getValue();
-            }
+            Util.tickExecuteLater(2, () -> PlayerLogger.send(
+                    "TIP - To claim stash more easily, use the Stash Helper keybind. " +
+                            "To disable stash messages, enable \"Disable Stash Messages\" in the Bazaar Utils config."));
+            return;
         }
 
-        return -1;
-    }
+        if (!isEnabled() || message.contains("Mana")) return;
 
-    @Override
-    protected void registerFabricEvents() {
-        registerStashRemover();
-        registerStashClaimDetector();
+        if (STASH_FILTER.shouldRemove(message)) {
+            event.cancel();
+        }
     }
 }

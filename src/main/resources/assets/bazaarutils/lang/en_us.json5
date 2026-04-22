@@ -89,6 +89,17 @@
       "second_tier.label": "Bazaar Flipper II"
     },
 
+    "messages.transient_bazaar_notifications.{}": {
+      "cancelling_order.label": "Cancelling Order",
+      "putting_goods_in_escrow.label": "Putting Goods in Escrow",
+      "submitting_buy_order.label": "Submitting Buy Order",
+      "claiming_order.label": "Claiming Order",
+      "submitting_sell_offer.label": "Submitting Sell Offer",
+      "executing_instant_sell.label": "Executing Instant Sell",
+      "executing_instant_buy.label": "Executing Instant Buy",
+      "claiming_orders.label": "Claiming Orders"
+    },
+
     "commands.bazaar.{}": {
       "none.{}": {
         "label": "None",
