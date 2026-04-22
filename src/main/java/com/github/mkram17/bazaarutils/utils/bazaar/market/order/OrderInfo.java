@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -86,7 +88,7 @@ public class OrderInfo extends PriceInfo {
         Optional<String> name = Optional.ofNullable(ResourceManager.getProductIdtoNameCache().get(order.productId()));
 
         if (name.isEmpty()) {
-            Util.notifyError("Order could not be built to a OrderInfo: " + order.describe(), new Throwable());
+            PlayerLogger.sendError("Could not resolve name for " + order.describe() + " — try /bu updateresources or relaunch the game.", new Throwable());
 
             return Optional.empty();
         }

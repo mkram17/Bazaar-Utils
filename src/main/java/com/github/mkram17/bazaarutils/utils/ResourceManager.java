@@ -3,8 +3,6 @@ package com.github.mkram17.bazaarutils.utils;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.remote.BazaarApiFetcher;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -29,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 
 //TODO move config to config/bazaarutils directory and rename to "config". See how REI does this.
 public class ResourceManager {
+    private static final BazaarLogger LOG = BazaarLogger.of(ResourceManager.class);
 
     private static final Path MOD_CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve(BazaarUtils.MOD_ID);
     private static final Path LOCAL_RESOURCES_PATH = MOD_CONFIG_DIR.resolve("bazaar-resources.json");
@@ -45,6 +44,8 @@ public class ResourceManager {
     private static volatile boolean conversionsLoaded = false;
 
     public static void initialize() {
+        LOG.info("ResourceManager initialising — local path={}", LOCAL_RESOURCES_PATH);
+
         CompletableFuture.runAsync(() -> {
             try {
                 if (!Files.exists(MOD_CONFIG_DIR)) {
@@ -53,8 +54,8 @@ public class ResourceManager {
                 copyDefaultResourcesIfMissing();
                 checkForUpdates(false); // Automatic check on startup
                 ensureConversionsLoaded();
-            } catch (IOException e) {
-                Util.notifyError("Failed to initialize resource manager", e);
+            } catch (IOException exception) {
+                PlayerLogger.sendError("Failed to initialize resource manager", exception);
             }
         });
     }
@@ -64,7 +65,8 @@ public class ResourceManager {
             return;
         }
 
-        Util.logMessage("Local resources file not found. Copying from bundled resources.");
+        LOG.info("Local resources file not found — copying from bundled resources");
+
         Optional<Resource> resourceOptional = Minecraft.getInstance().getResourceManager().getResource(BUNDLED_RESOURCES_ID);
         if (resourceOptional.isPresent()) {
             try (InputStream inputStream = resourceOptional.get().open()) {
@@ -74,7 +76,7 @@ public class ResourceManager {
                 ConfigUtil.scheduleConfigSave();
             }
         } else {
-            Util.notifyError("Could not find bundled bazaar-resources.json", null);
+            PlayerLogger.sendError("Could not find bundled bazaar-resources.json — mod may be corrupted", new Throwable());
         }
     }
 
@@ -87,9 +89,10 @@ public class ResourceManager {
                 connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
 
                 if (connection.getResponseCode() != 200) {
-                    if (manual)
-                        Util.notifyError("Failed to check for resource updates.", new Exception());
-                    Util.logError("GitHub API responded with code: " + connection.getResponseCode(), null);
+                    if (manual) PlayerLogger.sendError("Failed to check for resource updates (HTTP " + connection.getResponseCode() + ")", new Throwable());
+
+                    LOG.warn("GitHub API responded with code {} — skipping update check", connection.getResponseCode());
+
                     return;
                 }
 
@@ -100,22 +103,17 @@ public class ResourceManager {
                     String downloadUrl = jsonObject.get("download_url").getAsString();
 
                     if (!latestSha.equals(MetadataConfig.RESOURCES_SHA)) {
-                        if (manual) {
-                            PlayerActionUtil.notifyAll("New resources found, downloading...");
-                        }
+                        LOG.info("Resource update available — downloading (sha={})", latestSha);
+                        if (manual) PlayerLogger.send("New resources found, downloading...");
                         downloadLatestResources(downloadUrl, latestSha);
                     } else {
-                        if (manual) {
-                            PlayerActionUtil.notifyAll("Resources are already up-to-date.");
-                        }
+                        LOG.info("Resources up to date (sha={})", latestSha);
+                        if (manual) PlayerLogger.send("Resources are already up to date.");
                     }
                 }
-            } catch (Exception e) {
-                if (manual) {
-                    Util.notifyError("An error occurred while checking for updates.", new Exception());
-                }
-
-                Util.notifyError("Failed to check for resource updates", e);
+            } catch (Exception exception) {
+                LOG.warn("Failed to check for resource updates", exception);
+                if (manual) PlayerLogger.sendError("Failed to check for resource updates", exception);
             }
         });
     }
@@ -130,13 +128,15 @@ public class ResourceManager {
             ConfigUtil.scheduleConfigSave();
             ResourceManager.setConversionsLoaded(false);
             ensureConversionsLoaded();
-            PlayerActionUtil.notifyAll("Successfully updated Bazaar resources!");
-        } catch (Exception e) {
-            Util.notifyError("Failed to download resources", e);
+            LOG.info("Resources updated successfully — sha={}", latestSha);
+            PlayerLogger.send("Bazaar resources updated successfully.");
+        } catch (Exception exception) {
+            PlayerLogger.sendError("Failed to download resource update", exception);
+
             try {
                 Files.deleteIfExists(tempPath); // Clean up the temporary file on failure
             } catch (IOException ex) {
-                Util.logError("Failed to delete temporary resource file", ex);
+                LOG.warn("Failed to delete temporary resource file — path={}", tempPath, ex);
             }
         }
     }
@@ -146,7 +146,7 @@ public class ResourceManager {
             String content = Files.readString(LOCAL_RESOURCES_PATH);
             return JsonParser.parseString(content).getAsJsonObject();
         } catch (IOException e) {
-            Util.notifyError("Could not read local bazaar-resources.json", e);
+            LOG.warn("Could not read local bazaar-resources.json — falling back to bundled", e);
             // Fallback to bundled resources if local read fails
             try {
                 Optional<Resource> resourceOptional = Minecraft.getInstance().getResourceManager().getResource(BUNDLED_RESOURCES_ID);
@@ -157,7 +157,7 @@ public class ResourceManager {
                     }
                 }
             } catch (IOException ex) {
-                Util.notifyError("Fallback to bundled resources also failed", ex);
+                PlayerLogger.sendError("Failed to read resource file and bundled fallback also failed", ex);
             }
         }
         return new JsonObject(); //empty (shouldnt happen)
@@ -203,9 +203,9 @@ public class ResourceManager {
                 productIdtoNameCache = Collections.unmodifiableMap(idToName);
                 conversionsLoaded = true;
 
-                PlayerActionUtil.notifyAll("Loaded bazaarConversions cache: " + nameToProductIdCache.size() + " entries.", NotificationType.BAZAARDATA);
-            } catch (Exception e) {
-                Util.notifyError("Failed loading bazaarConversions cache", e);
+                LOG.info("Resource cache loaded — {} entries", nameToProductIdCache.size());
+            } catch (Exception exception) {
+                PlayerLogger.sendError("Failed to load resource cache — order tracking will not work. Try /bu updateresources or restart the game.", exception);
 
                 nameToProductIdCache = Map.of();
                 conversionsLoaded = true;
