@@ -7,7 +7,8 @@ import com.github.mkram17.bazaarutils.events.bazaar.BazaarApiSnapshotEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataBatchUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.TimeUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.DataSources;
@@ -36,6 +37,8 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @DataSource
 public final class ApiSnapshotDataSource extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(ApiSnapshotDataSource.class);
+
 
     public ApiSnapshotDataSource() {}
 
@@ -90,21 +93,16 @@ public final class ApiSnapshotDataSource extends BUListener {
                             int remaining = order.originalAmount() - order.filledAmount();
                             allInferredFills.add(order.withFill(remaining));
                             changed.add(productId);
-                            PlayerActionUtil.notifyAll(source.describe()
-                                            + " | Inferred fill (level absent): %s %dx @ %.1f".formatted(
-                                            order.side(), order.originalAmount(), order.pricePerItem()),
-                                    NotificationType.BAZAARDATA);
+
+                            PlayerLogger.debug("%s — Marked fully filled — level vanished from book: %s".formatted(source.describe(), order.describe()), NotificationType.PRICE_DATA);
                         } else if (level.orderCount() == 1) {
                             // Sole order at this level — snapshot volume = user's exact remaining amount.
                             int inferredFilled = order.originalAmount() - (int) level.totalVolume();
                             if (inferredFilled > order.filledAmount()) {
                                 allInferredFills.add(order.withFill(inferredFilled - order.filledAmount()));
                                 changed.add(productId);
-                                PlayerActionUtil.notifyAll(source.describe()
-                                                + " | Inferred partial fill (sole order): %s %dx @ %.1f | snapshotVol=%d inferredFilled=%d".formatted(
-                                                order.side(), order.originalAmount(), order.pricePerItem(),
-                                                level.totalVolume(), inferredFilled),
-                                        NotificationType.BAZAARDATA);
+
+                                PlayerLogger.debug("%s — Bumped fill %d → %d from sole-order snapshot (vol=%d): %s".formatted(source.describe(), order.filledAmount(), inferredFilled, (int) level.totalVolume(), order.describe()), NotificationType.PRICE_DATA);
                             }
                         }
                     });
@@ -122,14 +120,22 @@ public final class ApiSnapshotDataSource extends BUListener {
 
                 var reindexed = OrdersPageLayout.reindexActive(withFills);
 
+                LOG.debug("Applying {} inferred fills to storage — reindexed total={}", fillIds.size(), reindexed.size());
+
                 UserOrdersStorage.INSTANCE.set(reindexed);
 
                 reindexed.stream()
                         .filter(order -> fillIds.contains(order.id()))
                         .forEach(order -> {
                             switch (order.status()) {
-                                case OrderStatus.Filled ignored -> new UserOrderEvent.Filled(order).post(EVENT_BUS);
-                                default -> new UserOrderEvent.PartiallyFilled(order).post(EVENT_BUS);
+                                case OrderStatus.Filled ignored -> {
+                                    new UserOrderEvent.Filled(order).post(EVENT_BUS);
+                                    PlayerLogger.debug("%s — Marked fully filled (inferred): %s".formatted(source.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE);
+                                }
+                                default -> {
+                                    new UserOrderEvent.PartiallyFilled(order).post(EVENT_BUS);
+                                    PlayerLogger.debug("%s — Fill advanced (inferred): %s".formatted(source.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE);
+                                }
                             }
                         });
 
@@ -139,8 +145,7 @@ public final class ApiSnapshotDataSource extends BUListener {
 
         if (!changed.isEmpty()) {
             new BazaarDataBatchUpdateEvent(Collections.unmodifiableSet(changed), source).post(EVENT_BUS);
-            PlayerActionUtil.notifyAll(source.describe()
-                    + " → " + changed.size() + " products changed.", NotificationType.BAZAARDATA);
+            PlayerLogger.debug("API snapshot ts=%d — %d products changed".formatted(source.timestamp(), changed.size()), NotificationType.PRICE_DATA);
         }
     }
 }
