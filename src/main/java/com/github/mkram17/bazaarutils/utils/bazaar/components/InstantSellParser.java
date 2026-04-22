@@ -1,5 +1,8 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -10,8 +13,11 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class InstantSellParser {
+    private static final BazaarLogger LOG = BazaarLogger.of(InstantSellParser.class);
+
     public record InstantSellResult(List<OrderInfo> items, Optional<OtherItems> otherItems) {
         public record OtherItems(int volume, double totalValue) {}
     }
@@ -39,15 +45,20 @@ public final class InstantSellParser {
                     Optional<OrderInfo> result = OrderInfo.of(name, TransactionType.Side.BUY, pricePerUnit, volume);
 
                     if (result.isEmpty()) {
-                        Util.notifyError("Failed to source instant sell data; \"%s\" could not be built to a OrderInfo.".formatted(name), new Throwable());
+                        PlayerLogger.send("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(name));
 
                         continue;
                     }
 
                     items.add(result.get());
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                LOG.warn("parseOrders: failed to parse lore line — siblings=[{}]", siblings.stream().map(Component::getString).collect(Collectors.joining(", ")), e);
+            }
+
         }
+
+        PlayerLogger.debug("InstantSell (overview page) parsed: %d known items | %d folded to \"Other Items\"".formatted(items.size(), otherItems.map(InstantSellResult.OtherItems::volume).orElse(0)), NotificationType.SCREEN_PARSING);
 
         return new InstantSellResult(List.copyOf(items), otherItems);
     }
@@ -58,6 +69,14 @@ public final class InstantSellParser {
 
         try {
             String name = lines.get(0).getSiblings().getFirst().getString().trim();
+
+            List<Component> inventoryLineSiblings = lines.get(2).getSiblings();
+            if (inventoryLineSiblings.size() < 2 || inventoryLineSiblings.get(1).getString().contains("None")) {
+                LOG.info("parseItemPageOrder: no inventory for '{}' — skipping", name);
+
+                return Optional.empty();
+            }
+
             int volume = Util.parseNumber(lines.get(4).getSiblings().get(1).getString());
             double totalPrice = Double.parseDouble(lines.get(5).getSiblings().get(1).getString().replace(" coins", "").replace(",", ""));
             double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
@@ -65,13 +84,17 @@ public final class InstantSellParser {
             Optional<OrderInfo> result = OrderInfo.of(name, TransactionType.Side.BUY, pricePerUnit, volume);
 
             if (result.isEmpty()) {
-                Util.notifyError("Failed to source instant sell data; \"%s\" could not be built to a OrderInfo.".formatted(name), new Throwable());
+                PlayerLogger.send("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(name));
 
                 return Optional.empty();
             }
 
+            PlayerLogger.debug("InstantSell (item page) parsed: %s %dx@%.4f".formatted(result.get().getName(), result.get().getVolume(), result.get().getPricePerItem()), NotificationType.SCREEN_PARSING);
+
             return Optional.of(new InstantSellResult(List.of(result.get()), Optional.empty()));
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            LOG.warn("parseItemPageOrder: failed to parse lore — stack='{}'", sellInstantlyStack.getDisplayName().getString(), e);
+
             return Optional.empty();
         }
     }

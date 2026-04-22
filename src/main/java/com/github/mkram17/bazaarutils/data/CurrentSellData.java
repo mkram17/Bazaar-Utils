@@ -2,6 +2,9 @@ package com.github.mkram17.bazaarutils.data;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.SellTarget;
@@ -38,6 +41,8 @@ import java.util.stream.Collectors;
  */
 @Module
 public class CurrentSellData extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(CurrentSellData.class);
+
     public static final class InstantSell {
         @Getter
         @Nullable
@@ -172,10 +177,14 @@ public class CurrentSellData extends BUListener {
                 if (context.equals(BazaarScreenType.MAIN_PAGE)) {
                     InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), SellTarget.INSTANT_SELL));
                 }
+
+                PlayerLogger.debug("InstantSell stamped: %d orders".formatted(InstantSell.orders().size()), NotificationType.PRICE_DATA);
             });
 
             SellablePagesLayout.getSellSacksItem(context).ifPresent(info -> {
                 SellSacks.parse(info.itemStack());
+
+                PlayerLogger.debug("SellSacks stamped: %d orders".formatted(SellSacks.orders().size()), NotificationType.PRICE_DATA);
             });
         });
     }
@@ -218,5 +227,6 @@ public class CurrentSellData extends BUListener {
         Targets.clearAll();
         InstantSell.clear();
         SellSacks.clear();
+        LOG.info("CurrentSellData cleared");
     }
 }

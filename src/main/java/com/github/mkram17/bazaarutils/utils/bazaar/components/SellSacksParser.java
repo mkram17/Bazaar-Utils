@@ -1,5 +1,8 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -10,8 +13,11 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class SellSacksParser {
+    private static final BazaarLogger LOG = BazaarLogger.of(SellSacksParser.class);
+
     public record SellSacksResult(List<OrderInfo> items, Optional<OtherItems> otherItems) {
         public record OtherItems(int volume, double totalValue) {}
     }
@@ -39,15 +45,19 @@ public final class SellSacksParser {
                     Optional<OrderInfo> result = OrderInfo.of(name, TransactionType.Side.BUY, pricePerUnit, volume);
 
                     if (result.isEmpty()) {
-                        Util.notifyError("Failed to source sell sacks data; \"%s\" could not be built to a OrderInfo.".formatted(name), new Throwable());
+                        PlayerLogger.send("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(name));
 
                         continue;
                     }
 
                     items.add(result.get());
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                LOG.warn("parseOrders: failed to parse lore line — siblings=[{}]", siblings.stream().map(Component::getString).collect(Collectors.joining(", ")), e);
+            }
         }
+
+        PlayerLogger.debug("SellSacks parsed: %d known items | %d folded to \"Other Items\"".formatted(items.size(), otherItems.map(SellSacksResult.OtherItems::volume).orElse(0)), NotificationType.SCREEN_PARSING);
 
         return new SellSacksResult(List.copyOf(items), otherItems);
     }
