@@ -8,6 +8,8 @@ import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnIn
 import lombok.Getter;
 
 public class TimeUtil {
+    private static final BazaarLogger LOG = BazaarLogger.of(TimeUtil.class);
+
     @Getter
     private static ZonedDateTime modInitTime;
     public static final ZonedDateTime LAST_BAZAAR_LIMIT_RESET_TIME = ZonedDateTime.of(LocalDate.now(ZoneOffset.UTC), LocalTime.MIDNIGHT, ZoneOffset.UTC);
@@ -25,6 +27,8 @@ public class TimeUtil {
     @RunOnInit
     public static void startTimer() {
         updateTime();
+        LOG.info("TimeUtil initialised — nextBazaarLimitReset={} ({}s)", nextBazaarLimitReset, timeToBazaarLimitReset);
+
         Timer timer = new Timer(10 * 1000, e -> {
             updateTime();
         });

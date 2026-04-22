@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.components;
 
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.ItemLore;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class LoreParser {
+    private static final BazaarLogger LOG = BazaarLogger.of(LoreParser.class);
 
     private LoreParser() {}
 
@@ -38,7 +40,7 @@ public final class LoreParser {
             try {
                 return Optional.of(Double.parseDouble(raw.replace(",", "")));
             } catch (NumberFormatException e) {
-                Util.notifyError("Failed to parse double from lore (" + errorContext + "): " + raw, e);
+                LOG.warn("Failed to parse double from lore ({}) — raw='{}'", errorContext, raw, e);
                 return Optional.empty();
             }
         });
@@ -49,7 +51,7 @@ public final class LoreParser {
             try {
                 return Optional.of(Integer.parseInt(raw.replace(",", "")));
             } catch (NumberFormatException e) {
-                Util.notifyError("Failed to parse int from lore (" + errorContext + "): " + raw, e);
+                LOG.warn("Failed to parse int from lore ({}) — raw='{}'", errorContext, raw, e);
                 return Optional.empty();
             }
         });

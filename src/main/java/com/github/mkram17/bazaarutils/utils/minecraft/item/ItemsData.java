@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -18,6 +19,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public final class ItemsData {
+    private static final BazaarLogger LOG = BazaarLogger.of(ItemsData.class);
+
     private static boolean SKYBLOCK_REPO_READY = false;
     private static final Map<String, ItemStack> RESOLVED_CACHE = new HashMap<>();
     private static volatile List<ItemStack> SKYBLOCK_ITEMS_CACHE = List.of();
@@ -30,6 +33,7 @@ public final class ItemsData {
 
         CompletableFuture.runAsync(() -> {
             SKYBLOCK_ITEMS_CACHE = buildSkyBlockItems();
+            LOG.info("SkyBlock items cache built — {} items", SKYBLOCK_ITEMS_CACHE.size());
         });
     }
 
