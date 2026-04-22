@@ -8,7 +8,7 @@ import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.ChatOrderParser;
@@ -36,7 +36,6 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @DataSource
 public final class OrderPlacedDataSource extends BUListener {
-
     public OrderPlacedDataSource() {}
 
     @Subscription
@@ -52,7 +51,7 @@ public final class OrderPlacedDataSource extends BUListener {
     private void applyPlacement(OrderInfo info, long receivedAt) {
         var storage = UserOrdersStorage.INSTANCE.get();
         if (storage == null) {
-            Util.notifyError("Failed to source order placement; (ProfileStorage) Orders storage was not loaded.", new Throwable());
+            PlayerLogger.sendError("Order placement skipped — profile storage not loaded", new Throwable());
 
             return;
         }
@@ -85,6 +84,6 @@ public final class OrderPlacedDataSource extends BUListener {
         new UserOrderEvent.Placed(reindexedPlaced).post(EVENT_BUS);
         new BazaarDataUpdateEvent(info.getProductId(), source).post(EVENT_BUS);
 
-        PlayerActionUtil.notifyAll(source.describe() + " | " + reindexedPlaced.describe(), NotificationType.BAZAARDATA);
+        PlayerLogger.debug("%s — Placed: %s".formatted(source.describe(), reindexedPlaced.describe()), NotificationType.ORDER_LIFECYCLE);
     }
 }
