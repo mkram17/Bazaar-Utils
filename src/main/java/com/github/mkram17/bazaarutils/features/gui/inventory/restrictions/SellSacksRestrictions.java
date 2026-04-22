@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.data.CurrentSellData;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
@@ -22,6 +23,8 @@ import java.util.Set;
 
 @Module
 public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictions.SellSacksState> {
+    private static final BazaarLogger LOG = BazaarLogger.of(SellSacksRestrictions.class);
+
     public record SellSacksState(
             @NotNull
             ItemInfo targetItem,
@@ -62,13 +65,25 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
     @Override
     protected Optional<SellSacksState> makeState(ChestLoadedEvent event) {
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
-        if (context.isEmpty()) return Optional.empty();
+        if (context.isEmpty()) {
+            LOG.warn("SellSacksRestrictions.makeState: no current screen context");
+
+            return Optional.empty();
+        }
 
         Optional<ItemInfo> sellSacksItem = SellablePagesLayout.getSellSacksItem(context.get());
-        if (sellSacksItem.isEmpty()) return Optional.empty();
+        if (sellSacksItem.isEmpty()) {
+            LOG.warn("SellSacksRestrictions.makeState: no sell sacks item in layout for screen '{}'", context.get());
+
+            return Optional.empty();
+        }
 
         SellSacksParser.SellSacksResult result = CurrentSellData.SellSacks.getResult();
-        if (result == null) return Optional.empty();
+        if (result == null) {
+            LOG.warn("SellSacksRestrictions.makeState: CurrentSellData.SellSacks result is null — data not yet parsed");
+
+            return Optional.empty();
+        }
 
         Set<RestrictionControl<?>> triggered = new LinkedHashSet<>(getRestrictors().stream()
                 .filter(control -> control.anyMatch(result.items()))

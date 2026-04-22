@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.data.CurrentSellData;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
@@ -22,6 +23,8 @@ import java.util.Set;
 
 @Module
 public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestrictions.InstantSellState> {
+    private static final BazaarLogger LOG = BazaarLogger.of(InstantSellRestrictions.class);
+
     public record InstantSellState(
             @NotNull
             ItemInfo targetItem,
@@ -62,13 +65,25 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
     @Override
     protected Optional<InstantSellState> makeState(ChestLoadedEvent event) {
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
-        if (context.isEmpty()) return Optional.empty();
+        if (context.isEmpty()) {
+            LOG.warn("{}.makeState: no current screen context", name);
+
+            return Optional.empty();
+        }
 
         Optional<ItemInfo> instantSellItem = SellablePagesLayout.getInstantSellItem(context.get());
-        if (instantSellItem.isEmpty()) return Optional.empty();
+        if (instantSellItem.isEmpty()) {
+            LOG.warn("{}.makeState: no instant sell item in layout for screen '{}'", name, context.get());
+
+            return Optional.empty();
+        }
 
         InstantSellParser.InstantSellResult result = CurrentSellData.InstantSell.getResult();
-        if (result == null) return Optional.empty();
+        if (result == null) {
+            LOG.warn("{}.makeState: CurrentSellData.InstantSell result is null — data parse failed", name);
+
+            return Optional.empty();
+        }
 
         Set<RestrictionControl<?>> triggered = new LinkedHashSet<>(getRestrictors().stream()
                 .filter(control -> control.anyMatch(result.items()))

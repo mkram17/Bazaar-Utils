@@ -3,7 +3,10 @@ package com.github.mkram17.bazaarutils.utils.bazaar;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
@@ -31,8 +34,11 @@ import tech.thatgravyboat.skyblockapi.api.item.VisualItemAccessorKt;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionState> extends BUListener implements AbstractItemModifier, LoreModifier {
+    private static final BazaarLogger LOG = BazaarLogger.of(RestrictionHelper.class);
+
     public interface RestrictionState {
         @NotNull
         ItemInfo targetItem();
@@ -84,6 +90,22 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
         state = makeState(event);
         isRestricted = state.map(state -> !state.triggeredRestrictors().isEmpty()).orElse(true);
         clicks = 0;
+
+        if (state.isEmpty()) {
+            LOG.info("{}: makeState returned empty", name);
+        } else {
+            List<RestrictionControl<?>> triggered = state.get().triggeredRestrictors();
+
+            if (triggered.isEmpty()) {
+                PlayerLogger.debug("%s: loaded — no rules triggered, action unrestricted".formatted(name), NotificationType.FEATURE);
+            } else {
+                String rules = triggered.stream()
+                        .map(RestrictionControl::describeRule)
+                        .collect(Collectors.joining(", "));
+
+                PlayerLogger.debug("%s: loaded — restricted by [%s]".formatted(name, rules), NotificationType.FEATURE);
+            }
+        }
     }
 
     @Subscription(inherited = true)
@@ -105,6 +127,8 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
             PlayerActionUtil.notifyAll(getMessage(state.get()));
             retriggerModifier();
             event.cancel();
+        } else if (isRestricted) {
+            LOG.info("%s: override threshold reached (%d) — action proceeding".formatted(name, getClicksOverride()), NotificationType.FEATURE);
         }
     }
 
