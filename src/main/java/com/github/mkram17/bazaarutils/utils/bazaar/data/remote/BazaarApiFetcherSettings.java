@@ -5,5 +5,6 @@ public class BazaarApiFetcherSettings {
     public final long POST_OFFSET_MS = 500;
     public final long STALE_BACKOFF_MS = 750;
     public final long FAILURE_RETRY_MS = 500;
+    public final long FAILURE_ERROR_THRESHOLD = 4;
     public final int STALE_WARNING_THRESHOLD = 5;
 }

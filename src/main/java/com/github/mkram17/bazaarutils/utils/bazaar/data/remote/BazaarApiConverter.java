@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.data.remote;
 
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarApiSnapshotEvent;
 import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.DataSources;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.PriceLevel;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
@@ -11,12 +12,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class BazaarApiConverter {
+    private static final BazaarLogger LOG = BazaarLogger.of(BazaarApiConverter.class);
 
     public static BazaarApiSnapshotEvent convert(SkyBlockBazaarReply reply) {
         long timestamp = ((AccessorSkyBlockBazaarReply) reply).getLastUpdated();
         DataSources source = new DataSources.ApiSnapshot(timestamp);
 
-        Map<String, Map.Entry<List<PriceLevel>, List<PriceLevel>>> batch = transformProducts(reply.getProducts(), timestamp, source);
+        Map<String, SkyBlockBazaarReply.Product> products = reply.getProducts();
+
+        LOG.debug("Converting API reply — ts={} products={}", timestamp, products != null ? products.size() : 0);
+
+        Map<String, Map.Entry<List<PriceLevel>, List<PriceLevel>>> batch = transformProducts(products, timestamp, source);
 
         return new BazaarApiSnapshotEvent(batch, timestamp);
     }
