@@ -15,7 +15,17 @@ public final class MetadataConfig {
     @ConfigOption.Hidden
     public static String RESOURCES_SHA = "";
 
+    // mod flags \ user communications
+
     @ConfigEntry(id = "is_first_load")
     @ConfigOption.Hidden
     public static boolean IS_FIRST_LOAD = true;
+
+    @ConfigEntry(id = "stash_tip_shown")
+    @ConfigOption.Hidden
+    public static boolean STASH_TIP_SHOWN = false;
+
+    @ConfigEntry(id = "useless_notifications_tip_shown")
+    @ConfigOption.Hidden
+    public static boolean USELESS_NOTIFICATIONS_TIP_SHOWN = false;
 }

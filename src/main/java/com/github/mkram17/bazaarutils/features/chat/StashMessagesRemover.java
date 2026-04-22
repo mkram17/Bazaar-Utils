@@ -1,6 +1,8 @@
 package com.github.mkram17.bazaarutils.features.chat;
 
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
+import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
+import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -25,9 +27,6 @@ public class StashMessagesRemover extends BUListener implements ToggleableFeatur
         return ChatConfig.STASH_MESSAGES_REMOVER_TOGGLE;
     }
 
-    // We need to consider whether we store this to a DataStorage interface or just keep it to a per-boot level
-    public boolean stashPreviouslyClaimed = false;
-
     public StashMessagesRemover() {}
 
     @Subscription
@@ -35,12 +34,15 @@ public class StashMessagesRemover extends BUListener implements ToggleableFeatur
     public void onChat(ChatReceivedEvent.Pre event) {
         String message = event.getText();
 
-        if (message.contains("You picked up") && message.contains("from your material stash") && !stashPreviouslyClaimed) {
-            stashPreviouslyClaimed = true;
+        if (message.contains("You picked up") && message.contains("from your material stash")) {
+            if (!MetadataConfig.STASH_TIP_SHOWN) {
+                MetadataConfig.STASH_TIP_SHOWN = true;
+                ConfigUtil.scheduleConfigSave();
 
-            Util.tickExecuteLater(2, () -> PlayerLogger.send(
-                    "TIP - To claim stash more easily, use the Stash Helper keybind. " +
-                            "To disable stash messages, enable \"Disable Stash Messages\" in the Bazaar Utils config."));
+                Util.tickExecuteLater(2, () -> PlayerLogger.send(
+                        "TIP - To claim stash more easily, use the Stash Helper keybind. " +
+                                "To disable stash messages, enable \"Disable Stash Messages\" in the Bazaar Utils config."));
+            }
             return;
         }
 

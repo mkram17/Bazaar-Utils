@@ -1,6 +1,8 @@
 package com.github.mkram17.bazaarutils.features.chat;
 
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
+import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
+import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -56,9 +58,6 @@ public class UselessBazaarNotificationsRemover extends BUListener implements Tog
         return ChatConfig.USELESS_BAZAAR_NOTIFICATIONS_REMOVER_EXCLUDED_NOTIFICATIONS;
     }
 
-    // We need to consider whether we store this to a DataStorage interface or just keep it to a per-boot level
-    public boolean firstTimeRemoved = true;
-
     public UselessBazaarNotificationsRemover() {}
 
     @Subscription
@@ -68,8 +67,9 @@ public class UselessBazaarNotificationsRemover extends BUListener implements Tog
         String message = event.getText();
         if (!isNotificationUseless(message)) return;
 
-        if (firstTimeRemoved) {
-            firstTimeRemoved = false;
+        if (!MetadataConfig.USELESS_NOTIFICATIONS_TIP_SHOWN) {
+            MetadataConfig.USELESS_NOTIFICATIONS_TIP_SHOWN = true;
+            ConfigUtil.scheduleConfigSave();
 
             Util.tickExecuteLater(2, () -> PlayerLogger.send(
                     "TIP - Useless Bazaar notifications are removed by default! " +

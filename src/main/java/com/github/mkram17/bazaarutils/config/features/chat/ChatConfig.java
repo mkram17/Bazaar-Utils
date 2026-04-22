@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.config.features.chat;
 
-import com.github.mkram17.bazaarutils.features.chat.StashMessagesRemover;
 import com.github.mkram17.bazaarutils.features.chat.UselessBazaarNotificationsRemover;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 
