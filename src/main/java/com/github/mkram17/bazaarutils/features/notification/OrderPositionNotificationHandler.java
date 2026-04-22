@@ -3,9 +3,7 @@ package com.github.mkram17.bazaarutils.features.notification;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderPositionEvent;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.ResourceManager;
-import com.github.mkram17.bazaarutils.utils.SoundUtil;
+import com.github.mkram17.bazaarutils.utils.*;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
@@ -77,7 +75,7 @@ public final class OrderPositionNotificationHandler extends BUListener {
         if (!settings.isEnabled()) return;
 
         if (settings.emitChatMessage) {
-            PlayerActionUtil.notifyAll(message);
+            PlayerLogger.send(message);
         }
 
         if (settings.emitClientSound) {

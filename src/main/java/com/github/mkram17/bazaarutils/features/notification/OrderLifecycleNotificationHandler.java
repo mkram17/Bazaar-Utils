@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.config.features.notification.Notifications
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -69,7 +70,7 @@ public final class OrderLifecycleNotificationHandler extends BUListener {
         if (!settings.isEnabled()) return;
 
         if (settings.emitChatMessage) {
-            PlayerActionUtil.notifyAll(message);
+            PlayerLogger.send(message);
         }
 
         if (settings.emitClientSound) {

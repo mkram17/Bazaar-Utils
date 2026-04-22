@@ -5,11 +5,10 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataBatchUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderPositionEvent;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
@@ -27,7 +26,6 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @Module
 public final class UserOrderPositionHandler extends BUListener {
-
     private final Map<UUID, PricingPosition> lastKnown = new HashMap<>();
 
     public UserOrderPositionHandler() {}
@@ -57,10 +55,22 @@ public final class UserOrderPositionHandler extends BUListener {
 
     private void checkOrder(Order order, List<Order> userOrders) {
         var current = order.position(userOrders).orElse(null);
-        if (current == null) return;
+        if (current == null) {
+            PlayerLogger.debug("%s — no market data, position check skipped".formatted(order.describe()), NotificationType.ORDER_POSITION);
+
+            return;
+        }
 
         var previous = lastKnown.put(order.id(), current);
-        if (current == previous) return;
+        if (current == previous) {
+            if (NotificationType.ORDER_POSITION.isEnabled()) {
+                PlayerLogger.debug("%s — position unchanged (%s)".formatted(order.describe(), current), NotificationType.ORDER_POSITION);
+            }
+
+            return;
+        }
+
+        PlayerLogger.debug("%s — transition: %s → %s".formatted(order.describe(), previous, current), NotificationType.ORDER_POSITION);
 
         new UserOrderPositionEvent(order, previous, current).post(EVENT_BUS);
     }
