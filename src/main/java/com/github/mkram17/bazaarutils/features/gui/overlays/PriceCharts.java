@@ -2,6 +2,8 @@ package com.github.mkram17.bazaarutils.features.gui.overlays;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -36,6 +38,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Module
 public class PriceCharts extends BUListener implements AbstractItemModifier, LoreModifier {
+    private static final BazaarLogger LOG = BazaarLogger.of(PriceCharts.class);
+
     private static final Map<String, Boolean> SHOW_CACHE = new ConcurrentHashMap<>();
 
     @Override
@@ -88,11 +92,18 @@ public class PriceCharts extends BUListener implements AbstractItemModifier, Lor
         if (!appliesTo(stack)) return;
 
         String itemName = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
-        if (!SHOW_CACHE.getOrDefault(itemName, false)) return;
+        if (!SHOW_CACHE.getOrDefault(itemName, false)) {
+            LOG.info("PriceCharts: slot click on '{}' but not in SHOW_CACHE — skipped", itemName);
+
+            return;
+        }
 
         Optional<ProductInfo> info = ProductInfo.fromDisplayName(itemName);
+        if (info.isEmpty()) {
+            PlayerLogger.sendError("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(itemName), new Throwable());
 
-        if (info.isEmpty()) return;
+            return;
+        }
 
         String link = "https://skyblock.finance/items/" + info.get().getProductId();
 
@@ -103,7 +114,7 @@ public class PriceCharts extends BUListener implements AbstractItemModifier, Lor
                 try {
                     net.minecraft.util.Util.getPlatform().openUri(new URI(link));
                 } catch (URISyntaxException ex) {
-                    Util.notifyError("Failed to open skyblock.finance link.", ex);
+                    PlayerLogger.sendError("Failed to open skyblock.finance link", ex);
                 }
             }
             Minecraft.getInstance().setScreen(null);
