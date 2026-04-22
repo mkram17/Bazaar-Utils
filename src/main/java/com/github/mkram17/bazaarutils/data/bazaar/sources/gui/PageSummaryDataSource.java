@@ -7,7 +7,8 @@ import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.PageSummaryParser;
@@ -40,6 +41,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @DataSource
 public final class PageSummaryDataSource extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(PageSummaryDataSource.class);
 
     public PageSummaryDataSource() {}
 
@@ -70,6 +72,8 @@ public final class PageSummaryDataSource extends BUListener {
         boolean changed = data.apply(TransactionType.Side.BUY, result.askLevels(), source);
         changed |= data.apply(TransactionType.Side.SELL, result.bidLevels(), source);
 
+        PlayerLogger.debug("%s: %s — %d buy levels, %d sell levels".formatted(source.describe(), productId, result.askLevels().size(), result.bidLevels().size()), NotificationType.SCREEN_PARSING);
+
         var storage = UserOrdersStorage.INSTANCE.get();
         if (storage != null) {
             var allInferredFills = new ArrayList<Order>();
@@ -96,7 +100,7 @@ public final class PageSummaryDataSource extends BUListener {
                                     if (inferredFilled > order.filledAmount()) {
                                         allInferredFills.add(order.withFill(inferredFilled - order.filledAmount()));
 
-                                        PlayerActionUtil.notifyAll(source.describe() + " | Inferred partial fill (sole order): %s  | snapshotVol=%d inferredFilled=%d".formatted(order.describe(), level.totalVolume(), inferredFilled), NotificationType.BAZAARDATA);
+                                        PlayerLogger.debug("%s — Fill advanced %d → %d (sole order, vol=%d): %s".formatted(source.describe(), order.filledAmount(), inferredFilled, (int) level.totalVolume(), order.describe()), NotificationType.ORDER_LIFECYCLE);
                                     }
                                 });
                     });
@@ -119,8 +123,14 @@ public final class PageSummaryDataSource extends BUListener {
                         .filter(order -> fillIds.contains(order.id()))
                         .forEach(order -> {
                             switch (order.status()) {
-                                case OrderStatus.Filled ignored -> new UserOrderEvent.Filled(order).post(EVENT_BUS);
-                                default -> new UserOrderEvent.PartiallyFilled(order).post(EVENT_BUS);
+                                case OrderStatus.Filled ignored -> {
+                                    new UserOrderEvent.Filled(order).post(EVENT_BUS);
+                                    PlayerLogger.debug("%s — Marked fully filled (inferred): %s".formatted(source.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE);
+                                }
+                                default -> {
+                                    new UserOrderEvent.PartiallyFilled(order).post(EVENT_BUS);
+                                    PlayerLogger.debug("%s — Fill advanced (inferred): %s".formatted(source.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE);
+                                }
                             }
                         });
 
@@ -132,11 +142,7 @@ public final class PageSummaryDataSource extends BUListener {
             new BazaarDataUpdateEvent(productId, source).post(EVENT_BUS);
         }
 
-        PlayerActionUtil.notifyAll(source.describe()
-                        + " | " + productId
-                        + " instant buy="  + bestPrice(data.getBuyBook())
-                        + " instant sell=" + bestPrice(data.getSellBook()),
-                NotificationType.BAZAARDATA);
+        LOG.info("{}: {} buyBook={} sellBook={}", source.describe(), productId, bestPrice(data.getBuyBook()), bestPrice(data.getSellBook()));
     }
 
     private static String bestPrice(NavigableMap<Double, PriceLevel> book) {
