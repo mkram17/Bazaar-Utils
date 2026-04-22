@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.events.bazaar.handlers;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.RegexSwitch;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -23,12 +24,17 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @Module
 public class BazaarChatHandler extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(BazaarChatHandler.class);
 
     @Subscription(priority = Subscription.HIGHEST)
     public void onChat(ChatReceivedEvent.Pre event) {
         String message = Util.stripFormatCodes(event.getComponent().getString());
 
-        if (message.contains("Error")) return;
+        if (message.contains("Error")) {
+            LOG.debug("Chat message filtered (contains 'Error'): {}", message);
+
+            return;
+        }
 
         RegexSwitch.when()
                 .on(ORDER_FLIPPED, BazaarChatHandler::handleBuyOrderFlip)
@@ -48,6 +54,8 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern BUY_ORDER_CREATED = Pattern.compile("Buy Order Setup! (?<amount>[\\d,]+)x (?<item>.+?) for (?<price>[\\d,.]+) coins");
 
     private static void handleBuyOrderCreated(Matcher matcher) {
+        LOG.debug("BUY_ORDER_CREATED — item={} price={} amount={}", matcher.group("item"), matcher.group("price"), matcher.group("amount"));
+
         ChatOrderParser.parseBuyCreated(clean(matcher.group("item")), coins(matcher.group("price")), amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.BuyOrderCreated(order, now())));
     }
@@ -55,6 +63,8 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern SELL_OFFER_CREATED = Pattern.compile("Sell Offer Setup! (?<amount>[\\d,]+)x (?<item>.+?) for (?<price>[\\d,.]+) coins");
 
     private static void handleSellOfferCreated(Matcher matcher) {
+        LOG.debug("SELL_OFFER_CREATED — item={} price={} amount={}", matcher.group("item"), matcher.group("price"), matcher.group("amount"));
+
         ChatOrderParser.parseSellCreated(clean(matcher.group("item")), coins(matcher.group("price")), amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.SellOfferCreated(order, now())));
     }
@@ -62,6 +72,8 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern BUY_ORDER_FILLED = Pattern.compile("Your Buy Order for (?<amount>[\\d,]+)x (?<item>.+?) was filled");
 
     private static void handleFilledBuyOrder(Matcher matcher) {
+        LOG.debug("BUY_ORDER_FILLED — item={} amount={}", matcher.group("item"), matcher.group("amount"));
+
         ChatOrderParser.parseFilled(clean(matcher.group("item")), TransactionType.Side.BUY, amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.BuyOrderFilled(order, now())));
     }
@@ -69,6 +81,8 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern SELL_OFFER_FILLED = Pattern.compile("Your Sell Offer for (?<amount>[\\d,]+)x (?<item>.+?) was filled");
 
     private static void handleFilledSellOffer(Matcher matcher) {
+        LOG.debug("SELL_OFFER_FILLED — item={} amount={}", matcher.group("item"), matcher.group("amount"));
+
         ChatOrderParser.parseFilled(clean(matcher.group("item")), TransactionType.Side.SELL, amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.SellOfferFilled(order, now())));
     }
@@ -76,6 +90,8 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern BUY_ORDER_CLAIMED = Pattern.compile("Claimed (?<amount>[\\d,]+)x (?<item>.+?) worth (?<coins>[\\d,.]+) coins bought for (?<price>[\\d,.]+) each");
 
     private static void handleBuyOrderClaim(Matcher matcher) {
+        LOG.debug("BUY_ORDER_CLAIMED — item={} price={} amount={} coins={}", matcher.group("item"), matcher.group("price"), matcher.group("amount"), matcher.group("coins"));
+
         ChatOrderParser.parseClaimedBuy(clean(matcher.group("item")), coins(matcher.group("price")), amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.BuyOrderClaimed(order, now())));
     }
@@ -83,6 +99,8 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern SELL_OFFER_CLAIMED = Pattern.compile("Claimed (?<coins>[\\d,.]+) coins from selling (?<amount>[\\d,]+)x (?<item>.+?) at (?<price>[\\d,.]+) each");
 
     private static void handleSellOfferClaim(Matcher matcher) {
+        LOG.debug("SELL_OFFER_CLAIMED — item={} price={} amount={} coins={}", matcher.group("item"), matcher.group("price"), matcher.group("amount"), matcher.group("coins"));
+
         ChatOrderParser.parseClaimedSell(clean(matcher.group("item")), coins(matcher.group("coins")), amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.SellOfferClaimed(order, now())));
     }
@@ -90,6 +108,8 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern INSTANT_BUY = Pattern.compile("Bought (?<amount>[\\d,]+)x (?<item>.+?) for (?<price>[\\d,.]+) coins");
 
     private static void handleInstantBuyAction(Matcher matcher) {
+        LOG.debug("INSTANT_BUY — item={} price={} amount={}", matcher.group("item"), matcher.group("price"), matcher.group("amount"));
+
         ChatOrderParser.parseInstantBuy(clean(matcher.group("item")), coins(matcher.group("price")), amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.InstantBuy(order, now())));
     }
@@ -97,6 +117,8 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern INSTANT_SELL = Pattern.compile("Sold (?<amount>[\\d,]+)x (?<item>.+?) for (?<coins>[\\d,.]+) coins");
 
     private static void handleInstantSellAction(Matcher matcher) {
+        LOG.debug("INSTANT_SELL — item={} amount={} coins={}", matcher.group("item"), matcher.group("amount"), matcher.group("coins"));
+
         ChatOrderParser.parseInstantSell(clean(matcher.group("item")), coins(matcher.group("coins")), amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.InstantSell(order, now())));
     }
@@ -104,12 +126,16 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern BUY_ORDER_CANCELLED = Pattern.compile("Cancelled! Refunded (?<coins>[\\d,.]+) coins from cancelling Buy Order");
 
     private static void handleBuyOrderCancelled(Matcher matcher) {
+        LOG.debug("BUY_ORDER_CANCELLED — coins={}", matcher.group("coins"));
+
         post(new BazaarChatEvent.BuyOrderCancelled(coins(matcher.group("coins")), now()));
     }
 
     private static final Pattern SELL_OFFER_CANCELLED = Pattern.compile("Cancelled! Refunded (?<amount>[\\d,]+)x (?<item>.+?) from cancelling Sell Offer");
 
     private static void handleSellOfferCancelled(Matcher matcher) {
+        LOG.debug("SELL_OFFER_CANCELLED — item={} amount={}", matcher.group("item"), matcher.group("amount"));
+
         ChatOrderParser.parseFilled(clean(matcher.group("item")), TransactionType.Side.SELL, amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.SellOfferCancelled(order, now())));
     }
@@ -117,6 +143,8 @@ public class BazaarChatHandler extends BUListener {
     private static final Pattern ORDER_FLIPPED = Pattern.compile("Order Flipped! (?<amount>[\\d,]+)x (?<item>.+?) for (?<profit>-?[\\d,.]+) coins of total expected profit");
 
     private static void handleBuyOrderFlip(Matcher matcher) {
+        LOG.debug("ORDER_FLIPPED — item={} profit={} amount={}", matcher.group("item"), matcher.group("profit"), matcher.group("amount"));
+
         ChatOrderParser.parseFlipped(clean(matcher.group("item")), coins(matcher.group("profit")), amount(matcher.group("amount")))
                 .ifPresent(order -> post(new BazaarChatEvent.BuyOrderFlipped(order, now())));
     }
