@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
-import com.github.mkram17.bazaarutils.utils.PlayerLogger;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -25,6 +24,8 @@ import java.util.function.Predicate;
 @Getter
 @ToString(callSuper=true)
 public class OrderInfo extends PriceInfo {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrderInfo.class);
+
     /**
      * Maximum per-unit coin inaccuracy Hypixel can introduce in displayed prices.
      */
@@ -88,7 +89,7 @@ public class OrderInfo extends PriceInfo {
         Optional<String> name = Optional.ofNullable(ResourceManager.getProductIdtoNameCache().get(order.productId()));
 
         if (name.isEmpty()) {
-            PlayerLogger.sendError("Could not resolve name for " + order.describe() + " — try /bu updateresources or relaunch the game.", new Throwable());
+            LOG.warn("Name resolution failed for order — productId={}", order.productId());
 
             return Optional.empty();
         }

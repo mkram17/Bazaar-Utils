@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.price;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -29,6 +30,8 @@ import java.util.OptionalInt;
 @Getter
 @ToString
 public class PriceInfo implements ProductInfo {
+    private static final BazaarLogger LOG = BazaarLogger.of(PriceInfo.class);
+
     @NotNull
     private final String productId;
 
@@ -59,7 +62,7 @@ public class PriceInfo implements ProductInfo {
      */
     public static @NotNull OptionalDouble marketPrice(@Nullable String productId, @NotNull TransactionType transaction) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.notifyError("Error querying product data by id \"%s\"".formatted(productId), new Throwable("Product ID is invalid"));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalDouble.empty();
         }
@@ -79,7 +82,7 @@ public class PriceInfo implements ProductInfo {
      */
     public static @NotNull OptionalInt orderCount(@Nullable String productId, @NotNull TransactionType transaction, double pricePerUnit) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.notifyError("Error querying product data by id \"%s\"".formatted(productId), new Throwable("Product ID is invalid"));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalInt.empty();
         }
@@ -95,10 +98,11 @@ public class PriceInfo implements ProductInfo {
 
     public static @NotNull OptionalInt totalVolume(@Nullable String productId, @NotNull TransactionType transaction, double pricePerUnit) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.notifyError("Error querying product data by id \"%s\"".formatted(productId), new Throwable("Product ID is invalid"));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalInt.empty();
         }
+
         var data = BazaarDataRegistry.get(productId);
         if (data == null) return OptionalInt.empty();
 
@@ -116,7 +120,7 @@ public class PriceInfo implements ProductInfo {
      */
     public static OptionalDouble priceForPosition(@Nullable String productId, @NotNull TransactionType transaction, @NotNull PricingPosition position) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.notifyError("Error querying product data by id \"%s\"".formatted(productId), new Throwable("Product ID is invalid"));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalDouble.empty();
         }
@@ -143,7 +147,7 @@ public class PriceInfo implements ProductInfo {
      */
     public static OptionalDouble priceForPosition(@Nullable String productId, @NotNull TransactionType transaction, @NotNull PricingPosition position, @NotNull List<Order> userOrders) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.notifyError("Error querying product data by id \"%s\"".formatted(productId), new Throwable("Product ID is invalid"));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalDouble.empty();
         }
@@ -173,7 +177,7 @@ public class PriceInfo implements ProductInfo {
      */
     public static Optional<PricingPosition> position(@Nullable String productId, @NotNull TransactionType transaction, double pricePerUnit) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.notifyError("Error querying product data by id \"%s\"".formatted(productId), new Throwable("Product ID is invalid"));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return Optional.empty();
         }
