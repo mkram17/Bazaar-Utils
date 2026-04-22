@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.config.features.gui;
 
 import com.github.mkram17.bazaarutils.data.BookmarksStorage;
-import com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks.BookmarkUtil;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount.BuyOrderAmountHelper;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount.InstantBuyAmountHelper;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount.SellOfferAmountHelper;
@@ -14,7 +13,6 @@ import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import lombok.Getter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -113,6 +111,22 @@ public final class ButtonsConfig {
             titleTranslation = "bazaarutils.config.buttons.helpers.category.label"
     )
     public static final class HelpersConfig {
+        @ConfigEntry(
+                id = "fallback_price",
+                translation = "bazaarutils.config.buttons.helpers.fallback_price.label"
+        )
+        @Comment(
+                value = """
+                        Price per item to compute from when the order book is empty.
+
+                        Price helpers will apply their positioning strategy on top of this value.
+                        Amount helpers will use it to estimate how much you can afford.
+                        """,
+                translation = "bazaarutils.config.buttons.helpers.fallback_price.hint"
+        )
+        @ConfigOption.Range(min = 0.1, max = 1_000_000_000.0)
+        public static double HELPERS_FALLBACK_PRICE = 0.3;
+
         @ConfigEntry(id = "buy_related_separator")
         @ConfigOption.Hidden
         @ConfigOption.Separator(

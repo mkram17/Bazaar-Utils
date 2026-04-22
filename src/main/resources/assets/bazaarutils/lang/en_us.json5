@@ -262,6 +262,15 @@
       "helpers.{}": {
         "category.label": "Input Helpers",
 
+        "fallback_price.{}": {
+          "label": "Fallback Price",
+          "hint": [
+            "Price per item to compute from when the order book is empty.\n\n",
+            "Price helpers will apply their positioning strategy on top of this value.\n",
+            "Amount helpers will use it to estimate how much you can afford."
+          ]
+        },
+
         "separator.buy_related.{}": {
           "label": "Buy Helpers",
           "hint": "Helpers that appear when buying stuff off the Bazaar. Configure buttons to auto-fill amounts or prices when instant buying or placing buy orders."
