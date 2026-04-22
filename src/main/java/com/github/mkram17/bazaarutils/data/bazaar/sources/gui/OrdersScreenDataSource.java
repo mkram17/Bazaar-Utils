@@ -7,7 +7,8 @@ import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
 import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.PageOrderParser;
@@ -52,6 +53,8 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @DataSource
 public final class OrdersScreenDataSource extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrdersScreenDataSource.class);
+
     private static final long EVICTION_GRACE_MS = 600;
 
     /**
@@ -139,11 +142,7 @@ public final class OrdersScreenDataSource extends BUListener {
                 .computeIfAbsent(entry.info().getProductId(), k -> new ArrayList<>())
                 .add(entry));
 
-        parsed.forEach(e -> PlayerActionUtil.notifyAll(
-                "[OrdersScreenDataSource] " + e.info().getProductId()
-                        + " → " + e.info().getTransaction().getSide()
-                        + " " + e.info().getVolume() + "x @ " + e.info().getPricePerItem(),
-                NotificationType.BAZAARDATA));
+        LOG.info("Orders screen loaded — {} slots parsed, {} products", parsed.size(), byProduct.size());
 
         // Evict products tracked but entirely absent from the screen.
         storage.stream()
@@ -154,7 +153,8 @@ public final class OrdersScreenDataSource extends BUListener {
                         .filter(order -> order.productId().equals(id))
                         .allMatch(order -> (source.observedAt() - order.lastUpdatedAt()) > EVICTION_GRACE_MS))
                 .forEach(id -> {
-                    PlayerActionUtil.notifyAll("Screen evict (absent): " + id, NotificationType.BAZAARDATA);
+                    PlayerLogger.debug("%s — Evicting product absent from screen: %s".formatted(source.describe(), id), NotificationType.ORDER_LIFECYCLE);
+
                     reconcileProduct(id, List.of(), source);
                 });
 
@@ -203,14 +203,15 @@ public final class OrdersScreenDataSource extends BUListener {
                     if (found != null) {
                         matched.add(found.id());
                         result = new ReconcileResult(reconcileExisting(found, entry, source), found);
+
+                        if (found.lastKnownIndex() != result.order().lastKnownIndex()) {
+                            PlayerLogger.debug("%s — Reanchored slot %d → %d: %s".formatted(source.describe(), found.lastKnownIndex(), result.order().lastKnownIndex(), result.order().describe()), NotificationType.ORDER_LIFECYCLE);
+                        }
                     } else {
                         result = new ReconcileResult(synthesizeNew(entry, productId, source), null);
-                    }
 
-                    PlayerActionUtil.notifyAll(
-                            "Screen anchor: " + result.order().describe()
-                                    + " | slot=" + result.order().lastKnownIndex(),
-                            NotificationType.BAZAARDATA);
+                        PlayerLogger.debug("%s — Synthesized untracked order: %s".formatted(source.describe(), result.order().describe()), NotificationType.ORDER_LIFECYCLE);
+                    }
 
                     return result;
                 })
@@ -221,11 +222,7 @@ public final class OrdersScreenDataSource extends BUListener {
         var preserved = forProduct.stream()
                 .filter(order -> !matched.contains(order.id()))
                 .filter(order -> order.lastUpdatedAt() > source.observedAt())
-                .peek(order -> PlayerActionUtil.notifyAll(
-                        "Screen evict skipped (recent): " + order.describe()
-                                + " | lastUpdatedAt=" + order.lastUpdatedAt()
-                                + " > observedAt=" + source.observedAt(),
-                        NotificationType.BAZAARDATA))
+                .peek(order -> PlayerLogger.debug("%s — Skipped — updated after observation window: %s".formatted(source.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE))
                 .toList();
 
         // Off-screen orders (logicalPos overflowed the visible grid) are UNANCHORED.
@@ -234,7 +231,7 @@ public final class OrdersScreenDataSource extends BUListener {
                 .filter(order -> !matched.contains(order.id()))
                 .filter(order -> order.lastUpdatedAt() <= source.observedAt())
                 .filter(order -> order.lastKnownIndex() == Order.UNANCHORED)
-                .peek(order -> PlayerActionUtil.notifyAll("Screen evict skipped (off-screen; unanchored): %s".formatted(order.describe()), NotificationType.BAZAARDATA))
+                .peek(order -> PlayerLogger.debug("%s — Skipped — off-screen unanchored: %s".formatted(source.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE))
                 .toList();
 
         var evictedResults = new ArrayList<ReconcileResult>();
@@ -248,6 +245,8 @@ public final class OrdersScreenDataSource extends BUListener {
                 .forEach(order -> {
                     if (order.isFilled()) {
                         evictedResults.add(new ReconcileResult(order.withClaim(order.unclaimedFilled()), order));
+
+                        PlayerLogger.debug("%s — Auto-claimed %d units (left screen filled): %s".formatted(source.describe(), order.unclaimedFilled(), order.describe()), NotificationType.ORDER_LIFECYCLE);
                     } else {
                         // Set/Partial disappeared = cancelled. Screen is authoritative.
                         var data = BazaarDataRegistry.get(order.productId());
@@ -257,6 +256,8 @@ public final class OrdersScreenDataSource extends BUListener {
                         }
 
                         evictedResults.add(new ReconcileResult(order.cancelled(), order));
+
+                        PlayerLogger.debug("%s — Cancelled — disappeared from screen: %s".formatted(source.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE);
                     }
                 });
 
@@ -286,6 +287,8 @@ public final class OrdersScreenDataSource extends BUListener {
 
                     data.decrement(result.order().side(), result.original().pricePerItem(), result.original().unfilledAmount(), source);
                     data.place(result.order().side(), result.order().pricePerItem(), result.order().unfilledAmount(), source);
+
+                    PlayerLogger.debug("%s — Price corrected %.4f → %.4f: %s".formatted(source.describe(), result.original().pricePerItem(), result.order().pricePerItem(), result.order().describe()), NotificationType.ORDER_LIFECYCLE);
                 });
 
         // Fill delta — decrement newly-filled volume at unchanged price
@@ -298,7 +301,16 @@ public final class OrdersScreenDataSource extends BUListener {
                     int fillDelta = result.order().filledAmount() - result.original().filledAmount();
 
                     data.decrement(result.order().side(), result.order().pricePerItem(), fillDelta, source);
+
+                    PlayerLogger.debug("%s — Fill advanced %d → %d (Δ%d): %s".formatted(source.describe(), result.original().filledAmount(), result.order().filledAmount(), fillDelta, result.order().describe()), NotificationType.ORDER_LIFECYCLE);
                 });
+
+        if (NotificationType.ORDER_LIFECYCLE.isEnabled()) {
+            int nMatched = (int) results.stream().filter(result -> !result.isNew()).count();
+            int nSynthesized = (int) results.stream().filter(ReconcileResult::isNew).count();
+
+            PlayerLogger.debug("%s — Reconciled %s: %d matched, %d synthesized, %d evicted".formatted(source.describe(), productId, nMatched, nSynthesized, evictedResults.size()), NotificationType.ORDER_LIFECYCLE);
+        }
 
         allResults.forEach(ReconcileResult::postEvents);
         new BazaarDataUpdateEvent(productId, source).post(EVENT_BUS);

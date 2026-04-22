@@ -2,7 +2,8 @@ package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.OrdersPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -29,6 +30,8 @@ import java.util.regex.Pattern;
  * caller and concerns only this parser's output.
  */
 public final class PageOrderParser {
+    private static final BazaarLogger LOG = BazaarLogger.of(PageOrderParser.class);
+
     /**
      * "Order amount: 71,680x" (buy) or "Offer amount: 16x" (sell).
      * Hypixel never abbreviates this line.
@@ -89,21 +92,30 @@ public final class PageOrderParser {
     // ── Public API ────────────────────────────────────────────────────────────
 
     public static List<ParsedEntry> parse(List<ItemInfo> items, int containerSize) {
-        return items.stream()
+        var result = items.stream()
                 .filter(item -> !item.isEmpty())
                 .filter(item -> OrdersPageLayout.isOrderSlot(item.slotIndex(), containerSize))
                 .map(PageOrderParser::parseEntry)
                 .filter(Objects::nonNull)
-                .peek(entry -> PlayerActionUtil.notifyAll(
-                        "Slot#" + entry.item().slotIndex()
-                                + " -> " + entry.info().getProductId()
-                                + " | " + entry.info().getTransaction().getSide()
-                                + " " + entry.info().getVolume() + "x @ " + entry.info().getPricePerItem()
-                                + " | filled=" + entry.filledAmount()
-                                + " | claimable=" + entry.claimableAmount()
-                                + " | claimed=" + entry.claimedAmount(),
-                        NotificationType.ORDERDATA))
                 .toList();
+
+        if (NotificationType.SCREEN_PARSING.isEnabled()) {
+            for (var entry : result) {
+                PlayerLogger.debug(
+                        "Slot#%d → %s %s %dx @ %.4f | filled=%d claimable=%d claimed=%d".formatted(
+                                entry.item().slotIndex(),
+                                entry.info().getProductId(),
+                                entry.info().getTransaction().getSide(),
+                                entry.info().getVolume(),
+                                entry.info().getPricePerItem(),
+                                entry.filledAmount(),
+                                entry.claimableAmount(),
+                                entry.claimedAmount()),
+                        NotificationType.SCREEN_PARSING);
+            }
+        }
+
+        return result;
     }
 
     // ── Parsing ───────────────────────────────────────────────────────────────
@@ -111,18 +123,16 @@ public final class PageOrderParser {
     private static @Nullable ParsedEntry parseEntry(ItemInfo item) {
         var name = item.itemStack().getCustomName();
         if (name == null) {
-            PlayerActionUtil.notifyAll(
-                    "Slot#" + item.slotIndex() + " -> null name (unexpected after slot filter)",
-                    NotificationType.BAZAARDATA);
+            LOG.warn("Slot#{} → null custom name (unexpected after slot filter)", item.slotIndex());
+
             return null;
         }
 
         TransactionType.Side side = parseSide(name);
         if (side == null) {
             // All decoration slots are pre-filtered — null side here means Hypixel changed the format.
-            PlayerActionUtil.notifyAll(
-                    "Slot#" + item.slotIndex() + " -> null side (unexpected after slot filter)",
-                    NotificationType.BAZAARDATA);
+            LOG.warn("Slot#{} → null side (unexpected after slot filter) — name='{}'", item.slotIndex(), name.getString());
+
             return null;
         }
 
@@ -164,9 +174,8 @@ public final class PageOrderParser {
         }
 
         if (totalStr == null || priceStr == null) {
-            PlayerActionUtil.notifyAll("Slot#" + item.slotIndex() + " -> pattern miss | lore="
-                            + lore.stream().map(Component::getString).filter(s -> !s.isBlank()).toList(),
-                    NotificationType.BAZAARDATA);
+            LOG.warn("Slot#{} → pattern miss — lore={}", item.slotIndex(), lore.toString());
+
             return null;
         }
 
@@ -181,7 +190,8 @@ public final class PageOrderParser {
 
         Optional<OrderInfo> info = OrderInfo.of(itemName, side, price, totalAmount);
         if (info.isEmpty()) {
-            PlayerActionUtil.notifyAll("Slot#" + item.slotIndex() + " -> OrderInfo resolution failed for '" + itemName + "'", NotificationType.BAZAARDATA);
+            LOG.warn("Slot#{} → name resolution failed for '{}'", item.slotIndex(), itemName);
+            PlayerLogger.send("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(itemName));
 
             return null;
         }
