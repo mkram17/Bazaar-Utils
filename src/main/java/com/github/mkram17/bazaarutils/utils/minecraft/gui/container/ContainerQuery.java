@@ -71,7 +71,7 @@ public class ContainerQuery {
         }));
     }
 
-    public Optional<ItemStack> first(Container inventory) {
+    public Optional<ItemInfo> first(Container inventory) {
         int invSize = inventory.getContainerSize();
         int min = Math.max(0, slotRange.min().orElse(0));
         int max = Math.min(invSize - 1, slotRange.max().orElse(invSize - 1));
@@ -80,14 +80,14 @@ public class ContainerQuery {
             ItemInfo item = SlotLookup.getInventoryItem(inventory, i);
 
             if (!item.itemStack().isEmpty() && filter.test(item.itemStack())) {
-                return Optional.of(item.itemStack());
+                return Optional.of(item);
             }
         }
 
         return Optional.empty();
     }
 
-    public Optional<ItemStack> first() {
+    public Optional<ItemInfo> first() {
         Optional<Container> inventory = ScreenManager.getScreenContainer();
         if (inventory.isEmpty()) return Optional.empty();
 

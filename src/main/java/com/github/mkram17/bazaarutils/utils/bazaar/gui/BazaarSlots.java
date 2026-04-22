@@ -13,10 +13,6 @@ public class BazaarSlots {
             SlotLookup.IndexReference ref,
             Function<ContainerQuery, ContainerQuery> builder
     ) {
-        public int resolve(Container container) {
-            return ref.resolve(container);
-        }
-
         public ContainerQuery query(Container container) {
             return builder.apply(ref.query(container));
         }
@@ -25,7 +21,7 @@ public class BazaarSlots {
     @AllArgsConstructor
     public enum OVERVIEW_PAGE {
         SELL_INVENTORY(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(47),
+                SlotLookup.IndexReference.fixed(47),
                 (query) -> query
                         .itemType(Items.CHEST)
                         .withCustomName("Sell Inventory Now")
@@ -33,7 +29,7 @@ public class BazaarSlots {
         ),
 
         SELL_SACKS(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(48),
+                SlotLookup.IndexReference.fixed(48),
                 (query) -> query
                         .itemType(Items.CAULDRON)
                         .withCustomName("Sell Sacks Now")
@@ -50,7 +46,7 @@ public class BazaarSlots {
     @AllArgsConstructor
     public enum ITEM_PAGE {
         BUY_INSTANTLY(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(10),
+                SlotLookup.IndexReference.fixed(10),
                 (query) -> query
                         .itemType(Items.GOLDEN_HORSE_ARMOR)
                         .withCustomName("Buy Instantly")
@@ -58,7 +54,7 @@ public class BazaarSlots {
         ),
 
         SELL_INSTANTLY(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(11),
+                SlotLookup.IndexReference.fixed(11),
                 (query) -> query
                         .itemType(Items.HOPPER)
                         .withCustomName("Sell Instantly")
@@ -66,12 +62,12 @@ public class BazaarSlots {
         ),
 
         ITEM_DISPLAY(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(13),
+                SlotLookup.IndexReference.fixed(13),
                 (query) -> query)
         ),
 
         CREATE_BUY_ORDER(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(15),
+                SlotLookup.IndexReference.fixed(15),
                 (query) -> query
                         .itemType(Items.FILLED_MAP)
                         .withCustomName("Create Buy Order")
@@ -79,7 +75,7 @@ public class BazaarSlots {
         ),
 
         CREATE_SELL_OFFER(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(16),
+                SlotLookup.IndexReference.fixed(16),
                 (query) -> query
                         .itemType(Items.MAP)
                         .withCustomName("Create Sell Offer")
@@ -87,7 +83,7 @@ public class BazaarSlots {
         ),
 
         SELL_SACKS(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(29),
+                SlotLookup.IndexReference.fixed(29),
                 (query) -> query
                         .itemType(Items.CAULDRON)
                         .withCustomName("Sell Sacks Now")
@@ -95,7 +91,7 @@ public class BazaarSlots {
         ),
 
         VIEW_GRAPHS(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(33),
+                SlotLookup.IndexReference.fixed(33),
                 (query) -> query
                         .itemType(Items.PAPER)
                         .withCustomName("View Graphs")
@@ -113,7 +109,7 @@ public class BazaarSlots {
     public enum ITEMS_GROUP_PAGE {
         SELL_INVENTORY(
                 new BazaarSlot(
-                        new SlotLookup.IndexReference.ContainerSizeNegativeOffset(6),
+                        SlotLookup.IndexReference.negativeOffset(6),
                         (query) -> query
                                 .itemType(Items.CHEST)
                                 .withCustomName("Sell Inventory Now")
@@ -121,7 +117,7 @@ public class BazaarSlots {
         ),
 
         SELL_SACKS(new BazaarSlot(
-                new SlotLookup.IndexReference.ContainerSizeNegativeOffset(2),
+                SlotLookup.IndexReference.negativeOffset(2),
                 (query) -> query
                         .itemType(Items.CAULDRON)
                         .withCustomName("Sell Sacks Now")
@@ -129,7 +125,7 @@ public class BazaarSlots {
         ),
 
         SWITCH_VIEW_MODE(new BazaarSlot(
-                new SlotLookup.IndexReference.ContainerSizeNegativeOffset(1),
+                SlotLookup.IndexReference.negativeOffset(1),
                 (query) -> query
                         .itemType(Items.IRON_ORE, Items.GOLD_ORE)
                         .withCustomName("Advanced Mode", "Direct Mode")
@@ -147,7 +143,7 @@ public class BazaarSlots {
     @AllArgsConstructor
     public enum ORDER_OPTIONS {
         FLIP_FILLED_BUY_ORDER(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(15),
+                SlotLookup.IndexReference.fixed(15),
                 (query) -> query
                         .itemType(Items.NAME_TAG)
                         .withCustomName("Flip Order")
@@ -156,7 +152,7 @@ public class BazaarSlots {
         ),
 
         CANCEL_FILLED_BUY_ORDER (new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(11),
+                SlotLookup.IndexReference.fixed(11),
                 (query) -> query
                         .itemType(Items.RED_TERRACOTTA)
                         .withCustomName("Cancel Order")
@@ -165,7 +161,7 @@ public class BazaarSlots {
         ),
 
         FLIP_UNFILLED_BUY_ORDER(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(15),
+                SlotLookup.IndexReference.fixed(15),
                 (query) -> query
                         .itemType(Items.NAME_TAG)
                         .withCustomName("Flip Order")
@@ -174,7 +170,7 @@ public class BazaarSlots {
         ),
 
         CANCEL_UNFILLED_BUY_ORDER(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(11),
+                SlotLookup.IndexReference.fixed(11),
                 (query) -> query
                         .itemType(Items.GREEN_TERRACOTTA)
                         .withCustomName("Cancel Order")
@@ -183,7 +179,7 @@ public class BazaarSlots {
         ),
 
         CANCEL_SELL_OFFER(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(13),
+                SlotLookup.IndexReference.fixed(13),
                 (query) -> query
                         .itemType(Items.GREEN_TERRACOTTA)
                         .withCustomName("Cancel Order")
@@ -202,7 +198,7 @@ public class BazaarSlots {
     @AllArgsConstructor
     public enum BUY_ORDER {
         INPUT_CUSTOM_AMOUNT(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(16),
+                SlotLookup.IndexReference.fixed(16),
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Amount")
@@ -210,7 +206,7 @@ public class BazaarSlots {
         ),
 
         INPUT_CUSTOM_PRICE(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(16),
+                SlotLookup.IndexReference.fixed(16),
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Price")
@@ -218,7 +214,7 @@ public class BazaarSlots {
         ),
 
         CONFIRM_BUY_ORDER(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(13),
+                SlotLookup.IndexReference.fixed(13),
                 (query) -> query
                         .withCustomName("Buy Order")
                 )
@@ -234,7 +230,7 @@ public class BazaarSlots {
     @AllArgsConstructor
     public enum INSTANT_BUY {
         BUY_INVENTORY(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(14),
+                SlotLookup.IndexReference.fixed(14),
                 (query) -> query
                         .itemType(Items.CHEST)
                         .withCustomName("Fill my inventory!")
@@ -242,7 +238,7 @@ public class BazaarSlots {
         ),
 
         INPUT_FILLING_AMOUNT(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(14),
+                SlotLookup.IndexReference.fixed(14),
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Fill my inventory!")
@@ -250,7 +246,7 @@ public class BazaarSlots {
         ),
 
         INPUT_CUSTOM_AMOUNT(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(16),
+                SlotLookup.IndexReference.fixed(16),
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Amount")
@@ -267,7 +263,7 @@ public class BazaarSlots {
     @AllArgsConstructor
     public enum SELL_OFFER {
         INPUT_CUSTOM_AMOUNT(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(16),
+                SlotLookup.IndexReference.fixed(16),
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Amount")
@@ -275,7 +271,7 @@ public class BazaarSlots {
         ),
 
         INPUT_CUSTOM_PRICE(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(16),
+                SlotLookup.IndexReference.fixed(16),
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Price")
@@ -283,7 +279,7 @@ public class BazaarSlots {
         ),
 
         CONFIRM_SELL_OFFER(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(13),
+                SlotLookup.IndexReference.fixed(13),
                 (query) -> query
                         .withCustomName("Sell Offer")
                 )
@@ -299,7 +295,7 @@ public class BazaarSlots {
     @AllArgsConstructor
     public enum INSTANT_SELL_ITEM {
         SELL_INVENTORY(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(15),
+                SlotLookup.IndexReference.fixed(15),
                 (query) -> query
                         .itemType(Items.CHEST)
                         .withCustomName("Sell whole inventory!")
@@ -307,7 +303,7 @@ public class BazaarSlots {
         ),
 
         CONFIRM_SELL(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(13),
+                SlotLookup.IndexReference.fixed(13),
                 query -> query
                         .itemType(Items.BARRIER)
                         .withCustomName("WARNING")
@@ -325,7 +321,7 @@ public class BazaarSlots {
     @AllArgsConstructor
     public enum INSTANT_SELL_GROUP {
         CONFIRM_SELL(new BazaarSlot(
-                new SlotLookup.IndexReference.FixedIndex(11),
+                SlotLookup.IndexReference.fixed(11),
                 (query) -> query
                         .itemType(Items.HOPPER)
                         .withCustomName("Selling whole inventory")
