@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.events.screen.handlers.ChestLoadedEventHan
 import lombok.Getter;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -54,7 +55,7 @@ public class ChestLoadedEvent extends SkyBlockEvent {
     /**
      * The container screen that is being displayed.
      */
-    private final AbstractContainerScreen<?> screen;
+    private final AbstractContainerScreen<ChestMenu> screen;
 
     /**
      * The title of the container as a {@link Component}, preserving formatting.
@@ -88,7 +89,7 @@ public class ChestLoadedEvent extends SkyBlockEvent {
     private final List<ItemStack> containerItems;
 
     public ChestLoadedEvent(
-            AbstractContainerScreen<?> screen,
+            AbstractContainerScreen<ChestMenu> screen,
             Component titleComponent,
             String title,
             @Nullable Integer rowCount,

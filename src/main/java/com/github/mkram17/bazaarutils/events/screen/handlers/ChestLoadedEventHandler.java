@@ -58,7 +58,10 @@ public class ChestLoadedEventHandler extends BUListener {
                             .map(Slot::getItem)
                             .toList();
 
-                    new ChestLoadedEvent(container, titleComponent, title, rowCount, slots, containerSlots, containerItems).post(EVENT_BUS);
+                    @SuppressWarnings("unchecked") // if (!(container.getMenu() instanceof ChestMenu chest)) return; asserts this is a chestmenu
+                    AbstractContainerScreen<ChestMenu> typedContainer = (AbstractContainerScreen<ChestMenu>) container;
+
+                    new ChestLoadedEvent(typedContainer, titleComponent, title, rowCount, slots, containerSlots, containerItems).post(EVENT_BUS);
                 } else if (attempts.getAndIncrement() < MAX_ATTEMPTS) {
                     Util.tickExecuteLater(1, this);
                 }
