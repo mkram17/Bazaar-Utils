@@ -10,5 +10,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface OnlyBazaarScreen {
-    BazaarScreenType[] value();
+    BazaarScreenType[] value() default {};
+    boolean all() default false;
 }

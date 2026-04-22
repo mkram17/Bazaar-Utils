@@ -22,6 +22,13 @@ public class BazaarScreenEventPredicateProvider implements EventPredicateProvide
         OnlyBazaarScreen annotation = method.getAnnotation(OnlyBazaarScreen.class);
         if (annotation == null) return null;
 
+        if (annotation.all()) {
+            return (event, context) -> ScreenManager.getInstance().current()
+                    .flatMap(ScreenContext::type)
+                    .map(type -> type instanceof BazaarScreenType)
+                    .orElse(false);
+        }
+
         Set<ScreenType> wanted = Arrays.stream(annotation.value()).collect(Collectors.toSet());
 
         return (event, context) -> {
