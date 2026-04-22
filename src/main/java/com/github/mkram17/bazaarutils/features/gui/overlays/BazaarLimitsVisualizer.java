@@ -6,6 +6,13 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
+import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
+import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
+import com.github.mkram17.bazaarutils.utils.annotations.events.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.codecs.ZonedDateTimeCodec;
 import com.github.mkram17.bazaarutils.data.BazaarLimitsStorage;
@@ -26,9 +33,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 
 @Module
 public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeature {
+    private static final BazaarLogger LOG = BazaarLogger.of(BazaarLimitsVisualizer.class);
+
     private static final double COIN_LIMIT = 15_000_000_000d;
 
     public record OrderLimitEntry(double price, ZonedDateTime time) {
@@ -53,6 +64,24 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
 
     public BazaarLimitsVisualizer() {}
 
+    @Subscription
+    public void onOrderPlaced(UserOrderEvent.Placed event) {
+        addOrderToLimit(event.getOrder().pricePerItem() * event.getOrder().originalAmount());
+    }
+
+    @Subscription
+    public void onInstantBuy(BazaarChatEvent.InstantBuy event) {
+        addOrderToLimit(event.getOrder().getPricePerItem() * event.getOrder().getVolume());
+    }
+
+    // > = less priority, albeit run this whenever
+    @Subscription(priority = Integer.MAX_VALUE)
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(all = true)
+    public void onChestLoaded(ChestLoadedEvent event) {
+        BazaarLimitsVisualizer.removeOldEntries();
+    }
+
     @RunOnInit
     public static void registerBazaarOpen() {
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
@@ -66,29 +95,31 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
 
     public static void addOrderToLimit(double price) {
         if (price > Integer.MAX_VALUE) {
+            LOG.warn("Order price {} exceeds Integer.MAX_VALUE — capping", price);
+
             price = Integer.MAX_VALUE;
         }
 
-        limits().add(new OrderLimitEntry(price, ZonedDateTime.now()));
+        final double finalPrice = price;
 
-        saveLimits();
+        BazaarLimitsStorage.INSTANCE.edit(list -> list.add(new OrderLimitEntry(finalPrice, ZonedDateTime.now())));
+        PlayerLogger.debug("Limit entry added — price=%.0f total=%.0f / %.0f".formatted(finalPrice, getTotalOrderedCoins(), COIN_LIMIT), NotificationType.FEATURE);
     }
 
     public static void removeOldEntries() {
-        limits()
-                .stream()
-                .filter((entry) -> entry.time().isBefore(TimeUtil.LAST_BAZAAR_LIMIT_RESET_TIME))
-                .toList()
-                .forEach(limits()::remove);
-
-        saveLimits();
+        BazaarLimitsStorage.INSTANCE.edit(list -> {
+            int before = list.size();
+            list.removeIf(entry -> entry.time().isBefore(TimeUtil.LAST_BAZAAR_LIMIT_RESET_TIME));
+            int removed = before - list.size();
+            if (removed > 0) LOG.debug("Removed {} stale limit entries — {} remaining", removed, list.size());
+        });
     }
 
     private static double getTotalOrderedCoins() {
-        return limits()
-                .stream()
-                .mapToDouble(OrderLimitEntry::price)
-                .sum();
+        var list = BazaarLimitsStorage.INSTANCE.get();
+        if (list == null) return 0.0;
+
+        return list.stream().mapToDouble(OrderLimitEntry::price).sum();
     }
 
     private static final int TEXT_HEIGHT = 8;
@@ -103,7 +134,11 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
         }
 
         var dimensions = WidgetManager.getScreenDimensions(BazaarScreenType.MAIN_PAGE);
-        if (dimensions.isEmpty()) return Collections.emptyList();
+        if (dimensions.isEmpty()) {
+            LOG.info("BazaarLimitsVisualizer: no screen dimensions — widget skipped");
+
+            return Collections.emptyList();
+        }
 
         return List.of(createLimitWidget(dimensions.get()), createTimeUntilResetWidget(dimensions.get()));
     }
