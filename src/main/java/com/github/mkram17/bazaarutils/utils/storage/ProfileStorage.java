@@ -1,6 +1,8 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.google.gson.*;
@@ -26,6 +28,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ProfileStorage<T> {
+    private static final BazaarLogger LOG = BazaarLogger.of(ProfileStorage.class);
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Set<ProfileStorage<?>> REQUIRES_SAVE = ConcurrentHashMap.newKeySet();
 
@@ -33,6 +37,7 @@ public class ProfileStorage<T> {
     public static final class Listener extends BUListener {
         @Subscription(priority = Integer.MIN_VALUE)
         public void onProfileSwitch(ProfileChangeEvent event) {
+            LOG.info("Profile switch → {}", event.getName());
             currentProfile = event.getName();
         }
 
@@ -113,8 +118,12 @@ public class ProfileStorage<T> {
 
     public void delete() {
         if (lastPath == null) return;
-        try { Files.deleteIfExists(lastPath); }
-        catch (IOException e) { Util.logError("Failed to delete " + lastPath, e); }
+        try {
+            Files.deleteIfExists(lastPath);
+            LOG.debug("Deleted {}", DataStorage.DEFAULT_PATH.relativize(lastPath));
+        } catch (IOException exception) {
+            LOG.error("Failed to delete {}", DataStorage.DEFAULT_PATH.relativize(lastPath), exception);
+        }
     }
 
     private void load() {
@@ -127,8 +136,12 @@ public class ProfileStorage<T> {
                 .resolve(fileName + ".json");
 
         if (!Files.exists(lastPath)) {
-            try { Files.createDirectories(lastPath.getParent()); }
-            catch (IOException e) { Util.logError("Failed to create profile data directory", e); }
+            try {
+                Files.createDirectories(lastPath.getParent());
+            } catch (IOException exception) {
+                LOG.error("Failed to create profile data directory — path={}", lastPath, exception);
+            }
+            LOG.info("No existing data for profile={} file={} — initialising defaults", lastProfile, fileName);
             data = defaultData.get();
             saveToSystem();
             return;
@@ -142,14 +155,19 @@ public class ProfileStorage<T> {
             int fileVersion = root.get("@bazaarutils:version").getAsInt();
             JsonElement dataEl = root.get("@bazaarutils:data");
 
+            if (fileVersion < this.version) {
+                LOG.info("Migrating {} profile={} v{} → v{}", fileName, lastProfile, fileVersion, this.version);
+            }
+
             for (int v = fileVersion; v < this.version; v++) {
                 T intermediate = codec.apply(v).parse(JsonOps.INSTANCE, dataEl).getOrThrow();
                 dataEl = codec.apply(v + 1).encodeStart(JsonOps.INSTANCE, intermediate).getOrThrow();
             }
 
             data = codec.apply(this.version).parse(JsonOps.INSTANCE, dataEl).getOrThrow();
-        } catch (Exception e) {
-            Util.logError("Failed to load profile data from " + lastPath + ", using defaults.", e);
+            LOG.info("Loaded {} for profile={} (v{})", fileName, lastProfile, this.version);
+        } catch (Exception exception) {
+            PlayerLogger.sendError("Failed to load saved data for profile " + lastProfile + " (" + fileName + ") — your data may have been reset", exception);
             data = defaultData.get();
             saveToSystem();
         }
@@ -166,8 +184,9 @@ public class ProfileStorage<T> {
             root.addProperty("@bazaarutils:version", version);
             root.add("@bazaarutils:data", encoded);
             Files.writeString(lastPath, GSON.toJson(root), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            Util.logError("Failed to save profile data " + data + " to file", e);
+            LOG.debug("Saved {} for profile={}", fileName, lastProfile);
+        } catch (Exception exception) {
+            PlayerLogger.sendError("Failed to write " + fileName + " for profile " + lastProfile + " — your progress may not be saved", exception);
         }
     }
 }

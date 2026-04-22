@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.mojang.serialization.Codec;
 import com.github.mkram17.bazaarutils.utils.Util;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +12,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class FolderStorage<T> {
+    private static final BazaarLogger LOG = BazaarLogger.of(FolderStorage.class);
+
     private final String folder;
     private final Codec<T> codec;
     private final Map<String, DataStorage<T>> storages = new LinkedHashMap<>();
@@ -54,8 +57,12 @@ public class FolderStorage<T> {
     public void refresh() { storages.clear(); load(); }
 
     private void load() {
-        try { Files.createDirectories(folderPath); }
-        catch (IOException e) { Util.logError("Failed to create folder: " + folderPath, e); return; }
+        try {
+            Files.createDirectories(folderPath);
+        } catch (IOException e) {
+            LOG.error("Failed to create folder storage directory — path={}", folderPath, e);
+            return;
+        }
 
         try (Stream<Path> files = Files.list(folderPath)) {
             files.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".json"))
@@ -67,11 +74,14 @@ public class FolderStorage<T> {
                                     folder + "/" + id, codec
                             ));
                         } catch (Exception e) {
-                            Util.logError("Failed to load folder entry: " + file, e);
+                            LOG.warn("Failed to load folder entry — skipping file={}", file, e);
                         }
                     });
         } catch (IOException e) {
-            Util.logError("Failed to list folder: " + folderPath, e);
+            LOG.error("Failed to list folder storage directory — path={}", folderPath, e);
+            return;
         }
+
+        LOG.info("FolderStorage loaded — folder={} entries={}", folder, storages.size());
     }
 }

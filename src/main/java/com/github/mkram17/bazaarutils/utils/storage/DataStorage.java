@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.google.gson.*;
@@ -23,6 +24,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DataStorage<T> {
+    private static final BazaarLogger LOG = BazaarLogger.of(DataStorage.class);
+
     public static final Path DEFAULT_PATH = FabricLoader.getInstance().getConfigDir()
             .resolve("bazaarutils")
             .resolve("data");
@@ -76,14 +79,22 @@ public class DataStorage<T> {
     public void save() { REQUIRES_SAVE.add(this); }
 
     public void delete() {
-        try { Files.deleteIfExists(path); }
-        catch (IOException e) { Util.logError("Failed to delete " + path, e); }
+        try {
+            Files.deleteIfExists(path);
+            LOG.debug("Deleted {}", DataStorage.DEFAULT_PATH.relativize(path));
+        } catch (IOException e) {
+            LOG.error("Failed to delete {}", DataStorage.DEFAULT_PATH.relativize(path), e);
+        }
     }
 
     private T load(Supplier<T> defaultData) {
         if (!Files.exists(path)) {
-            try { Files.createDirectories(path.getParent()); }
-            catch (IOException e) { Util.logError("Failed to create data directory", e); }
+            try {
+                Files.createDirectories(path.getParent());
+            } catch (IOException e) {
+                LOG.error("Failed to create data directory — path={}", path, e);
+            }
+            LOG.info("No existing data at {} — initialising defaults", path);
             return defaultData.get();
         }
         try {
@@ -94,14 +105,22 @@ public class DataStorage<T> {
             int fileVersion = root.get("@bazaarutils:version").getAsInt();
             JsonElement data = root.get("@bazaarutils:data");
 
+            if (fileVersion < this.version) {
+                LOG.info("Migrating {} v{} → v{}", path.getFileName(), fileVersion, this.version);
+            }
+
             for (int v = fileVersion; v < this.version; v++) {
                 T intermediate = codec.apply(v).parse(JsonOps.INSTANCE, data).getOrThrow();
                 data = codec.apply(v + 1).encodeStart(JsonOps.INSTANCE, intermediate).getOrThrow();
             }
 
-            return codec.apply(this.version).parse(JsonOps.INSTANCE, data).getOrThrow();
+            T result = codec.apply(this.version).parse(JsonOps.INSTANCE, data).getOrThrow();
+
+            LOG.info("Loaded {} (v{})", DataStorage.DEFAULT_PATH.relativize(path), this.version);
+
+            return result;
         } catch (Exception e) {
-            Util.logError("Failed to load " + DEFAULT_PATH.relativize(path) + ", using defaults.", e);
+            LOG.error("Failed to load {} — using defaults", DataStorage.DEFAULT_PATH.relativize(path), e);
 
             return defaultData.get();
         }
@@ -115,8 +134,9 @@ public class DataStorage<T> {
             root.addProperty("@bazaarutils:version", version);
             root.add("@bazaarutils:data", encoded);
             Files.writeString(path, GSON.toJson(root), StandardCharsets.UTF_8);
+            LOG.debug("Saved {} (v{})", DataStorage.DEFAULT_PATH.relativize(path), version);
         } catch (Exception e) {
-            Util.logError("Failed to save " + data + " to file", e);
+            LOG.error("Failed to save {} — data may be lost", DataStorage.DEFAULT_PATH.relativize(path), e);
         }
     }
 }
