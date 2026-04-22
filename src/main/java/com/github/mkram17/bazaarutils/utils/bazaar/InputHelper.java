@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -16,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 public abstract class InputHelper<T> implements ItemButton {
+    protected static final BazaarLogger LOG = BazaarLogger.of(InputHelper.class);
+
     @Getter
     protected String name;
 
@@ -61,7 +64,7 @@ public abstract class InputHelper<T> implements ItemButton {
     @Override
     public Result onButtonClicked(int button) {
         if (state.isEmpty()) {
-            Util.logMessage("Cannot handle action for " + name + ", state is empty.");
+            LOG.warn("Button clicked with no state — action dropped for '{}'", name);
 
             return Result.CANCELLED;
         }
@@ -81,6 +84,8 @@ public abstract class InputHelper<T> implements ItemButton {
         }
 
         state = makeState(event);
+
+        if (state.isEmpty()) LOG.info("{}: makeState returned empty", name);
     }
 
     //    Button stuff
