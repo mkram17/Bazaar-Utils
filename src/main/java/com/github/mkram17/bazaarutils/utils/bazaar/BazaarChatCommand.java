@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.teamresourceful.resourcefulconfig.api.types.info.TooltipProvider;
 import com.teamresourceful.resourcefulconfig.api.types.info.Translatable;
 import net.minecraft.network.chat.Component;
@@ -9,9 +9,9 @@ import java.util.function.Consumer;
 
 public enum BazaarChatCommand implements Translatable, TooltipProvider {
     NONE (args -> {}),
-    OPEN_BAZAAR (args -> PlayerActionUtil.runCommand("bazaar")),
-    OPEN_ORDERS (args -> PlayerActionUtil.runCommand("managebazaarorders")),
-    SEARCH_ITEM (args -> PlayerActionUtil.runCommand(("bz " + String.join(" ", args)).trim()));
+    OPEN_BAZAAR (args -> PlayerLogger.runCommand("bazaar")),
+    OPEN_ORDERS (args -> PlayerLogger.runCommand("managebazaarorders")),
+    SEARCH_ITEM (args -> PlayerLogger.runCommand(("bz " + String.join(" ", args)).trim()));
 
     private final Consumer<String[]> action;
 

@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.utils.*;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -40,7 +41,9 @@ public final class OrderPositionNotificationHandler extends BUListener {
             case COMPETITIVE -> buildCompetitiveMessage(event.getOrder());
         };
 
-        dispatch(settings, message, event.getOrder());
+        boolean withCommand = event.getPosition() == PricingPosition.OUTBID;
+
+        dispatch(settings, message, event.getOrder(), withCommand);
     }
 
     private static MutableComponent buildOutbidMessage(Order order) {
@@ -71,18 +74,20 @@ public final class OrderPositionNotificationHandler extends BUListener {
                 .orElse(Component.empty());
     }
 
-    private void dispatch(NotificationsConfig.NotificationSettings settings, Component message, Order order) {
+    private void dispatch(NotificationsConfig.NotificationSettings settings, Component message, Order order, boolean withCommand) {
         if (!settings.isEnabled()) return;
 
-        if (settings.emitChatMessage) {
-            PlayerLogger.send(message);
-        }
-
-        if (settings.emitClientSound) {
-            SoundUtil.playSound(DEFAULT_SOUND, DEFAULT_VOLUME);
-        }
-
         String name = ResourceManager.getProductIdtoNameCache().getOrDefault(order.productId(), "");
+
+        if (settings.emitChatMessage) {
+            if (withCommand && message instanceof MutableComponent mutable) {
+                PlayerLogger.sendWithCommand(mutable, "bz " + name);
+            } else {
+                PlayerLogger.send(message);
+            }
+        }
+
+        if (settings.emitClientSound) SoundUtil.playSound(DEFAULT_SOUND, DEFAULT_VOLUME);
 
         settings.chatCommand.run(name);
     }
