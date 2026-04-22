@@ -9,7 +9,8 @@ import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.DataSources;
@@ -45,6 +46,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @DataSource
 public final class OrderFlippedDataSource extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrderFlippedDataSource.class);
 
     public OrderFlippedDataSource() {}
 
@@ -52,7 +54,8 @@ public final class OrderFlippedDataSource extends BUListener {
     public void onOrderFlipped(BazaarChatEvent.BuyOrderFlipped event) {
         var storage = UserOrdersStorage.INSTANCE.get();
         if (storage == null) {
-            Util.notifyError("Failed to source order flip; Orders storage was not loaded.", new Throwable());
+            PlayerLogger.sendError("Order flip skipped — profile storage not loaded", new Throwable());
+
             return;
         }
 
@@ -76,10 +79,7 @@ public final class OrderFlippedDataSource extends BUListener {
                 .orElse(null);
 
         if (matchedBuy == null) {
-            Util.notifyError("Failed to find matching buy order | "
-                    + "productId=" + info.getProductId()
-                    + ", flippedVolume=" + flipVolume
-                    + ", profitPerUnit=" + profitPerUnit, new Throwable());
+            PlayerLogger.sendError("Flip match not found — %s vol=%d profitPerUnit=%.4f".formatted(info.getProductId(), flipVolume, profitPerUnit), new Throwable());
 
             return;
         }
@@ -109,7 +109,6 @@ public final class OrderFlippedDataSource extends BUListener {
         new UserOrderEvent.Flipped(reindexedClaimedBuy, reindexedFlipped).post(EVENT_BUS);
         new BazaarDataUpdateEvent(info.getProductId(), source).post(EVENT_BUS);
 
-        PlayerActionUtil.notifyAll(source.describe()
-                + " | " + reindexedFlipped.describe(), NotificationType.BAZAARDATA);
+        PlayerLogger.debug("%s — Flipped %s into %s (profit/unit=%.4f)".formatted(source.describe(), reindexedClaimedBuy.describe(), reindexedFlipped.describe(), profitPerUnit), NotificationType.ORDER_LIFECYCLE);
     }
 }
