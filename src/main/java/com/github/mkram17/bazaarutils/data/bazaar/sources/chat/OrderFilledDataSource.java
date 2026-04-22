@@ -7,8 +7,8 @@ import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.DataSources;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.OrdersPageLayout;
@@ -16,7 +16,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderMatcher;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @DataSource
 public final class OrderFilledDataSource extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrderFilledDataSource.class);
 
     public OrderFilledDataSource() {}
 
@@ -50,7 +50,8 @@ public final class OrderFilledDataSource extends BUListener {
     private void applyFill(OrderInfo info, long receivedAt) {
         var storage = UserOrdersStorage.INSTANCE.get();
         if (storage == null) {
-            Util.notifyError("Failed to source order completion; Orders storage was not loaded.", new Throwable());
+            PlayerLogger.sendError("Order fill skipped — profile storage not loaded", new Throwable());
+
             return;
         }
 
@@ -99,7 +100,6 @@ public final class OrderFilledDataSource extends BUListener {
         new UserOrderEvent.Filled(reindexedCompleted).post(EVENT_BUS);
         new BazaarDataUpdateEvent(info.getProductId(), source).post(EVENT_BUS);
 
-        PlayerActionUtil.notifyAll(source.describe()
-                + " | " + reindexedCompleted.describe(), NotificationType.BAZAARDATA);
+        PlayerLogger.debug("%s — Filled: %s".formatted(source.describe(), reindexedCompleted.describe()), NotificationType.ORDER_LIFECYCLE);
     }
 }
