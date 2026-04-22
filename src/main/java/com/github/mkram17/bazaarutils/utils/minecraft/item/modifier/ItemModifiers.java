@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.events.screen.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsItemModifiers;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
 import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
@@ -44,6 +45,8 @@ import java.util.stream.Stream;
 
 @LateInitModule
 public class ItemModifiers extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(ItemModifiers.class);
+
     public static List<AbstractItemModifier> MODIFIERS;
     public static final WeakHashMap<ItemStack, List<AbstractItemModifier>> MODIFIED_ITEMS = new WeakHashMap<>();
 
@@ -57,6 +60,8 @@ public class ItemModifiers extends BUListener {
                 .map(it -> (AbstractItemModifier) it)
                 .sorted(Comparator.comparingInt(AbstractItemModifier::getPriority))
                 .toList();
+
+        LOG.info("ItemModifiers initialised — {} modifiers registered", MODIFIERS.size());
     }
 
     private static final Set<AbstractItemModifier> DYNAMIC_MODIFIERS = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
