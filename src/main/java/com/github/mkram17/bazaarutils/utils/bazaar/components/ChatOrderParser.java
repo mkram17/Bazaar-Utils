@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
@@ -33,7 +34,7 @@ public final class ChatOrderParser {
         if (now - lastTaxWarningMs < TAX_WARN_COOLDOWN_MS) return;
         lastTaxWarningMs = now;
 
-        Util.notifyError(context + " Run /bu config to fix your Account Upgrade setting.", new Throwable());
+        PlayerLogger.sendError(context + " Run /bu config to fix your Account Upgrade setting.", new Throwable());
     }
 
     private ChatOrderParser() {}
