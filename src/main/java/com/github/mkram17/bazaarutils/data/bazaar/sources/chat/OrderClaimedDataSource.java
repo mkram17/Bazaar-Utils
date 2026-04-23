@@ -17,12 +17,9 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderMatcher;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.stream.Collectors;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
