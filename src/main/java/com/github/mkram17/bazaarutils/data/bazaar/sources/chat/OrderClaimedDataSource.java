@@ -10,6 +10,7 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.ChatOrderParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.DataSources;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -75,7 +76,13 @@ public final class OrderClaimedDataSource extends BUListener {
                         : OrderMatcher.sellClaim(order, info))
                 .toList();
 
-        if (candidates.isEmpty()) return;
+        if (candidates.isEmpty()) {
+            if (side == TransactionType.Side.SELL && storage.stream().anyMatch(order -> order.productId().equals(info.getProductId()) && order.side() == side)) {
+                ChatOrderParser.warnTaxMisconfiguration("Sell claim for %s matched no tracked order.".formatted(info.getProductId()));
+            }
+
+            return;
+        }
 
         Order target = candidates.stream()
                 .filter(order -> OrderMatcher.coversUnclaimedFill(order, info.getVolume()))

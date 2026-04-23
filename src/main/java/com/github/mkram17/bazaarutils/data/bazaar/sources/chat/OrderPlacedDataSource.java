@@ -10,6 +10,7 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.DataSource;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.ChatOrderParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.DataSources;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.OrdersPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -57,6 +58,12 @@ public final class OrderPlacedDataSource extends BUListener {
 
         var source = new DataSources.OrderPlaced(receivedAt);
         TransactionType.Side side = info.getTransaction().getSide();
+
+        if (side == TransactionType.Side.SELL && !Util.isValidHypixelPrice(info.getPricePerItem())) {
+            ChatOrderParser.warnTaxMisconfiguration("Sell order price recovery produced an invalid value (%.5f).".formatted(info.getPricePerItem()));
+
+            return;
+        }
 
         var data = BazaarDataRegistry.getOrCreate(info.getProductId());
 

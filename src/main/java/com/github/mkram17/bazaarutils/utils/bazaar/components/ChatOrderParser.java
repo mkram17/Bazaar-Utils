@@ -25,6 +25,17 @@ import java.util.Optional;
  */
 public final class ChatOrderParser {
 
+    private static volatile long lastTaxWarningMs = 0L;
+    private static final long TAX_WARN_COOLDOWN_MS = 60_000L;
+
+    public static void warnTaxMisconfiguration(String context) {
+        long now = System.currentTimeMillis();
+        if (now - lastTaxWarningMs < TAX_WARN_COOLDOWN_MS) return;
+        lastTaxWarningMs = now;
+
+        Util.notifyError(context + " Run /bu config to fix your Account Upgrade setting.", new Throwable());
+    }
+
     private ChatOrderParser() {}
 
     /** ORDER_CREATED buy: chat gives total coins; per-unit = total ÷ volume. */
@@ -39,7 +50,8 @@ public final class ChatOrderParser {
     public static Optional<OrderInfo> parseSellCreated(String name, double totalCoins, int volume) {
         double tax = BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE.userBazaarTax;
         double postTaxPerUnit = Util.truncateNum(totalCoins / volume);
-        double preTaxPerUnit = Util.truncateNum(postTaxPerUnit / ((100.0 - tax) / 100.0));
+        double rawPreTax = postTaxPerUnit / ((100.0 - tax) / 100.0);
+        double preTaxPerUnit = Util.truncateNum(rawPreTax);
         return OrderInfo.of(name, TransactionType.Side.SELL, preTaxPerUnit, volume);
     }
 
