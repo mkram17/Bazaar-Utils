@@ -215,6 +215,13 @@ public class BazaarSlots {
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Price")
                 )
+        ),
+
+        CONFIRM_BUY_ORDER(new BazaarSlot(
+                new SlotLookup.IndexReference.FixedIndex(13),
+                (query) -> query
+                        .withCustomName("Buy Order")
+                )
         );
 
         public final BazaarSlot slot;
@@ -272,6 +279,13 @@ public class BazaarSlots {
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Price")
+                )
+        ),
+
+        CONFIRM_SELL_OFFER(new BazaarSlot(
+                new SlotLookup.IndexReference.FixedIndex(13),
+                (query) -> query
+                        .withCustomName("Sell Offer")
                 )
         );
 
