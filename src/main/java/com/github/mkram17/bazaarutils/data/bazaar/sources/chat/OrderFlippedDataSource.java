@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.data.bazaar.sources.chat;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.data.CurrentOrderData;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
 import com.github.mkram17.bazaarutils.events.BUListener;
@@ -64,11 +65,14 @@ public final class OrderFlippedDataSource extends BUListener {
         var data = BazaarDataRegistry.get(info.getProductId());
         if (data == null) return;
 
-        var matchedBuy = storage.stream()
-                .filter(Order.forProduct(info.getProductId(), TransactionType.Side.BUY))
+        var matchedBuy = CurrentOrderData.getForOptions()
                 .filter(Order::isFlippable)
-                .filter(order -> OrderMatcher.coversUnclaimedFill(order, flipVolume))
-                .min(Comparator.comparingInt(order -> order.unclaimedFilled() - flipVolume))
+                .filter(Order.forProduct(info.getProductId(), TransactionType.Side.BUY))
+                .or(() -> storage.stream()
+                        .filter(Order.forProduct(info.getProductId(), TransactionType.Side.BUY))
+                        .filter(Order::isFlippable)
+                        .filter(order -> OrderMatcher.coversUnclaimedFill(order, flipVolume))
+                        .min(Comparator.comparingInt(order -> order.unclaimedFilled() - flipVolume)))
                 .orElse(null);
 
         if (matchedBuy == null) {

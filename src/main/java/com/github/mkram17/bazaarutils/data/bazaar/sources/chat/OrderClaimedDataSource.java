@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.data.bazaar.sources.chat;
 
+import com.github.mkram17.bazaarutils.data.CurrentOrderData;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
 import com.github.mkram17.bazaarutils.events.BUListener;
@@ -67,36 +68,43 @@ public final class OrderClaimedDataSource extends BUListener {
         var data = BazaarDataRegistry.get(info.getProductId());
         if (data == null) return;
 
-        var candidates = storage.stream()
+        Order target = CurrentOrderData.getForClaim()
                 .filter(Order::isLive)
                 .filter(Order::isClaimable)
                 .filter(Order.forProduct(info.getProductId(), side))
-                .filter(order -> side == TransactionType.Side.BUY
-                        ? info.isPriceSimilarTo(order.pricePerItem())
-                        : OrderMatcher.sellClaim(order, info))
-                .toList();
+                .orElseGet(() -> {
+                    var candidates = storage.stream()
+                            .filter(Order::isLive)
+                            .filter(Order::isClaimable)
+                            .filter(Order.forProduct(info.getProductId(), side))
+                            .filter(order -> side == TransactionType.Side.BUY
+                                    ? info.isPriceSimilarTo(order.pricePerItem())
+                                    : OrderMatcher.sellClaim(order, info))
+                            .toList();
 
-        if (candidates.isEmpty()) {
-            if (side == TransactionType.Side.SELL && storage.stream().anyMatch(order -> order.productId().equals(info.getProductId()) && order.side() == side)) {
-                ChatOrderParser.warnTaxMisconfiguration("Sell claim for %s matched no tracked order.".formatted(info.getProductId()));
-            }
+                    if (candidates.isEmpty()) {
+                        if (side == TransactionType.Side.SELL && storage.stream().anyMatch(order -> order.productId().equals(info.getProductId()) && order.side() == side)) {
+                            ChatOrderParser.warnTaxMisconfiguration("Sell claim for %s matched no tracked order.".formatted(info.getProductId()));
+                        }
+                        return null;
+                    }
 
-            return;
-        }
+                    return candidates.stream()
+                            .filter(order -> OrderMatcher.coversUnclaimedFill(order, info.getVolume()))
+                            .findFirst()
+                            .orElseGet(() -> candidates.stream()
+                                    .filter(order -> data.positionOf(
+                                            TransactionType.of(side, TransactionType.Method.ORDER),
+                                            order.pricePerItem()) == 0)
+                                    .findFirst()
+                                    .orElseGet(() -> candidates.stream()
+                                            .min(side == TransactionType.Side.BUY
+                                                    ? Comparator.comparingDouble(Order::pricePerItem)
+                                                    : Comparator.comparingDouble(Order::pricePerItem).reversed())
+                                            .orElseThrow()));
+                });
 
-        Order target = candidates.stream()
-                .filter(order -> OrderMatcher.coversUnclaimedFill(order, info.getVolume()))
-                .findFirst()
-                .orElseGet(() -> candidates.stream()
-                        .filter(order -> data.positionOf(
-                                TransactionType.of(side, TransactionType.Method.ORDER),
-                                order.pricePerItem()) == 0)
-                        .findFirst()
-                        .orElseGet(() -> candidates.stream()
-                                .min(side == TransactionType.Side.BUY
-                                        ? Comparator.comparingDouble(Order::pricePerItem)
-                                        : Comparator.comparingDouble(Order::pricePerItem).reversed())
-                                .orElseThrow()));
+        if (target == null) return;
 
         var claimed = UserOrdersStorage.replace(target, t -> t.withClaim(info.getVolume())).orElse(null);
         if (claimed == null) return;

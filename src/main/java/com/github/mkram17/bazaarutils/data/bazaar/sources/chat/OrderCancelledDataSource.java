@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.data.bazaar.sources.chat;
 
+import com.github.mkram17.bazaarutils.data.CurrentOrderData;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
 import com.github.mkram17.bazaarutils.events.BUListener;
@@ -54,12 +55,15 @@ public final class OrderCancelledDataSource extends BUListener {
 
         var source = new DataSources.OrderCancelled(receivedAt);
 
-        var matched = storage.stream()
-                .filter(order -> order.side() == TransactionType.Side.BUY)
+        var matched = CurrentOrderData.getForOptions()
                 .filter(Order::isActive)
-                .filter(order -> OrderMatcher.buyCancel(order, coinsRefunded))
-                .findFirst()
-                .orElse(null);
+                .filter(order -> order.side() == TransactionType.Side.BUY)
+                .or(() -> storage.stream()
+                        .filter(order -> order.side() == TransactionType.Side.BUY)
+                        .filter(Order::isActive)
+                        .filter(order -> OrderMatcher.buyCancel(order, coinsRefunded))
+                        .findFirst()
+                ).orElse(null);
 
         if (matched == null) {
             PlayerActionUtil.notifyAll("Buy cancel skipped — screen already reconciled | coinsRefunded=" + coinsRefunded, NotificationType.BAZAARDATA);
@@ -97,12 +101,15 @@ public final class OrderCancelledDataSource extends BUListener {
         var data = BazaarDataRegistry.get(info.getProductId());
         if (data == null) return;
 
-        var matched = storage.stream()
-                .filter(Order.forProduct(info.getProductId(), TransactionType.Side.SELL))
+        var matched = CurrentOrderData.getForOptions()
                 .filter(Order::isActive)
-                .filter(order -> OrderMatcher.sellCancel(order, info.getVolume()))
-                .findFirst()
-                .orElse(null);
+                .filter(Order.forProduct(info.getProductId(), TransactionType.Side.SELL))
+                .or(() -> storage.stream()
+                        .filter(Order.forProduct(info.getProductId(), TransactionType.Side.SELL))
+                        .filter(Order::isActive)
+                        .filter(order -> OrderMatcher.sellCancel(order, info.getVolume()))
+                        .findFirst()
+                ).orElse(null);
 
         if (matched == null) {
             PlayerActionUtil.notifyAll("Sell cancel skipped — screen already reconciled | productId=" + info.getProductId(), NotificationType.BAZAARDATA);
