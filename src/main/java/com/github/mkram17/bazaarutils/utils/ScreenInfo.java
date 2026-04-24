@@ -40,7 +40,10 @@ public class ScreenInfo {
         INDIVIDUAL_ITEM(info -> {
             String name = info.getContainerName();
             if (name == null || !name.contains("➜")) return false;
-            return GUIUtils.getChestItem(33).getItem().equals(Items.PAPER);
+            var item = GUIUtils.getChestItem(33);
+            if (item == null || item.getCustomName() == null) return false;
+
+            return item.getCustomName().getString().equals("View Graphs");
         });
 
         @Getter
