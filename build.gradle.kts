@@ -213,7 +213,7 @@ publishMods {
         projectId = "c4u7nzUZ"
         minecraftVersions.add(mcVersion)
 
-        requires("fabric-api", "resourcefulconfig")
+        requires("fabric-api", "resourceful-config")
         optional("modmenu")
     }
     github {
