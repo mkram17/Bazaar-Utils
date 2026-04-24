@@ -1,1 +1,1 @@
- - Fix "failed to parse order data from chat" error
+ - Fix bug causing the Mining page to be detected as an item page
