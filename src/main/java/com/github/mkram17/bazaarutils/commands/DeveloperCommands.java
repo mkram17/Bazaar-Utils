@@ -2,11 +2,13 @@ package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.Command;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.PriceLevel;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -41,7 +43,8 @@ public final class DeveloperCommands implements BUCommand {
             new InfoCommand(),
             new OutdatedCommand(),
             new ConvertNameCommand(),
-            new ListCommand()
+            new ListCommand(),
+            new RegistryCommand()
     );
 
     @Override
@@ -221,6 +224,128 @@ public final class DeveloperCommands implements BUCommand {
             }
 
             return 1;
+        }
+    }
+
+    private static final class RegistryCommand implements BUCommand {
+        @Getter
+        public final String commandName = "registry";
+
+        @Getter
+        public final Component description = Component.literal("Prints the in-game book view for a product's order book.").withStyle(ChatFormatting.GRAY);
+
+        private static final int DEFAULT_LEVELS = 3;
+        private static final int MAX_LEVELS = 10;
+
+        @Override
+        public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
+            return base.then(
+                    ClientCommandManager.argument("productId", StringArgumentType.word())
+                            // /bu developer registry <productId>
+                            .executes(context -> printBook(context, TransactionType.Side.BUY, 1, DEFAULT_LEVELS))
+                            .then(ClientCommandManager.argument("side", StringArgumentType.word())
+                                    .suggests((context, builder) -> { builder.suggest("buy"); builder.suggest("sell"); return builder.buildFuture(); })
+                                    // /bu developer registry <productId> buy|sell
+                                    .executes(context -> printBook(context, parseSide(context), 1, DEFAULT_LEVELS))
+                                    .then(ClientCommandManager.argument("range", StringArgumentType.word())
+                                            .suggests((context, builder) -> { builder.suggest("1..5"); builder.suggest("1..10"); builder.suggest("3..7"); return builder.buildFuture(); })
+                                            .executes(context -> {
+                                                int[] bounds = parseRange(StringArgumentType.getString(context, "range"));
+
+                                                return printBook(context, parseSide(context), bounds[0], bounds[1]);
+                                            })
+                                    )
+                            )
+            );
+        }
+
+        private static int printBook(CommandContext<FabricClientCommandSource> context, TransactionType.Side side, int from, int to) {
+            if (!isEnabled()) return 0;
+
+            String productId = StringArgumentType.getString(context, "productId");
+            var data = BazaarDataRegistry.get(productId);
+
+            if (data == null) {
+                PlayerActionUtil.notifyAll("No data for: " + productId);
+
+                return 0;
+            }
+
+            var book = data.bookFor(side);
+
+            PlayerActionUtil.notifyAll(Component.literal("Top " + side + " Orders:").withStyle(ChatFormatting.GREEN));
+
+            if (book.isEmpty()) {
+                PlayerActionUtil.notifyAll(Component.literal("(empty)").withStyle(ChatFormatting.GRAY));
+
+                return 1;
+            }
+
+            book.entrySet().stream()
+                    .skip(from - 1)
+                    .limit(to - from + 1)
+                    .forEach(entry -> PlayerActionUtil.notifyAll(formatLevel(entry.getKey(), entry.getValue())));
+
+            return 1;
+        }
+
+        /** Mirrors the NBT lore coloring exactly, with source appended in dark_gray. */
+        private static Component formatLevel(double price, PriceLevel level) {
+            int orders = level.orderCount();
+            String volume = String.format("%,d", level.totalVolume());
+            String quantifier = orders == 1 ? "order" : "orders";
+
+            return Component.literal(formatPrice(price) + " coins ").withStyle(ChatFormatting.GOLD)
+                    .append(Component.literal("each | ").withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(volume).withStyle(ChatFormatting.GREEN))
+                    .append(Component.literal("x ").withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal("in ").withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(orders + " ").withStyle(ChatFormatting.WHITE))
+                    .append(Component.literal(quantifier).withStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(" [" + level.source().describe() + "]").withStyle(ChatFormatting.DARK_GRAY));
+        }
+
+
+        private static String formatPrice(double price) {
+            if (price == Math.floor(price)) return String.format("%,.0f", price);
+
+            long whole = (long) price;
+
+            return String.format("%,d", whole) + String.format("%.1f", price - whole).substring(1);
+        }
+
+        /**
+         * Parses a range string into a [from, to] pair (both 1-based inclusive).
+         * Accepts:
+         *   "3..10"  → [3, 10]
+         *   "..5"    → [1, 5]
+         *   "3.."    → [3, MAX_LEVELS]
+         *   "5"      → [5, 5]
+         */
+        private static int[] parseRange(String raw) {
+            if (raw.contains("..")) {
+                String[] parts = raw.split("\\.\\.", -1);
+
+                int from = parts[0].isBlank() ? 1 : Math.max(1, Integer.parseInt(parts[0]));
+                int to = parts[1].isBlank() ? MAX_LEVELS : Math.min(MAX_LEVELS, Integer.parseInt(parts[1]));
+
+                if (from > to) {
+                    int tmp = from; from = to; to = tmp; // swap if inverted
+                }
+
+                return new int[]{from, to};
+            }
+
+            int n = Math.clamp(Integer.parseInt(raw), 1, MAX_LEVELS);
+
+            return new int[]{n, n};
+        }
+
+        private static TransactionType.Side parseSide(CommandContext<FabricClientCommandSource> ctx) {
+            return switch (StringArgumentType.getString(ctx, "side").toLowerCase()) {
+                case "sell", "s" -> TransactionType.Side.SELL;
+                default          -> TransactionType.Side.BUY;
+            };
         }
     }
 }
