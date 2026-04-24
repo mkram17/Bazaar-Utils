@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.data.bazaar.sources.chat;
 
+import com.github.mkram17.bazaarutils.data.CurrentTransactionData;
 import com.github.mkram17.bazaarutils.data.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
 import com.github.mkram17.bazaarutils.events.BUListener;
@@ -40,12 +41,12 @@ public final class OrderPlacedDataSource extends BUListener {
 
     @Subscription
     public void onBuyOrderCreated(BazaarChatEvent.BuyOrderCreated event) {
-        applyPlacement(event.getOrder(), event.getReceivedAt());
+        applyPlacement(CurrentTransactionData.consume().orElseGet(event::getOrder), event.getReceivedAt());
     }
 
     @Subscription
     public void onSellOfferCreated(BazaarChatEvent.SellOfferCreated event) {
-        applyPlacement(event.getOrder(), event.getReceivedAt());
+        applyPlacement(CurrentTransactionData.consume().orElseGet(event::getOrder), event.getReceivedAt());
     }
 
     private void applyPlacement(OrderInfo info, long receivedAt) {
