@@ -24,7 +24,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,12 +61,7 @@ public class ScreenManager {
         return Optional.empty();
     }
 
-    public record ScreenSnapshot(Screen screen, ScreenType type) {
-        @Override
-        public @NotNull String toString() {
-            return typeLabel(type) + " " + (screen != null ? screen.getClass().getSimpleName() : "null");
-        }
-    }
+    public record ScreenSnapshot(Screen screen, ScreenType type) {}
 
     private static final int MAX_HISTORY = 8;
 
@@ -95,8 +89,8 @@ public class ScreenManager {
 
             // A screen closed. We check whether it is a known overlay which double nulls currentScreen
             instance.expectingServerFollowUp = isFollowUpScreen(prev);
-//            instance.logHistory("CLOSE  " + typeLabel(instance.history.isEmpty() ? null : instance.history.peekFirst().type()));
-            instance.logHistoryCompact("CLOSE");
+            instance.logHistory("CLOSE");
+
             return;
         }
 
@@ -104,8 +98,7 @@ public class ScreenManager {
         // we're starting fresh from the game world, or a server follow-up just arrived.
         if (prev == null && !instance.expectingServerFollowUp && !instance.history.isEmpty()) {
             instance.history.clear();
-//            instance.logHistory("CLEAR  (new session)");
-            instance.logHistoryCompact("CLEAR");
+            instance.logHistory("CLEAR");
         }
         instance.expectingServerFollowUp = false;
 
@@ -127,15 +120,14 @@ public class ScreenManager {
         ContainerScreen screen = event.getGenericContainerScreen();
         ScreenType resolved = matchType(screen).orElse(null);
 
-        List<ScreenSnapshot> list = new ArrayList<>(instance.history);
+        List<ScreenSnapshot> list = instance.getHistorySnapshot();
 
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).screen() == screen) {
                 list.set(i, new ScreenSnapshot(screen, resolved));
                 instance.history.clear();
                 instance.history.addAll(list);
-//                instance.logHistory("LOADED " + typeLabel(resolved));
-                instance.logHistoryCompact("LOADED");
+                instance.logHistory("LOADED");
                 return;
             }
         }
@@ -147,64 +139,26 @@ public class ScreenManager {
         ScreenSnapshot snapshot = new ScreenSnapshot(screen, matchType(screen).orElse(null));
 
         ScreenSnapshot head = history.peekFirst();
-        if (head != null && head.screen() == screen) {
-            if (head.type() == null && snapshot.type() != null) {
-                history.removeFirst();
-                history.addFirst(snapshot);
-//                logHistory("RETYPE " + typeLabel(snapshot.type()));
-                logHistoryCompact("RETYPE");
-            }
-
-            return;
-        }
+        // ScreenEvents.AFTER_INIT fires after setScreen — same screen instance arriving twice is a no-op
+        // we no longer check for a RETYPE op as the cases were we fall to that are generally ones where
+        // we depend on off ContainerQuery, and that solely is handled by #onChestLoaded
+        if (head != null && head.screen() == screen) return;
 
         if (history.size() >= MAX_HISTORY) history.removeLast();
         history.addFirst(snapshot);
-//        logHistory("PUSH   " + typeLabel(snapshot.type()));
-        logHistoryCompact("PUSH");
+        logHistory("PUSH");
     }
 
-//    Useful for debugging, too large as to stream it to the chat.
-//    public void logHistory(String trigger) {
-//        StringBuilder builder = new StringBuilder();
-//        String header = "── " + trigger + " ";
-//        builder.append(header).append("─".repeat(Math.max(0, 72 - header.length()))).append("\n");
-//
-//        if (history.isEmpty()) {
-//            builder.append("  (empty)\n");
-//        } else {
-//            int depth = 0;
-//            for (ScreenSnapshot snapshot : history) {
-//                String pointer = depth == 0 ? "▶" : " ";
-//                String typeStr = typeLabel(snapshot.type());
-//                String screenStr = snapshot.screen() != null
-//                        ? snapshot.screen().getClass().getSimpleName() + "@"
-//                        + Integer.toHexString(System.identityHashCode(snapshot.screen()))
-//                        : "null";
-//
-//                builder.append(String.format("  [%d] %s %-55s %s%n", depth, pointer, typeStr, screenStr));
-//                depth++;
-//            }
-//        }
-//
-//        builder.append("─".repeat(72));
-//        Util.logMessage(builder.toString());
-//    }
-
-    private void logHistoryCompact(String trigger) {
+    private void logHistory(String trigger) {
         if (!NotificationType.GUI.isEnabled()) return;
 
         StringJoiner breadcrumb = new StringJoiner(" › ");
 
         for (ScreenSnapshot snap : history) {
-            breadcrumb.add(snap.type() != null ? snap.type().shortName() : "???");
+            breadcrumb.add(snap.type() != null ? snap.type().name() : "???");
         }
 
         PlayerActionUtil.notifyAll("[" + trigger.strip() + "] " + breadcrumb, NotificationType.GUI);
-    }
-
-    private static String typeLabel(ScreenType type) {
-        return type == null ? "???" : type.asString();
     }
 
     public Optional<ScreenContext> current() {

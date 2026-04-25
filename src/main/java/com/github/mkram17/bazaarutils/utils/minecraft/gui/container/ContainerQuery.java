@@ -22,62 +22,52 @@ public class ContainerQuery {
 
     private final Ints slotRange;
     private final Predicate<ItemStack> filter;
-    private final List<String>      description;
 
-    private ContainerQuery(Ints slotRange, Predicate<ItemStack> filter, List<String> description) {
-        this.slotRange   = slotRange;
-        this.filter      = filter;
-        this.description = List.copyOf(description);
+    private ContainerQuery(Ints slotRange, Predicate<ItemStack> filter) {
+        this.slotRange = slotRange;
+        this.filter = filter;
     }
 
     public static ContainerQuery at(int slot) {
-        return new ContainerQuery(
-                Ints.exactly(slot),
-                item -> true,
-                List.of("slot=" + slot));
+        return new ContainerQuery(Ints.exactly(slot), item -> true);
     }
 
     public static ContainerQuery range(int minInclusive, int maxInclusive) {
-        return new ContainerQuery(
-                Ints.between(minInclusive, maxInclusive),
-                item -> true,
-                List.of("slots=" + minInclusive + ".." + maxInclusive));
+        return new ContainerQuery(Ints.between(minInclusive, maxInclusive), item -> true);
     }
 
     public ContainerQuery itemType(Item... wanted) {
-        String names = java.util.Arrays.stream(wanted)
-                .map(item -> item.toString())
-                .reduce((a, b) -> a + "|" + b)
-                .orElse("none");
-
         return chain(filter.and(stack -> {
             Item item = stack.getItem();
+
             for (Item type : wanted) {
                 if (item == type) return true;
             }
+
             return false;
-        }), "itemType[" + names + "]");
+        }));
     }
 
     public ContainerQuery withCustomName(String... allowed) {
-        String names = String.join("|", allowed);
-
         return chain(filter.and(stack -> {
             Component data = stack.get(DataComponents.CUSTOM_NAME);
+
             if (data != null) {
                 for (String name : allowed) {
                     if (data.getString().contains(name)) return true;
                 }
             }
+
             return false;
-        }), "name[" + names + "]");
+        }));
     }
 
     public ContainerQuery withLore(String lore) {
         return chain(filter.and(stack -> {
             ItemLore data = stack.get(DataComponents.LORE);
+
             return data != null && !TextSearch.findSpanning(data.lines(), lore).isEmpty();
-        }), "lore[" + lore + "]");
+        }));
     }
 
     public Optional<ItemStack> first(Container inventory) {
@@ -119,32 +109,13 @@ public class ContainerQuery {
 
     public List<ItemStack> all() {
         Optional<Container> inventory = ScreenManager.getScreenContainer();
+
         if (inventory.isEmpty()) return new ArrayList<>();
+
         return all(inventory.get());
     }
 
-    public String describe() {
-        if (description.isEmpty()) return "empty";
-
-        if (description.size() == 1) return description.getFirst();
-
-        String slotPart = description.getFirst();
-        String filterPart = description.subList(1, description.size())
-                .stream()
-                .reduce((a, b) -> a + " && " + b)
-                .orElse("");
-
-        return slotPart + " → " + filterPart;
-    }
-
-    @Override
-    public String toString() {
-        return "ContainerQuery{" + describe() + "}";
-    }
-
-    private ContainerQuery chain(Predicate<ItemStack> newFilter, String desc) {
-        List<String> newDesc = new ArrayList<>(description);
-        newDesc.add(desc);
-        return new ContainerQuery(slotRange, newFilter, newDesc);
+    private ContainerQuery chain(Predicate<ItemStack> newFilter) {
+        return new ContainerQuery(slotRange, newFilter);
     }
 }
