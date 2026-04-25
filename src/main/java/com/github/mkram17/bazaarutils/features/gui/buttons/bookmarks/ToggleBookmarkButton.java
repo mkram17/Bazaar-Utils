@@ -5,8 +5,8 @@ import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
@@ -43,7 +43,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
     private Optional<String> resolveCurrentItemName() {
         return ScreenManager.getInstance()
                 .current()
-                .flatMap(BazaarScreenHandler::getDisplayItemName);
+                .flatMap(ProductPageLayout::getDisplayItemName);
     }
 
     @Override
@@ -89,12 +89,12 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
             BookmarkUtil.currentBookmarkOpt = Optional.empty();
         } else {
             ItemStack itemStack = ScreenManager.getInstance().current()
-                    .flatMap(BazaarScreenHandler::getDisplayItem)
+                    .flatMap(ProductPageLayout::getDisplayItem)
                     .map(ItemInfo::itemStack)
                     .orElse(Items.DIAMOND.getDefaultInstance());
 
             String productId = ScreenManager.getInstance().current()
-                    .flatMap(BazaarScreenHandler::getDisplayProductId)
+                    .flatMap(ProductPageLayout::getDisplayProductInfo)
                     .orElse(null);
 
             Bookmark newBookmark = new Bookmark(name, itemStack, productId);

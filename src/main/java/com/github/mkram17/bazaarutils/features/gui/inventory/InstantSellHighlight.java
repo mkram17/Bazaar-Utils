@@ -4,10 +4,10 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -105,16 +105,14 @@ public class InstantSellHighlight extends BUListener implements ToggleableFeatur
     }
 
     private static List<OrderInfo> resolveOrders(ScreenContext context) {
+        var instantSellItem = SellablePageLayout.getInstantSellItem(context).map(ItemInfo::itemStack);
+
         if (context.isAnyOf(BazaarScreens.ITEM_PAGE))
-            return BazaarScreenHandler.getInstantSellItem(context)
-                    .map(ItemInfo::itemStack)
-                    .flatMap(InstantSellParser::parseItemPageOrder)
+            return instantSellItem.flatMap(InstantSellParser::parseItemPageOrder)
                     .map(InstantSellParser.InstantSellResult::items)
                     .orElse(List.of());
 
-        return BazaarScreenHandler.getInstantSellItem(context)
-                .map(ItemInfo::itemStack)
-                .map(InstantSellParser::parseOrders)
+        return instantSellItem.map(InstantSellParser::parseOrders)
                 .map(InstantSellParser.InstantSellResult::items)
                 .orElse(List.of());
     }

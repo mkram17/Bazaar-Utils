@@ -1,23 +1,11 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui;
 
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.chat.Component;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class BazaarScreens {
-    public static final Pattern AMOUNT_PATTERN = Pattern.compile("Amount: (?<amount>[0-9,.]+)x");
-    private static final Pattern SELL_LIMIT_PATTERN = Pattern.compile("Inventory: (?<amount>[0-9,.]+) items");
-    private static final Pattern PURCHASE_LIMIT_PATTERN = Pattern.compile("Buy up to (?<amount>[0-9,.]+)x.");
-
     private static boolean initialized = false;
 
     private BazaarScreens() {}
@@ -181,62 +169,4 @@ public class BazaarScreens {
             INSTANT_SELL_ITEM_CONFIRMATION,
             INSTANT_SELL_GROUP_CONFIRMATION
     );
-
-    public static Optional<Double> findOptionAmount(ItemStack option) {
-        ItemLore lore = option.getComponents().get(DataComponents.LORE);
-
-        if (lore != null) {
-            String joined = lore.lines().stream().map(Component::getString).collect(Collectors.joining((" ")));
-            Matcher matcher = AMOUNT_PATTERN.matcher(joined);
-
-            if (matcher.find()) {
-                try {
-                    return Optional.of(Double.parseDouble(matcher.group("amount").replace(",", "")));
-                } catch(NumberFormatException exception) {
-                    Util.notifyError("Failed to parse the amount specifier from " + option.getCustomName(), exception);
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    public static Optional<Integer> findBuyOrderAmountLimit(ItemStack inputSign) {
-        ItemLore lore = inputSign.getComponents().get(DataComponents.LORE);
-
-        if (lore != null) {
-            String joined = lore.lines().stream().map(Component::getString).collect(Collectors.joining((" ")));
-            Matcher matcher = PURCHASE_LIMIT_PATTERN.matcher(joined);
-
-            if (matcher.find()) {
-                try {
-                    return Optional.of(Integer.parseInt(matcher.group("amount").replace(",", "")));
-                } catch (NumberFormatException exception) {
-                    Util.notifyError("Failed to parse the amount limit specifier from " + inputSign.getCustomName(), exception);
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    // Could be of use, but is not, as generally you cannot hold any further than what the Bazaar would allow you to sell order.
-    public static Optional<Integer> findSellAmountLimit(ItemStack inputSign) {
-        ItemLore lore = inputSign.getComponents().get(DataComponents.LORE);
-
-        if (lore != null) {
-            String joined = lore.lines().stream().map(Component::getString).collect(Collectors.joining((" ")));
-            Matcher matcher = SELL_LIMIT_PATTERN.matcher(joined);
-
-            if (matcher.find()) {
-                try {
-                    return Optional.of(Integer.parseInt(matcher.group("amount").replace(",", "")));
-                } catch (NumberFormatException exception) {
-                    Util.notifyError("Failed to parse the amount limit specifier from " + inputSign.getCustomName(), exception);
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
 }
