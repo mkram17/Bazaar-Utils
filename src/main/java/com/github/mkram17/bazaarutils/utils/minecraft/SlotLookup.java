@@ -42,5 +42,9 @@ public class SlotLookup {
         static IndexReference negativeOffset(int delta) {
             return container -> ContainerQuery.at(container.getContainerSize() - 1 - delta);
         }
+
+        static IndexReference range(int min, int max) {
+            return ignored -> ContainerQuery.range(min, max);
+        }
     }
 }
