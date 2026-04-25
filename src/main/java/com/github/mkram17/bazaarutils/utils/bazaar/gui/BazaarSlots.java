@@ -206,7 +206,7 @@ public class BazaarSlots {
         ),
 
         INPUT_CUSTOM_PRICE(new BazaarSlot(
-                SlotLookup.IndexReference.fixed(16),
+                SlotLookup.IndexReference.range(15, 16),
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Price")
@@ -265,7 +265,7 @@ public class BazaarSlots {
         ),
 
         INPUT_CUSTOM_PRICE(new BazaarSlot(
-                SlotLookup.IndexReference.fixed(16),
+                SlotLookup.IndexReference.range(15, 16),
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Price")
