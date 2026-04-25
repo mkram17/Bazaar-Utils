@@ -174,7 +174,7 @@ publishMods {
     } else {
         "Bazaar Utils v$versionNumber-$releaseChannel.$preReleaseNumber for $mcVersion"
     }
-//    dryRun = true
+    dryRun = true
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")

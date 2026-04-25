@@ -1,2 +1,1 @@
- - Fix "failed to parse order data from chat" error
- - Hopefully fix crash when trying to flip a buy order
+- Fix bug causing the Mining page to be detected as an item page
