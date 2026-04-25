@@ -1,9 +1,9 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -128,7 +128,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         protected abstract AmountStrategy getAmountStrategy();
 
         @Override
-        protected Optional<TransactionState> makeState(ChestLoadedEvent event) {
+        protected Optional<TransactionState> makeState(ContainerLoadedEvent event) {
             Optional<ContainerScreen> container = ScreenManager.getInstance()
                     .current()
                     .flatMap(context -> context.as(ContainerScreen.class));
@@ -312,7 +312,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         }
 
         @Override
-        protected Optional<TransactionState> makeState(ChestLoadedEvent event) {
+        protected Optional<TransactionState> makeState(ContainerLoadedEvent event) {
             Optional<ContainerScreen> container = ScreenManager.getInstance()
                     .current()
                     .flatMap(context -> context.as(ContainerScreen.class));

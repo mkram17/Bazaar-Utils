@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
@@ -35,7 +35,7 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     private transient boolean isRestricted = true;
     private transient Optional<T> state = Optional.empty();
 
-    protected abstract Optional<T> makeState(ChestLoadedEvent event);
+    protected abstract Optional<T> makeState(ContainerLoadedEvent event);
 
     protected void resetState() {
         state = Optional.empty();
@@ -56,7 +56,7 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     }
 
     @EventHandler
-    public void onChestLoaded(ChestLoadedEvent event) {
+    public void onChestLoaded(ContainerLoadedEvent event) {
         if (!(isEnabled() && inCorrectScreen())) {
             resetState();
             return;

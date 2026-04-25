@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -40,12 +40,12 @@ public class OrderUpdater {
     private static final double FILL_TOLERANCE_RATIO = 0.05; //5%
 
     @EventHandler(priority = EventPriority.HIGH)
-    public static void onGUI(ChestLoadedEvent event) {
+    public static void onGUI(ContainerLoadedEvent event) {
         if (!ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
             return;
         }
 
-        lowerChestInventory = event.getLowerChestInventory();
+        lowerChestInventory = event.getContainer();
 
         List<ItemStack> allInventoryStacks = event.getItemStacks();
         List<ItemStack> orderStacks = extractOrderStacks(allInventoryStacks);

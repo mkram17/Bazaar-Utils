@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.inventory;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -81,15 +81,14 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     }
 
     @EventHandler
-    private void onChestLoaded(ChestLoadedEvent event) {
+    private void onChestLoaded(ContainerLoadedEvent event) {
         if (!BazaarUtilsModules.OrderStatusHighlight.isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
             return;
         }
 
-        AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
-        if (screen == null) return;
-
-        event.getItemStacks().forEach(stack -> populateCache(stack, screen));
+        event.getContainerSlots().stream()
+                .map(Slot::getItem)
+                .forEach(stack -> populateCache(stack, event.getContainerSlots()));
     }
 
     private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {

@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -60,7 +60,7 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
     }
 
     @Override
-    protected Optional<SellSacksState> makeState(ChestLoadedEvent event) {
+    protected Optional<SellSacksState> makeState(ContainerLoadedEvent event) {
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
 
         if (context.isEmpty()) return Optional.empty();

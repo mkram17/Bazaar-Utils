@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
@@ -31,7 +31,7 @@ public abstract class InputHelper<T> implements ItemButton {
     @NotNull
     private transient Optional<T> state = Optional.empty();
 
-    protected abstract Optional<T> makeState(ChestLoadedEvent event);
+    protected abstract Optional<T> makeState(ContainerLoadedEvent event);
 
     protected void resetState() {
         state = Optional.empty();
@@ -41,7 +41,7 @@ public abstract class InputHelper<T> implements ItemButton {
         this.name = name;
     }
 
-    public void onChestLoaded(ChestLoadedEvent event) {
+    public void onChestLoaded(ContainerLoadedEvent event) {
         if (!inCorrectScreen()) {
             resetState();
 

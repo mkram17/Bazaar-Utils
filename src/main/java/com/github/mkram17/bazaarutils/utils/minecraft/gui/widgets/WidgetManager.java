@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
@@ -43,8 +43,8 @@ public class WidgetManager {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    private static void onChestLoaded(ChestLoadedEvent event) {
-        Screen screen = event.getGenericContainerScreen();
+    private static void onChestLoaded(ContainerLoadedEvent event) {
+        Screen screen = event.getScreen();
         removeWidgetsFrom(screen);
         addWidgetsTo(screen);
     }

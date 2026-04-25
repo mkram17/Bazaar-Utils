@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.container;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
@@ -19,8 +19,8 @@ import java.util.Optional;
 
 // Utility class for current screen info
 public class ContainerManager {
-    public static void onChestLoaded(ChestLoadedEvent event) {
-        lowerChestInventory = event.getLowerChestInventory();
+    public static void onChestLoaded(ContainerLoadedEvent event) {
+        lowerChestInventory = event.getContainer();
     }
 
     public static String getContainerName() {
@@ -34,14 +34,21 @@ public class ContainerManager {
     }
 
     @Getter
-    private static Container lowerChestInventory = null;
+    @NotNull
+    private static List<Slot> containerSlots = List.of();
 
-    public static int getLowerChestInventorySize() {
-        Container inventory = getLowerChestInventory();
+    @Getter
+    @NotNull
+    private static List<Slot> playerSlots = List.of();
 
-        if (inventory == null) {
-            return -1;
-        }
+    public static void onContainerLoaded(ContainerLoadedEvent event) {
+        screen = event.getScreen();
+        container = event.getContainer();
+        title = event.getTitle();
+        titleComponent = event.getTitleComponent();
+        containerSlots = event.getContainerSlots();
+        playerSlots = event.getPlayerSlots();
+    }
 
         return inventory.getContainerSize();
     }

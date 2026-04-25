@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
@@ -58,7 +58,7 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
     }
 
     @Override
-    protected Optional<InstantSellState> makeState(ChestLoadedEvent event) {
+    protected Optional<InstantSellState> makeState(ContainerLoadedEvent event) {
         Optional<ScreenContext> context = ScreenManager.getInstance().current();
 
         if (context.isEmpty()) return Optional.empty();

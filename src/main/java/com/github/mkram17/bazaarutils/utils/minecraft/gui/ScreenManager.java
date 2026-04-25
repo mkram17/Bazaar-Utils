@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -114,10 +114,10 @@ public class ScreenManager {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private static void onChestLoaded(ChestLoadedEvent event) {
+    private static void onChestLoaded(ContainerLoadedEvent event) {
         ContainerManager.onChestLoaded(event);
 
-        ContainerScreen screen = event.getGenericContainerScreen();
+        AbstractContainerScreen<ChestMenu> screen = event.getScreen();
         ScreenType resolved = matchType(screen).orElse(null);
 
         List<ScreenSnapshot> list = instance.getHistorySnapshot();

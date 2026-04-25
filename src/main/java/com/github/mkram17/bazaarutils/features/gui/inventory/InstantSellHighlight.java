@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.features.gui.inventory;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -77,7 +77,7 @@ public class InstantSellHighlight extends BUListener implements ToggleableFeatur
     }
 
     @EventHandler
-    private void onChestLoaded(ChestLoadedEvent event) {
+    private void onChestLoaded(ContainerLoadedEvent event) {
         colorCache.clear();
 
         if (!isEnabled()) return;
