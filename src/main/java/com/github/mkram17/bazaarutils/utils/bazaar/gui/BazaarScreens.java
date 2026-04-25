@@ -140,7 +140,21 @@ public class BazaarScreens {
             .name("INSTANT_SELL")
             .genericContainer()
             .containerTitle("➜ Inst")
-            .containerQuery("SELL_INVENTORY", BazaarSlots.INSTANT_SELL.SELL_INVENTORY::query)
+            .containerQuery("SELL_INVENTORY", BazaarSlots.INSTANT_SELL_ITEM.SELL_INVENTORY::query)
+            .build();
+
+    public static final ScreenType INSTANT_SELL_ITEM_CONFIRMATION = new ScreenType.Builder()
+            .name("INSTANT_SELL_ITEM_CONFIRMATION")
+            .genericContainer()
+            .containerTitle("Confirm")
+            .containerQuery("CONFIRM_SELL", BazaarSlots.INSTANT_SELL_ITEM.CONFIRM_SELL::query)
+            .build();
+
+    public static final ScreenType INSTANT_SELL_GROUP_CONFIRMATION = new ScreenType.Builder()
+            .name("INSTANT_SELL_GROUP_CONFIRMATION")
+            .genericContainer()
+            .containerTitle("Are you sure?")
+            .containerQuery("CONFIRM_SELL", BazaarSlots.INSTANT_SELL_GROUP.CONFIRM_SELL::query)
             .build();
 
     public static final Set<ScreenType> ALL = Set.of(
@@ -163,7 +177,9 @@ public class BazaarScreens {
             SELL_OFFER_CONFIRMATION,
             SELL_OFFER_OPTIONS,
 
-            INSTANT_SELL
+            INSTANT_SELL,
+            INSTANT_SELL_ITEM_CONFIRMATION,
+            INSTANT_SELL_GROUP_CONFIRMATION
     );
 
     public static Optional<Double> findOptionAmount(ItemStack option) {
