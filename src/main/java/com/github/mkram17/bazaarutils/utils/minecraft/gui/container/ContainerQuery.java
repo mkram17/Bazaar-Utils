@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.container;
 
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
@@ -70,44 +69,46 @@ public class ContainerQuery {
         }));
     }
 
-    public Optional<ItemStack> first(Container inventory) {
+    public Optional<ItemInfo> first(Container inventory) {
         int invSize = inventory.getContainerSize();
         int min = Math.max(0, slotRange.min().orElse(0));
         int max = Math.min(invSize - 1, slotRange.max().orElse(invSize - 1));
 
         for (int i = min; i <= max; i++) {
             ItemInfo item = SlotLookup.getInventoryItem(inventory, i);
+
             if (!item.itemStack().isEmpty() && filter.test(item.itemStack())) {
-                return Optional.of(item.itemStack());
+                return Optional.of(item);
             }
         }
 
         return Optional.empty();
     }
 
-    public Optional<ItemStack> first() {
+    public Optional<ItemInfo> first() {
         Optional<Container> inventory = ScreenManager.getScreenContainer();
         if (inventory.isEmpty()) return Optional.empty();
+
         return first(inventory.get());
     }
 
-    public List<ItemStack> all(Container inventory) {
+    public List<ItemInfo> all(Container inventory) {
         int invSize = inventory.getContainerSize();
         int min = Math.max(0, slotRange.min().orElse(0));
         int max = Math.min(invSize - 1, slotRange.max().orElse(invSize - 1));
-        List<ItemStack> out = new ArrayList<>();
+        List<ItemInfo> out = new ArrayList<>();
 
         for (int i = min; i <= max; i++) {
             ItemInfo item = SlotLookup.getInventoryItem(inventory, i);
             if (!item.itemStack().isEmpty() && filter.test(item.itemStack())) {
-                out.add(item.itemStack());
+                out.add(item);
             }
         }
 
         return out;
     }
 
-    public List<ItemStack> all() {
+    public List<ItemInfo> all() {
         Optional<Container> inventory = ScreenManager.getScreenContainer();
 
         if (inventory.isEmpty()) return new ArrayList<>();
