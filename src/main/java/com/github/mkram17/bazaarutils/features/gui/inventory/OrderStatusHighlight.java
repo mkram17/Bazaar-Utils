@@ -6,7 +6,7 @@ import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
@@ -82,7 +82,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
 
     @EventHandler
     private void onChestLoaded(ChestLoadedEvent event) {
-        if (!BazaarUtilsModules.OrderStatusHighlight.isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
+        if (!BazaarUtilsModules.OrderStatusHighlight.isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
             return;
         }
 
@@ -98,7 +98,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     }
 
     private void onTooltip(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, TooltipFlag type, List<Component> lines) {
-        if (!isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) return;
+        if (!isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) return;
 
         AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
         if (screen == null) return;

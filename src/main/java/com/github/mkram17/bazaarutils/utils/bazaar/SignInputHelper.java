@@ -6,7 +6,7 @@ import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
@@ -144,13 +144,13 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             if (inputSign.isEmpty()) return Optional.empty();
 
             Optional<ItemInfo> productItem = ScreenManager.getInstance()
-                    .findBack(BazaarScreens.ITEM_PAGE)
+                    .findBack(BazaarScreenType.ITEM_PAGE)
                     .flatMap(ProductPageLayout::getDisplayItem);
 
             if (productItem.isEmpty()) return Optional.empty();
 
             Optional<String> productId = ScreenManager.getInstance()
-                    .findBack(BazaarScreens.ITEM_PAGE)
+                    .findBack(BazaarScreenType.ITEM_PAGE)
                     .flatMap(ProductPageLayout::getDisplayProductInfo);
 
             if (productId.isEmpty()) return Optional.empty();
@@ -307,7 +307,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         protected Optional<String> getItemProductId(ItemInfo inputSign) {
             return ScreenManager.getInstance()
-                    .findBack(BazaarScreens.ITEM_PAGE)
+                    .findBack(BazaarScreenType.ITEM_PAGE)
                     .flatMap(ProductPageLayout::getDisplayProductInfo);
         }
 

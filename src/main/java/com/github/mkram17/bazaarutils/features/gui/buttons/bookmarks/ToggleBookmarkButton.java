@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -35,7 +35,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
     }
 
     private boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.ITEM_PAGE);
+        return ScreenManager.getInstance().isCurrent(BazaarScreenType.ITEM_PAGE);
     }
 
     public ToggleBookmarkButton() {}

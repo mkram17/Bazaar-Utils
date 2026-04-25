@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
@@ -72,7 +72,7 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost impleme
 
     @Override
     protected boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.BUY_ORDER_PRICE);
+        return ScreenManager.getInstance().isCurrent(BazaarScreenType.BUY_ORDER_PRICE);
     }
 
     public BuyOrderPriceHelper(int slotIndex, PricingPosition pricingPosition) {

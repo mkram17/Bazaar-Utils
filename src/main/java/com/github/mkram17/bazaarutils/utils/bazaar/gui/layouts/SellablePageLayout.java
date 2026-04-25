@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
@@ -22,26 +22,26 @@ public final class SellablePageLayout {
     private SellablePageLayout() {}
 
     public static Optional<ItemInfo> getInstantSellItem(@NotNull ScreenContext context) {
-        if (context.isAnyOf(BazaarScreens.MAIN_PAGE))
+        if (context.isAnyOf(BazaarScreenType.MAIN_PAGE))
             return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot);
 
-        if (context.isAnyOf(BazaarScreens.ITEM_PAGE))
+        if (context.isAnyOf(BazaarScreenType.ITEM_PAGE))
             return getSlot(context, BazaarSlots.ITEM_PAGE.SELL_INSTANTLY.slot);
 
-        if (context.isAnyOf(BazaarScreens.ITEMS_GROUP_PAGE))
+        if (context.isAnyOf(BazaarScreenType.ITEMS_GROUP_PAGE))
             return getSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_INVENTORY.slot);
 
         return Optional.empty();
     }
 
     public static Optional<ItemInfo> getSellSacksItem(@NotNull ScreenContext context) {
-        if (context.isAnyOf(BazaarScreens.MAIN_PAGE))
+        if (context.isAnyOf(BazaarScreenType.MAIN_PAGE))
             return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot);
 
-        if (context.isAnyOf(BazaarScreens.ITEM_PAGE))
+        if (context.isAnyOf(BazaarScreenType.ITEM_PAGE))
             return getSlot(context, BazaarSlots.ITEM_PAGE.SELL_SACKS.slot);
 
-        if (context.isAnyOf(BazaarScreens.ITEMS_GROUP_PAGE))
+        if (context.isAnyOf(BazaarScreenType.ITEMS_GROUP_PAGE))
             return getSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_SACKS.slot);
 
         return Optional.empty();

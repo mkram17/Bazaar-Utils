@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
@@ -54,7 +54,7 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
 
     @Override
     public boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.MAIN_PAGE, BazaarScreens.ITEM_PAGE, BazaarScreens.ITEMS_GROUP_PAGE);
+        return ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEM_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
 
         if (instantSellItem.isEmpty()) return Optional.empty();
 
-        List<OrderInfo> orders = context.get().isAnyOf(BazaarScreens.ITEM_PAGE)
+        List<OrderInfo> orders = context.get().isAnyOf(BazaarScreenType.ITEM_PAGE)
                 ? InstantSellParser.parseItemPageOrder(instantSellItem.get().itemStack())
                         .map(InstantSellParser.InstantSellResult::items)
                         .orElse(List.of())

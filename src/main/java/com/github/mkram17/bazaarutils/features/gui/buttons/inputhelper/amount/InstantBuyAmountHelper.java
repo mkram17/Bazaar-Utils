@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
@@ -80,7 +80,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
 
     @Override
     protected boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.INSTANT_BUY);
+        return ScreenManager.getInstance().isCurrent(BazaarScreenType.INSTANT_BUY);
     }
 
     public InstantBuyAmountHelper(int slotIndex) {

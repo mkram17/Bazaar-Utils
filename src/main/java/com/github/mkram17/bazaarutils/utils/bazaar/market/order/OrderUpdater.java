@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -41,7 +41,7 @@ public class OrderUpdater {
 
     @EventHandler(priority = EventPriority.HIGH)
     public static void onGUI(ChestLoadedEvent event) {
-        if (!ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
+        if (!ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
             return;
         }
 

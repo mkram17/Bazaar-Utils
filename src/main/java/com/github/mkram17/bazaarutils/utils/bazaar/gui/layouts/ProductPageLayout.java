@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
@@ -24,15 +24,15 @@ public final class ProductPageLayout {
     private ProductPageLayout() {}
 
     public static Optional<ItemInfo> getCreateBuyOrderItem(@NotNull ScreenContext context) {
-        return getIf(context, BazaarScreens.ITEM_PAGE, BazaarSlots.ITEM_PAGE.CREATE_BUY_ORDER.slot);
+        return getIf(context, BazaarScreenType.ITEM_PAGE, BazaarSlots.ITEM_PAGE.CREATE_BUY_ORDER.slot);
     }
 
     public static Optional<ItemInfo> getCreateSellOfferItem(@NotNull ScreenContext context) {
-        return getIf(context, BazaarScreens.ITEM_PAGE, BazaarSlots.ITEM_PAGE.CREATE_SELL_OFFER.slot);
+        return getIf(context, BazaarScreenType.ITEM_PAGE, BazaarSlots.ITEM_PAGE.CREATE_SELL_OFFER.slot);
     }
 
     public static Optional<ItemInfo> getDisplayItem(@NotNull ScreenContext context) {
-        return getIf(context, BazaarScreens.ITEM_PAGE, BazaarSlots.ITEM_PAGE.ITEM_DISPLAY.slot);
+        return getIf(context, BazaarScreenType.ITEM_PAGE, BazaarSlots.ITEM_PAGE.ITEM_DISPLAY.slot);
     }
 
     public static Optional<String> getDisplayItemName(@NotNull ScreenContext context) {

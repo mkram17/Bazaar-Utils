@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
@@ -26,11 +26,11 @@ public final class TransactionPageLayout {
     private TransactionPageLayout() {}
 
     public static Optional<ItemInfo> getConfirmSellOfferItem(@NotNull ScreenContext context) {
-        return getIf(context, BazaarScreens.BUY_ORDER_CONFIRMATION, BazaarSlots.SELL_OFFER.CONFIRM_SELL_OFFER.slot);
+        return getIf(context, BazaarScreenType.BUY_ORDER_CONFIRMATION, BazaarSlots.SELL_OFFER.CONFIRM_SELL_OFFER.slot);
     }
 
     public static Optional<ItemInfo> getConfirmBuyOrderItem(@NotNull ScreenContext context) {
-        return getIf(context, BazaarScreens.BUY_ORDER_CONFIRMATION, BazaarSlots.BUY_ORDER.CONFIRM_BUY_ORDER.slot);
+        return getIf(context, BazaarScreenType.BUY_ORDER_CONFIRMATION, BazaarSlots.BUY_ORDER.CONFIRM_BUY_ORDER.slot);
     }
 
     public static Optional<Double> findOptionAmount(ItemStack option) {

@@ -4,7 +4,7 @@ package com.github.mkram17.bazaarutils.mixin;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -60,7 +60,7 @@ public abstract class MixinAbstractContainerScreen extends Screen {
 	@Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItem(Lnet/minecraft/world/item/ItemStack;III)V"))
 	private void drawOnItem_OrderStatusHighlight(GuiGraphics context, Slot slot, int x, int y, CallbackInfo ci) {
 		if (slot == null || !slot.hasItem() || !BazaarUtilsModules.OrderStatusHighlight.isEnabled()
-				|| !ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
+				|| !ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
 			return;
 		}
 
@@ -75,7 +75,7 @@ public abstract class MixinAbstractContainerScreen extends Screen {
 	@Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItem(Lnet/minecraft/world/item/ItemStack;III)V"))
 	private void drawOnItem_InstantSellHighlight(GuiGraphics context, Slot slot, int x, int y, CallbackInfo ci) {
 		if (slot == null || !slot.hasItem() || !BazaarUtilsModules.InstantSellHighlight.isEnabled()
-				|| !ScreenManager.getInstance().isCurrent(BazaarScreens.MAIN_PAGE, BazaarScreens.ITEMS_GROUP_PAGE, BazaarScreens.ITEM_PAGE)) {
+				|| !ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE)) {
 			return;
 		}
 
