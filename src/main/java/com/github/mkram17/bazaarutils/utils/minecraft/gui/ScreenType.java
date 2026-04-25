@@ -1,11 +1,12 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQuery;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.Container;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.advancements.criterion.MinMaxBounds;
 
@@ -44,7 +45,7 @@ public interface ScreenType extends Predicate<Screen> {
         }
 
         public Builder genericContainer() {
-            return new Builder(concat(chain, new ScreenPredicate("ContainerScreen", screen -> screen instanceof ContainerScreen)), name);
+            return new Builder(concat(chain, new ScreenPredicate("ContainerScreen", screen -> screen instanceof AbstractContainerScreen<?>)), name);
         }
 
         public Builder containerTitle(String fragment) {
@@ -52,34 +53,41 @@ public interface ScreenType extends Predicate<Screen> {
         }
 
         public Builder containerItem(MinMaxBounds.Ints slotRange, Item... wanted) {
-            return new Builder(concat(chain, new ScreenPredicate("ContainerItem", screen -> ContainerQuery
-                    .range(
+            return new Builder(concat(chain, new ScreenPredicate("ContainerItem", screen -> screen instanceof AbstractContainerScreen<?> container
+                    && container.getMenu() instanceof ChestMenu chest
+                    && ContainerQuery.range(
                             slotRange.min().orElse(0),
-                            slotRange.max().orElse(ContainerManager.getLowerChestInventory().getContainerSize() - 1)
+                            slotRange.max().orElse(chest.getContainer().getContainerSize() - 1)
                     )
                     .itemType(wanted)
-                    .first()
+                    .first(chest.getContainer())
                     .isPresent())), name);
         }
+
 
         public Builder containerItem(int slot, Item... wanted) {
             return containerItem(MinMaxBounds.Ints.exactly(slot), wanted);
         }
 
         public Builder containerQuery(ContainerQuery query) {
-            return new Builder(concat(chain, new ScreenPredicate(
-                    "ContainerQuery",
-                    screen -> query.first().isPresent())), name);
+            return new Builder(concat(chain, new ScreenPredicate("ContainerQuery", screen ->
+                    screen instanceof AbstractContainerScreen<?> container
+                            && container.getMenu() instanceof ChestMenu chest
+                            && query.first(chest.getContainer()).isPresent())), name);
         }
 
         public Builder containerQuery(Function<Container, ContainerQuery> builder) {
-            return containerQuery("ContainerQuery", builder);
+            return new Builder(concat(chain, new ScreenPredicate("ContainerQuery", screen ->
+                    screen instanceof AbstractContainerScreen<?> container
+                            && container.getMenu() instanceof ChestMenu chest
+                            && builder.apply(chest.getContainer()).first(chest.getContainer()).isPresent())), name);
         }
 
         public Builder containerQuery(String label, Function<Container, ContainerQuery> builder) {
-            return new Builder(concat(chain, new ScreenPredicate(
-                    "ContainerQuery[%s]".formatted(label),
-                    screen -> builder.apply(ContainerManager.getLowerChestInventory()).first().isPresent())), name);
+            return new Builder(concat(chain, new ScreenPredicate("ContainerQuery[%s]".formatted(label), screen ->
+                    screen instanceof AbstractContainerScreen<?> container
+                            && container.getMenu() instanceof ChestMenu chest
+                            && builder.apply(chest.getContainer()).first(chest.getContainer()).isPresent())), name);
         }
 
         public Builder custom(String label, Predicate<Screen> test) {
