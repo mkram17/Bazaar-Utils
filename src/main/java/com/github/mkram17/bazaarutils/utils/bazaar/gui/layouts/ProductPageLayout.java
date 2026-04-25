@@ -51,7 +51,7 @@ public final class ProductPageLayout {
             @NotNull ScreenContext context,
             ScreenType type,
             BazaarSlots.BazaarSlot slot) {
-        if (!context.isAnyOf(type)) return Optional.empty();
+        if (!context.is(type)) return Optional.empty();
 
         return context.as(ContainerScreen.class)
                 .map(screen -> SlotLookup.getInventoryItem(screen.getMenu().getContainer(), slot));

@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -23,8 +24,8 @@ public final class ScreenContext {
         return Optional.ofNullable(type);
     }
 
-    public boolean matches(ScreenType wanted) {
-        return type != null && type == wanted;
+    public boolean is(@NotNull ScreenType wanted) {
+        return type == wanted;
     }
 
     public <T extends AbstractContainerScreen<?>> Optional<T> as(Class<T> type) {

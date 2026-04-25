@@ -67,7 +67,7 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
 
         if (instantSellItem.isEmpty()) return Optional.empty();
 
-        List<OrderInfo> orders = context.get().isAnyOf(BazaarScreenType.ITEM_PAGE)
+        List<OrderInfo> orders = context.get().is(BazaarScreenType.ITEM_PAGE)
                 ? InstantSellParser.parseItemPageOrder(instantSellItem.get().itemStack())
                         .map(InstantSellParser.InstantSellResult::items)
                         .orElse(List.of())

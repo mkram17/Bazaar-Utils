@@ -107,7 +107,7 @@ public class InstantSellHighlight extends BUListener implements ToggleableFeatur
     private static List<OrderInfo> resolveOrders(ScreenContext context) {
         var instantSellItem = SellablePageLayout.getInstantSellItem(context).map(ItemInfo::itemStack);
 
-        if (context.isAnyOf(BazaarScreenType.ITEM_PAGE))
+        if (context.is(BazaarScreenType.ITEM_PAGE))
             return instantSellItem.flatMap(InstantSellParser::parseItemPageOrder)
                     .map(InstantSellParser.InstantSellResult::items)
                     .orElse(List.of());

@@ -22,26 +22,26 @@ public final class SellablePageLayout {
     private SellablePageLayout() {}
 
     public static Optional<ItemInfo> getInstantSellItem(@NotNull ScreenContext context) {
-        if (context.isAnyOf(BazaarScreenType.MAIN_PAGE))
+        if (context.is(BazaarScreenType.MAIN_PAGE))
             return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot);
 
-        if (context.isAnyOf(BazaarScreenType.ITEM_PAGE))
+        if (context.is(BazaarScreenType.ITEM_PAGE))
             return getSlot(context, BazaarSlots.ITEM_PAGE.SELL_INSTANTLY.slot);
 
-        if (context.isAnyOf(BazaarScreenType.ITEMS_GROUP_PAGE))
+        if (context.is(BazaarScreenType.ITEMS_GROUP_PAGE))
             return getSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_INVENTORY.slot);
 
         return Optional.empty();
     }
 
     public static Optional<ItemInfo> getSellSacksItem(@NotNull ScreenContext context) {
-        if (context.isAnyOf(BazaarScreenType.MAIN_PAGE))
+        if (context.is(BazaarScreenType.MAIN_PAGE))
             return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot);
 
-        if (context.isAnyOf(BazaarScreenType.ITEM_PAGE))
+        if (context.is(BazaarScreenType.ITEM_PAGE))
             return getSlot(context, BazaarSlots.ITEM_PAGE.SELL_SACKS.slot);
 
-        if (context.isAnyOf(BazaarScreenType.ITEMS_GROUP_PAGE))
+        if (context.is(BazaarScreenType.ITEMS_GROUP_PAGE))
             return getSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_SACKS.slot);
 
         return Optional.empty();
