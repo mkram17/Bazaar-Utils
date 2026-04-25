@@ -80,7 +80,7 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
 
     @Override
     protected boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.SELL_ORDER_AMOUNT);
+        return ScreenManager.getInstance().isCurrent(BazaarScreens.SELL_OFFER_AMOUNT);
     }
 
     public SellOfferAmountHelper(int slotIndex) {

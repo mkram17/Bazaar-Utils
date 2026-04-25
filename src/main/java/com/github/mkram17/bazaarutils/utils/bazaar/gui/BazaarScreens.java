@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui;
 
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.InputHelper;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import net.minecraft.core.component.DataComponents;
@@ -96,6 +95,7 @@ public class BazaarScreens {
             .build();
 
     public static final ScreenType COMPLETED_BUY_ORDER_OPTIONS = new ScreenType.Builder()
+            .name("COMPLETED_BUY_ORDER_OPTIONS")
             .genericContainer()
             .containerTitle("Order options")
             .containerQuery("FLIP_FILLED_BUY_ORDER", BazaarSlots.ORDER_OPTIONS.FLIP_FILLED_BUY_ORDER::query)
@@ -111,29 +111,29 @@ public class BazaarScreens {
 
 //    Selling stuff
 
-    public static final ScreenType SELL_ORDER_AMOUNT = new ScreenType.Builder()
-            .name("SELL_ORDER_AMOUNT")
+    public static final ScreenType SELL_OFFER_AMOUNT = new ScreenType.Builder()
+            .name("SELL_OFFER_AMOUNT")
             .genericContainer()
             .containerTitle("How many are you selling?")
             .build();
 
-    public static final ScreenType SELL_ORDER_PRICE = new ScreenType.Builder()
-            .name("SELL_ORDER_PRICE")
+    public static final ScreenType SELL_OFFER_PRICE = new ScreenType.Builder()
+            .name("SELL_OFFER_PRICE")
             .genericContainer()
             .containerTitle("At what price are you selling?")
             .build();
 
-    public static final ScreenType SELL_ORDER_CONFIRMATION = new ScreenType.Builder()
-            .name("SELL_ORDER_CONFIRMATION")
+    public static final ScreenType SELL_OFFER_CONFIRMATION = new ScreenType.Builder()
+            .name("SELL_OFFER_CONFIRMATION")
             .genericContainer()
             .containerTitle("Confirm Sell Offer")
             .build();
 
-    public static final ScreenType SELL_ORDER_OPTIONS = new ScreenType.Builder()
+    public static final ScreenType SELL_OFFER_OPTIONS = new ScreenType.Builder()
             .name("SELL_ORDER_OPTIONS")
             .genericContainer()
             .containerTitle("Order options")
-            .containerQuery("CANCEL_SELL_ORDER", BazaarSlots.ORDER_OPTIONS.CANCEL_SELL_ORDER::query)
+            .containerQuery("CANCEL_SELL_OFFER", BazaarSlots.ORDER_OPTIONS.CANCEL_SELL_OFFER::query)
             .build();
 
     public static final ScreenType INSTANT_SELL = new ScreenType.Builder()
@@ -158,10 +158,11 @@ public class BazaarScreens {
             COMPLETED_BUY_ORDER_OPTIONS,
             INSTANT_BUY,
 
-            SELL_ORDER_AMOUNT,
-            SELL_ORDER_PRICE,
-            SELL_ORDER_CONFIRMATION,
-            SELL_ORDER_OPTIONS,
+            SELL_OFFER_AMOUNT,
+            SELL_OFFER_PRICE,
+            SELL_OFFER_CONFIRMATION,
+            SELL_OFFER_OPTIONS,
+
             INSTANT_SELL
     );
 

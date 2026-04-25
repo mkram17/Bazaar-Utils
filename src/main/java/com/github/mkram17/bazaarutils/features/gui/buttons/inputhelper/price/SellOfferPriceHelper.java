@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price;
 
-import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
@@ -73,7 +72,7 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implem
 
     @Override
     protected boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.SELL_ORDER_PRICE);
+        return ScreenManager.getInstance().isCurrent(BazaarScreens.SELL_OFFER_PRICE);
     }
 
     public SellOfferPriceHelper(int slotIndex, PricingPosition pricingPosition) {
