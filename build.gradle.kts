@@ -1,6 +1,5 @@
 plugins {
     id("fabric-loom") version "1.15-SNAPSHOT"
-    id("maven-publish")
     `maven-publish`
     java
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
@@ -65,16 +64,37 @@ class ModDependencies {
 val deps = ModDependencies()
 val mcVersion = stonecutter.current.version
 val maxMcVersion = deps["core.maxMcVersion"]
+val fabricKotlinVersion = property("fabric_kotlin_version").toString().trim()
+val modMenuVersion = deps["modmenu_version"]
+val orbitVersion = deps["orbit_version"]
+val devAuthVersion = deps["devauth_version"]
+val hypixelApiVersion = deps["hypixel_api_version"]
+val apacheHttpClientVersion = deps["apache_httpclient_version"]
+val apacheHttpCoreVersion = deps["apache_httpcore_version"]
+val commonsLoggingVersion = deps["commons_logging_version"]
+val commonsCodecVersion = deps["commons_codec_version"]
+val lombokVersion = deps["lombok_version"]
+val mixinConstraintsVersion = deps["mixinconstraints_version"]
+val gsonExtrasVersion = deps["gson_extras_version"]
+val hypixelModApiVersion = deps["hypixel_mod_api_version"]
 group = property("maven_group")!!
-val versionNumber = property("mod_version") as String
-val releaseChannel = property("mod_release_channel") as String
-val preReleaseNumber = property("mod_prerelease_number")
+val versionNumber = property("mod_version").toString().trim()
+val releaseChannel = property("mod_release_channel").toString().trim().ifEmpty { "stable" }.lowercase()
 
-version = if (preReleaseNumber == 0) {
-    "$versionNumber-$releaseChannel+mc$mcVersion"
-} else {
-    "$versionNumber-$releaseChannel.$preReleaseNumber+mc$mcVersion"
+require(releaseChannel in setOf("stable", "beta", "alpha")) {
+    "mod_release_channel must be one of: stable, beta, alpha"
 }
+val preReleaseNumber = property("mod_prerelease_number").toString().trim().toIntOrNull()
+    ?: error("mod_prerelease_number must be a valid integer")
+
+require(preReleaseNumber >= 0) {
+    "mod_prerelease_number must be >= 0, got $preReleaseNumber"
+}
+
+val prereleaseSuffix = if (preReleaseNumber == 0) "" else ".$preReleaseNumber"
+val releaseLabel = "$versionNumber-$releaseChannel$prereleaseSuffix"
+
+version = "$releaseLabel+mc$mcVersion"
 
 dependencies {
     minecraft("com.mojang:minecraft:${mcVersion}")
@@ -83,11 +103,11 @@ dependencies {
 
     modImplementation("net.fabricmc.fabric-api:fabric-api:${deps["fabric_api"]}")
 
-    modLocalRuntime("maven.modrinth:hypixel-mod-api:1.0.1+build.1+mc1.21")
-    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
+    modLocalRuntime("maven.modrinth:hypixel-mod-api:$hypixelModApiVersion")
+    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:$devAuthVersion")
 
-    implementation("meteordevelopment:orbit:0.2.4")
-    include("meteordevelopment:orbit:0.2.4")
+    implementation("meteordevelopment:orbit:$orbitVersion")
+    include("meteordevelopment:orbit:$orbitVersion")
 
     modImplementation("tech.thatgravyboat:skyblock-api:${deps["skyblock_api_version"]}") {
         capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${deps["skyblock_api_platform"]}") }
@@ -97,42 +117,37 @@ dependencies {
     }
 
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.4+kotlin.2.2.0")
+    modImplementation("net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion")
 
-    modImplementation("net.hypixel:hypixel-api-transport-apache:4.4")
-    include("net.hypixel:hypixel-api-transport-apache:4.4")
-    include("net.hypixel:hypixel-api-core:4.4")
+    modImplementation("net.hypixel:hypixel-api-transport-apache:$hypixelApiVersion")
+    include("net.hypixel:hypixel-api-transport-apache:$hypixelApiVersion")
+    include("net.hypixel:hypixel-api-core:$hypixelApiVersion")
 
     // Apache HTTP Client + all transitive deps — no longer bundled as of 1.21.11
-    include("org.apache.httpcomponents:httpclient:4.5.14")
-    include("org.apache.httpcomponents:httpcore:4.4.16")
-    include("commons-logging:commons-logging:1.2")
-    include("commons-codec:commons-codec:1.16.0")
+    include("org.apache.httpcomponents:httpclient:$apacheHttpClientVersion")
+    include("org.apache.httpcomponents:httpcore:$apacheHttpCoreVersion")
+    include("commons-logging:commons-logging:$commonsLoggingVersion")
+    include("commons-codec:commons-codec:$commonsCodecVersion")
 
     // Config lib and settings screen
     modImplementation("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-${deps["resourcefulconfig_version"]}")
 
-    modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
+    modCompileOnly("com.terraformersmc:modmenu:$modMenuVersion")
 
     // Project Lombok
-    compileOnly("org.projectlombok:lombok:1.18.36")
-    annotationProcessor("org.projectlombok:lombok:1.18.36")
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 
-    testCompileOnly("org.projectlombok:lombok:1.18.36")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
+    testCompileOnly("org.projectlombok:lombok:$lombokVersion")
+    testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
     // Mixin Constraints
-    include(implementation("com.moulberry:mixinconstraints:1.0.8")!!)
+    include(implementation("com.moulberry:mixinconstraints:$mixinConstraintsVersion")!!)
 
     //gson extras for easy type adapters
-    implementation("org.danilopianini:gson-extras:3.3.0")
-    include("org.danilopianini:gson-extras:3.3.0")
+    implementation("org.danilopianini:gson-extras:$gsonExtrasVersion")
+    include("org.danilopianini:gson-extras:$gsonExtrasVersion")
     // Skyblocker for compatibility
     modCompileOnly("maven.modrinth:skyblocker-liap:v${deps["skyblocker_version"]}")
-
-    // Owo Lib
-    modImplementation("io.wispforest:owo-lib:${deps["owo_version"]}")
-    //  If a player installs without installing owo, sentinel will prevent their game from launching and instead open a window warning them that owo is required.
-    include("io.wispforest:owo-sentinel:${deps["owo_version"]}")
 }
 
 val buildtimeInjectionTask = tasks.register<com.github.mkram17.bazaarutils.build.BuildtimeInjectionTask>("processInitAnnotations") {
@@ -198,14 +213,14 @@ publishMods {
     additionalFiles.from(tasks.remapSourcesJar.get().archiveFile)
     version = project.version.toString()
 
-    type = if(releaseChannel == "alpha") ALPHA else STABLE
+    type = when (releaseChannel) {
+        "alpha" -> ALPHA
+        "beta" -> BETA
+        else -> STABLE
+    }
     modLoaders.add("fabric")
     changelog = rootProject.file("UPDATES.MD").readText()
-    displayName = if (preReleaseNumber == 0) {
-        "Bazaar Utils v$versionNumber-$releaseChannel for $mcVersion"
-    } else {
-        "Bazaar Utils v$versionNumber-$releaseChannel.$preReleaseNumber for $mcVersion"
-    }
+    displayName = "Bazaar Utils v$releaseLabel for $mcVersion"
     dryRun = true
 
     modrinth {
@@ -221,7 +236,11 @@ publishMods {
         repository = "mkram17/Bazaar-Utils"
         commitish = "modern"
         tagName = "v" + project.version.toString()
-        type = STABLE
+        type = when (releaseChannel) {
+            "alpha" -> ALPHA
+            "beta" -> BETA
+            else -> STABLE
+        }
     }
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")

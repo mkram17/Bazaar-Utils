@@ -1,1 +1,0 @@
- - Fix bug causing the Mining page to be detected as an item page
