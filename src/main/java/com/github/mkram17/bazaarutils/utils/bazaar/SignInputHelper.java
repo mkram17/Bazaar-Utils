@@ -78,9 +78,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     }
 
     protected Optional<ItemInfo> getInputSign(Container inventory) {
-        int slot = inputSignRef.resolve(inventory);
-
-        return inputSignRef.query(inventory).first(inventory).map(stack -> new ItemInfo(slot, stack));
+        return inputSignRef.query(inventory).first(inventory);
     }
 
     @Override

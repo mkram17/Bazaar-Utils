@@ -13,7 +13,7 @@ public class SlotLookup {
     }
 
     public static ItemInfo getInventoryItem(Container inventory, BazaarSlots.BazaarSlot slot) {
-        return getInventoryItem(inventory, slot.resolve(inventory));
+        return slot.query(inventory).first(inventory).orElse(ItemInfo.empty(-1));
     }
 
     public static Optional<Integer> getInventorySlotFromItemStack(Container inventory, ItemStack wanted) {
@@ -31,41 +31,16 @@ public class SlotLookup {
     }
 
 
-    public sealed interface IndexReference permits IndexReference.FixedIndex, IndexReference.ContainerSizeNegativeOffset {
-        int resolve(Container container);
+    @FunctionalInterface
+    public interface IndexReference {
+        ContainerQuery query(Container container);
 
-        default int getMaxInventoryIndex(Container container) {
-            return container.getContainerSize() - 1;
+        static IndexReference fixed(int index) {
+            return ignored -> ContainerQuery.at(index);
         }
 
-        default ContainerQuery query(Container container) {
-            return ContainerQuery.at(resolve(container));
-        }
-
-        final class FixedIndex implements IndexReference {
-            private final int index;
-
-            public FixedIndex(int index) {
-                this.index = index;
-            }
-
-            @Override
-            public int resolve(Container container) {
-                return index;
-            }
-        }
-
-        final class ContainerSizeNegativeOffset implements IndexReference {
-            private final int delta;
-
-            public ContainerSizeNegativeOffset(int delta) {
-                this.delta = delta;
-            }
-
-            @Override
-            public int resolve(Container container) {
-                return this.getMaxInventoryIndex(container) - delta;
-            }
+        static IndexReference negativeOffset(int delta) {
+            return container -> ContainerQuery.at(container.getContainerSize() - 1 - delta);
         }
     }
 }
