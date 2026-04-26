@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.inventory.Slot;
@@ -82,9 +83,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
 
     @EventHandler
     private void onChestLoaded(ContainerLoadedEvent event) {
-        if (!BazaarUtilsModules.OrderStatusHighlight.isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
-            return;
-        }
+        if (!BazaarUtilsModules.OrderStatusHighlight.isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) return;
 
         event.getContainerSlots().stream()
                 .map(Slot::getItem)
@@ -96,17 +95,19 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
         tooltipCache.clear();
     }
 
-    private void onTooltip(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, TooltipFlag type, List<Component> lines) {
-        if (!isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) return;
+    private void onTooltip(ItemStack stack, Item.TooltipContext tooltip, TooltipFlag type, List<Component> lines) {
+        if (!isEnabled()) return;
 
-        AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
-        if (screen == null) return;
+        ScreenManager.getInstance().current()
+                .filter(context -> context.is(BazaarScreenType.ORDERS_PAGE))
+                .flatMap(context -> context.as(AbstractContainerScreen.class))
+                .ifPresent(screen -> {
+                    int index = getSlotIndex(stack, screen);
+                    if (index == -1) return;
 
-        int index = getSlotIndex(stack, screen);
-        if (index == -1) return;
-
-        List<Component> cached = tooltipCache.get(index);
-        if (cached != null) lines.addAll(1, cached);
+                    List<Component> cached = tooltipCache.get(index);
+                    if (cached != null) lines.addAll(1, cached);
+                });
     }
 
     private static int getSlotIndex(ItemStack stack, AbstractContainerScreen<?> screen) {

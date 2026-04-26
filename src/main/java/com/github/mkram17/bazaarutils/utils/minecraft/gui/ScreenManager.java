@@ -7,8 +7,6 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
-import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
@@ -16,11 +14,8 @@ import meteordevelopment.orbit.EventPriority;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -208,15 +203,7 @@ public class ScreenManager {
         return current().map(ctx -> ctx.isAnyOf(wanted)).orElse(false);
     }
 
-    public boolean inRegisteredScreenType() {
-        return isCurrent(types.toArray(ScreenType[]::new));
-    }
-
-    public Optional<ContainerScreen> inGenericContainerScreen() {
-        return current().flatMap(ctx -> ctx.as(ContainerScreen.class));
-    }
-
-    public static <T extends AbstractContainerMenu> Optional<T> getCurrentScreenHandler(Class<T> type) {
+    public static <T extends AbstractContainerMenu> Optional<T> getMenu(Class<T> type) {
         Minecraft client = Minecraft.getInstance();
 
         if (client == null || client.player == null) {
@@ -228,42 +215,18 @@ public class ScreenManager {
                 : Optional.empty();
     }
 
-    public static <T extends AbstractContainerScreen<?>> Optional<T> getCurrentlyHandledScreen(Class<T> type) {
+    public static <T extends Screen> Optional<T> getScreen(Class<T> type) {
         Minecraft client = Minecraft.getInstance();
-
-        if (client == null || client.player == null) {
-            return Optional.empty();
-        }
 
         return type.isInstance(client.screen)
                 ? Optional.of(type.cast(client.screen))
                 : Optional.empty();
     }
 
-    public static Optional<Container> getScreenContainer() {
-        return getCurrentScreenHandler(ChestMenu.class)
-                .map(ChestMenu::getContainer);
-    }
-
-    public static Optional<Integer> getScreenContainerSize() {
-        return getScreenContainer().map(Container::getContainerSize);
-    }
-
-    public static ItemInfo getScreenItem(int chestSlot) {
-        return getScreenContainer()
-                .map(inv -> SlotLookup.getInventoryItem(inv, chestSlot))
-                .orElse(ItemInfo.empty(chestSlot));
-    }
-
-    public static Optional<Integer> getInventorySlotFromItemStack(ItemStack wanted) {
-        return getScreenContainer()
-                .flatMap(inv -> SlotLookup.getInventorySlotFromItemStack(inv, wanted));
-    }
-
-    public static void closeHandledScreen() {
+    public static void closeScreen() {
         PlayerActionUtil.notifyAll("Closing GUI", NotificationType.GUI);
 
-        if (getCurrentlyHandledScreen(AbstractContainerScreen.class).isEmpty()) {
+        if (getScreen(AbstractContainerScreen.class).isEmpty()) {
             Util.notifyError("Current screen does not implement HandledScreen", new Throwable());
 
             return;
@@ -272,19 +235,13 @@ public class ScreenManager {
         try {
             Minecraft client = Minecraft.getInstance();
 
-            if (client == null) {
-                Util.notifyError("Client is null", new Throwable());
-
-                return;
-            }
-
-            client.execute(ScreenManager::customCloseHandledScreen);
+            client.execute(ScreenManager::doCloseScreen);
         } catch (Exception exception) {
             Util.notifyError("Error closing GUI", exception);
         }
     }
 
-    private static void customCloseHandledScreen() {
+    private static void doCloseScreen() {
         try {
             Minecraft client = Minecraft.getInstance();
 

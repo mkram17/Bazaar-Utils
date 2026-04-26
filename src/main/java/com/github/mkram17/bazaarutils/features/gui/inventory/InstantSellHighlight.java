@@ -83,20 +83,14 @@ public class InstantSellHighlight extends BUListener implements ToggleableFeatur
         if (!isEnabled()) return;
 
         ScreenManager.getInstance().current().ifPresent(context -> {
-            AbstractContainerScreen<?> screen = ScreenManager.getCurrentlyHandledScreen(AbstractContainerScreen.class).orElse(null);
             Minecraft client = Minecraft.getInstance();
-
-            if (screen == null || client.player == null) return;
+            if (client.player == null) return;
 
             List<OrderInfo> orders = resolveOrders(context);
-
             if (orders.isEmpty()) return;
 
-            Set<String> names = orders.stream()
-                    .map(OrderInfo::getName)
-                    .collect(Collectors.toSet());
-
-            populateCache(names, screen, client.player.getInventory());
+            Set<String> names = orders.stream().map(OrderInfo::getName).collect(Collectors.toSet());
+            populateCache(names, event.getScreen(), client.player.getInventory());
         });
     }
 

@@ -86,7 +86,7 @@ public class ContainerQuery {
     }
 
     public Optional<ItemInfo> first() {
-        Optional<Container> inventory = ScreenManager.getScreenContainer();
+        Optional<Container> inventory = ContainerManager.getContainer();
         if (inventory.isEmpty()) return Optional.empty();
 
         return first(inventory.get());
@@ -109,7 +109,7 @@ public class ContainerQuery {
     }
 
     public List<ItemInfo> all() {
-        Optional<Container> inventory = ScreenManager.getScreenContainer();
+        Optional<Container> inventory = ContainerManager.getContainer();
 
         if (inventory.isEmpty()) return new ArrayList<>();
 

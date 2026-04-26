@@ -81,7 +81,7 @@ public class WidgetManager {
         int backgroundWidth = screen.getImageWidth();
 
         if (backgroundWidth <= 0) {
-            PlayerActionUtil.notifyAll("BackgroundWidth not yet initialized for " + ContainerManager.getContainerName(), NotificationType.GUI);
+            PlayerActionUtil.notifyAll("BackgroundWidth not yet initialized for " + ContainerManager.getTitle(), NotificationType.GUI);
         }
 
         return Optional.of(new ScreenWidgetDimensions(x, y, backgroundWidth));

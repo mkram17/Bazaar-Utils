@@ -76,6 +76,7 @@ public class ContainerLoadedEvent {
     /**
      * The title of the container as a {@link Component}, preserving formatting.
      */
+    @Getter
     private Component titleComponent;
 
     /**
