@@ -21,13 +21,10 @@ public abstract class BUListener implements AbstractListener {
     @Getter
     private transient boolean isSubscribed = false;
 
-    protected transient boolean runOnInit = true;
     protected transient boolean subscribeToMeteorEventBus = true;
 
     public BUListener(){
-        if (!ListenerManager.listeners.contains(this)) {
-            ListenerManager.listeners.add(this);
-        }
+        subscribe();
     }
 
     /**
@@ -36,11 +33,9 @@ public abstract class BUListener implements AbstractListener {
      */
     @Override
     public final void subscribe(){
-        if (isSubscribed) {
-            return;
-        }
+        if (isSubscribed) return;
+        else isSubscribed = true;
 
-        isSubscribed = true;
         registerFabricEvents();
 
         if (subscribeToMeteorEventBus) {
