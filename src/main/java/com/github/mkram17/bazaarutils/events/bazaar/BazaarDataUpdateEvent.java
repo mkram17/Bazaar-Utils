@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.events.bazaar;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
 import lombok.Getter;
-import meteordevelopment.orbit.ICancellable;
+import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 
 /**
  * Event fired when bazaar data is updated from the Hypixel API.
@@ -12,8 +12,7 @@ import meteordevelopment.orbit.ICancellable;
  * volumes, and other bazaar statistics.
  * </p>
  */
-public class BazaarDataUpdateEvent implements ICancellable {
-
+public final class BazaarDataUpdateEvent extends SkyBlockEvent {
     /**
      * The converted bazaar data reply containing current market information.
      */
@@ -22,14 +21,5 @@ public class BazaarDataUpdateEvent implements ICancellable {
 
     public BazaarDataUpdateEvent(CustomBazaarReply bazaarReply) {
         this.bazaarReply = bazaarReply;
-    }
-
-    @Override
-    public void setCancelled(boolean cancelled) {
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return false;
     }
 }

@@ -1,6 +1,8 @@
 package com.github.mkram17.bazaarutils.events.bazaar;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
+import lombok.Getter;
+import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 
 /**
  * Event fired when a bazaar-related chat message is received and parsed.
@@ -10,19 +12,13 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
  * the parsed order information and the type of bazaar action that occurred.
  * </p>
  *
- * 
  * @param <T> the type of order information container, must extend OrderInfoContainer
- * @param type the type of bazaar event that occurred
- * @param order the order information associated with the event
- * 
+ *
  * @see OrderInfo
  * @see BazaarEventTypes
  */
 //TODO use this instead of OutdatedOrderEvent
-public record BazaarChatEvent<T extends OrderInfo>(
-        BazaarEventTypes type,
-        T order
-) {
+public final class BazaarChatEvent<T extends OrderInfo> extends SkyBlockEvent {
     /**
      * Enumeration of bazaar event types that can be detected from chat messages.
      */
@@ -41,5 +37,20 @@ public record BazaarChatEvent<T extends OrderInfo>(
         INSTA_SELL,
         /** Items were instantly bought from sell offers */
         INSTA_BUY,
+    }
+
+    @Getter
+    public final BazaarEventTypes type;
+
+    @Getter
+    public final T order;
+
+    /**
+     * @param type the type of bazaar event that occurred
+     * @param order the order information associated with the event
+     */
+    public BazaarChatEvent(BazaarChatEvent.BazaarEventTypes type, T order) {
+        this.type = type;
+        this.order = order;
     }
 }
