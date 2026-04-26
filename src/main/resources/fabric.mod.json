@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "bazaarutils",
-	"version": "${mod_version}",
+	"version": "${version}",
 	"name": "Bazaar Utils",
 	"description": "Bazaar Utils is a QOL mod for the Bazaar. It has useful features like outdated order notifications, item bookmarks, custom order amounts, and more!",
 	"authors": [
