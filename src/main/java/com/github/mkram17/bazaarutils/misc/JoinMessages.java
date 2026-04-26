@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.misc;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
@@ -26,7 +25,7 @@ public final class JoinMessages extends BUListener {
     public JoinMessages() {
         super();
 
-        this.updateMessage = Component.literal(BazaarUtils.getUpdateNotes()).withStyle(ChatFormatting.DARK_GREEN);
+        this.updateMessage = Component.literal(MetadataConfig.UPDATE_NOTES).withStyle(ChatFormatting.DARK_GREEN);
     }
 
     @Override
@@ -34,7 +33,7 @@ public final class JoinMessages extends BUListener {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             if (MetadataConfig.IS_FIRST_LOAD) {
                 sendFirstLoadMessages();
-            } else if (BazaarUtils.updatedMajorVersion) {
+            } else if (MetadataConfig.UPDATED_MAJOR_VERSION) {
                 sendMajorUpdateMessages();
             }
         });
@@ -52,6 +51,6 @@ public final class JoinMessages extends BUListener {
         Util.tickExecuteLater(40, () -> PlayerActionUtil.notifyAll(updateMessage));
         Util.tickExecuteLater(41, () -> PlayerActionUtil.notifyAll(Util.CHANGELOG));
 
-        BazaarUtils.updatedMajorVersion = false;
+        MetadataConfig.UPDATED_MAJOR_VERSION = false;
     }
 }

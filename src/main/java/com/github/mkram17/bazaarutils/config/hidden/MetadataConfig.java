@@ -18,4 +18,16 @@ public final class MetadataConfig {
     @ConfigEntry(id = "is_first_load")
     @ConfigOption.Hidden
     public static boolean IS_FIRST_LOAD = true;
+
+    @ConfigEntry(id = "auto_update_enabled")
+    @ConfigOption.Hidden
+    public static boolean AUTO_UPDATE_ENABLED = true;
+
+    @ConfigEntry(id = "updated_major_version")
+    @ConfigOption.Hidden
+    public static boolean UPDATED_MAJOR_VERSION = false;
+
+    @ConfigEntry(id = "update_notes")
+    @ConfigOption.Hidden
+    public static String UPDATE_NOTES;
 }
