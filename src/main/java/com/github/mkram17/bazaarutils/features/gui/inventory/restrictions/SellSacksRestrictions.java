@@ -61,11 +61,9 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
 
     @Override
     protected Optional<SellSacksState> makeState(ContainerLoadedEvent event) {
-        Optional<ScreenContext> context = ScreenManager.getInstance().current();
+        ScreenContext context = event.asContext();
 
-        if (context.isEmpty()) return Optional.empty();
-
-        Optional<ItemInfo> sellSacksItem = SellablePageLayout.getSellSacksItem(context.get());
+        Optional<ItemInfo> sellSacksItem = SellablePageLayout.getSellSacksItem(context);
 
         if (sellSacksItem.isEmpty()) return Optional.empty();
 

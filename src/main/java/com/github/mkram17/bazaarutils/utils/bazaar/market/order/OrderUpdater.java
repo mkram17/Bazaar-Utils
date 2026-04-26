@@ -11,6 +11,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnIn
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +48,7 @@ public class OrderUpdater {
 
         lowerChestInventory = event.getContainer();
 
-        List<ItemStack> allInventoryStacks = event.getItemStacks();
+        List<ItemStack> allInventoryStacks = event.getContainerSlots().stream().map(Slot::getItem).toList();
         List<ItemStack> orderStacks = extractOrderStacks(allInventoryStacks);
 
         updateWatchedOrders(orderStacks);

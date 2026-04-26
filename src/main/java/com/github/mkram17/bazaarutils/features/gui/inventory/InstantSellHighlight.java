@@ -20,6 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -39,7 +40,7 @@ public class InstantSellHighlight extends BUListener implements ToggleableFeatur
 
     private static final Map<Integer, Integer> colorCache = new ConcurrentHashMap<>();
 
-    private void populateCache(Set<String> names, AbstractContainerScreen<?> screen, Inventory playerInventory) {
+    private void populateCache(Set<String> names, AbstractContainerScreen<ChestMenu> screen, Inventory playerInventory) {
         colorCache.clear();
 
         for (Slot slot : screen.getMenu().slots) {

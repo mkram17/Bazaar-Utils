@@ -47,8 +47,8 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     private static final Map<Integer, Integer> colorCache = new ConcurrentHashMap<>();
     private static final Map<Integer, List<Component>> tooltipCache = new ConcurrentHashMap<>();
 
-    private void populateCache(ItemStack stack, AbstractContainerScreen<?> screen) {
-        int index = getSlotIndex(stack, screen);
+    private void populateCache(ItemStack stack, List<Slot> slots) {
+        int index = getSlotIndex(stack, slots);
         if (index == -1) return;
 
         Order order = getOrderForHighlight(index);
@@ -101,8 +101,9 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
         ScreenManager.getInstance().current()
                 .filter(context -> context.is(BazaarScreenType.ORDERS_PAGE))
                 .flatMap(context -> context.as(AbstractContainerScreen.class))
+                .map(AbstractContainerScreen::getMenu)
                 .ifPresent(screen -> {
-                    int index = getSlotIndex(stack, screen);
+                    int index = getSlotIndex(stack, screen.slots);
                     if (index == -1) return;
 
                     List<Component> cached = tooltipCache.get(index);
@@ -110,8 +111,8 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
                 });
     }
 
-    private static int getSlotIndex(ItemStack stack, AbstractContainerScreen<?> screen) {
-        for (Slot slot : screen.getMenu().slots) {
+    private static int getSlotIndex(ItemStack stack, List<Slot> slots) {
+        for (Slot slot : slots) {
             if (slot.hasItem() && slot.getItem().equals(stack)) return slot.getContainerSlot();
         }
 

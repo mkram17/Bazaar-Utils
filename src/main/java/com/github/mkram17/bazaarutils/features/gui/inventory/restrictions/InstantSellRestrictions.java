@@ -59,15 +59,13 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
 
     @Override
     protected Optional<InstantSellState> makeState(ContainerLoadedEvent event) {
-        Optional<ScreenContext> context = ScreenManager.getInstance().current();
+        ScreenContext context = event.asContext();
 
-        if (context.isEmpty()) return Optional.empty();
-
-        Optional<ItemInfo> instantSellItem = SellablePageLayout.getInstantSellItem(context.get());
+        Optional<ItemInfo> instantSellItem = SellablePageLayout.getInstantSellItem(context);
 
         if (instantSellItem.isEmpty()) return Optional.empty();
 
-        List<OrderInfo> orders = context.get().is(BazaarScreenType.ITEM_PAGE)
+        List<OrderInfo> orders = context.is(BazaarScreenType.ITEM_PAGE)
                 ? InstantSellParser.parseItemPageOrder(instantSellItem.get().itemStack())
                         .map(InstantSellParser.InstantSellResult::items)
                         .orElse(List.of())
