@@ -21,8 +21,6 @@ public abstract class BUListener implements AbstractListener {
     @Getter
     private transient boolean isSubscribed = false;
 
-    protected transient boolean subscribeToMeteorEventBus = true;
-
     public BUListener(){
         subscribe();
     }
@@ -37,15 +35,12 @@ public abstract class BUListener implements AbstractListener {
         else isSubscribed = true;
 
         registerFabricEvents();
-
-        if (subscribeToMeteorEventBus) {
-            subscribeToMeteorEventBus();
-        }
+        subscribeToSkyblockApiEventBus();
     }
 
     protected void registerFabricEvents() {}
 
-    private void subscribeToMeteorEventBus() {
-        BazaarUtils.EVENT_BUS.subscribe(this);
+    private void subscribeToSkyblockApiEventBus() {
+        BazaarUtils.EVENT_BUS.register(this);
     }
 }
