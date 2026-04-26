@@ -63,7 +63,7 @@ public final class OrderUtil {
         }
         UserOrdersStorage.INSTANCE.get().add(order);
         PlayerActionUtil.notifyAll("Added order: § " + order, NotificationType.ORDERDATA);
-        EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.ADD, order));
+        new UserOrdersChangeEvent(order, UserOrdersChangeEvent.ChangeTypes.ADD).post(EVENT_BUS);
         UserOrdersStorage.INSTANCE.save();
     }
 
