@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
 import com.github.mkram17.bazaarutils.utils.update.UpdateUtil;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
@@ -33,15 +34,20 @@ public class BazaarUtils implements ClientModInitializer {
     public static IEventBus EVENT_BUS = new EventBus();
     public static ScheduledExecutorService BUExecutorService = Executors.newSingleThreadScheduledExecutor();
 
+    static {
+        BazaarUtilsPreInitModules.init();
+    }
+
     @Override
     public void onInitializeClient() {
-        BazaarUtilsPreInitModules.init();
 
         BUCompatibilityHelper.initializePatches();
 
         UpdateUtil.updateModProperties();
 
         BazaarUtilsModules.init();
+
+        BazaarUtilsCommands.init();
 
         BazaarUtilsLateInitModules.init();
 
