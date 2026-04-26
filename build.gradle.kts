@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     java
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
+    id("com.gradleup.shadow") version "9.2.2"
 }
 
 base {
@@ -33,6 +34,9 @@ repositories {
     }
     maven("https://maven.fabricmc.net/") {
         name = "FabricMC"
+    }
+    maven("https://repo.nea.moe/releases"){
+        name = "Nea Repo for Auto Update"
     }
 
     exclusiveContent {
@@ -148,6 +152,10 @@ dependencies {
     include("org.danilopianini:gson-extras:$gsonExtrasVersion")
     // Skyblocker for compatibility
     modCompileOnly("maven.modrinth:skyblocker-liap:v${deps["skyblocker_version"]}")
+
+    // Auto Update Library
+    implementation("moe.nea:libautoupdate:1.3.1")
+    shadow("moe.nea:libautoupdate:1.3.1")
 }
 
 val buildtimeInjectionTask = tasks.register<com.github.mkram17.bazaarutils.build.BuildtimeInjectionTask>("processInitAnnotations") {
@@ -196,6 +204,14 @@ tasks {
         from("LICENSE"){
             rename { "${it}_${archiveBaseName.get()}" }
         }
+    }
+
+    shadowJar {
+        configurations = listOf(project.configurations.shadow.get())
+    }
+    remapJar {
+        dependsOn(shadowJar)
+        inputFile.set(shadowJar.get().archiveFile)
     }
 }
 loom {
