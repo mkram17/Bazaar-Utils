@@ -1,8 +1,8 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
-import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.events.SlotClickEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.SlotClickEvent;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;

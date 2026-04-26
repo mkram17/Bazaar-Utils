@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.events.listener;
+package com.github.mkram17.bazaarutils.events;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
@@ -17,7 +17,7 @@ import lombok.Getter;
  * {@link BUConfig}, which gets automatically subscribed.</p>
  */
 //TODO switch to using fabric event system with annotation processor
-public abstract class BUListener implements AbstractListener{
+public abstract class BUListener implements AbstractListener {
     @Getter
     private transient boolean isSubscribed = false;
 

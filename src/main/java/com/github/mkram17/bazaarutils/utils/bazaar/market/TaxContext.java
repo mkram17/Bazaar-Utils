@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import tech.thatgravyboat.skyblockapi.api.data.MayorPerks;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;

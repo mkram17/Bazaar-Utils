@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.NonNullList;

@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.events.listener;
+package com.github.mkram17.bazaarutils.events;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
