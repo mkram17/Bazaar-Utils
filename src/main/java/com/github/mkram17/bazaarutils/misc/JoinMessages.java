@@ -52,5 +52,6 @@ public final class JoinMessages extends BUListener {
         Util.tickExecuteLater(41, () -> PlayerActionUtil.notifyAll(Util.CHANGELOG));
 
         MetadataConfig.UPDATED_MAJOR_VERSION = false;
+        ConfigUtil.scheduleConfigSave();
     }
 }
