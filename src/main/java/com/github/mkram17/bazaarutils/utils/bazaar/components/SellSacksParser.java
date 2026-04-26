@@ -23,14 +23,14 @@ public final class SellSacksParser {
         Optional<SellSacksResult.OtherItems> otherItems = Optional.empty();
 
         for (Component line : LoreParser.lines(sellSacksStack)) {
-            List<Component> s = line.getSiblings();
-            if (s.size() != 6) continue;
+            List<Component> siblings = line.getSiblings();
+            if (siblings.size() != 6) continue;
 
-            String name = s.get(3).getString().trim();
+            String name = siblings.get(3).getString().trim();
 
             try {
-                int volume = Util.parseNumber(s.get(1).getString());
-                double totalPrice = Double.parseDouble(s.get(5).getString().replace(" coins", "").replace(",", ""));
+                int volume = Util.parseNumber(siblings.get(1).getString());
+                double totalPrice = Double.parseDouble(siblings.get(5).getString().replace(" coins", "").replace(",", ""));
                 double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
 
                 if (name.equals("Other items")) {
