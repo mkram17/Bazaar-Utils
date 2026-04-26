@@ -1,9 +1,9 @@
-package com.github.mkram17.bazaarutils.events.handler;
+package com.github.mkram17.bazaarutils.events;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.BazaarChatEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;

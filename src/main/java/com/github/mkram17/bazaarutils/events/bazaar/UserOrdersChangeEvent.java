@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.events;
+package com.github.mkram17.bazaarutils.events.bazaar;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import lombok.AllArgsConstructor;

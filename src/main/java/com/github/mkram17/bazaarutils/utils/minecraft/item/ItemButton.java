@@ -1,8 +1,8 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
 import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
-import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.events.SlotClickEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.SlotClickEvent;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.StateItemGroup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

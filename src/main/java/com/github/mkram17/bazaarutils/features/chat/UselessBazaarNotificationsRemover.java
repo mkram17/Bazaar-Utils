@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.features.chat;
 
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;

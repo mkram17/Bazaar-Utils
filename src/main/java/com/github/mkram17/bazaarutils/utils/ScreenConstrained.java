@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils;
 
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;

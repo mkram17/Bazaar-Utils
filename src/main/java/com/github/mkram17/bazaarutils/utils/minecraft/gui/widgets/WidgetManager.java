@@ -1,8 +1,8 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
-import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.mixin.AccessorScreen;

@@ -1,8 +1,8 @@
 package com.github.mkram17.bazaarutils.data;
 
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
-import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
