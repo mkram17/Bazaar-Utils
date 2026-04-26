@@ -29,5 +29,5 @@ public final class MetadataConfig {
 
     @ConfigEntry(id = "update_notes")
     @ConfigOption.Hidden
-    public static String UPDATE_NOTES;
+    public static String UPDATE_NOTES = "";
 }
