@@ -9,11 +9,14 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.concurrent.CompletableFuture;
 
 public final class UpdateUtil {
 
     public static BazaarUtilsGithubSource githubSource = new BazaarUtilsGithubSource();
+    private static final Pattern LEADING_NUMBER = Pattern.compile("^(\\d+)");
 
     public static void updateModProperties(){
         FabricLoader.getInstance().getModContainer(BazaarUtils.MOD_ID).ifPresent(modContainer -> {
@@ -26,24 +29,61 @@ public final class UpdateUtil {
             var oldVersion = MetadataConfig.MOD_VERSION;
             var currentVersion = metadata.getVersion().getFriendlyString();
 
-            var oldVersionMajor = oldVersion.substring(oldVersion.indexOf(".")+1);
-            var currentVersionMajor = currentVersion.substring(currentVersion.indexOf(".")+1);
-
             MetadataConfig.MOD_VERSION = currentVersion;
-            ConfigUtil.scheduleConfigSave();
 
-            if (!oldVersionMajor.equals(currentVersionMajor)) {
+            if (isMajorVersionChanged(oldVersion, currentVersion)) {
                 MetadataConfig.UPDATED_MAJOR_VERSION = true;
             }
+
+            ConfigUtil.scheduleConfigSave();
         });
     }
 
     private static final UpdateContext updateContext = new UpdateContext(
             githubSource,
-            UpdateTarget.deleteAndSaveInTheSameFolder(Main.class),
-            CurrentVersion.ofTag("v" + MetadataConfig.MOD_VERSION),
+            UpdateTarget.deleteAndSaveInTheSameFolder(BazaarUtils.class),
+            CurrentVersion.ofTag("v" + getCurrentVersionTag()),
             "bazaarutils"
     );
+
+    private static String getCurrentVersionTag() {
+        return FabricLoader.getInstance()
+                .getModContainer(BazaarUtils.MOD_ID)
+                .map(container -> container.getMetadata().getVersion().getFriendlyString())
+                .orElse(MetadataConfig.MOD_VERSION);
+    }
+
+    private static boolean isMajorVersionChanged(String oldVersion, String currentVersion) {
+        Integer oldMajor = extractMajorVersion(oldVersion);
+        Integer currentMajor = extractMajorVersion(currentVersion);
+
+        if (oldMajor == null || currentMajor == null) {
+            return false;
+        }
+
+        return !oldMajor.equals(currentMajor);
+    }
+
+    private static Integer extractMajorVersion(String version) {
+        if (version == null || version.isBlank()) {
+            return null;
+        }
+
+        String normalizedVersion = version.trim();
+        if (normalizedVersion.startsWith("v") || normalizedVersion.startsWith("V")) {
+            normalizedVersion = normalizedVersion.substring(1);
+        }
+
+        String coreVersion = normalizedVersion.split("[-+]", 2)[0];
+        String firstSegment = coreVersion.split("\\.", 2)[0];
+        Matcher matcher = LEADING_NUMBER.matcher(firstSegment);
+
+        if (!matcher.find()) {
+            return null;
+        }
+
+        return Integer.parseInt(matcher.group(1));
+    }
 
     public static String getUpdateSource(){
         String currentVersion = MetadataConfig.MOD_VERSION;
