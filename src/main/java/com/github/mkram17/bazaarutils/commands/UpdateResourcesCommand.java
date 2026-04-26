@@ -2,14 +2,14 @@ package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-@Module
+@Command
 public final class UpdateResourcesCommand implements BUCommand {
     @Getter
     public final String commandName = "updateresources";
