@@ -18,25 +18,23 @@ public final class UpdateUtil {
     public static BazaarUtilsGithubSource githubSource = new BazaarUtilsGithubSource();
     private static final Pattern LEADING_NUMBER = Pattern.compile("^(\\d+)");
 
-    public static void updateModProperties(){
-        FabricLoader.getInstance().getModContainer(BazaarUtils.MOD_ID).ifPresent(modContainer -> {
-            ModMetadata metadata = modContainer.getMetadata();
+    public static void updateModProperties() {
+        ModMetadata metadata = BazaarUtils.SELF.getMetadata();
 
-            CustomValue updateNotesValue = metadata.getCustomValue("latestMajorUpdateNotes");
-            if (updateNotesValue != null)
-                MetadataConfig.UPDATE_NOTES = updateNotesValue.getAsString();
+        CustomValue updateNotesValue = metadata.getCustomValue("latestMajorUpdateNotes");
+        if (updateNotesValue != null) {
+            MetadataConfig.UPDATE_NOTES = updateNotesValue.getAsString();
+        }
 
-            var oldVersion = MetadataConfig.MOD_VERSION;
-            var currentVersion = metadata.getVersion().getFriendlyString();
+        String oldVersion = MetadataConfig.MOD_VERSION;
+        String currentVersion = metadata.getVersion().getFriendlyString();
+        MetadataConfig.MOD_VERSION = currentVersion;
 
-            MetadataConfig.MOD_VERSION = currentVersion;
+        if (isMajorVersionChanged(oldVersion, currentVersion)) {
+            MetadataConfig.UPDATED_MAJOR_VERSION = true;
+        }
 
-            if (isMajorVersionChanged(oldVersion, currentVersion)) {
-                MetadataConfig.UPDATED_MAJOR_VERSION = true;
-            }
-
-            ConfigUtil.scheduleConfigSave();
-        });
+        ConfigUtil.scheduleConfigSave();
     }
 
     private static UpdateContext updateContext;
