@@ -23,8 +23,8 @@ public class PriceHelpers extends BUListener {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onChestLoaded(ContainerLoadedEvent event) {
-        helpers().forEach(helper -> helper.onChestLoaded(event));
+    private void onContainerLoaded(ContainerLoadedEvent event) {
+        helpers().forEach(helper -> helper.onContainerLoaded(event));
     }
 
     @EventHandler(priority = EventPriority.HIGH)

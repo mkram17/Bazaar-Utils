@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <pre>
  * {@code
  * @EventHandler
- * public void onChestLoaded(ContainerLoadedEvent event) {
+ * public void onContainerLoaded(ContainerLoadedEvent event) {
  *    List<ItemStack> items = event.getItemStacks();
  *    processBazaarItems(items);
  * }

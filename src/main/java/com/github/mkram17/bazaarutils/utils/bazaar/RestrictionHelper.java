@@ -57,7 +57,7 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     }
 
     @EventHandler
-    public void onChestLoaded(ContainerLoadedEvent event) {
+    public void onContainerLoaded(ContainerLoadedEvent event) {
         if (!(isEnabled() && inCorrectScreen(event))) {
             resetState();
             return;

@@ -87,7 +87,7 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
     }
 
     @EventHandler
-    private void onChestLoaded(ContainerLoadedEvent event) {
+    private void onContainerLoaded(ContainerLoadedEvent event) {
         colorCache.clear();
 
         if (!isEnabled() || !inCorrectScreen(event)) return;

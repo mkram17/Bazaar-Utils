@@ -110,8 +110,8 @@ public class ScreenManager {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private static void onChestLoaded(ContainerLoadedEvent event) {
-        ContainerManager.onChestLoaded(event);
+    private static void onContainerLoaded(ContainerLoadedEvent event) {
+        ContainerManager.onContainerLoaded(event);
 
         AbstractContainerScreen<ChestMenu> screen = event.getScreen();
         ScreenType resolved = event.getType().orElse(null);
@@ -137,7 +137,7 @@ public class ScreenManager {
         ScreenSnapshot head = history.peekFirst();
         // ScreenEvents.AFTER_INIT fires after setScreen — same screen instance arriving twice is a no-op
         // we no longer check for a RETYPE op as the cases were we fall to that are generally ones where
-        // we depend on off ContainerQuery, and that solely is handled by #onChestLoaded
+        // we depend on off ContainerQuery, and that solely is handled by #onContainerLoaded
         if (head != null && head.screen() == screen) return;
 
         if (history.size() >= MAX_HISTORY) history.removeLast();

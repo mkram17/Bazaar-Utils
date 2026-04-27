@@ -91,7 +91,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     }
 
     @EventHandler
-    private void onChestLoaded(ContainerLoadedEvent event) {
+    private void onContainerLoaded(ContainerLoadedEvent event) {
         if (!isEnabled() || !inCorrectScreen(event)) return;
 
         event.getContainerSlots().stream()

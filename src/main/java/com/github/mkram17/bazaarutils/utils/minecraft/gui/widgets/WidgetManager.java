@@ -35,7 +35,7 @@ public class WidgetManager {
     private static void onScreenChange(ScreenChangeEvent event) {
         if (event.getOldScreen() != null) removeWidgetsFrom(event.getOldScreen());
 
-        // causes a flash when onChestLoaded removes and re-adds immediately after.
+        // causes a flash when onContainerLoaded removes and re-adds immediately after.
         Screen next = event.getNewScreen();
         if (next == null || next instanceof ContainerScreen) return;
 
@@ -43,7 +43,7 @@ public class WidgetManager {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    private static void onChestLoaded(ContainerLoadedEvent event) {
+    private static void onContainerLoaded(ContainerLoadedEvent event) {
         Screen screen = event.getScreen();
         removeWidgetsFrom(screen);
         addWidgetsTo(screen);

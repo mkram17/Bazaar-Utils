@@ -42,7 +42,7 @@ public abstract class InputHelper<T> implements ItemButton, ScreenConstrained {
         this.name = name;
     }
 
-    public void onChestLoaded(ContainerLoadedEvent event) {
+    public void onContainerLoaded(ContainerLoadedEvent event) {
         if (!inCorrectScreen(event)) {
             resetState();
 
