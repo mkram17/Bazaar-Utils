@@ -3,6 +3,9 @@ package com.github.mkram17.bazaarutils.events;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -14,9 +17,11 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -61,6 +66,15 @@ public class ContainerLoadedEvent {
     @Getter
     private AbstractContainerScreen<ChestMenu> screen;
 
+    private @Nullable ScreenType type;
+
+    /**
+     * The resolved {@link ScreenType} for this container, or empty if unrecognised.
+     */
+    public Optional<ScreenType> getType() {
+        return Optional.ofNullable(type);
+    }
+
     /**
      * The inventory of the container opened.
      */
@@ -90,6 +104,10 @@ public class ContainerLoadedEvent {
      */
     @Getter
     private List<Slot> playerSlots = new ArrayList<>();
+
+    public ScreenContext asContext() {
+        return new ScreenContext(screen, type);
+    }
 
     /**
      * Registers the screen event listener that triggers this event when chests are loaded.
@@ -130,6 +148,7 @@ public class ContainerLoadedEvent {
                         ContainerLoadedEvent event = new ContainerLoadedEvent();
 
                         event.screen = typedScreen;
+                        event.type = type;
                         event.container = inventory;
 
                         event.titleComponent = container.getTitle();

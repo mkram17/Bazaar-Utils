@@ -113,7 +113,7 @@ public class ScreenManager {
         ContainerManager.onChestLoaded(event);
 
         AbstractContainerScreen<ChestMenu> screen = event.getScreen();
-        ScreenType resolved = matchType(screen).orElse(null);
+        ScreenType resolved = event.getType().orElse(null);
 
         List<ScreenSnapshot> list = instance.getHistorySnapshot();
 
