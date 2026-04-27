@@ -15,10 +15,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
-import meteordevelopment.orbit.EventHandler;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ChestMenu;
@@ -26,6 +23,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ScreenInitializedEvent;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,20 +80,11 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
         super();
     }
 
-    @Override
-    protected void registerFabricEvents() {
-        ScreenEvents.AFTER_INIT.register(this::onScreenInitialized);
-    }
-
     @Subscription
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
-    @OnlyBazaarScreen(useTargetScreens = true)
+    @OnlyBazaarScreen(useConstrainsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
-        colorCache.clear();
-
-        if (!isEnabled() || !inCorrectScreen(event)) return;
-
         Minecraft client = Minecraft.getInstance();
         if (client.player == null) return;
 
@@ -105,7 +95,8 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
         populateCache(names, event.getScreen(), client.player.getInventory());
     }
 
-    private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {
+    @Subscription
+    private void onScreenInitialized(ScreenInitializedEvent event) {
         colorCache.clear();
     }
 }
