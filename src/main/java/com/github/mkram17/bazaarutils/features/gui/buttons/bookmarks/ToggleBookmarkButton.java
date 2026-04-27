@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.events.minecraft.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
@@ -16,11 +15,13 @@ import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataCompo
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.ItemGroups;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -70,7 +71,8 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
         return stack;
     }
 
-    @EventHandler
+    @Subscription
+    @OnlyOnSkyBlock
     private void onReplaceItemEvent(ReplaceItemEvent event) {
         if (!shouldReplaceItem(event) || !inCorrectScreen()) return;
 
@@ -79,7 +81,8 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
         event.setReplacement(getReplacementItem());
     }
 
-    @EventHandler
+    @Subscription
+    @OnlyOnSkyBlock
     private void onClick(SlotClickEvent event) {
         if (!wasButtonClicked(event) || !inCorrectScreen()) return;
 

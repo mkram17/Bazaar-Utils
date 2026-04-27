@@ -17,7 +17,7 @@ import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
  * <p><strong>Usage Example:</strong></p>
  * <pre>
  * {@code
- * @EventHandler
+ * @Subscription
  * public void onItemReplace(ReplaceItemEvent event) {
  *     ItemStack original = event.getOriginal();
  *     ItemStack modified = addCustomLore(original);

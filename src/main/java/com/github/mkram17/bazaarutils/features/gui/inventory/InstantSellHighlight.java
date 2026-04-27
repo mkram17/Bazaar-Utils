@@ -23,6 +23,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -83,10 +84,12 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
         ScreenEvents.AFTER_INIT.register(this::onScreenInitialized);
     }
 
-    @EventHandler
+    @Subscription
     private void onContainerLoaded(ContainerLoadedEvent event) {
         colorCache.clear();
+
         if (!isEnabled() || !inCorrectScreen(event)) return;
+
         Minecraft client = Minecraft.getInstance();
         if (client.player == null) return;
 

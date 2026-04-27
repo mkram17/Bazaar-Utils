@@ -8,8 +8,10 @@ import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.teamresourceful.resourcefulconfig.api.types.info.TooltipProvider;
 import lombok.Getter;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.network.chat.Component;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.chat.ChatReceivedEvent;
 
 import java.util.Arrays;
 
@@ -47,39 +49,30 @@ public class UselessBazaarNotificationsRemover extends BUListener implements Tog
         return ChatConfig.USELESS_BAZAAR_NOTIFICATIONS_REMOVER_EXCLUDED_NOTIFICATIONS;
     }
 
-    //    We need to consider whether we store this to a DataStorage interface or just keep it to a per-boot level
-    public boolean firstTimeRemoved = true;
-
     public UselessBazaarNotificationsRemover() {}
+    //  We need to consider whether we store this to a DataStorage interface or just keep it to a per-boot level
+    public transient boolean firstTimeRemoved = true;
 
-    private void registerUselessNotificationDetector(){
-        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
-            if (!isEnabled()) {
-                return true;
+    @Subscription
+    @OnlyOnSkyBlock
+    private void onChat(ChatReceivedEvent.Pre event) {
+        if (!isEnabled()) return;
+
+        String message = event.getText();
+
+        if (isNotificationUseless(message)) {
+            if (firstTimeRemoved) {
+                firstTimeRemoved = false;
+
+                Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyAll("TIP - Useless Bazaar notifications such as \"Putting goods in escrow...\" are removed by default! " +
+                        "To disable this feature, uncheck the \"Remove Useless Bazaar Notifications\" option in the Bazaar Utils settings."));
             }
 
-            if (isNotificationUseless(message.getString())) {
-                if (firstTimeRemoved) {
-                    firstTimeRemoved = false;
-
-                    Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyAll("TIP - Useless Bazaar notifications such as \"Putting goods in escrow...\" are removed by default! " +
-                            "To disable this feature, uncheck the \"Remove Useless Bazaar Notifications\" option in the Bazaar Utils settings."));
-                }
-
-                return false;
-            }
-
-            return true;
-        });
+            event.cancel();
+        }
     }
 
     private boolean isNotificationUseless(String message) {
         return Arrays.stream(getExcludedNotifications()).anyMatch(n -> message.contains(n.getMessage()));
-    }
-
-    @Override
-    protected void registerFabricEvents() {
-        super.subscribeToMeteorEventBus = false;
-        registerUselessNotificationDetector();
     }
 }

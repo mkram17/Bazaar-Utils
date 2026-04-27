@@ -8,22 +8,22 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
 public class SignManager {
     public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
-        BazaarUtils.EVENT_BUS.subscribe(new Object() {
-            @EventHandler
+        BazaarUtils.EVENT_BUS.register(new Object() {
+            @Subscription(priority = Integer.MIN_VALUE)
             private void onSignOpen(SignOpenEvent event) {
                 try {
                     action.accept(event);
                 } finally {
-                    BazaarUtils.EVENT_BUS.unsubscribe(this);
+                    BazaarUtils.EVENT_BUS.unregister(this);
                 }
             }
         });
