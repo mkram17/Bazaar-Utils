@@ -31,7 +31,7 @@ public final class SlotProviders {
 
                 boolean isSelf = occupant.get().getSlotIndex() == selectedSlotIndex;
 
-                return stack(occupant.get().resolveItem())
+                return stack(occupant.get().resolveStack())
                         .named(isSelf
                                 ? "Currently selected slot"
                                 : "Slot taken by Button #" + occupantIndex
