@@ -14,7 +14,6 @@ public class MixinSignEditScreen {
 
     @Inject(method = "init()V", at = @At("TAIL"))
     private void onScreenInit(CallbackInfo ci) {
-        SignOpenEvent event = new SignOpenEvent((SignEditScreen) (Object) this);
-        BazaarUtils.EVENT_BUS.post(event);
+        new SignOpenEvent((SignEditScreen) (Object) this).post(BazaarUtils.EVENT_BUS);
     }
 }

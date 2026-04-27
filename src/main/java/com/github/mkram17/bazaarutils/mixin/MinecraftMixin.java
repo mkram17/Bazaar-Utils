@@ -20,6 +20,6 @@ public class MinecraftMixin {
 
     @Inject(method = "setScreen", at = @At("HEAD"))
     public void setScreen(Screen newScreen, CallbackInfo ci) {
-        BazaarUtils.EVENT_BUS.post(new ScreenChangeEvent(screen, newScreen));
+        new ScreenChangeEvent(screen, newScreen).post(BazaarUtils.EVENT_BUS);
     }
 }
