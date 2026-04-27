@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.overlays;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
@@ -38,12 +39,13 @@ public class PriceCharts extends BUListener implements ToggleableFeature {
     public PriceCharts() {}
 
     @Subscription
+    @OnlyWhenEnabled
     @OnlyOnSkyBlock
     public void onTooltip(ItemTooltipEvent event) {
         var stack = event.getItem();
         var lines = event.getTooltip();
 
-        if (!isEnabled() || stack.isEmpty() || !shouldShow()) return;
+        if (stack.isEmpty() || !shouldShow()) return;
         if (stack.getItem().getName().getString().contains("GLASS_PANE")) return;
 
         String key = sanitizeName(stack.getHoverName().getString());
@@ -64,10 +66,11 @@ public class PriceCharts extends BUListener implements ToggleableFeature {
     }
 
     @Subscription
+    @OnlyWhenEnabled
     @OnlyOnSkyBlock
     @IgnoreFiller
     private void onClick(SlotClickEvent event) {
-        if (!isEnabled() || !shouldShow() || event.isCancelled()) {
+        if (!shouldShow() || event.isCancelled()) {
             return;
         }
 

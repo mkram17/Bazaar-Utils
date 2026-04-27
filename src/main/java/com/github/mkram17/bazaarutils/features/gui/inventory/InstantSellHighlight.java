@@ -5,6 +5,8 @@ import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.data.SellableAPI;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -85,6 +87,9 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
     }
 
     @Subscription
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useTargetScreens = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
         colorCache.clear();
 
