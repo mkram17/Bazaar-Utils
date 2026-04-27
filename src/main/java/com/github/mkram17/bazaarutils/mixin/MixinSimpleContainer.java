@@ -25,7 +25,8 @@ public abstract class MixinSimpleContainer {
         if (slot < 0 || slot >= this.items.size()) return;
 
         ReplaceItemEvent event = new ReplaceItemEvent(this.items.get(slot),(SimpleContainer) (Object) this,slot);
-        BazaarUtils.EVENT_BUS.post(event);
+
+        event.post(BazaarUtils.EVENT_BUS);
 
         if (event.getReplacement() != event.getOriginal()) {
             cir.setReturnValue(event.getReplacement());
