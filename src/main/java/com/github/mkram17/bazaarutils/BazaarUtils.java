@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsRepo;
 import com.github.mkram17.bazaarutils.utils.update.UpdateUtil;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
@@ -54,8 +55,6 @@ public class BazaarUtils implements ClientModInitializer {
 
         BazaarUtilsCommands.init();
 
-        BazaarUtilsLateInitModules.init();
-
         if (RepoAPI.isInitialized()) {
             onRepoReady();
         }
@@ -71,6 +70,8 @@ public class BazaarUtils implements ClientModInitializer {
 
     private void onRepoReady() {
         if (!repoReady.compareAndSet(false, true)) return;
+
+        ItemsRepo.buildSkyBlockItemsCache();
 
         BazaarUtilsLateInitModules.init();
         UpdateUtil.checkForUpdates();
