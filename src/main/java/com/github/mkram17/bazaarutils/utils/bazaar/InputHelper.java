@@ -2,7 +2,6 @@ package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.events.minecraft.SlotClickEvent;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -14,6 +13,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.util.Optional;
 

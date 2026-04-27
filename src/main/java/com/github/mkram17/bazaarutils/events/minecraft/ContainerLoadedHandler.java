@@ -104,7 +104,6 @@ public final class ContainerLoadedHandler extends BUListener {
                 }
             }
         }
-
         return false;
     }
 }

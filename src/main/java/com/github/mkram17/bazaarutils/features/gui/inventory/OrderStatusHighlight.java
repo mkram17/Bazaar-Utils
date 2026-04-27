@@ -3,8 +3,8 @@ package com.github.mkram17.bazaarutils.features.gui.inventory;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -16,20 +16,16 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
-import meteordevelopment.orbit.EventHandler;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ItemTooltipEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,13 +80,13 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
         super();
     }
 
-    @Override
-    protected void registerFabricEvents() {
-        ScreenEvents.AFTER_INIT.register(this::onScreenInitialized);
-        ItemTooltipCallback.EVENT.register(this::onTooltip);
+    @Subscription
+    private void onScreenInitialized(ContainerInitializedEvent event) {
+        colorCache.clear();
+        tooltipCache.clear();
     }
 
-    @EventHandler
+    @Subscription
     private void onContainerLoaded(ContainerLoadedEvent event) {
         if (!isEnabled() || !inCorrectScreen(event)) return;
 
@@ -99,12 +95,11 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
                 .forEach(stack -> populateCache(stack, event.getContainerSlots()));
     }
 
-    private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {
-        colorCache.clear();
-        tooltipCache.clear();
-    }
+    @Subscription
+    private void onTooltip(ItemTooltipEvent event) {
+        var stack = event.getItem();
+        var lines = event.getTooltip();
 
-    private void onTooltip(ItemStack stack, Item.TooltipContext tooltip, TooltipFlag type, List<Component> lines) {
         if (!isEnabled()) return;
 
         ScreenManager.getInstance().current()

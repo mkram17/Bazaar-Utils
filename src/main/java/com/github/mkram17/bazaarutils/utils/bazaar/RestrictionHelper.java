@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
-import com.github.mkram17.bazaarutils.events.minecraft.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -9,9 +8,11 @@ import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import lombok.Getter;
-import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import org.jetbrains.annotations.NotNull;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,7 +57,8 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
         });
     }
 
-    @EventHandler
+    @Subscription(inherited = true)
+    @OnlyOnSkyBlock
     public void onContainerLoaded(ContainerLoadedEvent event) {
         if (!(isEnabled() && inCorrectScreen(event))) {
             resetState();
@@ -68,12 +70,13 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
         clicks = 0;
     }
 
-    @EventHandler
+    @Subscription(inherited = true)
+    @OnlyOnSkyBlock
     public void onSlotClicked(SlotClickEvent event) {
         if (!(isEnabled() && inCorrectScreen())) return;
 
         boolean isRestrictedSlot = state.map(RestrictionState::targetItem)
-                .map(info -> info.slotIndex() == event.slotId)
+                .map(info -> info.slotIndex() == event.getSlot().getContainerSlot())
                 .orElse(false);
 
         if (!isRestrictedSlot) return;

@@ -37,7 +37,7 @@ import java.util.Optional;
  * <p><strong>Usage Example:</strong></p>
  * <pre>
  * {@code
- * @EventHandler
+ * @Subscription
  * public void onContainerLoaded(ContainerLoadedEvent event) {
  *    List<ItemStack> items = event.getItemStacks();
  *    processBazaarItems(items);

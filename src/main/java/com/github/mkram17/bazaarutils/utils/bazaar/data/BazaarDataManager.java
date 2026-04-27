@@ -124,7 +124,7 @@ public final class BazaarDataManager {
         currentReply = reply;
         consecutiveIdenticalSnapshots.set(0);
 
-        EVENT_BUS.post(new BazaarDataUpdateEvent(reply));
+        new BazaarDataUpdateEvent(reply).post(EVENT_BUS);
 
         if (previousSnapshotTs != -1) {
             PlayerActionUtil.notifyAll(

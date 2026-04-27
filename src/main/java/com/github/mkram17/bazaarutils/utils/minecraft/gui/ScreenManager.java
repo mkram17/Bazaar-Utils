@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
+import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
@@ -9,8 +10,6 @@ import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnIn
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import lombok.Getter;
-import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,11 +19,10 @@ import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.Nullable;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public class ScreenManager {
     @Getter
@@ -34,7 +32,7 @@ public class ScreenManager {
     public static void initialize() {
         BazaarScreenType.registerAll();
 
-        EVENT_BUS.subscribe(ScreenManager.class);
+        BazaarUtils.EVENT_BUS.register(instance);
 
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> instance.setCurrentScreen(screen));
     }
@@ -78,8 +76,8 @@ public class ScreenManager {
      */
     private boolean expectingServerFollowUp = false;
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    private static void onScreenChange(ScreenChangeEvent event) {
+    @Subscription(priority = Integer.MIN_VALUE)
+    private void onScreenChange(ScreenChangeEvent event) {
         Screen next = event.getNewScreen();
         Screen prev = event.getOldScreen();
 
@@ -115,8 +113,8 @@ public class ScreenManager {
         return screen instanceof SignEditScreen;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    private static void onContainerLoaded(ContainerLoadedEvent event) {
+    @Subscription(priority = Integer.MIN_VALUE)
+    private void onContainerLoaded(ContainerLoadedEvent event) {
         ContainerManager.onContainerLoaded(event);
 
         AbstractContainerScreen<ChestMenu> screen = event.getScreen();
