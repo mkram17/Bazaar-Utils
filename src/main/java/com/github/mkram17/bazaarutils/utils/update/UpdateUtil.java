@@ -85,20 +85,36 @@ public final class UpdateUtil {
     }
 
     public static void checkForUpdates() {
-        getUpdateContext().cleanup();
-        getUpdateContext().checkUpdate(getUpdateStream().toAutoUpdateKey()).thenCompose(update -> {
-            if (!update.isUpdateAvailable()) {
-                return CompletableFuture.completedFuture(null);
-            }
+        CompletableFuture.runAsync(() -> {
+            UpdateContext context = getUpdateContext();
+            context.cleanup();
 
-            if (MetadataConfig.AUTO_UPDATE_ENABLED) {
-                PlayerActionUtil.notifyAll("Successfully updated. Restart for changes to take effect.");
-                return update.launchUpdate();
-            } else {
-                PlayerActionUtil.notifyAll("A new version of Bazaar Utils is available! To update, download it from the Modrinth/GitHub, or enable auto update.");
-                return CompletableFuture.completedFuture(null);
-            }
-        });
+            context.checkUpdate(getUpdateStream().toAutoUpdateKey())
+                    .thenCompose(update -> {
+                        if (!update.isUpdateAvailable()) {
+                            Util.logMessage("Already up to date.");
+
+                            return CompletableFuture.completedFuture(null);
+                        }
+
+                        if (MetadataConfig.AUTO_UPDATE_ENABLED) {
+                            return update.launchUpdate().thenRun(() -> PlayerActionUtil.notifyAll("Update downloaded! Restart to apply."));
+                        } else {
+                            PlayerActionUtil.notifyAll(
+                                    "A new Bazaar Utils version is available! " +
+                                            "Download it from Modrinth/GitHub, or enable auto-update in settings."
+                            );
+
+                            return CompletableFuture.completedFuture(null);
+                        }
+                    })
+                    .exceptionally(exception -> {
+                        Util.logMessage("Update check failed: %s".formatted(exception.getMessage()));
+
+                        return null;
+                    });
+
+        }, BazaarUtils.BUExecutorService);
     }
 
     private static int extractMajor(Version version) {
