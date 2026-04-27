@@ -4,7 +4,6 @@ import moe.nea.libautoupdate.GithubReleaseUpdateSource;
 import moe.nea.libautoupdate.UpdateData;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BazaarUtilsGithubSource extends GithubReleaseUpdateSource {
     public BazaarUtilsGithubSource() {
@@ -13,18 +12,24 @@ public class BazaarUtilsGithubSource extends GithubReleaseUpdateSource {
 
     @Override
     protected UpdateData selectUpdate(String updateStream, List<GithubRelease> releases) {
-        return findLatestRelease(releases.stream().filter(release -> {
-            if (release.isDraft()) return false;
+        UpdateStream stream = UpdateStream.fromVersion(updateStream);
 
-            String tag = release.getTagName().toLowerCase();
-            boolean isAlpha = tag.contains("alpha");
-            boolean isBeta = tag.contains("beta");
+        return findLatestRelease(
+                releases.stream()
+                        .filter(release -> !release.isDraft())
+                        .filter(release -> matchesStream(release.getTagName().toLowerCase(), stream))
+                        .toList()
+        );
+    }
 
-            return switch (updateStream.toLowerCase()) {
-                case "alpha" -> true;
-                case "beta" -> !isAlpha;
-                default -> !isAlpha && !isBeta;
-            };
-        }).collect(Collectors.toList()));
+    private boolean matchesStream(String tag, UpdateStream stream) {
+        boolean isAlpha = tag.contains("alpha");
+        boolean isBeta  = tag.contains("beta");
+
+        return switch (stream) {
+            case ALPHA  -> true;     // alpha users receive all releases
+            case BETA   -> !isAlpha; // beta users skip alpha
+            case STABLE -> !isAlpha && !isBeta;
+        };
     }
 }
