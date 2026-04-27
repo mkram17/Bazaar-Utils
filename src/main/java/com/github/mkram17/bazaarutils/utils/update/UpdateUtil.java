@@ -95,21 +95,13 @@ public final class UpdateUtil {
         return Integer.parseInt(matcher.group(1));
     }
 
-    public static String getUpdateSource(){
-        String currentVersion = MetadataConfig.MOD_VERSION;
-        String currentStream = "full";
-
-        if (currentVersion.toLowerCase().contains("alpha")) {
-            currentStream = "alpha";
-        } else if (currentVersion.toLowerCase().contains("beta")) {
-            currentStream = "beta";
-        }
-        return currentStream;
+    public static UpdateStream getUpdateStream() {
+        return UpdateStream.fromVersion(MetadataConfig.MOD_VERSION);
     }
 
     public static void checkForUpdates() {
         getUpdateContext().cleanup();
-        getUpdateContext().checkUpdate(getUpdateSource()).thenCompose(update -> {
+        getUpdateContext().checkUpdate(getUpdateStream().toAutoUpdateKey()).thenCompose(update -> {
             if (!update.isUpdateAvailable()) {
                 return CompletableFuture.completedFuture(null);
             }
