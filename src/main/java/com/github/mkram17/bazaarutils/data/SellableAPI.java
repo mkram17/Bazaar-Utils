@@ -3,16 +3,19 @@ package com.github.mkram17.bazaarutils.data;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.google.common.collect.MapMaker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.Slot;
@@ -180,17 +183,18 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
         }
     }
 
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
+
     @Override
-    public EnumSet<BazaarScreenType> getTargetScreens() {
-        return EnumSet.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
+    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+        return SCREENS;
     }
 
     @Subscription
     @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstrainsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
         var context = event.asContext();
-
-        if (!inCorrectScreen(event)) return;
 
         SellablePageLayout.getInstantSellItem(context).ifPresent(info -> {
             InstantSell.parse(info.itemStack(), context);
@@ -208,6 +212,7 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
 
     @Subscription
     @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstrainsInterface = true)
     private void onInventoryChange(PlayerInventoryChangeEvent event) {
         if (InstantSell.orders().isEmpty() && SellSacks.orders().isEmpty()) return;
 

@@ -2,13 +2,13 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.component.ItemLore;
@@ -40,11 +40,8 @@ public final class OrderUpdater extends BUListener {
     private static final double FILL_TOLERANCE_RATIO = 0.05; //5%
 
     @Subscription(priority = Subscription.HIGH)
+    @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
     private void onGUI(ContainerLoadedEvent event) {
-        if (!ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
-            return;
-        }
-
         lowerChestInventory = event.getContainer();
 
         List<ItemStack> allInventoryStacks = event.getContainerSlots().stream().map(Slot::getItem).toList();

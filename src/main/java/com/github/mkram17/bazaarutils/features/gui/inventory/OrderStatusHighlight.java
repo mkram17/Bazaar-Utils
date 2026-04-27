@@ -3,9 +3,10 @@ package com.github.mkram17.bazaarutils.features.gui.inventory;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.events.BUListener;
-import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -83,6 +84,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     }
 
     @Subscription
+    @OnlyBazaarScreen(any = true)
     private void onScreenInitialized(ContainerInitializedEvent event) {
         colorCache.clear();
         tooltipCache.clear();
@@ -91,9 +93,8 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     @Subscription
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstrainsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
-        if (!isEnabled() || !inCorrectScreen(event)) return;
-
         event.getContainerSlots().stream()
                 .map(Slot::getItem)
                 .forEach(stack -> populateCache(stack, event.getContainerSlots()));
@@ -102,6 +103,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     @Subscription
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstrainsInterface = true)
     private void onTooltip(ItemTooltipEvent event) {
         var stack = event.getItem();
         var lines = event.getTooltip();

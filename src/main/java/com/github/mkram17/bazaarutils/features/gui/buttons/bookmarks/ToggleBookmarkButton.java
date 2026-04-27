@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -23,7 +24,6 @@ import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,8 +73,9 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
 
     @Subscription
     @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstrainsInterface = true)
     private void onReplaceItemEvent(ReplaceItemEvent event) {
-        if (!shouldReplaceItem(event) || !inCorrectScreen()) return;
+        if (!shouldReplaceItem(event)) return;
 
         resolveCurrentItemName().ifPresent(name -> BookmarkUtil.currentBookmarkOpt = BookmarkUtil.findMatchingBookmark(name));
 
@@ -83,8 +84,9 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
 
     @Subscription
     @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstrainsInterface = true)
     private void onClick(SlotClickEvent event) {
-        if (!wasButtonClicked(event) || !inCorrectScreen()) return;
+        if (!wasButtonClicked(event)) return;
 
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
 

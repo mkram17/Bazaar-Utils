@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -75,9 +76,8 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     @Subscription(inherited = true)
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstrainsInterface = true)
     public void onSlotClicked(SlotClickEvent event) {
-        if (!inCorrectScreen()) return;
-
         boolean isRestrictedSlot = state.map(RestrictionState::targetItem)
                 .map(info -> info.slotIndex() == event.getSlot().getContainerSlot())
                 .orElse(false);
