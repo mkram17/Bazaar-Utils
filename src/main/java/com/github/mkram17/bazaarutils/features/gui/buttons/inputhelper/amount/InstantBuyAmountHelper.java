@@ -115,7 +115,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
 
     @Override
     public Component getDescription(int index) {
-        return Component.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
+        return Component.literal("Slot " + slotIndex + " · " + resolveStack().getItem().getName().getString());
     }
 
     private static int getNextSlotIndex() {
