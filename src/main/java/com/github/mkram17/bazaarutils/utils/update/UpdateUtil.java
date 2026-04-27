@@ -4,19 +4,33 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.Util;
 import moe.nea.libautoupdate.*;
-import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.fabricmc.loader.api.metadata.version.VersionComparisonOperator;
+import net.fabricmc.loader.api.metadata.version.VersionPredicate;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.concurrent.CompletableFuture;
 
 public final class UpdateUtil {
+    private static UpdateContext updateContext;
 
-    public static BazaarUtilsGithubSource githubSource = new BazaarUtilsGithubSource();
-    private static final Pattern LEADING_NUMBER = Pattern.compile("^(\\d+)");
+    private static UpdateContext getUpdateContext() {
+        if (updateContext == null) {
+            String versionTag = "v" + BazaarUtils.SELF.getMetadata().getVersion().getFriendlyString();
+
+            updateContext = new UpdateContext(
+                    new BazaarUtilsGithubSource(),
+                    UpdateTarget.deleteAndSaveInTheSameFolder(BazaarUtils.class),
+                    CurrentVersion.ofTag(versionTag),
+                    BazaarUtils.MOD_ID
+            );
+        }
+
+        return updateContext;
+    }
 
     public static void updateModProperties() {
         ModMetadata metadata = BazaarUtils.SELF.getMetadata();
@@ -37,60 +51,33 @@ public final class UpdateUtil {
         ConfigUtil.scheduleConfigSave();
     }
 
-    private static UpdateContext updateContext;
+    /**
+     * Detects a major version bump using Fabric's VersionPredicate API.
+     *
+     * Strategy: parse both versions, extract the old major number, then build
+     * a VersionPredicate ">= <oldMajor+1>.0.0" and test the new version against it.
+     */
+    private static boolean isMajorVersionChanged(String oldRaw, String newRaw) {
+        if (oldRaw == null || oldRaw.isBlank()) return false;
 
-    private static UpdateContext getUpdateContext() {
-        if (updateContext == null) {
-            String versionTag = "v" + BazaarUtils.SELF.getMetadata().getVersion().getFriendlyString();
+        try {
+            Version oldVersion = Version.parse(stripLeadingV(oldRaw));
+            Version newVersion = Version.parse(stripLeadingV(newRaw));
 
-            updateContext = new UpdateContext(
-                    new BazaarUtilsGithubSource(),
-                    UpdateTarget.deleteAndSaveInTheSameFolder(BazaarUtils.class),
-                    CurrentVersion.ofTag(versionTag),
-                    BazaarUtils.MOD_ID
-            );
-        }
+            int oldMajor = extractMajor(oldVersion);
 
-        return updateContext;
-    }
+            // Build predicate: ">= <oldMajor+1>.0.0"
+            // e.g. if old is 1.x.x, predicate is ">=2.0.0"
+            // Uses VersionComparisonOperator.getSerialized() from fabric's stable api
+            String predicateStr = VersionComparisonOperator.GREATER_EQUAL.getSerialized() + (oldMajor + 1) + ".0.0";
+            VersionPredicate nextMajorBoundary = VersionPredicate.parse(predicateStr);
 
-    private static String getCurrentVersionTag() {
-        return FabricLoader.getInstance()
-                .getModContainer(BazaarUtils.MOD_ID)
-                .map(container -> container.getMetadata().getVersion().getFriendlyString())
-                .orElse(MetadataConfig.MOD_VERSION);
-    }
+            return nextMajorBoundary.test(newVersion);
+        } catch (Exception exception) {
+            Util.logMessage("Could not compare versions '%s' and '%s': %s".formatted(oldRaw, newRaw, exception.getMessage()));
 
-    private static boolean isMajorVersionChanged(String oldVersion, String currentVersion) {
-        Integer oldMajor = extractMajorVersion(oldVersion);
-        Integer currentMajor = extractMajorVersion(currentVersion);
-
-        if (oldMajor == null || currentMajor == null) {
             return false;
         }
-
-        return !oldMajor.equals(currentMajor);
-    }
-
-    private static Integer extractMajorVersion(String version) {
-        if (version == null || version.isBlank()) {
-            return null;
-        }
-
-        String normalizedVersion = version.trim();
-        if (normalizedVersion.startsWith("v") || normalizedVersion.startsWith("V")) {
-            normalizedVersion = normalizedVersion.substring(1);
-        }
-
-        String coreVersion = normalizedVersion.split("[-+]", 2)[0];
-        String firstSegment = coreVersion.split("\\.", 2)[0];
-        Matcher matcher = LEADING_NUMBER.matcher(firstSegment);
-
-        if (!matcher.find()) {
-            return null;
-        }
-
-        return Integer.parseInt(matcher.group(1));
     }
 
     public static UpdateStream getUpdateStream() {
@@ -112,5 +99,20 @@ public final class UpdateUtil {
                 return CompletableFuture.completedFuture(null);
             }
         });
+    }
+
+    private static int extractMajor(Version version) {
+        String[] parts = version.getFriendlyString().split("[.\\-+]", 2);
+        try {
+            return Integer.parseInt(parts[0]);
+        } catch (NumberFormatException exception) {
+            return 0;
+        }
+    }
+
+    private static String stripLeadingV(String version) {
+        return (version.startsWith("v") || version.startsWith("V"))
+                ? version.substring(1)
+                : version;
     }
 }
