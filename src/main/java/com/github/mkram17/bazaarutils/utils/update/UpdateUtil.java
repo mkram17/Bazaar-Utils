@@ -39,12 +39,22 @@ public final class UpdateUtil {
         });
     }
 
-    private static final UpdateContext updateContext = new UpdateContext(
-            githubSource,
-            UpdateTarget.deleteAndSaveInTheSameFolder(BazaarUtils.class),
-            CurrentVersion.ofTag("v" + getCurrentVersionTag()),
-            "bazaarutils"
-    );
+    private static UpdateContext updateContext;
+
+    private static UpdateContext getUpdateContext() {
+        if (updateContext == null) {
+            String versionTag = "v" + BazaarUtils.SELF.getMetadata().getVersion().getFriendlyString();
+
+            updateContext = new UpdateContext(
+                    new BazaarUtilsGithubSource(),
+                    UpdateTarget.deleteAndSaveInTheSameFolder(BazaarUtils.class),
+                    CurrentVersion.ofTag(versionTag),
+                    BazaarUtils.MOD_ID
+            );
+        }
+
+        return updateContext;
+    }
 
     private static String getCurrentVersionTag() {
         return FabricLoader.getInstance()
@@ -98,8 +108,8 @@ public final class UpdateUtil {
     }
 
     public static void checkForUpdates() {
-        updateContext.cleanup();
-        updateContext.checkUpdate(getUpdateSource()).thenCompose(update -> {
+        getUpdateContext().cleanup();
+        getUpdateContext().checkUpdate(getUpdateSource()).thenCompose(update -> {
             if (!update.isUpdateAvailable()) {
                 return CompletableFuture.completedFuture(null);
             }
