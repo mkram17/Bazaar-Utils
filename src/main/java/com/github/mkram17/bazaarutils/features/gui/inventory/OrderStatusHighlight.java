@@ -5,15 +5,17 @@ import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
+import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
-import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -36,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 //drawing done in MixinHandledScreen
 @Module
-public class OrderStatusHighlight extends BUListener implements ToggleableFeature, SlotHighlight {
+public class OrderStatusHighlight extends BUListener implements ToggleableFeature, ScreenConstrained, SlotHighlight {
     public static final Identifier IDENTIFIER = Identifier.tryBuild(BazaarUtils.MOD_ID, "highlights/standard_background");
 
     @Override
@@ -71,6 +73,13 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
         return InventoryConfig.ORDER_STATUS_HIGHLIGHT_TOGGLE;
     }
 
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.ORDERS_PAGE);
+
+    @Override
+    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+        return SCREENS;
+    }
+
     public OrderStatusHighlight() {
         super();
     }
@@ -83,7 +92,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
 
     @EventHandler
     private void onChestLoaded(ContainerLoadedEvent event) {
-        if (!BazaarUtilsModules.OrderStatusHighlight.isEnabled() || !ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) return;
+        if (!isEnabled() || !inCorrectScreen(event)) return;
 
         event.getContainerSlots().stream()
                 .map(Slot::getItem)

@@ -19,6 +19,7 @@ import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -158,6 +159,10 @@ public class ScreenManager {
 
     public Optional<ScreenContext> current() {
         return Optional.ofNullable(history.peekFirst()).map(ScreenContext::new);
+    }
+
+    public @Nullable ScreenContext currentOrNull() {
+        return current().orElse(null);
     }
 
     public Optional<ScreenContext> getAtDepth(int depth) {

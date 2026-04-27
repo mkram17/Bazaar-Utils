@@ -3,11 +3,12 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
@@ -78,9 +79,11 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
         return ItemRef.of(this::getItemId);
     }
 
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.BUY_ORDER_AMOUNT);
+
     @Override
-    protected boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreenType.BUY_ORDER_AMOUNT);
+    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+        return SCREENS;
     }
 
     public BuyOrderAmountHelper(int slotIndex) {

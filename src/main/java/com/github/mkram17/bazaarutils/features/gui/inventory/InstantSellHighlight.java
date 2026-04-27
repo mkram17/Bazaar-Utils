@@ -4,16 +4,18 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
@@ -30,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Module
-public class InstantSellHighlight extends BUListener implements ToggleableFeature, SlotHighlight {
+public class InstantSellHighlight extends BUListener implements SlotHighlight, ToggleableFeature, ScreenConstrained {
     public static final Identifier IDENTIFIER = Identifier.tryBuild(BazaarUtils.MOD_ID, "highlights/standard_background");
 
     @Override
@@ -63,6 +65,13 @@ public class InstantSellHighlight extends BUListener implements ToggleableFeatur
         return colorCache.get(slotIndex);
     }
 
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE);
+
+    @Override
+    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+        return SCREENS;
+    }
+
     @Override
     public boolean isEnabled() {
         return InventoryConfig.INSTANT_SELL_HIGHLIGHT_TOGGLE;
@@ -81,18 +90,16 @@ public class InstantSellHighlight extends BUListener implements ToggleableFeatur
     private void onChestLoaded(ContainerLoadedEvent event) {
         colorCache.clear();
 
-        if (!isEnabled()) return;
+        if (!isEnabled() || !inCorrectScreen(event)) return;
 
-        ScreenManager.getInstance().current().ifPresent(context -> {
-            Minecraft client = Minecraft.getInstance();
-            if (client.player == null) return;
+        Minecraft client = Minecraft.getInstance();
+        if (client.player == null) return;
 
-            List<OrderInfo> orders = resolveOrders(context);
-            if (orders.isEmpty()) return;
+        List<OrderInfo> orders = resolveOrders(event.asContext());
+        if (orders.isEmpty()) return;
 
-            Set<String> names = orders.stream().map(OrderInfo::getName).collect(Collectors.toSet());
-            populateCache(names, event.getScreen(), client.player.getInventory());
-        });
+        Set<String> names = orders.stream().map(OrderInfo::getName).collect(Collectors.toSet());
+        populateCache(names, event.getScreen(), client.player.getInventory());
     }
 
     private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {

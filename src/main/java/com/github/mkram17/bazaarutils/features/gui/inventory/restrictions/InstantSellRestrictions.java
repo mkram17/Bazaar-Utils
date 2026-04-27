@@ -5,17 +5,17 @@ import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 //TODO maybe color chest if it is locked
 @Module
@@ -48,13 +48,15 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
         return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.INSTANT_SELL);
     }
 
-    public InstantSellRestrictions() {
-        super("Instant Sell Restrictions");
-    }
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE);
 
     @Override
-    public boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEM_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE);
+    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+        return SCREENS;
+    }
+
+    public InstantSellRestrictions() {
+        super("Instant Sell Restrictions");
     }
 
     @Override

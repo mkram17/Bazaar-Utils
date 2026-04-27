@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar;
 import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
+import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public abstract class InputHelper<T> implements ItemButton {
+public abstract class InputHelper<T> implements ItemButton, ScreenConstrained {
     @Getter
     protected String name;
 
@@ -42,7 +43,7 @@ public abstract class InputHelper<T> implements ItemButton {
     }
 
     public void onChestLoaded(ContainerLoadedEvent event) {
-        if (!inCorrectScreen()) {
+        if (!inCorrectScreen(event)) {
             resetState();
 
             return;
@@ -82,10 +83,6 @@ public abstract class InputHelper<T> implements ItemButton {
         handleAction(state.get());
         resetState();
     }
-
-    //    Screen/menu/inventory stuff
-
-    protected abstract boolean inCorrectScreen();
 
     //    Button stuff
 

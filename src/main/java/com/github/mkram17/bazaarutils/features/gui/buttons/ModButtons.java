@@ -9,8 +9,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.Registe
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
-import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
+import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.world.item.Items;

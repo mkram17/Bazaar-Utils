@@ -17,9 +17,8 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.TextDisplayWid
 import com.github.mkram17.bazaarutils.utils.TimeUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
-import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.network.chat.Component;

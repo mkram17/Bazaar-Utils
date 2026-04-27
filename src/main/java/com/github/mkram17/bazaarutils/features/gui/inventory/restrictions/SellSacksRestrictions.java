@@ -7,17 +7,15 @@ import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.contro
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Module
 public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictions.SellSacksState> {
@@ -49,14 +47,15 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
         return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.SELL_SACKS);
     }
 
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE);
+
+    @Override
+    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+        return SCREENS;
+    }
 
     public SellSacksRestrictions() {
         super("Sell Sacks Restrictions");
-    }
-
-    @Override
-    public boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEM_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE);
     }
 
     @Override
