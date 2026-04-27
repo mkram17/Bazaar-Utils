@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.features.chat;
 
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -54,10 +55,9 @@ public class UselessBazaarNotificationsRemover extends BUListener implements Tog
     public transient boolean firstTimeRemoved = true;
 
     @Subscription
+    @OnlyWhenEnabled
     @OnlyOnSkyBlock
     private void onChat(ChatReceivedEvent.Pre event) {
-        if (!isEnabled()) return;
-
         String message = event.getText();
 
         if (isNotificationUseless(message)) {

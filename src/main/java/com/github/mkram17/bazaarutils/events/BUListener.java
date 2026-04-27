@@ -4,6 +4,8 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import lombok.Getter;
 
+import java.util.Optional;
+
 /**
  * Interface for event listeners.
  * <p>
@@ -35,7 +37,7 @@ public abstract class BUListener implements AbstractListener {
         else isSubscribed = true;
 
         registerFabricEvents();
-        subscribeToSkyblockApiEventBus();
+        RegistrationScope.wrap(this, this::subscribeToSkyblockApiEventBus);
     }
 
     protected void registerFabricEvents() {}

@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -24,6 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ItemTooltipEvent;
 
@@ -87,6 +89,8 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     }
 
     @Subscription
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
     private void onContainerLoaded(ContainerLoadedEvent event) {
         if (!isEnabled() || !inCorrectScreen(event)) return;
 
@@ -96,6 +100,8 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     }
 
     @Subscription
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
     private void onTooltip(ItemTooltipEvent event) {
         var stack = event.getItem();
         var lines = event.getTooltip();
