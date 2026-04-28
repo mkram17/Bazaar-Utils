@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.contro
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.RestrictionTarget;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.StringRestrictionControl;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.SlotHighlight;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 
 import java.util.ArrayList;
@@ -38,6 +39,16 @@ public final class InventoryConfig {
     public static boolean INSTANT_SELL_HIGHLIGHT_TOGGLE = true;
 
     @ConfigEntry(
+            id = "instant_sell_highlight:style",
+            translation = "bazaarutils.config.inventory.instant_sell_highlight.style.label"
+    )
+    @Comment(
+            value = "Determines how the highlight color is rendered on matching inventory slots.",
+            translation = "bazaarutils.config.inventory.instant_sell_highlight.style.hint"
+    )
+    public static SlotHighlight.HighlightStyle INSTANT_SELL_HIGHLIGHT_STYLE = SlotHighlight.HighlightStyle.BACKGROUND;
+
+    @ConfigEntry(
             id = "instant_sell_highlight:color",
             translation = "bazaarutils.config.inventory.instant_sell_highlight.color.label"
     )
@@ -61,6 +72,16 @@ public final class InventoryConfig {
     )
     @ConfigOption.Separator(value = "bazaarutils.config.inventory.separator.order_status_highlight.label")
     public static boolean ORDER_STATUS_HIGHLIGHT_TOGGLE = true;
+
+    @ConfigEntry(
+            id = "order_status_highlight:style",
+            translation = "bazaarutils.config.inventory.order_status_highlight.style.label"
+    )
+    @Comment(
+            value = "Determines how the status colors are rendered on your order slots.",
+            translation = "bazaarutils.config.inventory.order_status_highlight.style.hint"
+    )
+    public static SlotHighlight.HighlightStyle ORDER_STATUS_HIGHLIGHT_STYLE = SlotHighlight.HighlightStyle.BACKGROUND;
 
     @ConfigEntry(
             id = "order_status_highlight:competitive_color",

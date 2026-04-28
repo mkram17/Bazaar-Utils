@@ -118,6 +118,14 @@
       "disabled.label": "No indicator"
     },
 
+    "highlight.{}": {
+      "style.{}": {
+        "background.label": "Background Fill",
+        "foreground.label": "Foreground Tint",
+        "border.label": "Border Outline"
+      }
+    },
+
     "chat.{}": {
       "category.label": "Chat",
       "category.hint": "Configurations for the chat features of the mod",
@@ -260,9 +268,11 @@
       "separator.instant_sell_highlight.label": "Instant Sell Highlight",
       "instant_sell_highlight.{}": {
         "label": "Instant Sell Highlight",
-        "hint": [
-          "Highlights items in your inventory that would be sold by the Instant Sell button."
-        ],
+        "hint": "Highlights items in your inventory that would be sold by the Instant Sell button.",
+        "style.{}": {
+          "label": "Highlight Style",
+          "hint": "Determines how the highlight color is rendered on matching inventory slots."
+        },
         "color.label": "Highlight Color"
       },
 
@@ -270,6 +280,10 @@
       "order_status_highlight.{}": {
         "label": "Order Status Highlight",
         "hint": "Highlights the status of your Bazaar Orders by coloring the items with representative colors.",
+        "style.{}": {
+          "label": "Highlight Style",
+          "hint": "Determines how the status colors are rendered on your order slots."
+        },
 
         "competitive_color.{}": {
           "label": "Competitive Color",
