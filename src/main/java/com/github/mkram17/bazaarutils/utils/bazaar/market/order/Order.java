@@ -12,6 +12,8 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -34,6 +36,33 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @ToString(callSuper=true)
 public class Order extends OrderInfo implements AbstractListener {
+    public static final Codec<Order> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING
+                    .fieldOf("name")
+                    .forGetter(Order::getName),
+            Codec.INT
+                    .fieldOf("volume")
+                    .forGetter(Order::getVolume),
+            Codec.DOUBLE
+                    .fieldOf("price_per_item")
+                    .forGetter(Order::getPricePerItem),
+            Codec.STRING
+                    .xmap(TransactionType.Side::valueOf, Enum::name)
+                    .fieldOf("side")
+                    .forGetter(order -> order.getTransactionType().getSide()),
+            Codec.INT
+                    .optionalFieldOf("amount_claimed", 0)
+                    .forGetter(Order::getAmountClaimed),
+            Codec.INT
+                    .optionalFieldOf("amount_filled", 0)
+                    .forGetter(Order::getAmountFilled)
+    ).apply(instance, (name, volume, pricePerItem, side, amountClaimed, amountFilled) -> {
+        Order order = new Order(name, volume, pricePerItem, side, null);
+        order.setAmountClaimed(amountClaimed);
+        order.setAmountFilled(amountFilled); // restores OrderStatus via existing logic
+        return order;
+    }));
+
     public static final int OUTBID_ORDER_NOTIFICATIONS = 3; // number of notifications to send when an order becomes outdated
 
     @Getter @Setter

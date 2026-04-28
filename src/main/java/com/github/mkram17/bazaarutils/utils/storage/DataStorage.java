@@ -4,35 +4,29 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.codecs.CodecGsonAdapter;
-import com.github.mkram17.bazaarutils.utils.codecs.ZonedDateTimeCodec;
 import com.google.gson.*;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.world.item.ItemStack;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.TimePassed;
 import tech.thatgravyboat.skyblockapi.api.events.time.TickEvent;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DataStorage<T> {
     public static final Path DEFAULT_PATH = FabricLoader.getInstance().getConfigDir().resolve(BazaarUtils.MOD_ID).resolve("data");
 
-    private static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .registerTypeAdapter(ItemStack.class, new CodecGsonAdapter<>(ItemStack.CODEC))
-            .registerTypeAdapter(ZonedDateTime.class, new CodecGsonAdapter<>(ZonedDateTimeCodec.CODEC))
-            .create();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private static final Set<DataStorage<?>> REQUIRES_SAVE = ConcurrentHashMap.newKeySet();
 
@@ -56,44 +50,62 @@ public class DataStorage<T> {
         for (DataStorage<?> s : toSave) s.saveToSystem();
     }
 
-    private final Function<Integer, Type> codec;
-    private final Type currentCodec;
     private final int version;
+    private final Function<Integer, Codec<T>> codec;
+    private final Codec<T> currentCodec;
     private final Path path;
-    private T data;
+    private final T data;
 
-
-    public DataStorage(int version, Supplier<T> defaultData, String fileName, Function<Integer, Type> codec) {
+    public DataStorage(int version, Supplier<T> defaultData, String fileName, Function<Integer, Codec<T>> codec) {
         this.version = version;
         this.codec = codec;
+        this.currentCodec = codec.apply(version);
         this.path = DEFAULT_PATH.resolve(fileName + ".json");
         this.data = load(defaultData);
-        this.currentCodec = codec.apply(version);
     }
 
-    public DataStorage(int version, Supplier<T> defaultData, String fileName, Type dataType) {
-        this(version, defaultData, fileName, v -> dataType);
+    public DataStorage(int version, Supplier<T> defaultData, String fileName, Codec<T> codec) {
+        this(version, defaultData, fileName, v -> codec);
     }
 
-    public DataStorage(Supplier<T> defaultData, String fileName, Type dataType) {
-        this(0, defaultData, fileName, v -> dataType);
+    public DataStorage(Supplier<T> defaultData, String fileName, Codec<T> codec) {
+        this(0, defaultData, fileName, v -> codec);
     }
 
-    public T get() { return data; }
-    public void set(T newData) { this.data = newData; }
-    public void save() { REQUIRES_SAVE.add(this); }
+    public T get() {
+        return data;
+    }
+
+    public void edit(Consumer<T> modifier) {
+        modifier.accept(data);
+        save();
+    }
+
+    public void save() {
+        REQUIRES_SAVE.add(this);
+    }
 
     public void delete() {
-        try { Files.deleteIfExists(path); }
-        catch (IOException e) { Util.logError("Failed to delete " + path, e); }
+        try {
+            Files.deleteIfExists(path);
+            Util.logMessage("Deleted %s".formatted(path));
+        } catch (IOException e) {
+            Util.logError("Failed to delete " + path, e);
+        }
     }
 
     private T load(Supplier<T> defaultData) {
         if (!Files.exists(path)) {
-            try { Files.createDirectories(path.getParent()); }
-            catch (IOException e) { Util.logError("Failed to create data directory", e); }
+            try {
+                Files.createDirectories(path.getParent());
+            } catch (IOException e) {
+                Util.logError("Failed to create data directory", e);
+            }
+            Util.logError("No existing data at %s — initialising defaults".formatted(path), null);
+
             return defaultData.get();
         }
+
         try {
             JsonObject root = JsonParser.parseString(
                     Files.readString(path, StandardCharsets.UTF_8)
@@ -102,14 +114,20 @@ public class DataStorage<T> {
             int fileVersion = root.get("@bazaarutils:version").getAsInt();
             JsonElement data = root.get("@bazaarutils:data");
 
-            for (int v = fileVersion; v < this.version; v++) {
-                Object intermediate = GSON.fromJson(data, codec.apply(v));
-                data = GSON.toJsonTree(intermediate, codec.apply(v));
+            if (fileVersion < this.version) {
+                Util.logMessage("Migrating %s v%d → v%d".formatted(path.getFileName(), fileVersion, this.version));
             }
 
-            T loaded = GSON.fromJson(data, codec.apply(this.version));
+            for (int v = fileVersion; v < this.version; v++) {
+                T intermediate = codec.apply(v).parse(JsonOps.INSTANCE, data).getOrThrow();
+                data = codec.apply(v + 1).encodeStart(JsonOps.INSTANCE, intermediate).getOrThrow();
+            }
 
-            return loaded != null ? loaded : defaultData.get();
+            T result = codec.apply(this.version).parse(JsonOps.INSTANCE, data).getOrThrow();
+
+            Util.logMessage("Loaded %s (v%d)".formatted(DataStorage.DEFAULT_PATH.relativize(path), this.version));
+
+            return result;
         } catch (Exception e) {
             Util.logError("Failed to load " + DEFAULT_PATH.relativize(path) + ", using defaults.", e);
 
@@ -121,18 +139,14 @@ public class DataStorage<T> {
         Util.logMessage("Saving " + path);
         try {
             Files.createDirectories(path.getParent());
+            JsonElement encoded = currentCodec.encodeStart(JsonOps.INSTANCE, data).getOrThrow();
             JsonObject root = new JsonObject();
             root.addProperty("@bazaarutils:version", version);
-            JsonElement encoded = GSON.toJsonTree(data, currentCodec);
-            if (encoded == null) {
-                Util.logMessage("Failed to encode " + data + " to json");
-                return;
-            }
             root.add("@bazaarutils:data", encoded);
             Files.writeString(path, GSON.toJson(root), StandardCharsets.UTF_8);
-            Util.logMessage("Saved " + path);
-        } catch (Exception e) {
-            Util.logError("Failed to save " + data + " to file", e);
+            Util.logMessage("Saved %s (v%d)".formatted(DataStorage.DEFAULT_PATH.relativize(path), version));
+        } catch (Exception exception) {
+            Util.logError("Failed to save %s — data may be lost".formatted(DataStorage.DEFAULT_PATH.relativize(path)), exception);
         }
     }
 }
