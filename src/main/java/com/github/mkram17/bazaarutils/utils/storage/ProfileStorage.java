@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.utils.storage;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
@@ -29,7 +30,7 @@ public class ProfileStorage<T> {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Set<ProfileStorage<?>> REQUIRES_SAVE = ConcurrentHashMap.newKeySet();
 
-    @Module
+    @PreInitModule
     public static final class Listener extends BUListener {
         @Subscription(priority = Integer.MIN_VALUE)
         public void onProfileSwitch(ProfileChangeEvent event) {
