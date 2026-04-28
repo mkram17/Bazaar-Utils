@@ -2,6 +2,13 @@
   "owo:extended_lang": true,
 
   "bazaarutils.ref.{}": {
+    "mark_indicator": [
+      {
+        "text": "₿",
+        "color": "gold"
+      }
+    ],
+
     "instant_sell": [{
       "text": "Instant Sell",
       "color": "green"
@@ -96,6 +103,19 @@
         { "translate": "bazaarutils.ref.community_center" }, " in the ",
         { "translate": "bazaarutils.ref.skyblock_hub" }, "."
       ]
+    },
+
+    "modify_indicator.{}": {
+      "label": "Modify Indicator",
+      "hint": [
+        "Item modified or added by Bazaar Utils will have a small indicator (",
+        { "translate":  "bazaarutils.ref.mark_indicator" }, ") to signal modification."
+      ],
+      "prefix.label": "Prefix in name",
+      "suffix.label": "Suffix in name",
+      "lore.label": "Last line in lore",
+      "at_modification.label": "At Modification",
+      "disabled.label": "No indicator"
     },
 
     "chat.{}": {
