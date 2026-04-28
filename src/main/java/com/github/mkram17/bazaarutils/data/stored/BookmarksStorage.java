@@ -1,6 +1,7 @@
-package com.github.mkram17.bazaarutils.utils.storage;
+package com.github.mkram17.bazaarutils.data.stored;
 
 import com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks.Bookmark;
+import com.github.mkram17.bazaarutils.utils.storage.DataStorage;
 import com.mojang.serialization.Codec;
 
 import java.util.ArrayList;

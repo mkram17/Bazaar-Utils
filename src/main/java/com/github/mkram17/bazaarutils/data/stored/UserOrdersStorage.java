@@ -1,10 +1,9 @@
-package com.github.mkram17.bazaarutils.utils.storage;
+package com.github.mkram17.bazaarutils.data.stored;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
-import com.google.gson.reflect.TypeToken;
+import com.github.mkram17.bazaarutils.utils.storage.ProfileStorage;
 import com.mojang.serialization.Codec;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
