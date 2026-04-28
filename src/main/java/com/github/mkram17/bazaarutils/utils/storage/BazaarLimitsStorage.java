@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class BazaarLimitsStorage {
-    public static final DataStorage<List<BazaarLimitsVisualizer.OrderLimitEntry>> INSTANCE = new DataStorage<>(
+    public static final ProfileStorage<List<BazaarLimitsVisualizer.OrderLimitEntry>> INSTANCE = new ProfileStorage<>(
             0,
             ArrayList::new,
             "bazaar_limits",

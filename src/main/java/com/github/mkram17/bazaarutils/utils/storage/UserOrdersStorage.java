@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class UserOrdersStorage {
-    public static final DataStorage<List<Order>> INSTANCE = new DataStorage<>(
+    public static final ProfileStorage<List<Order>> INSTANCE = new ProfileStorage<>(
             0,
             ArrayList::new,
             "user_orders",

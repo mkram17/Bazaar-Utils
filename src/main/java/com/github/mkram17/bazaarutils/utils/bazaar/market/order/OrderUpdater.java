@@ -60,7 +60,10 @@ public final class OrderUpdater extends BUListener {
     }
 
     private static void updateOrders(List<OrderInfo> parsedOrders) {
-        List<Order> userOrdersCopy = new ArrayList<>(UserOrdersStorage.INSTANCE.get());
+        var stored = UserOrdersStorage.INSTANCE.get();
+        if (stored == null) return;
+
+        List<Order> userOrdersCopy = new ArrayList<>(stored);
 
         parsedOrders.iterator().forEachRemaining(order -> {
             Optional<Order> matchedOrder = order.findOrderInList(userOrdersCopy);
