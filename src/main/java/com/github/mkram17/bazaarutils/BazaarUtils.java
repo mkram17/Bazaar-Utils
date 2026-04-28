@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
+import com.github.mkram17.bazaarutils.generated.*;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsRepo;
 import com.github.mkram17.bazaarutils.utils.update.UpdateUtil;
@@ -11,9 +11,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
 import tech.thatgravyboat.repolib.api.RepoAPI;
 import tech.thatgravyboat.repolib.api.RepoStatus;
 import tech.thatgravyboat.skyblockapi.api.SkyBlockAPI;
@@ -53,6 +50,7 @@ public class BazaarUtils implements ClientModInitializer {
 
         BazaarUtilsModules.init();
 
+        BazaarUtilsItemModifiers.init();
         BazaarUtilsCommands.init();
 
         if (RepoAPI.isInitialized()) {
