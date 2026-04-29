@@ -1,23 +1,24 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
-import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
+import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import lombok.Getter;
-import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public abstract class InputHelper<T> implements ItemButton, ScreenConstrained {
+public abstract class InputHelper<T> implements ItemButton {
     @Getter
     protected String name;
 
@@ -36,10 +37,28 @@ public abstract class InputHelper<T> implements ItemButton, ScreenConstrained {
 
     protected void resetState() {
         state = Optional.empty();
+        retriggerModifier();
     }
 
     public InputHelper(@NotNull String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean appliesTo(ItemStack stack, @Nullable Slot slot, @Nullable ScreenContext context) {
+        return state.isPresent() && ItemButton.super.appliesTo(stack, slot, context);
+    }
+
+    @Override
+    public Optional<Component> nameOverride(ItemStack stack, @Nullable Slot slot) {
+        return state.map(this::getButtonItemText);
+    }
+
+    @Override
+    public Optional<DataComponentPatch> patchComponents(ItemStack stack, @Nullable Slot slot) {
+        return state.map(state -> DataComponentPatch.builder()
+                .set(CustomDataComponents.CUSTOM_SIZE, getButtonItemStackSize(state))
+                .build());
     }
 
     public void onContainerLoaded(ContainerLoadedEvent event) {
@@ -52,36 +71,19 @@ public abstract class InputHelper<T> implements ItemButton, ScreenConstrained {
         state = makeState(event);
     }
 
-    public void onReplaceItem(ReplaceItemEvent event) {
-        if (!(inCorrectScreen()
-                && state.isPresent()
-                && shouldReplaceItem(event))) {
-            return;
-        }
-
-        ItemStack stack = getReplacementItem();
-
-        stack.set(CustomDataComponents.CUSTOM_SIZE, String.valueOf(getButtonItemStackSize(state.get())));
-        stack.set(DataComponents.CUSTOM_NAME, getButtonItemText(state.get()));
-
-        event.setReplacement(stack);
-    }
-
-    public void onSlotClicked(SlotClickEvent event) {
-        if (!(inCorrectScreen() && wasButtonClicked(event))) {
-            return;
-        }
-
+    public Result onButtonClicked(int button) {
         if (state.isEmpty()) {
             Util.logMessage("Cannot handle action for " + name + ", state is empty.");
 
-            return;
+            return Result.CANCELLED;
         }
 
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
 
         handleAction(state.get());
         resetState();
+
+        return Result.CONSUMED;
     }
 
     //    Button stuff

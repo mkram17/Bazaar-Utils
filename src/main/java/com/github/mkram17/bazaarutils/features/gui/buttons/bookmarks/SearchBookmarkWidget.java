@@ -1,6 +1,8 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
+import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
+import com.github.mkram17.bazaarutils.data.stored.BookmarksStorage;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
@@ -15,6 +17,8 @@ import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.MutableComponent;
@@ -27,7 +31,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class BookmarkSearchWidget {
+public class SearchBookmarkWidget {
+
+    public static final Identifier DEFAULT_WIDGET_TEXTURE = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/bookmark_widget_base");
+    public static final Identifier HOVER_WIDGET_TEXTURE = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/bookmark_widget_hover");
+
+    public static final WidgetSprites SLOT_BUTTON_TEXTURES = new WidgetSprites(DEFAULT_WIDGET_TEXTURE, HOVER_WIDGET_TEXTURE);
+
     @RegisterWidget
     public static List<ItemSlotButtonWidget> getWidgets() {
         var dimensions = WidgetManager.getScreenDimensions(BazaarScreenType.values());
@@ -39,7 +49,7 @@ public class BookmarkSearchWidget {
         int currentButtonY = dimensions.get().y() + spacing;
 
         List<ItemSlotButtonWidget> widgets = new ArrayList<>();
-        List<Bookmark> bookmarks = BookmarkUtil.getBookmarks();
+        List<Bookmark> bookmarks = BookmarksStorage.INSTANCE.get();
 
         for (Bookmark bookmark : bookmarks) {
             ItemStack configuredItem = bookmark.itemStack();
@@ -55,7 +65,7 @@ public class BookmarkSearchWidget {
                     buttonX,
                     currentButtonY,
                     buttonSize, buttonSize,
-                    BookmarkUtil.SLOT_BUTTON_TEXTURES,
+                    SLOT_BUTTON_TEXTURES,
                     (btn) -> {
                         if (Minecraft.getInstance().hasShiftDown()) {
                             PlayerActionUtil.notifyAll("Removed " + bookmark.name() + " bookmark from shift-click. Open Bazaar again to display changes.");
@@ -77,8 +87,7 @@ public class BookmarkSearchWidget {
     }
 
     public static void onWidgetShiftClick(Bookmark bookmark) {
-        BookmarkUtil.getBookmarks().remove(bookmark);
-        BookmarkUtil.saveBookmarks();
+        BookmarksStorage.remove(bookmark);
     }
 
     public static void onWidgetLeftClick(Bookmark bookmark) {
