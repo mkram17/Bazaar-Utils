@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.update;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -97,7 +98,7 @@ public final class UpdateUtil {
                             return CompletableFuture.completedFuture(null);
                         }
 
-                        if (MetadataConfig.AUTO_UPDATE_ENABLED) {
+                        if (DeveloperConfig.AUTO_UPDATE_ENABLED) {
                             return update.launchUpdate().thenRun(() -> PlayerActionUtil.notifyAll("Update downloaded! Restart to apply."));
                         } else {
                             PlayerActionUtil.notifyAll(

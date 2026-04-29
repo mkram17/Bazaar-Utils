@@ -42,6 +42,13 @@ public final class DeveloperConfig {
     @ConfigOption.Draggable
     public static NotificationType[] DEVELOPER_MODE_DEBUG_MESSAGES = new NotificationType[]{};
 
+    @ConfigEntry(id = "auto_update_enabled")
+    @Comment(
+            value = "Automatically update the mod when an update is found.",
+            translation = "bazaarutils.config.developer.auto_update_enabled.hint"
+    )
+    public static boolean AUTO_UPDATE_ENABLED = true;
+
     public static boolean isDeveloperVariableEnabled(NotificationType type) {
         return Arrays.asList(DEVELOPER_MODE_DEBUG_MESSAGES).contains(type);
     }
