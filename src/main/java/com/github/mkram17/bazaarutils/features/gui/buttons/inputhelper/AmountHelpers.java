@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
@@ -22,7 +23,7 @@ public class AmountHelpers extends BUListener {
         super();
     }
 
-    @Subscription(priority = Subscription.HIGH)
+    @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
     private void onContainerLoaded(ContainerLoadedEvent event) {
         helpers().forEach(helper -> helper.onContainerLoaded(event));

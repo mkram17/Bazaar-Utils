@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.events.minecraft.SignOpenEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -18,7 +19,7 @@ import java.util.function.Consumer;
 public class SignManager {
     public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
         BazaarUtils.EVENT_BUS.register(new Object() {
-            @Subscription(priority = Integer.MIN_VALUE)
+            @Subscription(priority = Priority.FIRST)
             private void onSignOpen(SignOpenEvent event) {
                 try {
                     action.accept(event);

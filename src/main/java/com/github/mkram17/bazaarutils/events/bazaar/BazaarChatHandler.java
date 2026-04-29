@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.events.bazaar;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
@@ -35,7 +36,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @Module
 public final class BazaarChatHandler extends BUListener {
-    @Subscription(priority = Integer.MIN_VALUE)
+    @Subscription(priority = Priority.FIRST)
     private void onChat(ChatReceivedEvent.Post event) {
         Component message = event.getComponent();
 

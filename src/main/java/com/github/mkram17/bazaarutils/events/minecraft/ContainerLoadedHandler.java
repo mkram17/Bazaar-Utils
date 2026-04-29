@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.events.minecraft;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Module
 public final class ContainerLoadedHandler extends BUListener {
 
-    @Subscription(priority = Integer.MIN_VALUE)
+    @Subscription(priority = Priority.FIRST)
     private void onScreenInitialized(ScreenInitializedEvent event) {
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> container)) return;
         if (!(container.getMenu() instanceof ChestMenu chest)) return;
