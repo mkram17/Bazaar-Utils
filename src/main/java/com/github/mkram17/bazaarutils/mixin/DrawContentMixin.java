@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.mixin;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -8,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import tech.thatgravyboat.skyblockapi.api.item.VisualItemAccessorKt;
 
 //used to change stack size String
 @Mixin(GuiGraphics.class)
@@ -18,7 +18,9 @@ public abstract class DrawContentMixin {
             ordinal = 0,
             argsOnly = true)
     private String modifyStackCountString(String text, Font textRenderer, ItemStack stack, int x, int y) {
-        String customData = stack.get(CustomDataComponents.CUSTOM_SIZE);
+        ItemStack effective = VisualItemAccessorKt.getVisualItem(stack);
+        if (effective == null) effective = stack;
+        String customData = effective.get(CustomDataComponents.CUSTOM_SIZE);
 
         double dataSize;
         if (customData != null) {
