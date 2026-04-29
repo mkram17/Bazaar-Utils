@@ -20,7 +20,7 @@ public final class UpdateUtil {
 
     private static UpdateContext getUpdateContext() {
         if (updateContext == null) {
-            String versionTag = "v" + BazaarUtils.SELF.getMetadata().getVersion().getFriendlyString();
+            String versionTag = "v" + BazaarUtils.MOD_CONTAINER.getMetadata().getVersion().getFriendlyString();
 
             updateContext = new UpdateContext(
                     new BazaarUtilsGithubSource(),
@@ -34,7 +34,7 @@ public final class UpdateUtil {
     }
 
     public static void updateModProperties() {
-        ModMetadata metadata = BazaarUtils.SELF.getMetadata();
+        ModMetadata metadata = BazaarUtils.MOD_CONTAINER.getMetadata();
 
         CustomValue updateNotesValue = metadata.getCustomValue("latestMajorUpdateNotes");
         if (updateNotesValue != null) {
@@ -54,7 +54,6 @@ public final class UpdateUtil {
 
     /**
      * Detects a major version bump using Fabric's VersionPredicate API.
-     *
      * Strategy: parse both versions, extract the old major number, then build
      * a VersionPredicate ">= <oldMajor+1>.0.0" and test the new version against it.
      */

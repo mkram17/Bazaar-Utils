@@ -22,11 +22,11 @@ public class BazaarUtils implements ClientModInitializer {
     public static final String MOD_ID = "bazaarutils";
     public static final String MOD_NAME = "Bazaar Utils";
 
-    public static ModContainer SELF = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
+    public static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
 
-    public static Configurator CONFIGURATOR = new Configurator(MOD_ID);
+    public static final Configurator CONFIGURATOR = new Configurator(MOD_ID);
 
-    public static ResourcefulConfig config = ConfigUtil.register(CONFIGURATOR);
+    public static final ResourcefulConfig CONFIG = ConfigUtil.register(CONFIGURATOR);
 
 
 

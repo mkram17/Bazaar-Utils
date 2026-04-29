@@ -11,7 +11,6 @@ import com.google.gson.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.JsonOps;
-import lombok.extern.slf4j.Slf4j;
 import net.minecraft.resources.Identifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +35,7 @@ public final class ConfigPatches {
     }
 
     public static Map<Integer, UnaryOperator<JsonObject>> loadPatches() {
-        Path patchDir = BazaarUtils.SELF.findPath("repo/patches").orElse(null);
+        Path patchDir = BazaarUtils.MOD_CONTAINER.findPath("repo/patches").orElse(null);
 
         if (patchDir == null || !Files.exists(patchDir)) {
             return Map.of();
