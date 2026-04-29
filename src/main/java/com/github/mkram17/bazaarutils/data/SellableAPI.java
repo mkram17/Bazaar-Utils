@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
@@ -190,7 +191,7 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
         return SCREENS;
     }
 
-    @Subscription
+    @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
     @OnlyBazaarScreen(useConstrainsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
@@ -210,7 +211,7 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
         });
     }
 
-    @Subscription
+    @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
     @OnlyBazaarScreen(useConstrainsInterface = true)
     private void onInventoryChange(PlayerInventoryChangeEvent event) {

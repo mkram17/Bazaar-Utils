@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -76,7 +77,7 @@ public class ScreenManager {
      */
     private boolean expectingServerFollowUp = false;
 
-    @Subscription(priority = Integer.MIN_VALUE)
+    @Subscription(priority = Priority.FIRST)
     private void onScreenChange(ScreenChangeEvent event) {
         Screen next = event.getNewScreen();
         Screen prev = event.getOldScreen();
@@ -113,7 +114,7 @@ public class ScreenManager {
         return screen instanceof SignEditScreen;
     }
 
-    @Subscription(priority = Integer.MIN_VALUE)
+    @Subscription(priority = Priority.FIRST)
     private void onContainerLoaded(ContainerLoadedEvent event) {
         ContainerManager.onContainerLoaded(event);
 

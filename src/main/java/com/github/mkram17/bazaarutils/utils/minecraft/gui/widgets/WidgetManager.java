@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.mixin.AccessorScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
@@ -37,7 +38,7 @@ public class WidgetManager extends BUListener {
         addWidgetsTo(next);
     }
 
-    @Subscription(priority = Subscription.LOW)
+    @Subscription(priority = Priority.LOW)
     private void onContainerLoaded(ContainerLoadedEvent event) {
         AbstractContainerScreen<?> screen = event.getScreen();
 

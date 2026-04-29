@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -39,7 +40,7 @@ public final class OrderUpdater extends BUListener {
     private static final String WORD_UNIT = "unit:";
     private static final double FILL_TOLERANCE_RATIO = 0.05; //5%
 
-    @Subscription(priority = Subscription.HIGH)
+    @Subscription(priority = Priority.HIGH)
     @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
     private void onGUI(ContainerLoadedEvent event) {
         lowerChestInventory = event.getContainer();
