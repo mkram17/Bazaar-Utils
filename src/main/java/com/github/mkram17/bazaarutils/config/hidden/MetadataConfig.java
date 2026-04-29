@@ -19,9 +19,9 @@ public final class MetadataConfig {
     @ConfigOption.Hidden
     public static boolean IS_FIRST_LOAD = true;
 
-    @ConfigEntry(id = "updated_major_version")
+    @ConfigEntry(id = "updated_minor_version")
     @ConfigOption.Hidden
-    public static boolean UPDATED_MAJOR_VERSION = false;
+    public static boolean UPDATED_MINOR_VERSION = false;
 
     @ConfigEntry(id = "update_notes")
     @ConfigOption.Hidden

@@ -191,7 +191,7 @@ tasks {
     processResources {
         inputs.property("version", project.version)
         inputs.property("mcVersion", mcVersion)
-        inputs.property("major_update_notes", rootProject.property("major_update_notes") as String)
+        inputs.property("minor_update_notes", rootProject.property("minor_update_notes") as String)
 
         filesMatching("fabric.mod.json") {
             expand(mapOf(
@@ -199,7 +199,7 @@ tasks {
                 "mod_version" to rootProject.property("mod_version"),
                 "mcVersion" to mcVersion,
                 "maxMcVersion" to maxMcVersion,
-                "major_update_notes" to rootProject.property("major_update_notes")
+                "minor_update_notes" to rootProject.property("minor_update_notes")
             ))
         }
     }

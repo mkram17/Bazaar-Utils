@@ -36,7 +36,7 @@ public final class UpdateUtil {
     public static void updateModProperties() {
         ModMetadata metadata = BazaarUtils.MOD_CONTAINER.getMetadata();
 
-        CustomValue updateNotesValue = metadata.getCustomValue("latestMajorUpdateNotes");
+        CustomValue updateNotesValue = metadata.getCustomValue("latestMinorUpdateNotes");
         if (updateNotesValue != null) {
             MetadataConfig.UPDATE_NOTES = updateNotesValue.getAsString();
         }
@@ -45,19 +45,19 @@ public final class UpdateUtil {
         String currentVersion = metadata.getVersion().getFriendlyString();
         MetadataConfig.MOD_VERSION = currentVersion;
 
-        if (isMajorVersionChanged(oldVersion, currentVersion)) {
-            MetadataConfig.UPDATED_MAJOR_VERSION = true;
+        if (isMinorVersionChanged(oldVersion, currentVersion)) {
+            MetadataConfig.UPDATED_MINOR_VERSION = true;
         }
 
         ConfigUtil.scheduleConfigSave();
     }
 
     /**
-     * Detects a major version bump using Fabric's VersionPredicate API.
-     * Strategy: parse both versions, extract the old major number, then build
-     * a VersionPredicate ">= <oldMajor+1>.0.0" and test the new version against it.
+     * Detects a minor version bump using Fabric's VersionPredicate API.
+     * Strategy: parse both versions, extract the old major and minor numbers, then build
+     * a VersionPredicate ">= <oldMajor>.<oldMinor+1>.0" and test the new version against it.
      */
-    private static boolean isMajorVersionChanged(String oldRaw, String newRaw) {
+    private static boolean isMinorVersionChanged(String oldRaw, String newRaw) {
         if (oldRaw == null || oldRaw.isBlank()) return false;
 
         try {
@@ -65,14 +65,13 @@ public final class UpdateUtil {
             Version newVersion = Version.parse(stripLeadingV(newRaw));
 
             int oldMajor = extractMajor(oldVersion);
+            int oldMinor = extractMinor(oldVersion);
 
-            // Build predicate: ">= <oldMajor+1>.0.0"
-            // e.g. if old is 1.x.x, predicate is ">=2.0.0"
-            // Uses VersionComparisonOperator.getSerialized() from fabric's stable api
-            String predicateStr = VersionComparisonOperator.GREATER_EQUAL.getSerialized() + (oldMajor + 1) + ".0.0";
-            VersionPredicate nextMajorBoundary = VersionPredicate.parse(predicateStr);
+            // Build predicate: ">= <oldMajor>.<oldMinor+1>.0"
+            String predicateStr = VersionComparisonOperator.GREATER_EQUAL.getSerialized() + oldMajor + "." + (oldMinor + 1) + ".0";
+            VersionPredicate nextMinorBoundary = VersionPredicate.parse(predicateStr);
 
-            return nextMajorBoundary.test(newVersion);
+            return nextMinorBoundary.test(newVersion);
         } catch (Exception exception) {
             Util.logMessage("Could not compare versions '%s' and '%s': %s".formatted(oldRaw, newRaw, exception.getMessage()));
 
@@ -121,6 +120,15 @@ public final class UpdateUtil {
         String[] parts = version.getFriendlyString().split("[.\\-+]", 2);
         try {
             return Integer.parseInt(parts[0]);
+        } catch (NumberFormatException exception) {
+            return 0;
+        }
+    }
+
+    private static int extractMinor(Version version) {
+        String[] parts = version.getFriendlyString().split("[.\\-+]", 3);
+        try {
+            return parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
         } catch (NumberFormatException exception) {
             return 0;
         }
