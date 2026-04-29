@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.data.SellableAPI;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 //TODO maybe color chest if it is locked
-@Module
+@ItemModifier
 public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestrictions.InstantSellState> {
     public record InstantSellState(
             @NotNull
@@ -41,13 +41,12 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
     }
 
     @Override
-    protected String getMessagePrefix() {
-        return "Sell protected by rules:";
-    }
-
-    @Override
     protected List<RestrictionControl<?>> getRestrictors() {
         return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.INSTANT_SELL);
+    }
+
+    public InstantSellRestrictions() {
+        super("Instant Sell Restrictions");
     }
 
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
@@ -57,8 +56,16 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
         return SCREENS;
     }
 
-    public InstantSellRestrictions() {
-        super("Instant Sell Restrictions");
+    public final EnumSet<ModifierSource> MODIFIER_SOURCES = EnumSet.of(ModifierSource.CONTAINER);
+
+    @Override
+    public EnumSet<ModifierSource> getModifierSources() {
+        return MODIFIER_SOURCES; // to prevent instantiating the LIST every single iteration
+    }
+
+    @Override
+    protected String getMessagePrefix() {
+        return "Sell protected by rules:";
     }
 
     @Override
