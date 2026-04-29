@@ -16,4 +16,16 @@ public final class BookmarksStorage {
     );
 
     private BookmarksStorage() { }
+
+    public static void add(Bookmark bookmark) {
+        INSTANCE.edit(list -> list.add(bookmark));
+    }
+
+    public static void remove(Bookmark bookmark) {
+        INSTANCE.edit(list -> list.remove(bookmark));
+    }
+
+    public static void clear() {
+        INSTANCE.edit(List::clear);
+    }
 }
