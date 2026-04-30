@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.commands;
 
+import com.github.mkram17.bazaarutils.data.bazaar.conversions.BazaarConversionsUpdater;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.data.bazaar.conversions.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -21,7 +21,8 @@ public final class UpdateResourcesCommand implements BUCommand {
     public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
         return base.executes(context -> {
             PlayerActionUtil.notifyAll("Checking for resource updates...");
-            ResourceManager.checkForUpdates(true);
+
+            BazaarConversionsUpdater.checkForUpdates(true);
 
             return 1;
         });
