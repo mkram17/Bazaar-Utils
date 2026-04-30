@@ -455,6 +455,7 @@
         "hint": "Global toggle for all developer features and utilities."
       },
       "disable_error_notifications.label": "Disable Error Notifications",
+      "disable_auto_resource_updates.label": "Disable Automatic Resource Updates",
       "debug_messages.{}": {
         "label": "Debug Messages",
         "hint": "Configures debug messages sent to chat regarding mod routines and state"
