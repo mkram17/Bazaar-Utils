@@ -6,7 +6,9 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.PriceType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 

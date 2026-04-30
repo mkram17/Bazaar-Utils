@@ -9,7 +9,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
