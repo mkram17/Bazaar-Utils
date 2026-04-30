@@ -2,9 +2,9 @@ package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.BUListener;
-import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.resources.BazaarConversions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -239,11 +239,11 @@ public final class ItemsRepo extends BUListener {
      * Filters SkyBlock items to those tradeable on the Bazaar.
      */
     private static List<ItemStack> getSkyBlockBazaarItems() {
-        ResourceManager.ensureConversionsLoaded();
-        Map<String, String> conversions = ResourceManager.getNameToProductIdCache();
+        BazaarConversions.ensureLoaded();
+        Map<String, String> conversions = BazaarConversions.getNameToProductIdCache();
 
         if (conversions.isEmpty()) {
-            Util.logMessage("ItemsRepo/bazaar: conversions cache empty — check ResourceManager init");
+            Util.logMessage("ItemsRepo/bazaar: conversions cache empty — check BazaarConversions/updater init");
 
             return List.of();
         }

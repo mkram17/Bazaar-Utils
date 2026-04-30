@@ -32,6 +32,12 @@ public final class DeveloperConfig {
     public static boolean DEVELOPER_MODE_DISABLE_ERROR_NOTIFICATIONS = false;
 
     @ConfigEntry(
+            id = "disable_auto_resource_updates",
+            translation = "bazaarutils.config.developer.disable_auto_resource_updates.label"
+    )
+    public static boolean DEVELOPER_MODE_DISABLE_AUTO_RESOURCE_UPDATES = true;
+
+    @ConfigEntry(
             id = "debug_messages",
             translation = "bazaarutils.config.developer.debug_messages.label"
     )

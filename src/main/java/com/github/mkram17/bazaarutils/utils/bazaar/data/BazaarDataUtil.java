@@ -1,11 +1,11 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.data;
 
-import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductData;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductOrder;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.resources.BazaarConversions;
 
 import java.util.List;
 import java.util.Locale;
@@ -132,8 +132,8 @@ public class BazaarDataUtil {
             return true;
         }
 
-        ResourceManager.ensureConversionsLoaded();
-        return ResourceManager.getNameToProductIdCache().containsValue(productId);
+        BazaarConversions.ensureLoaded();
+        return BazaarConversions.getProductIdToNameCache().containsKey(productId);
     }
 
     public static Optional<String> findProductIdOptional(String naturalName) {
@@ -141,8 +141,8 @@ public class BazaarDataUtil {
             return Optional.empty();
         }
 
-        ResourceManager.ensureConversionsLoaded();
+        BazaarConversions.ensureLoaded();
 
-        return Optional.ofNullable(ResourceManager.getNameToProductIdCache().get(naturalName.toLowerCase(Locale.ROOT)));
+        return Optional.ofNullable(BazaarConversions.getNameToProductIdCache().get(naturalName.toLowerCase(Locale.ROOT)));
     }
 }
