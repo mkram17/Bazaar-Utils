@@ -4,123 +4,75 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQuery;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.advancements.criterion.MinMaxBounds;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface ScreenType extends Predicate<Screen> {
     String name();
 
-    final class Builder {
-        private final String name;
-        private final List<ScreenPredicate> chain;
-
-        private static List<ScreenPredicate> concat(List<ScreenPredicate> list, ScreenPredicate next) {
-            List<ScreenPredicate> copy = new ArrayList<>(list.size() + 1);
-
-            copy.addAll(list);
-            copy.add(next);
-
-            return List.copyOf(copy);
-        }
-
-        private Builder(List<ScreenPredicate> chain, String name) {
-            this.chain = List.copyOf(chain);
-            this.name = name;
-        }
-
-        public Builder() {
-            this(List.of(), null);
-        }
-
-        public Builder name(String label) {
-            return new Builder(chain, label);
-        }
-
-        public Builder genericContainer() {
-            return new Builder(concat(chain, new ScreenPredicate("ContainerScreen", screen -> screen instanceof AbstractContainerScreen<?>)), name);
-        }
-
-        public Builder containerTitle(String fragment) {
-            return new Builder(concat(chain, new ScreenPredicate("ContainerTitle", screen -> Util.removeFormatting(screen.getTitle().getString()).contains(fragment))), name);
-        }
-
-        public Builder containerItem(MinMaxBounds.Ints slotRange, Item... wanted) {
-            return new Builder(concat(chain, new ScreenPredicate("ContainerItem", screen -> screen instanceof AbstractContainerScreen<?> container
-                    && container.getMenu() instanceof ChestMenu chest
-                    && ContainerQuery.range(
-                            slotRange.min().orElse(0),
-                            slotRange.max().orElse(chest.getContainer().getContainerSize() - 1)
-                    )
-                    .itemType(wanted)
-                    .first(chest.getContainer())
-                    .isPresent())), name);
-        }
-
-
-        public Builder containerItem(int slot, Item... wanted) {
-            return containerItem(MinMaxBounds.Ints.exactly(slot), wanted);
-        }
-
-        public Builder containerQuery(ContainerQuery query) {
-            return new Builder(concat(chain, new ScreenPredicate("ContainerQuery", screen ->
-                    screen instanceof AbstractContainerScreen<?> container
-                            && container.getMenu() instanceof ChestMenu chest
-                            && query.first(chest.getContainer()).isPresent())), name);
-        }
-
-        public Builder containerQuery(Function<Container, ContainerQuery> builder) {
-            return new Builder(concat(chain, new ScreenPredicate("ContainerQuery", screen ->
-                    screen instanceof AbstractContainerScreen<?> container
-                            && container.getMenu() instanceof ChestMenu chest
-                            && builder.apply(chest.getContainer()).first(chest.getContainer()).isPresent())), name);
-        }
-
-        public Builder containerQuery(String label, Function<Container, ContainerQuery> builder) {
-            return new Builder(concat(chain, new ScreenPredicate("ContainerQuery[%s]".formatted(label), screen ->
-                    screen instanceof AbstractContainerScreen<?> container
-                            && container.getMenu() instanceof ChestMenu chest
-                            && builder.apply(chest.getContainer()).first(chest.getContainer()).isPresent())), name);
-        }
-
-        public Builder custom(String label, Predicate<Screen> test) {
-            return new Builder(concat(chain, new ScreenPredicate(label, test)), name);
-        }
-
-        public Builder custom(Predicate<Screen> test) {
-            return custom("Custom", test);
-        }
-
-        public ScreenType build() {
-            return new ScreenType() {
-                public String name() {
-                    return name != null ? name : "???";
-                }
-
-                @Override
-                public boolean test(Screen screen) {
-                    return chain.stream().allMatch(predicate -> predicate.test(screen));
-                }
-
-                @Override
-                public String toString() {
-                    return name();
-                }
-            };
-        }
-
-        private record ScreenPredicate(String name, Predicate<Screen> predicate) implements Predicate<Screen> {
-            @Override
-            public boolean test(Screen screen) {
-                return predicate.test(screen);
+    static ScreenType named(String name, Predicate<Screen> test) {
+        return new ScreenType() {
+            public String name() {
+                return name;
             }
-        }
+
+            public boolean test(Screen screen) {
+                return test.test(screen);
+            }
+
+            public String toString() {
+                return name;
+            }
+        };
+    }
+
+    default @NotNull ScreenType and(@NotNull Predicate<? super Screen> other) {
+        return named(name(), s -> test(s) && other.test(s));
+    }
+
+    static Predicate<Screen> isContainer() {
+        return screen -> screen instanceof AbstractContainerScreen<?>;
+    }
+
+    static Predicate<Screen> hasTitle(String fragment) {
+        return screen -> Util.removeFormatting(screen.getTitle().getString()).contains(fragment);
+    }
+
+    static Predicate<Screen> hasItem(MinMaxBounds.Ints slotRange, Item... wanted) {
+        return screen -> screen instanceof AbstractContainerScreen<?> container
+                && container.getMenu() instanceof ChestMenu chest
+                && ContainerQuery.range(
+                        slotRange.min().orElse(0),
+                        slotRange.max().orElse(chest.getContainer().getContainerSize() - 1)
+                )
+                .itemType(wanted)
+                .first(chest.getContainer())
+                .isPresent();
+    }
+
+    static Predicate<Screen> hasItem(int slot, Item... wanted) {
+        return hasItem(MinMaxBounds.Ints.exactly(slot), wanted);
+    }
+
+    static Predicate<Screen> hasSlot(ContainerQuery query) {
+        return screen -> screen instanceof AbstractContainerScreen<?> container
+                && container.getMenu() instanceof ChestMenu chest
+                && query.first(chest.getContainer()).isPresent();
+    }
+
+    static Predicate<Screen> hasSlot(Function<Container, ContainerQuery> query) {
+        return screen -> screen instanceof AbstractContainerScreen<?> container
+                && container.getMenu() instanceof ChestMenu chest
+                && query.apply(chest.getContainer()).first(chest.getContainer()).isPresent();
+    }
+
+    static Predicate<Screen> hasSlot(String label, Function<Container, ContainerQuery> query) {
+        return hasSlot(query);
     }
 }
