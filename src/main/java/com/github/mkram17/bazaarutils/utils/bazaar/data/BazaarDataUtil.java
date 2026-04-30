@@ -5,8 +5,7 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductData;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductOrder;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 
 import java.util.List;
 import java.util.Locale;
