@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQuery;

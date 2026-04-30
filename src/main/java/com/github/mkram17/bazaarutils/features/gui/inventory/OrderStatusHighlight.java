@@ -12,6 +12,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.modules.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;

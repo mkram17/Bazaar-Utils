@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.events.bazaar;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
+import com.github.mkram17.bazaarutils.data.bazaar.book.remote.CustomBazaarReply;
 import lombok.Getter;
 import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 

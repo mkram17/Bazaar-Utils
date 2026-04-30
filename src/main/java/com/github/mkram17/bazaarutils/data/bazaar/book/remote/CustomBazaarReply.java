@@ -1,5 +1,6 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers;
+package com.github.mkram17.bazaarutils.data.bazaar.book.remote;
 
+import com.github.mkram17.bazaarutils.data.bazaar.book.ProductData;
 import lombok.Getter;
 import net.hypixel.api.reply.AbstractReply;
 

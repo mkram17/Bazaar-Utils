@@ -1,5 +1,6 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers;
+package com.github.mkram17.bazaarutils.data.bazaar.book;
 
+import com.github.mkram17.bazaarutils.utils.bazaar.market.PriceType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.*;
 
 public record ProductOrder(PriceType priceType, double pricePerUnit, long volume, long numOrders) {

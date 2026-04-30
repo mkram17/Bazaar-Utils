@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
+package com.github.mkram17.bazaarutils.utils.bazaar.market;
 
 import com.mojang.serialization.Codec;
 import lombok.Getter;
