@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.data;
+package com.github.mkram17.bazaarutils.data.bazaar.book.remote;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.APIUtil;
@@ -7,8 +7,6 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.APIConversionUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
 import lombok.Getter;
 
 import java.util.concurrent.ScheduledFuture;

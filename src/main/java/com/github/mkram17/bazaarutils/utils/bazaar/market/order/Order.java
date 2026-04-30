@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.events.AbstractListener;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.features.notification.OutbidOrderHandler;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;

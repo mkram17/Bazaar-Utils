@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.price;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

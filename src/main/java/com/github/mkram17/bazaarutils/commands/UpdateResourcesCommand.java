@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.ResourceManager;
+import com.github.mkram17.bazaarutils.data.bazaar.conversions.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;

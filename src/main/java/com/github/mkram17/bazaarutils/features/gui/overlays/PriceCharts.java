@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.overlays;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.utils.*;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.ItemModifier;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
@@ -25,7 +25,6 @@ import tech.thatgravyboat.skyblockapi.impl.tagkey.ItemTag;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

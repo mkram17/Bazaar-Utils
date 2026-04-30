@@ -4,12 +4,12 @@ import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
@@ -22,9 +22,7 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 

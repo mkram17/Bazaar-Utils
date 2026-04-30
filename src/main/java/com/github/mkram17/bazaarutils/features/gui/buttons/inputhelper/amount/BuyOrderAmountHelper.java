@@ -11,8 +11,8 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLa
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;

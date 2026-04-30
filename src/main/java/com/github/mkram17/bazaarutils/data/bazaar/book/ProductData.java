@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers;
+package com.github.mkram17.bazaarutils.data.bazaar.book;
 
 import lombok.Getter;
 

@@ -1,7 +1,9 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers;
+package com.github.mkram17.bazaarutils.data.bazaar.book.remote;
 
+import com.github.mkram17.bazaarutils.data.bazaar.book.ProductData;
+import com.github.mkram17.bazaarutils.data.bazaar.book.ProductOrder;
 import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
 import java.util.ArrayList;
