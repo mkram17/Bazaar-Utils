@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.BUListener;
-import com.github.mkram17.bazaarutils.utils.ResourceManager;
+import com.github.mkram17.bazaarutils.data.bazaar.conversions.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import net.minecraft.core.registries.BuiltInRegistries;

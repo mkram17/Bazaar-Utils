@@ -1,12 +1,13 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.data;
+package com.github.mkram17.bazaarutils.data.bazaar;
 
-import com.github.mkram17.bazaarutils.utils.ResourceManager;
+import com.github.mkram17.bazaarutils.data.bazaar.book.remote.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.PriceType;
+import com.github.mkram17.bazaarutils.data.bazaar.conversions.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductData;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductOrder;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.PriceType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.data.bazaar.book.remote.CustomBazaarReply;
+import com.github.mkram17.bazaarutils.data.bazaar.book.ProductData;
+import com.github.mkram17.bazaarutils.data.bazaar.book.ProductOrder;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 
 import java.util.List;
 import java.util.Locale;

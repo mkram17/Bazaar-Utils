@@ -1,11 +1,12 @@
-package com.github.mkram17.bazaarutils.utils;
+package com.github.mkram17.bazaarutils.data.bazaar.conversions;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataManager;
+import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.data.bazaar.book.remote.BazaarDataManager;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

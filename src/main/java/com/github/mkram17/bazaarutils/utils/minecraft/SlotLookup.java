@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQuery;
@@ -25,7 +25,7 @@ public class SlotLookup {
     }
 
     public static Optional<Integer> getInventorySlotFromItemStack(Container inventory, ItemStack wanted) {
-        for (int i = 0; i < inventory.getContainerSize() - 1; i++) {
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack item = inventory.getItem(i);
 
             if (item.isEmpty()) continue;

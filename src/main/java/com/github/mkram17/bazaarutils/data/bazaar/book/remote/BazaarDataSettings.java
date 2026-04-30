@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.utils.bazaar.data;
+package com.github.mkram17.bazaarutils.data.bazaar.book.remote;
 
 public class BazaarDataSettings {
     public final long BASE_INTERVAL_MS = 20_000;
