@@ -2,8 +2,6 @@ package com.github.mkram17.bazaarutils.utils.bazaar.data;
 
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarReply;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductData;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.ProductOrder;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.resources.BazaarConversions;
 
@@ -38,7 +36,7 @@ public class BazaarDataUtil {
                 return OptionalInt.empty();
             }
 
-            List<ProductOrder> list = switch (priceType) {
+            List<PriceLevel> list = switch (priceType) {
                 case INSTABUY -> product.getBuyOrders();
                 case INSTASELL -> product.getSellOrders();
             };
@@ -47,9 +45,9 @@ public class BazaarDataUtil {
                 return OptionalInt.empty();
             }
 
-            for (ProductOrder s : list) {
+            for (PriceLevel s : list) {
                 if (Double.compare(s.pricePerUnit(), price) == 0) {
-                    return OptionalInt.of((int) s.volume());
+                    return OptionalInt.of((int) s.totalVolume());
                 }
             }
 
@@ -92,7 +90,7 @@ public class BazaarDataUtil {
 
             return switch (priceType) {
                 case INSTABUY -> {
-                    List<ProductOrder> buySummary = product.getBuyOrders();
+                    List<PriceLevel> buySummary = product.getBuyOrders();
 
                     if (buySummary == null || buySummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
@@ -101,7 +99,7 @@ public class BazaarDataUtil {
                     yield OptionalDouble.of(buySummary.getFirst().pricePerUnit());
                 }
                 case INSTASELL -> {
-                    List<ProductOrder> sellSummary = product.getSellOrders();
+                    List<PriceLevel> sellSummary = product.getSellOrders();
 
                     if (sellSummary == null || sellSummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
