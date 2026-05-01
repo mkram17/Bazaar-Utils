@@ -67,6 +67,15 @@ public class ScreenManager {
     private final ScreenHistory history = new ScreenHistory();
 
     /**
+     * Retains the context of the most recently closed screen across the synchronous
+     * {@link ScreenChangeEvent.Pre} → {@link ScreenChangeEvent.Post} pair so
+     * {@link #find(Screen)} (and {@code @OnlyBazaarScreen(previous = true)}) resolves
+     * reliably for every closing screen, not only {@link SignEditScreen}. Cleared at
+     * {@link Priority#LAST} in {@link #onScreenChangePost} so no screen reference leaks.
+     */
+    private @Nullable ScreenContext lastClosed = null;
+
+    /**
      * True immediately after a screen closes that is known to cause the server to
      * open a follow-up screen, leaving Minecraft momentarily with no current screen
      * between the two (so the follow-up arrives with prev=null).
@@ -89,6 +98,7 @@ public class ScreenManager {
             // A screen closed. We check whether it is a known overlay which double nulls currentScreen
             instance.expectingServerFollowUp = isFollowUpScreen(prev);
             if (!instance.expectingServerFollowUp) {
+                instance.lastClosed = instance.find(prev).orElse(null);
                 instance.history.clear(); // context is gone, currentOrNull() now returns null
             }
             instance.logHistory("CLOSE");
@@ -103,8 +113,16 @@ public class ScreenManager {
             instance.logHistory("CLEAR");
         }
         instance.expectingServerFollowUp = false;
+        instance.lastClosed = null;
 
         instance.setCurrentScreen(next);
+    }
+
+    @Subscription(priority = Priority.LAST)
+    private void onScreenChangePost(ScreenChangeEvent.Post event) {
+        if (event.getNewScreen() == null) {
+            instance.lastClosed = null;
+        }
     }
 
     /**
@@ -124,15 +142,11 @@ public class ScreenManager {
 
         if (resolved instanceof BazaarScreenType bst && bst.isEager()) resolved = null;
 
-        for (int i = 0; i < instance.history.size(); i++) {
-            ScreenContext ctx = instance.history.get(i);
+        int index = instance.indexOf(screen);
+        if (index < 0) return;
 
-            if (ctx != null && ctx.screen() == screen) {
-                instance.history.set(i, new ScreenContext(screen, resolved));
-                instance.logHistory("LOADED");
-                return;
-            }
-        }
+        instance.history.set(index, new ScreenContext(screen, resolved));
+        instance.logHistory("LOADED");
     }
 
     public void setCurrentScreen(Screen screen) {
@@ -171,6 +185,31 @@ public class ScreenManager {
 
     public Optional<ScreenContext> previous() {
         return getAtDepth(1);
+    }
+
+    public Optional<ScreenContext> find(@Nullable Screen screen) {
+        if (screen == null) return Optional.empty();
+
+        Optional<ScreenContext> inHistory = getAtDepth(indexOf(screen));
+        if (inHistory.isPresent()) return inHistory;
+
+        if (lastClosed != null && lastClosed.screen() == screen) {
+            return Optional.of(lastClosed);
+        }
+
+        return Optional.empty();
+    }
+
+    private int indexOf(@Nullable Screen screen) {
+        if (screen == null) return -1;
+
+        for (int i = 0; i < history.size(); i++) {
+            ScreenContext ctx = history.get(i);
+
+            if (ctx != null && ctx.screen() == screen) return i;
+        }
+
+        return -1;
     }
 
     public Optional<ScreenContext> findBack(ScreenType... wanted) {
