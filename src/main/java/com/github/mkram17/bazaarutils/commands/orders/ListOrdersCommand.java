@@ -3,15 +3,19 @@ package com.github.mkram17.bazaarutils.commands.orders;
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.DeveloperCommands;
 import com.github.mkram17.bazaarutils.commands.OrdersCommands;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
+import com.github.mkram17.bazaarutils.utils.resources.BazaarConversions;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+
+import java.util.List;
 
 @Command(parent = OrdersCommands.class)
 public final class ListOrdersCommand implements BUCommand {
@@ -29,8 +33,22 @@ public final class ListOrdersCommand implements BUCommand {
     private int queryAll(CommandContext<FabricClientCommandSource> context) {
         if (!DeveloperCommands.isEnabled()) return 0;
 
-        PlayerActionUtil.notifyAll(Order.getVariables(Order::getName).toString());
+        var storage = UserOrdersStorage.orders();
+        if (storage.isEmpty()) {
+            PlayerActionUtil.notifyAll("No tracked orders.");
 
+            return 1;
+        }
+
+        BazaarConversions.ensureLoaded();
+
+        for (int i = 0; i < storage.size(); i++) {
+            Order order = storage.get(i);
+
+            String name = BazaarConversions.getProductIdToNameCache().getOrDefault(order.productId(), order.productId());
+
+            PlayerActionUtil.notifyAll("[" + i + "] " + name + " | " + order.side() + " | " + order.pricePerItem() + " x" + order.originalAmount() + " | " + order.status());
+        }
         return 1;
     }
 }
