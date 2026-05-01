@@ -1,12 +1,9 @@
 package com.github.mkram17.bazaarutils.data.bazaar.book.remote;
 
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
+import com.github.mkram17.bazaarutils.data.bazaar.book.PriceLevel;
 import com.github.mkram17.bazaarutils.data.bazaar.book.ProductData;
-import com.github.mkram17.bazaarutils.data.bazaar.book.ProductOrder;
 import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.DataOrigin;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.PriceLevel;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.ProductData;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
 import java.util.ArrayList;
@@ -69,7 +66,7 @@ public final class APIConversionUtil {
                 apiSummary.getPricePerUnit(),
                 apiSummary.getAmount(),
                 (int) apiSummary.getOrders(),
-                new DataOrigin.ApiSnapshot(now)
+                new BazaarDataOrigin.ApiSnapshot(now)
         );
     }
 }
