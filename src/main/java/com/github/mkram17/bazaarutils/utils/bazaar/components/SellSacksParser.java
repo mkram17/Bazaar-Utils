@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -58,10 +60,22 @@ public final class SellSacksParser {
                 if (product.equals("Other items")) {
                     otherItems = Optional.of(new SellSacksResult.OtherItems(volume, totalPrice));
                 } else {
-                    items.add(new OrderInfo(product, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
+                    Optional<OrderInfo> result = OrderInfo.of(product, TransactionType.Side.BUY, pricePerUnit, volume, false);
+
+                    if (result.isEmpty()) {
+                        PlayerActionUtil.notifyAll("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
+
+                        continue;
+                    }
+
+                    items.add(result.get());
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception exception) {
+                Util.logError("parseSackOrders: failed to parse lore line — value=[%s]".formatted(line.getString()), exception);
+            }
         }
+
+        PlayerActionUtil.notifyAll("SellSacks parsed: %d known items | %d folded to \"Other Items\"".formatted(items.size(), otherItems.map(SellSacksResult.OtherItems::volume).orElse(0)), NotificationType.GUI);
 
         return new SellSacksResult(List.copyOf(items), otherItems);
     }
