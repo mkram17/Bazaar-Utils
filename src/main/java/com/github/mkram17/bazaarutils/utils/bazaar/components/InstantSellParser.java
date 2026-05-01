@@ -63,7 +63,7 @@ public final class InstantSellParser {
                 // Items with no buy orders appear with 0 quantity — skip them
                 // rather than dividing by zero or producing a meaningless order.
                 if (volume == 0) {
-                    Util.logMessage("parseOrders: skipping '%s' — 0 quantity (no buy orders)".formatted(product));
+                    Util.logMessage("parseInstantSellOrders: skipping '%s' — 0 quantity (no buy orders)".formatted(product));
 
                     continue;
                 }
@@ -74,10 +74,23 @@ public final class InstantSellParser {
                 if (product.equals("Other items")) {
                     otherItems = Optional.of(new InstantSellResult.OtherItems(volume, totalPrice));
                 } else {
-                    items.add(new OrderInfo(product, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
+                    Optional<OrderInfo> result = OrderInfo.of(product, TransactionType.Side.BUY, pricePerUnit, volume);
+
+                    if (result.isEmpty()) {
+                        PlayerActionUtil.notifyAll("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
+
+                        continue;
+                    }
+
+                    items.add(result.get());
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception exception) {
+                Util.logError("parseInstantSellOrders: failed to parse lore line — value=[%s]".formatted(line.getString()), exception);
+            }
+
         }
+
+        PlayerActionUtil.notifyAll("InstantSell (overview page) parsed: %d known items | %d folded to \"Other Items\"".formatted(items.size(), otherItems.map(InstantSellResult.OtherItems::volume).orElse(0)), NotificationType.GUI);
 
         return new InstantSellResult(List.copyOf(items), otherItems);
     }
@@ -109,20 +122,9 @@ public final class InstantSellParser {
     public static Optional<InstantSellResult> parseProductPageOrder(ItemStack sellInstantlyStack) {
         List<Component> lines = LoreParser.lines(sellInstantlyStack);
 
-        // Name is still read positionally — line 0 is always the item name
-        // and is structurally stable across both the orders/no-orders cases.
-        String product = lines.isEmpty() ? null
-                : lines.getFirst().getSiblings().stream()
-                  .map(Component::getString)
-                  .map(String::trim)
-                  .filter(s -> !s.isEmpty())
-                  .findFirst()
-                  .orElse(null);
-
-        if (product == null) {
-            Util.logMessage("parseProductPageOrder: could not read item name from lore");
-
-            return Optional.empty();
+        String product = lines.isEmpty() ? null : lines.getFirst().getString().trim();
+        if (product != null && product.isEmpty()) {
+            product = null;
         }
 
         String amountStr = null;
@@ -177,7 +179,13 @@ public final class InstantSellParser {
             double totalPrice = Double.parseDouble(priceStr.replace(",", "").trim());
             double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
 
-            OrderInfo result = new OrderInfo(product, TransactionType.Side.BUY, null, volume, pricePerUnit, null);
+            Optional<OrderInfo> result = OrderInfo.of(product, TransactionType.Side.BUY, pricePerUnit, volume);
+
+            if (result.isEmpty()) {
+                PlayerActionUtil.notifyAll("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
+
+                return Optional.empty();
+            }
 
             if (taxStr != null) {
                 try {
@@ -187,10 +195,9 @@ public final class InstantSellParser {
                 }
             }
 
-            PlayerActionUtil.notifyAll("InstantSell (item page) parsed: %s %dx@%.4f".formatted(product, result.getVolume(), result.getPricePerItem()), NotificationType.GUI);
+            PlayerActionUtil.notifyAll("InstantSell (item page) parsed: %s %dx@%.4f".formatted(result.get().getName(), result.get().getVolume(), result.get().getPricePerItem()), NotificationType.GUI);
 
-            return Optional.of(new InstantSellResult(List.of(result), Optional.empty()));
-
+            return Optional.of(new InstantSellResult(List.of(result.get()), Optional.empty()));
         } catch (Exception exception) {
             Util.logError("parseProductPageOrder: arithmetic failed for '%s' — amount='%s' price='%s'".formatted(product, amountStr, priceStr), exception);
 

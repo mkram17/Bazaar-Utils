@@ -1,298 +1,107 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
- * Stores Bazaar item information while automatically tracking market price updates and performing
- * health checks on product identifiers. Intended for order-like data that does not need the full
- * {@link Order} lifecycle.
+ * Snapshot of one Bazaar order interaction: product display name, side, per-unit price, and volume.
+ *
+ * <p>Extends {@link PriceInfo} to inherit static market-query methods. The primary purpose beyond
+ * being a data carrier is price-similarity matching via {@link #isPriceSimilarTo}: Hypixel rounds
+ * displayed totals above {@link #FOLDING_THRESHOLD} (10 000 coins total order value), introducing
+ * up to {@link #COIN_EPSILON} (0.9 coins) of per-unit error. {@link #computeTolerance} derives
+ * the per-unit band from those constants and the order volume.
  */
+@Getter
 @ToString(callSuper=true)
 public class OrderInfo extends PriceInfo {
-    private static final double DEFAULT_TOLERANCE = 0.9;
-    private static final double TOTAL_PRICE_ROUNDING_THRESHOLD = 10000;
-
-    @Getter
-    protected String productID; //Hypixel's code for the product
-    @Getter
-    protected final String name; //name of the item in game
-
-    @Getter
-    protected OrderStatus status;
-
-    @Getter
-    protected final Integer volume;
-
-    @Getter @Setter
-    protected double tolerance; //When finding item price, it can round to the nearest coin sometimes, so tolerance is needed for price calculations
-
-    @Getter @Setter
-    private ItemInfo itemInfo;
+    /**
+     * Maximum per-unit coin inaccuracy Hypixel can introduce in displayed prices.
+     */
+    public static final double COIN_EPSILON = 0.9;
 
     /**
-     * Creates a container that tracks market data for a specific Bazaar product.
-     *
-     * @param name         display name of the item
-     * @param side         whether this is a buy or sell transaction
-     * @param status       status of the order
-     * @param volume       quantity of the order
-     * @param pricePerItem current price per unit for the order
-     * @param itemInfo     optional UI context from the Bazaar screen
+     * Total order value above which Hypixel starts rounding displayed prices/whereof the epsilon is to be consumed.
      */
-    public OrderInfo(@Nullable String name, @Nullable TransactionType.Side side, @Nullable OrderStatus status, @Nullable Integer volume, @Nullable Double pricePerItem, @Nullable ItemInfo itemInfo) {
-        super(pricePerItem, side != null ? TransactionType.of(side, TransactionType.Method.ORDER) : null);
+    public static final double FOLDING_THRESHOLD = 10000;
 
+    @NotNull
+    private final String name;
+
+    private final int volume;
+
+    private final double tolerance;
+
+    /**
+     * @param name         item display name
+     * @param productId    resolved Bazaar product identifier
+     * @param side         order side
+     * @param pricePerItem price per unit; truncated to one decimal place by {@link PriceInfo}
+     * @param volume       order quantity; determines the per-unit tolerance band
+     */
+    private OrderInfo(
+            @NotNull String name,
+            @NotNull String productId,
+            @NotNull TransactionType.Side side,
+            @NotNull Double pricePerItem,
+            @NotNull Integer volume) {
+        super(productId, TransactionType.of(side, TransactionType.Method.ORDER), pricePerItem);
         this.name = name;
-        this.itemInfo = itemInfo;
-        this.status = status;
         this.volume = volume;
-        this.tolerance = calculateTolerance();
-
-        BazaarDataUtil.findProductIdOptional(name).ifPresent(id -> this.productID = id);
-        validateProductId();
-        findPricingPosition().ifPresent(pricingPosition -> this.pricingPosition = pricingPosition);
-    }
-
-    private void validateProductId() {
-        if(!BazaarDataUtil.isValidProductId(productID)){
-            Util.notifyError("Error setting product id for " + this, new Throwable("Product ID is invalid"));
-        }
-    }
-
-    private double calculateTolerance() {
-        //default tolerance
-        if (this.pricePerItem == null || this.volume == null) {
-            return DEFAULT_TOLERANCE;
-        }
-        //doesn't round prices when the total is over 10k
-        if (this.pricePerItem * this.volume < TOTAL_PRICE_ROUNDING_THRESHOLD) {
-            return 0;
-        } else {
-            double priceMaximumInaccuracy = DEFAULT_TOLERANCE / volume; //0.9 coins is the most that it can be off per unit and not show in places where it rounds
-
-            return (Math.round(priceMaximumInaccuracy * 10)) / 10.0;
-        }
+        this.tolerance = computeTolerance(pricePerItem, volume);
     }
 
     /**
-     * Checks whether a provided item name can be resolved to a Bazaar product.
+     * Resolves {@code name} to a product ID via {@link ProductInfo#fromDisplayName} and
+     * constructs an instance. Returns empty when the name is unknown.
      *
-     * @param itemName name to validate
-     * @return {@code true} when a product ID exists for the name
+     * @see #OrderInfo(String, String, TransactionType.Side, Double, Integer)
      */
-    public static boolean isValidName(String itemName) {
-        return itemName != null && BazaarDataUtil.findProductIdOptional(itemName).isPresent();
+    public static Optional<OrderInfo> of(@NotNull String name, @NotNull TransactionType.Side side, @NotNull Double pricePerItem, @NotNull Integer volume) {
+        return ProductInfo.fromDisplayName(name).map(info -> new OrderInfo(name, info.getProductId(), side, pricePerItem, volume));
     }
 
     /**
-     * Determines whether the order price is competitive, matched, or outbid relative to the market.
+     * Constructs directly from a known product ID, bypassing name resolution.
      *
-     * @return status reflecting how this order compares to current prices, if calculable
+     * @see #OrderInfo(String, String, TransactionType.Side, Double, Integer)
      */
-    public Optional<PricingPosition> findPricingPosition() {
-        if (this.pricePerItem == null) {
-            return Optional.empty();
-        }
-
-        double marketPrice = getMarketPrice(transactionType.getSide());
-
-        var orderCountOpt = BazaarDataUtil.getOrderCountOptional(productID, getTransactionType(), getPricePerItem());
-
-        if (orderCountOpt.isEmpty()) {
-            return Optional.empty();
-        }
-
-        int orderCount = orderCountOpt.getAsInt();
-
-        if (transactionType != null && transactionType.getSide() == TransactionType.Side.BUY) {
-            if (this.pricePerItem > marketPrice) {
-                return Optional.of(PricingPosition.COMPETITIVE);
-            } else if (this.pricePerItem < marketPrice) {
-                return Optional.of(PricingPosition.OUTBID);
-            } else {
-                if (orderCount > 1) {
-                    return Optional.of(PricingPosition.MATCHED);
-                }
-            }
-        } else {
-            if (pricePerItem < marketPrice) {
-                return Optional.of(PricingPosition.COMPETITIVE);
-            } else if (pricePerItem > marketPrice) {
-                return Optional.of(PricingPosition.OUTBID);
-            } else {
-                if (orderCount > 1) {
-                    return Optional.of(PricingPosition.MATCHED);
-                }
-            }
-        }
-
-        return Optional.of(PricingPosition.COMPETITIVE);
+    public static OrderInfo of(@NotNull String name, @NotNull String productId, @NotNull TransactionType.Side side, @NotNull Double pricePerItem, @NotNull Integer volume) {
+        return new OrderInfo(name, productId, side, pricePerItem, volume);
     }
 
-    public double getMarketPrice(TransactionType.Side transactionSide) {
-        return OrderUtil.getPriceForPosition(productID, PricingPosition.MATCHED, TransactionType.of(transactionSide, TransactionType.Method.ORDER));
+    public static Optional<OrderInfo> of(@NotNull Order order) {
+        return ProductInfo.fromProductId(order.productId())
+                .map(info -> new OrderInfo(info.getName(), order.productId(), order.side(), order.pricePerItem(), order.originalAmount()));
     }
 
     /**
-     * Tests whether this order corresponds to another order, optionally using loose comparisons for volume and price.
+     * Returns {@code true} when {@code other} is within the tolerance band for this order.
      *
-     * @param other    order to compare against
-     * @param isStrict when true requires exact matches, when false allows small deviations
-     * @return {@code true} if the two orders can be considered the same
+     * <p>Tolerance = {@link #tolerance} + 1% of {@code other} to absorb floating-point residuals.
      */
-    public boolean isSimilarTo(Order other, boolean isStrict) {
-        String otherOrderName = other.getName();
-        Double otherOrderPrice = other.getPricePerItem();
-        Integer otherOrderVolume = other.getVolume();
-        int otherOrderAmountUnclaimed = other.getAmountFilled() - other.getAmountClaimed();
-        TransactionType transactionType = other.getTransactionType();
-
-        if (isStrict) {
-            return isStrictlySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, transactionType);
-        }
-
-        return isLooselySimilarTo(otherOrderName, otherOrderPrice, otherOrderVolume, otherOrderAmountUnclaimed, transactionType);
-    }
-
-    private boolean isStrictlySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, TransactionType transactionType) {
-        return (areAnyNull(this.pricePerItem, otherOrderPrice) || isSimilarPrice(otherOrderPrice)) &&
-                (areAnyNull(this.volume, otherOrderVolume) || this.volume.equals(otherOrderVolume)) &&
-                (areAnyNull(this.name, otherOrderName) || this.name.equalsIgnoreCase(otherOrderName)) &&
-                (areAnyNull(this.transactionType, transactionType) || this.transactionType.getSide() == transactionType.getSide());
-    }
-
-    private boolean isLooselySimilarTo(String otherOrderName, Double otherOrderPrice, Integer otherOrderVolume, int otherOrderAmountUnclaimed, TransactionType transactionType) {
-        return (areAnyNull(this.pricePerItem, otherOrderPrice) || this.isSimilarPrice(otherOrderPrice)) &&
-                (areAnyNull(this.volume, otherOrderVolume) || Util.genericIsSimilarValue(this.getVolume(), otherOrderVolume, 0.05 * otherOrderVolume) || this.getVolume().equals(otherOrderAmountUnclaimed)) && // sometimes the only volume that can be found is the amount that is unclaimed, like in FlipHelper
-                (areAnyNull(this.name, otherOrderName) || this.getName().equalsIgnoreCase(otherOrderName)) &&
-                (areAnyNull(this.transactionType, transactionType) || this.getTransactionType().getSide() == transactionType.getSide());
-    }
-
-    private boolean areAnyNull(Object... objects) {
-        for (Object object : objects) {
-            if (object == null) {
-                return true;
-            }
-        }
-
-        return false;
+    public boolean isPriceSimilarTo(double other) {
+        return Util.genericIsSimilarValue(getPricePerItem(), other, tolerance + other * 0.01);
     }
 
     /**
-     * Finds a matching order in the provided list, preferring the closest match when multiple entries are similar.
+     * Computes the per-unit pricePerUnit tolerance for this order.
      *
-     * @param list list of existing orders to search
-     * @return best matching order if one exists
+     * <p>When the total order value is below {@link #FOLDING_THRESHOLD}, Hypixel does not
+     * round, so tolerance is 0. Above the threshold, up to {@link #COIN_EPSILON} coins
+     * of rounding can appear in the total, which translates to a per-unit tolerance of
+     * {@code round(COIN_ROUNDING_CAP / volume, 1)}.
      */
-    public Optional<Order> findOrderInList(List<Order> list) {
-        List<Order> itemList = findAllMatchesInList(list);
-
-        if (itemList.size() > 1) {
-            return Optional.of(findBestMatch(itemList));
-        }
-
-        if (itemList.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(itemList.getFirst());
-    }
-
-    /**
-     * Locates all orders in the provided list that resemble this order.
-     *
-     * @param list candidate orders
-     * @return list of matches, ordered first by strict then loose similarity
-     */
-    public List<Order> findAllMatchesInList(List<Order> list) {
-        List<Order> itemList = new ArrayList<>();
-
-        for (Order item : list) {
-            if (this.isSimilarTo(item, true)) {
-                itemList.add(item);
-            }
-        }
-
-        if (itemList.isEmpty()) {
-            for (Order item : list) {
-                if (this.isSimilarTo(item, false)) {
-                    itemList.add(item);
-                }
-            }
-        }
-
-        return itemList;
-    }
-    //TODO some error with maximum rounding or finding the price. either finding price can round down by .1 accidentally or maximum rounding calculation is wrong
-    private boolean isSimilarPrice(double price) {
-        //tolerance + 1% of price to account for rounding errors (1% is just in case, but shouldnt matter)
-        return Util.genericIsSimilarValue(pricePerItem, price, tolerance + price * .01);
-    }
-
-    /**
-     * Projects each stored user order to a single variable, such as volume or price. For example,
-     * {@code getVariables(BazaarOrder::getPricePerItem)} extracts all prices from user orders in
-     * {@link UserOrdersStorage}.
-     *
-     * @param <T>      type of value extracted from each order
-     * @param variable accessor used to extract a value from each order
-     * @return immutable list of extracted values
-     */
-    public static <T> List<T> getVariables(Function<Order, T> variable) {
-        return OrderUtil.getUserOrders()
-                .stream()
-                .map(variable)
-                .toList();
-    }
-    /** Used for when there are duplicate matches found and the best should be chosen to use.
-     * Typically, volume is the variable that is different, but it can also be price
-    */
-    private Order findBestMatch(List<Order> list) {
-        return list.stream()
-                .min(getVolumeThenPriceComparator())
-                .orElse(list.getFirst());
-    }
-
-    private Comparator<Order> getVolumeThenPriceComparator() {
-        Comparator<Order> volumeComparator = Comparator.comparingDouble(order -> {
-            if (areAnyNull(this.getVolume(), order.getVolume())) {
-                return Double.MAX_VALUE;
-            }
-
-            return Math.abs(order.getVolume() - this.getVolume());
-        });
-
-        Comparator<Order> priceComparator = Comparator.comparingDouble(order -> {
-            if (areAnyNull(this.pricePerItem, order.getPricePerItem())) {
-                return Double.MAX_VALUE;
-            }
-
-            return Math.abs(order.getPricePerItem() - this.pricePerItem);
-        });
-
-        return volumeComparator.thenComparing(priceComparator);
-    }
-
-    /**
-     * Converts the current container into a fully tracked {@link Order}.
-     */
-    public Order toBazaarOrder() {
-        return new Order(name, volume, pricePerItem, transactionType.getSide(), null);
+    public static double computeTolerance(double price, int volume) {
+        if (volume <= 0 || price <= 0) return COIN_EPSILON;
+        if (price * volume < FOLDING_THRESHOLD) return 0.0;
+        return Math.round((COIN_EPSILON / volume) * 10) / 10.0;
     }
 }
