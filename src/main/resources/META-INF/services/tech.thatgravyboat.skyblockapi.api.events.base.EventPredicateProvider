@@ -1,2 +1,3 @@
 com.github.mkram17.bazaarutils.events.predicates.ToggleableFeaturePredicateProvider
+com.github.mkram17.bazaarutils.events.predicates.CurrentProfilePredicateProvider
 com.github.mkram17.bazaarutils.events.predicates.BazaarScreenEventPredicateProvider
