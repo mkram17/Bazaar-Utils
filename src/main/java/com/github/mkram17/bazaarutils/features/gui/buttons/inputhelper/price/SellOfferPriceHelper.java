@@ -64,7 +64,7 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implem
     )
     public PricingPosition pricingPosition;
 
-    public TransactionType transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
+    public TransactionType transactionType = TransactionType.SELL_OFFER;
 
     @Override
     public ItemRef getItemRef() {

@@ -64,7 +64,7 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost impleme
     )
     public PricingPosition pricingPosition;
 
-    public TransactionType transactionType = TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER);
+    public TransactionType transactionType = TransactionType.BUY_ORDER;
 
     @Override
     public ItemRef getItemRef() {
