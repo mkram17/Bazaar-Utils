@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -15,6 +16,8 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+
+import java.util.List;
 
 @Command(parent = OrdersCommands.class)
 public final class RemoveOrderCommand implements BUCommand {
@@ -30,10 +33,19 @@ public final class RemoveOrderCommand implements BUCommand {
     }
 
     private int removeByIndex(CommandContext<FabricClientCommandSource> context) {
+        List<Order> orders = UserOrdersStorage.orders();
         int index = IntegerArgumentType.getInteger(context, "index");
 
-        Order order = UserOrdersStorage.INSTANCE.get().get(index);
-        order.removeFromUserOrders();
+        if (index >= orders.size()) {
+            PlayerActionUtil.notifyAll("No order at index " + index + ".", NotificationType.COMMAND);
+
+            return 0;
+        }
+
+        Order order = orders.get(index);
+        UserOrdersStorage.apply(
+                UserOrdersStorage.StorageOp.cancel(order, new BazaarDataOrigin.OrderCancelled(System.currentTimeMillis()))
+                        .then(UserOrdersStorage.StorageOp.reindex()));
         PlayerActionUtil.notifyAll("Removed " + order, NotificationType.COMMAND);
 
         return 1;

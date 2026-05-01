@@ -39,15 +39,8 @@ public class OutbidOrderHandler implements ToggleableFeature {
     }
 
     private static MutableComponent createYourOrderForText(Order order) {
-        return Component.literal("Your " + order.getTransactionType().getSide().toString().toLowerCase() + " order for ").withStyle(ChatFormatting.WHITE)
-                .append(Component.literal(order.getVolume().toString() + " ").withStyle(ChatFormatting.DARK_PURPLE))
-                .append(Component.literal(order.getName()).withStyle(ChatFormatting.GOLD));
-    }
-
-    public static List<Order> getOutbidOrders() {
-        return UserOrdersStorage.INSTANCE.get()
-                .stream()
-                .filter(order -> order.getPricingPosition() == PricingPosition.OUTBID && order.getStatus() != OrderStatus.FILLED)
-                .toList();
+        return Component.literal("Your " + order.side().toString().toLowerCase() + " order for ").withStyle(ChatFormatting.WHITE)
+                .append(Component.literal(order.originalAmount() + " ").withStyle(ChatFormatting.DARK_PURPLE))
+                .append(Component.literal(order.productId()).withStyle(ChatFormatting.GOLD));
     }
 }
