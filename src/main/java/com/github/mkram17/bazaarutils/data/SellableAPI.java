@@ -9,6 +9,7 @@ import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.SellableItemList;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
  *
  * <p>{@code SellSacks} is imprecise as players can hold well over 1,300 products in their sacks,
  * and thus for any sellable context (a scoped catalog page or the direct Bazaar overview),
- * most items will be folded into {@link SellSacksParser.SellSacksResult.OtherItems}.
+ * most items will be folded into {@link SellableItemList.OtherItems}.
  *
  * <p>This is a limitation per the lack of a proper {@code BazaarScreenType} → {@code CATALOGS}
  * reference to index via {@link SacksAPI}, because Hypixel doesn't offer a proper endpoint of
@@ -53,8 +54,8 @@ import java.util.stream.Collectors;
 @Module
 public final class SellableAPI extends BUListener implements ScreenConstrained {
     private record SellDataState(
-            @Nullable InstantSellParser.InstantSellResult instantSell,
-            @Nullable SellSacksParser.SellSacksResult sellSacks,
+            @Nullable SellableItemList instantSell,
+            @Nullable SellableItemList sellSacks,
             Map<ItemStack, TransactionType> targets
     ) {
         static Map<ItemStack, TransactionType> newTargetsMap() {
@@ -81,7 +82,7 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
             return cache != null ? cache.items() : List.of();
         }
 
-        public static Optional<InstantSellParser.InstantSellResult.OtherItems> otherItems() {
+        public static Optional<SellableItemList.OtherItems> otherItems() {
             var cache = STATE.get().instantSell();
 
             return cache != null ? cache.otherItems() : Optional.empty();
@@ -89,7 +90,9 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
 
         public static void parse(ItemStack stack, ScreenContext context) {
             var result = context.is(BazaarScreenType.PRODUCT_PAGE)
-                    ? InstantSellParser.parseProductPageOrder(stack).orElse(new InstantSellParser.InstantSellResult(List.of(), Optional.empty()))
+                    ? InstantSellParser.parseProductPageOrder(stack)
+                    .map(InstantSellParser.ProductSellResult::toSellableList)
+                    .orElse(SellableItemList.EMPTY)
                     : InstantSellParser.parseInstantSellOrders(stack);
 
             STATE.updateAndGet(data -> new SellDataState(result, data.sellSacks(), SellDataState.newTargetsMap()));
@@ -109,7 +112,7 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
             return cache != null ? cache.items() : List.of();
         }
 
-        public static Optional<SellSacksParser.SellSacksResult.OtherItems> otherItems() {
+        public static Optional<SellableItemList.OtherItems> otherItems() {
             var cache = STATE.get().sellSacks();
 
             return cache != null ? cache.otherItems() : Optional.empty();
@@ -143,8 +146,8 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
             Minecraft client = Minecraft.getInstance();
             if (client.player == null) return;
 
-            Set<String> names = orders.stream()
-                    .map(OrderInfo::getName)
+            Set<String> productIds = orders.stream()
+                    .map(OrderInfo::getProductId)
                     .collect(Collectors.toSet());
 
             for (Slot slot : event.getPlayerSlots()) {
@@ -153,7 +156,7 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
                 if (slot.container != client.player.getInventory()) continue;
 
                 ProductInfo.fromItemStack(item)
-                        .filter(p -> names.contains(p.getName()))
+                        .filter(p -> productIds.contains(p.getProductId()))
                         .ifPresent(p -> stamp(item, type));
             }
         }
@@ -208,11 +211,10 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
 
         SellablePageLayout.getInstantSellItem(context).ifPresent(info -> {
             InstantSell.parse(info.itemStack(), context);
-            Targets.parse(event, InstantSell.orders(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+            Targets.parse(event, InstantSell.orders(), TransactionType.INSTANT_SELL);
 
             if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE)) {
-                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), TransactionType.of(TransactionType.Side.SELL,
-                        TransactionType.Method.INSTANT)));
+                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), TransactionType.INSTANT_SELL));
             }
         });
 
@@ -230,8 +232,8 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
         ProductInfo product = ProductInfo.fromItemStack(item).orElse(null);
         if (product == null) return;
 
-        if (InstantSell.orders().stream().anyMatch(order -> order.getName().equalsIgnoreCase(product.getName()))) {
-            Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+        if (InstantSell.orders().stream().anyMatch(order -> order.getProductId().equals(product.getProductId()))) {
+            Targets.stamp(item, TransactionType.INSTANT_SELL);
             return;
         }
 
@@ -239,7 +241,7 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
             var current = ScreenManager.getInstance().currentOrNull();
             if (current != null && (current.is(BazaarScreenType.MAIN_PAGE) || current.is(BazaarScreenType.SEARCH_PAGE))) {
                 if (Targets.hasActiveBuyOrders(product)) {
-                    Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+                    Targets.stamp(item, TransactionType.INSTANT_SELL);
                 }
             }
         }
