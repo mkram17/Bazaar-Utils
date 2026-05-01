@@ -1,11 +1,11 @@
 package com.github.mkram17.bazaarutils.data.bazaar;
 
+import com.github.mkram17.bazaarutils.data.bazaar.book.PriceLevel;
 import com.github.mkram17.bazaarutils.data.bazaar.book.remote.BazaarDataManager;
 import com.github.mkram17.bazaarutils.data.bazaar.conversions.BazaarConversions;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.PriceType;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.data.bazaar.book.remote.CustomBazaarReply;
-import com.github.mkram17.bazaarutils.data.bazaar.book.ProductData;
 import com.github.mkram17.bazaarutils.data.bazaar.book.ProductOrder;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 
@@ -34,13 +34,13 @@ public class BazaarDataUtil {
         }
 
         try {
-            ProductData product = reply.getProduct(productId);
+            ProductOrder product = reply.getProduct(productId);
 
             if (product == null) {
                 return OptionalInt.empty();
             }
 
-            List<ProductOrder> list = switch (priceType) {
+            List<PriceLevel> list = switch (priceType) {
                 case INSTABUY -> product.getBuyOrders();
                 case INSTASELL -> product.getSellOrders();
             };
@@ -49,9 +49,9 @@ public class BazaarDataUtil {
                 return OptionalInt.empty();
             }
 
-            for (ProductOrder s : list) {
+            for (PriceLevel s : list) {
                 if (Double.compare(s.pricePerUnit(), price) == 0) {
-                    return OptionalInt.of((int) s.volume());
+                    return OptionalInt.of((int) s.totalVolume());
                 }
             }
 
@@ -86,7 +86,7 @@ public class BazaarDataUtil {
         }
 
         try {
-            ProductData product = reply.getProduct(productId);
+            ProductOrder product = reply.getProduct(productId);
 
             if (product == null) {
                 return OptionalDouble.empty();
@@ -94,7 +94,7 @@ public class BazaarDataUtil {
 
             return switch (priceType) {
                 case INSTABUY -> {
-                    List<ProductOrder> buySummary = product.getBuyOrders();
+                    List<PriceLevel> buySummary = product.getBuyOrders();
 
                     if (buySummary == null || buySummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
@@ -103,7 +103,7 @@ public class BazaarDataUtil {
                     yield OptionalDouble.of(buySummary.getFirst().pricePerUnit());
                 }
                 case INSTASELL -> {
-                    List<ProductOrder> sellSummary = product.getSellOrders();
+                    List<PriceLevel> sellSummary = product.getSellOrders();
 
                     if (sellSummary == null || sellSummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
