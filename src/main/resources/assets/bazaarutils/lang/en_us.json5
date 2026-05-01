@@ -82,10 +82,12 @@
     }
   },
 
-  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
-    "not_upgraded.label": "Not Upgraded",
-    "first_tier.label": "Bazaar Flipper I",
-    "second_tier.label": "Bazaar Flipper II"
+  "bazaarutils.hypixel.{}": {
+    "account_upgrades.bazaar_flipper.{}": {
+      "not_upgraded.label": "Not Upgraded",
+      "first_tier.label": "Bazaar Flipper I",
+      "second_tier.label": "Bazaar Flipper II"
+    }
   },
 
   "bazaarutils.config.{}": {
@@ -281,6 +283,16 @@
         "style.{}": {
           "label": "Highlight Style",
           "hint": "Determines how the status colors are rendered on your order slots."
+        },
+
+        "self_outbid.{}": {
+          "label": "Self Outbid",
+          "hint": "By default, your own volume at a price level doesn't count against you — so a spot you hold alone still shows as COMPETITIVE. Enable this if you'd rather any shared price level report MATCHED regardless of who owns the volume."
+        },
+
+        "settled_color.{}": {
+          "label": "Settled Color",
+          "hint": "The color to highlight orders which have been fully filled or have expired and are awaiting flip or claim."
         },
 
         "competitive_color.{}": {
