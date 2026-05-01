@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
@@ -143,7 +144,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 Double purse,
 
                 @NotNull
-                String productId,
+                ProductInfo productInfo,
 
                 @NotNull
                 ItemInfo productItem,
@@ -191,11 +192,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (productItem.isEmpty()) return Optional.empty();
 
-            Optional<String> productId = ScreenManager.getInstance()
+            Optional<ProductInfo> productInfo = ScreenManager.getInstance()
                     .findBack(BazaarScreenType.PRODUCT_PAGE)
                     .flatMap(ProductPageLayout::getDisplayProductInfo);
 
-            if (productId.isEmpty()) return Optional.empty();
+            if (productInfo.isEmpty()) return Optional.empty();
 
             double purse = CurrencyAPI.INSTANCE.getPurse();
 
@@ -205,7 +206,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (playerInventory.isEmpty()) return Optional.empty();
 
-            return Optional.of(new TransactionState(purse, productId.get(), productItem.get(), inputSign.get(), playerInventory.get(), container, event.getScreen()));
+            return Optional.of(new TransactionState(purse, productInfo.get(), productItem.get(), inputSign.get(), playerInventory.get(), container, event.getScreen()));
         }
 
         public TransactionAmount(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
@@ -235,7 +236,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     public abstract static class TransactionCost extends SignInputHelper<TransactionCost.TransactionState> {
         public record TransactionState(
                 @NotNull
-                String productId,
+                ProductInfo productInfo,
 
                 @NotNull
                 ItemInfo inputSign,
@@ -253,7 +254,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
          */
         protected abstract PricingPosition getPricingPosition();
 
-        protected Optional<String> getItemProductId(ItemInfo inputSign) {
+        protected Optional<ProductInfo> getItemProductInfo(ItemInfo inputSign) {
             return ScreenManager.getInstance()
                     .findBack(BazaarScreenType.PRODUCT_PAGE)
                     .flatMap(ProductPageLayout::getDisplayProductInfo);
@@ -266,10 +267,10 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             Optional<ItemInfo> inputSign = getInputSign(container);
             if (inputSign.isEmpty()) return Optional.empty();
 
-            Optional<String> productId = getItemProductId(inputSign.get());
-            if (productId.isEmpty()) return Optional.empty();
+            Optional<ProductInfo> productInfo = getItemProductInfo(inputSign.get());
+            if (productInfo.isEmpty()) return Optional.empty();
 
-            return Optional.of(new TransactionState(productId.get(), inputSign.get(), container, event.getScreen()));
+            return Optional.of(new TransactionState(productInfo.get(), inputSign.get(), container, event.getScreen()));
         }
 
         public TransactionCost(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
@@ -284,7 +285,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
             return new ResolvedInput.Value(
-                    OrderUtil.getPriceForPosition(state.productId(), getPricingPosition(), getTransactionType())
+                    OrderUtil.getPriceForPosition(state.productInfo().getProductId(), getPricingPosition(), getTransactionType())
             );
         }
     }
