@@ -103,18 +103,6 @@
       "hint": "Automatically update the mod when an update is found."
     },
 
-    "bazaar_flipper_account_upgrade.{}": {
-      "label": "Bazaar Flipper Account Upgrade",
-      "hint": [
-        "The tier of your ", { "translate": "bazaarutils.ref.bazaar_flipper" },
-        " Account Upgrade, which is factored in on tax calculation and current order limits.",
-        "\nYour Bazaar Flipper level can be upgraded by talking to ",
-        { "translate": "bazaarutils.ref.elizabeth" }, " at the ",
-        { "translate": "bazaarutils.ref.community_center" }, " in the ",
-        { "translate": "bazaarutils.ref.skyblock_hub" }, "."
-      ]
-    },
-
     "modify_indicator.{}": {
       "label": "Modify Indicator",
       "hint": [

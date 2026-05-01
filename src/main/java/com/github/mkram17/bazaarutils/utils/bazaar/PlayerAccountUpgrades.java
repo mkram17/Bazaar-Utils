@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
+import com.mojang.serialization.Codec;
 import com.teamresourceful.resourcefulconfig.api.types.info.TooltipProvider;
 import com.teamresourceful.resourcefulconfig.api.types.info.Translatable;
 import lombok.Getter;
@@ -38,6 +39,7 @@ public class PlayerAccountUpgrades {
 
         @Getter
         public final double userBazaarTax;
+
         @Getter
         public final int maxBazaarOrders;
 
@@ -47,5 +49,7 @@ public class PlayerAccountUpgrades {
         }
 
         public abstract String getTranslationKey();
+
+        public static final Codec<BazaarFlipper> CODEC = Codec.STRING.xmap(BazaarFlipper::valueOf, Enum::name);
     }
 }
