@@ -1,41 +1,34 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
-import com.github.mkram17.bazaarutils.config.BUConfig;
-import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.TaxContext;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Pure parser for Instant Sell buttons across overview/catalog and product pages.
+ *
  * @see com.github.mkram17.bazaarutils.data.SellableAPI
  */
 public final class InstantSellParser {
-    /** Parsed result from an Instant Sell container. */
-    public record InstantSellResult(List<OrderInfo> items, Optional<OtherItems> otherItems) {
-        /** Volume folded under the "Other items" aggregation line — volume and total value actionable only, no per-product breakdown. */
-        public record OtherItems(int volume, double totalValue) {}
+    /** Parsed result from a product page's Instant Sell button. */
+    public record ProductSellResult(OrderInfo item, OptionalDouble observedTax) {
+        public SellableItemList toSellableList() {
+            return new SellableItemList(List.of(item), Optional.empty());
+        }
     }
 
     private InstantSellParser() {}
-
-    /** Each sellable-item entry in an instant-sell lore:
-     *  " 432x Fig Log for 1,296 coins"
-     *  Siblings: [" ", quantity(green), "x "(gray), product(white), "for "(gray), "NNN coins"(gold)]
-     */
-    private static final Pattern ITEM_LINE_PATTERN = Pattern.compile("(?<volume>[\\d,]+)x (?<product>.+?) for (?<price>[\\d,.]+) coins");
 
     /**
      * Parses the instant-sell button present on catalog/overview pages
@@ -47,39 +40,15 @@ public final class InstantSellParser {
      *  <li>{@code PRODUCTS_CATALOG_PAGE}: {@code BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_INVENTORY}</li>
      * </ul>
      */
-    public static InstantSellResult parseInstantSellOrders(ItemStack instantSellStack) {
-        List<OrderInfo> items = new ArrayList<>();
-        Optional<InstantSellResult.OtherItems> otherItems = Optional.empty();
+    public static SellableItemList parseInstantSellOrders(ItemStack instantSellStack) {
+        var parsed = SellableItemList.parse(instantSellStack, "parseInstantSellOrders");
 
-        for (Component line : LoreParser.lines(instantSellStack)) {
-            Matcher matcher = ITEM_LINE_PATTERN.matcher(line.getString());
-            if (!matcher.find()) continue;
+        PlayerActionUtil.notifyAll(
+                "InstantSell (overview page) parsed: %d known items | %d folded to \"Other Items\""
+                        .formatted(parsed.items().size(), parsed.otherItems().map(SellableItemList.OtherItems::volume).orElse(0)),
+                NotificationType.GUI);
 
-            String product = matcher.group("product").trim();
-
-            try {
-                int volume = Util.parseNumber(matcher.group("volume"));
-
-                // Items with no buy orders appear with 0 quantity — skip them
-                // rather than dividing by zero or producing a meaningless order.
-                if (volume == 0) {
-                    Util.logMessage("parseOrders: skipping '%s' — 0 quantity (no buy orders)".formatted(product));
-
-                    continue;
-                }
-
-                double totalPrice = Double.parseDouble(matcher.group("price").replace(",", ""));
-                double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
-
-                if (product.equals("Other items")) {
-                    otherItems = Optional.of(new InstantSellResult.OtherItems(volume, totalPrice));
-                } else {
-                    items.add(new OrderInfo(product, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
-                }
-            } catch (Exception ignored) {}
-        }
-
-        return new InstantSellResult(List.copyOf(items), otherItems);
+        return parsed;
     }
 
     /** "Amount: 896x" — the "x" is a separate sibling but getString() concatenates */
@@ -98,30 +67,19 @@ public final class InstantSellParser {
     private static final Pattern TAX_PATTERN = Pattern.compile("Current tax: (?<tax>[\\d.]+)%");
 
     /**
-     * Parses the instant-sell button present on product pages
-     * for data of how much of the player-held volume is sellable instantly.
+     * Parses the instant-sell button present on product pages for how much of the
+     * player-held volume is sellable instantly, along with any observed tax rate.
      *
      * <p>Targets</p>
      * <ul>
-     *  <li>{@code PRODUCT_PAGE}: {@code BazaarSlots.PRODUCT_PAGE.SELL_INSTANTLY},</li>
+     *  <li>{@code PRODUCT_PAGE}: {@code BazaarSlots.PRODUCT_PAGE.SELL_INSTANTLY}</li>
      * </ul>
      */
-    public static Optional<InstantSellResult> parseProductPageOrder(ItemStack sellInstantlyStack) {
+    public static Optional<ProductSellResult> parseProductPageOrder(ItemStack sellInstantlyStack) {
         List<Component> lines = LoreParser.lines(sellInstantlyStack);
 
-        // Name is still read positionally — line 0 is always the item name
-        // and is structurally stable across both the orders/no-orders cases.
-        String product = lines.isEmpty() ? null
-                : lines.getFirst().getSiblings().stream()
-                  .map(Component::getString)
-                  .map(String::trim)
-                  .filter(s -> !s.isEmpty())
-                  .findFirst()
-                  .orElse(null);
-
-        if (product == null) {
-            Util.logMessage("parseProductPageOrder: could not read item name from lore");
-
+        String product = lines.isEmpty() ? null : Util.stripFormatCodes(lines.getFirst().getString()).trim();
+        if (product == null || product.isEmpty()) {
             return Optional.empty();
         }
 
@@ -132,8 +90,7 @@ public final class InstantSellParser {
         boolean noOrders = false;
 
         for (Component line : lines) {
-            String plain = line.getString();
-
+            String plain = Util.stripFormatCodes(line.getString());
             Matcher matcher;
 
             if (NO_INVENTORY_OR_ORDERS_PATTERN.matcher(plain).find()) {
@@ -156,67 +113,53 @@ public final class InstantSellParser {
 
         if (noInventory) {
             Util.logMessage("parseProductPageOrder: no inventory for '%s' — skipping".formatted(product));
-
             return Optional.empty();
         }
 
         if (noOrders) {
             Util.logMessage("parseProductPageOrder: no buy orders for '%s' — skipping".formatted(product));
-
             return Optional.empty();
         }
 
         if (amountStr == null || priceStr == null) {
             Util.logMessage("parseProductPageOrder: pattern miss for '%s' — amount=%s price=%s".formatted(product, amountStr, priceStr));
-
             return Optional.empty();
         }
 
         try {
             int volume = Integer.parseInt(amountStr.replace(",", "").trim());
-            if (volume == 0) return Optional.empty();
+            if (volume <= 0) {
+                Util.logMessage("parseProductPageOrder: skipping '%s' — non-positive quantity (%d)".formatted(product, volume));
+                return Optional.empty();
+            }
+
             double totalPrice = Double.parseDouble(priceStr.replace(",", "").trim());
-            double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
+            double pricePerUnit = Util.truncateNum(totalPrice / volume);
 
-            OrderInfo result = new OrderInfo(product, TransactionType.Side.BUY, null, volume, pricePerUnit, null);
+            Optional<OrderInfo> result = OrderInfo.of(product, TransactionType.Side.BUY, pricePerUnit, volume, false);
 
+            if (result.isEmpty()) {
+                PlayerActionUtil.notifyAll("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
+                return Optional.empty();
+            }
+
+            OptionalDouble observedTax = OptionalDouble.empty();
             if (taxStr != null) {
                 try {
-                    reconcileTax(Double.parseDouble(taxStr.trim()));
-                } catch (Exception e) {
+                    observedTax = OptionalDouble.of(Double.parseDouble(taxStr.trim()));
+                } catch (NumberFormatException e) {
                     Util.logError("parseProductPageOrder: failed to parse tax '%s'".formatted(taxStr), e);
                 }
             }
 
-            PlayerActionUtil.notifyAll("InstantSell (item page) parsed: %s %dx@%.4f".formatted(product, result.getVolume(), result.getPricePerItem()), NotificationType.GUI);
+            PlayerActionUtil.notifyAll(
+                    "InstantSell (item page) parsed: %s %dx@%.4f".formatted(result.get().getName(), result.get().getVolume(), result.get().getPricePerItem()),
+                    NotificationType.GUI);
 
-            return Optional.of(new InstantSellResult(List.of(result), Optional.empty()));
-
+            return Optional.of(new ProductSellResult(result.get(), observedTax));
         } catch (Exception exception) {
             Util.logError("parseProductPageOrder: arithmetic failed for '%s' — amount='%s' price='%s'".formatted(product, amountStr, priceStr), exception);
-
             return Optional.empty();
         }
-    }
-
-    private static void reconcileTax(double observedPercent) {
-        double normalizedTax = TaxContext.normalizeObserved(observedPercent);
-
-        for (PlayerAccountUpgrades.BazaarFlipper tier : PlayerAccountUpgrades.BazaarFlipper.values()) {
-            if (Math.round(tier.getUserBazaarTax() * 10) == Math.round(normalizedTax * 10)) {
-                if (BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE != tier) {
-                    Util.logMessage("reconcileTax: %s → %s (observed %.4g%%%s)".formatted(BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE, tier, observedPercent, TaxContext.isQuadTaxes() ? " [quad taxes /4 → " + normalizedTax + "%]" : ""));
-
-                    BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE = tier;
-                    ConfigUtil.scheduleConfigSave();
-
-                    PlayerActionUtil.notifyAll("Bazaar Flipper tier auto-detected as %s from observed tax; saved to your configuration file.".formatted(tier.name()));
-                }
-
-                return;
-            }
-        }
-
-        Util.logMessage("reconcileTax: observed %.4g%% (normalized %.4g%%) matches no BazaarFlipper tier — ignoring".formatted(observedPercent, normalizedTax));
     }
 }
