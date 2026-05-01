@@ -216,4 +216,23 @@ public class Util {
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
     }
+
+    /**
+     * Returns {@code true} when {@code price} conforms to Hypixel's Bazaar price invariant.
+     *
+     * <p>Hypixel enforces that all order prices have at most one decimal digit
+     * (e.g. {@code 4.6}, {@code 41727.8}), making any result with more precision
+     * a signal that a tax reversal or arithmetic operation was given a wrong input —
+     * most commonly a misconfigured {@code userBazaarTax}, or a unresolvable value per truncated data sent from Hypixel.
+     *
+     * <p>The check multiplies by 10 and compares the result to its nearest integer
+     * within a tolerance of {@code 1e-4} to absorb floating-point residuals without
+     * admitting genuinely fractional prices.
+     *
+     * @param price the recovered or computed per-unit price to validate
+     * @return {@code true} if {@code price} is a valid Hypixel price; {@code false} otherwise
+     */
+    public static boolean isValidHypixelPrice(double price) {
+        return Math.abs(price * 10.0 - Math.round(price * 10.0)) < 1e-4;
+    }
 }
