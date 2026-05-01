@@ -187,15 +187,6 @@ public final class ItemsRepo extends BUListener {
         };
     }
 
-    private static @Nullable ItemStack resolveVanilla(String id) {
-        Identifier identifier = Identifier.tryParse(id);
-        if (identifier == null) return null;
-
-        return BuiltInRegistries.ITEM.getOptional(identifier)
-                .map(ItemStack::new)
-                .orElse(null);
-    }
-
     private static @Nullable ItemStackTemplate resolveVanillaTemplate(String id) {
         Identifier identifier = Identifier.tryParse(id);
         if (identifier == null) return null;

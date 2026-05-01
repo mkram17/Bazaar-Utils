@@ -1,8 +1,9 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts;
 
-import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -15,14 +16,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 /**
- * Layout utilities for the Bazaar item page.
+ * Layout utilities for the Bazaar product page.
  *
- * <p>Handles slot queries, display-product resolution, and lore amount extraction.
+ * <p>Handles slot queries and display-product resolution.
  */
 public final class ProductPageLayout {
 
     private ProductPageLayout() {}
-
 
     public static Optional<ItemInfo> getCreateBuyOrderItem(@NotNull ScreenContext context) {
         return ScreenSwitch.<Optional<ItemInfo>>on(context)
@@ -46,11 +46,12 @@ public final class ProductPageLayout {
         return getDisplayItem(context)
                 .map(ItemInfo::itemStack)
                 .map(ItemStack::getCustomName)
-                .map(Component::getString);
+                .map(Component::getString)
+                .map(Util::stripFormatCodes);
     }
 
-    public static Optional<String> getDisplayProductInfo(@NotNull ScreenContext context) {
-        return getDisplayItemName(context).flatMap(BazaarDataUtil::findProductIdOptional);
+    public static Optional<ProductInfo> getDisplayProductInfo(@NotNull ScreenContext context) {
+        return getDisplayItemName(context).flatMap(ProductInfo::fromDisplayName);
     }
 
     private static Optional<ItemInfo> getSlot(

@@ -4,7 +4,7 @@ import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.DeveloperCommands;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
-import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -31,8 +31,8 @@ public final class ConvertNameDeveloperCommand implements BUCommand {
         if (!DeveloperCommands.isEnabled()) return 0;
 
         String name = StringArgumentType.getString(context, "item name").replaceAll("_", " ");
-        BazaarDataUtil.findProductIdOptional(name).ifPresentOrElse(
-                id -> PlayerActionUtil.notifyAll(name + ": " + id),
+        ProductInfo.fromDisplayName(name).ifPresentOrElse(
+                info -> PlayerActionUtil.notifyAll(name + ": " + info.getProductId()),
                 () -> PlayerActionUtil.notifyAll("Could not find product ID for " + name)
         );
 
