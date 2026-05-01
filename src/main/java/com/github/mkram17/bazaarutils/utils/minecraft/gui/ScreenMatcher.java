@@ -1,12 +1,14 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 import lombok.Getter;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -100,6 +102,25 @@ public final class ScreenMatcher<T extends Enum<T> & ScreenType>
 
     public boolean matchesCurrent() {
         return matches(ScreenManager.getInstance().currentOrNull());
+    }
+
+    /**
+     * Matches against the screen the player just left — {@link ScreenChangeEvent#getOldScreen()},
+     * resolved to the entry {@link ScreenManager} recorded for that {@link Screen} instance while
+     * it was open. Returns {@code false} when nothing was open before it, or when no entry
+     * survives for it.
+     */
+    public boolean matchesPrevious(ScreenChangeEvent event) {
+        return matches(ScreenManager.getInstance().find(event.getOldScreen()).orElse(null));
+    }
+
+    /**
+     * Depth-based sibling of {@link #matchesPrevious(ScreenChangeEvent)}, not a substitute for it.
+     * Nothing is popped on close, so mid-transition the screen that just closed is still at depth
+     * 0 and this returns the screen behind it.
+     */
+    public boolean matchesPrevious() {
+        return matches(ScreenManager.getInstance().previous().orElse(null));
     }
 
     /** Defensive copy. Empty when {@link #isAnyMode()}. */
