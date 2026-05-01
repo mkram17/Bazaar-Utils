@@ -9,12 +9,13 @@ import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.google.common.collect.MapMaker;
@@ -22,8 +23,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import tech.thatgravyboat.skyblockapi.api.datatype.DataTypeItemStackKt;
-import tech.thatgravyboat.skyblockapi.api.datatype.DataTypes;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.PlayerInventoryChangeEvent;
@@ -143,11 +142,9 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
 
                 if (slot.container != client.player.getInventory()) continue;
 
-                String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
-
-                if (name != null && names.contains(name)) {
-                    stamp(item, type);
-                }
+                ProductInfo.fromItemStack(item)
+                        .filter(p -> names.contains(p.getName()))
+                        .ifPresent(p -> stamp(item, type));
             }
         }
 
@@ -164,22 +161,20 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
                 if (slot.container != client.player.getInventory()) continue;
                 if (Targets.containsKey(item)) continue;
 
-                String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
-                if (name == null || !hasActiveBuyOrders(name)) continue;
+                Optional<ProductInfo> productInfo = ProductInfo.fromItemStack(item);
+                if (productInfo.isEmpty()) continue;
+                if (!hasActiveBuyOrders(productInfo.get())) continue;
 
                 stamp(item, type);
                 remaining -= item.getCount();
             }
         }
 
-        private static boolean hasActiveBuyOrders(String name) {
-            Optional<String> productId = BazaarDataUtil.findProductIdOptional(name);
-            if (productId.isEmpty()) return false;
-
-            OptionalDouble topPrice = BazaarDataUtil.findItemPriceOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
+        private static boolean hasActiveBuyOrders(ProductInfo productInfo) {
+            OptionalDouble topPrice = PriceInfo.marketPrice(productInfo.getProductId(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
             if (topPrice.isEmpty() || topPrice.getAsDouble() == 0.0) return false;
 
-            OptionalInt orderCount = BazaarDataUtil.getOrderCountOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER), topPrice.getAsDouble());
+            OptionalInt orderCount = PriceInfo.orderCount(productInfo.getProductId(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER), topPrice.getAsDouble());
             return orderCount.isPresent() && orderCount.getAsInt() > 0;
         }
     }
@@ -220,7 +215,7 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
         ItemStack item = event.getItem();
         if (Targets.get(item).isPresent()) return;
 
-        String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
+        String name = ProductInfo.fromItemStack(item).map(ProductInfo::getName).orElse(null);
         if (name == null) return;
 
         if (InstantSell.orders().stream().anyMatch(order -> order.getName().equalsIgnoreCase(name))) {
@@ -228,8 +223,10 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
             return;
         }
 
-        if (InstantSell.otherItems().isPresent() && Targets.hasActiveBuyOrders(name)) {
-            Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+        if (InstantSell.otherItems().isPresent()) {
+            ProductInfo.fromDisplayName(name).ifPresent(productInfo -> {
+                if (Targets.hasActiveBuyOrders(productInfo)) Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+            });
         }
     }
 

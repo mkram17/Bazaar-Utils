@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.data.stored.BookmarksStorage;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -26,10 +26,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class SearchBookmarkWidget {
 
@@ -57,9 +54,17 @@ public class SearchBookmarkWidget {
             final ItemStack itemForButton = (configuredItem == null) ? Items.BARRIER.getDefaultInstance() : configuredItem;
             MutableComponent text = Component.literal(bookmark.name()).withStyle(ChatFormatting.BOLD);
 
+            OptionalDouble instaBuy = PriceInfo.priceForPosition(bookmark.productId(),
+                    TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT),
+                    PricingPosition.MATCHED);
+            OptionalDouble instaSell = PriceInfo.priceForPosition(bookmark.productId(),
+                    TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT),
+                    PricingPosition.MATCHED);
+
             Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withBold(false);
-            text.append(Component.literal("\nInsta Buy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT))) + " coins").setStyle(style));
-            text.append(Component.literal("\nInsta Sell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productId(), PricingPosition.MATCHED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT))) + " coins").setStyle(style));
+
+            text.append(Component.literal("\nInsta Buy: " + (instaBuy.isPresent() ? Util.getPrettyString(instaBuy.getAsDouble()) + " coins" : "N/A")).setStyle(style));
+            text.append(Component.literal("\nInsta Sell: " + (instaSell.isPresent() ? Util.getPrettyString(instaSell.getAsDouble()) + " coins" : "N/A")).setStyle(style));
 
             ItemSlotButtonWidget button = new ItemSlotButtonWidget(
                     buttonX,

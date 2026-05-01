@@ -3,12 +3,13 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
+import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
@@ -107,7 +108,13 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
 
     @Override
     protected int computeMaxValue(TransactionAmount.TransactionState state) {
-        int amountCanAfford = (int) (state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()));
+        double competitive = PriceInfo.priceForPosition(state.productInfo().getProductId(), getTransactionType(), PricingPosition.COMPETITIVE).orElseGet(() -> {
+            Util.logMessage("%s.computeMaxValue: book empty for %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), PriceInfo.MINIMUM_PRICE));
+
+            return PriceInfo.MINIMUM_PRICE;
+        });
+
+        int amountCanAfford = (int) Math.min(state.purse() / competitive, 71680);
 
         return TransactionPageLayout.findBuyOrderAmountLimit(state.inputSign().itemStack())
                             .map(limit -> Math.min(amountCanAfford, limit))
