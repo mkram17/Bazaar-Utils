@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts;
 
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
+import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -34,6 +36,14 @@ public final class TransactionPageLayout {
     public static Optional<ItemInfo> getConfirmBuyOrderItem(@NotNull ScreenContext context) {
         return ScreenSwitch.<Optional<ItemInfo>>on(context)
                 .when(BazaarScreenType.BUY_ORDER_CONFIRMATION, ctx -> getSlot(ctx, BazaarSlots.BUY_ORDER.CONFIRM_BUY_ORDER.slot))
+                .orElse(Optional.empty());
+    }
+
+    public static Optional<String[]> getFlipSignLines(ScreenContext context) {
+        return ScreenSwitch.<Optional<String[]>>on(context)
+                .when(BazaarScreenType.COMPLETED_BUY_ORDER_FLIP_PRICE_INPUT, ctx ->
+                        Optional.of(((AccessorSignEditScreen) ctx.screen()).getMessages())
+                )
                 .orElse(Optional.empty());
     }
 

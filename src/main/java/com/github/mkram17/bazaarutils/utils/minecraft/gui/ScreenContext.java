@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,13 +30,13 @@ public final class ScreenContext {
         return wanted.includes(type);
     }
 
-    public <T extends AbstractContainerScreen<?>> Optional<T> as(Class<T> type) {
+    public <T extends Screen> Optional<T> as(Class<T> type) {
         return type.isInstance(screen)
                 ? Optional.of(type.cast(screen))
                 : Optional.empty();
     }
 
-    public <T extends AbstractContainerScreen<?>> Optional<T> asIf(ScreenType wanted, Class<T> screenClass) {
+    public <T extends Screen> Optional<T> asIf(ScreenType wanted, Class<T> screenClass) {
         if (!is(wanted)) return Optional.empty();
 
         return as(screenClass);
@@ -47,7 +46,7 @@ public final class ScreenContext {
         if (type == null) return false;
 
         for (ScreenType w : wanted) {
-            if (is(w)) return true; // delegate to is() for hierarchy
+            if (is(w)) return true;
         }
 
         return false;
