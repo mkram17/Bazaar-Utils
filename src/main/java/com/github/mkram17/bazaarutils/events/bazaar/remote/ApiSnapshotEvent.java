@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.events.bazaar;
+package com.github.mkram17.bazaarutils.events.bazaar.remote;
 
 import com.github.mkram17.bazaarutils.data.bazaar.book.BookLevels;
 import lombok.Getter;
