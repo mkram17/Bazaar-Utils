@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.minecraft;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQuery;
 import net.minecraft.client.Minecraft;
@@ -51,8 +51,8 @@ public class SlotLookup {
                         ItemStack stack = mainStacks.get(i);
 
                         boolean matches = !stack.isEmpty()
-                                && BazaarDataUtil.findProductIdOptional(stack.getHoverName().getString())
-                                .map(id -> id.equals(productId))
+                                && ProductInfo.fromDisplayName(stack.getHoverName().getString())
+                                .map(info -> info.getProductId().equals(productId))
                                 .orElse(false);
 
                         if (!matches) continue;

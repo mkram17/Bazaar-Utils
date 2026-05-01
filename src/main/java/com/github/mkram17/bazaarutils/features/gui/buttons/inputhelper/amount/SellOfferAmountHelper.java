@@ -4,10 +4,10 @@ import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
@@ -111,8 +111,8 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
                 .filter(stack -> !stack.isEmpty())
                 .filter(stack -> Optional.ofNullable(stack.getCustomName())
                         .map(Component::getString)
-                        .flatMap(BazaarDataUtil::findProductIdOptional)
-                        .map(productId -> productId.equals(state.productId()))
+                        .flatMap(ProductInfo::fromDisplayName)
+                        .map(info -> info.getProductId().equals(state.productInfo().getProductId()))
                         .orElse(false))
                 .mapToInt(ItemStack::getCount)
                 .sum();
