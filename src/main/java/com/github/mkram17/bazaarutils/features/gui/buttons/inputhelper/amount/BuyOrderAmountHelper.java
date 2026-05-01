@@ -4,11 +4,13 @@ import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigu
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
+import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
@@ -22,7 +24,6 @@ import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvide
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 
-import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
@@ -111,16 +112,17 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
 
     @Override
     protected OptionalInt computeMaxValue(TransactionAmount.TransactionState state) {
-        OptionalDouble price = OrderUtil.getPriceForPositionOptional(state.productId(), PricingPosition.COMPETITIVE, getTransactionType());
+        double competitive = PriceInfo.priceForPosition(state.productInfo().getProductId(), getTransactionType(), PricingPosition.COMPETITIVE).orElseGet(() -> {
+            Util.logMessage("%s.computeMaxValue: book empty for %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), PriceInfo.MINIMUM_PRICE));
 
-        // A missing or non-positive price divides into an amount that is nonsense rather than large.
-        if (price.isEmpty() || price.getAsDouble() <= 0) return OptionalInt.empty();
+            return PriceInfo.MINIMUM_PRICE;
+        });
 
-        int amountCanAfford = (int) (state.purse() / price.getAsDouble());
+        int amountCanAfford = (int) Math.min(state.purse() / competitive, 71680);
 
         return OptionalInt.of(TransactionPageLayout.findBuyOrderAmountLimit(state.inputSign().itemStack())
-                            .map(limit -> Math.min(amountCanAfford, limit))
-                            .orElse(amountCanAfford));
+                .map(limit -> Math.min(amountCanAfford, limit))
+                .orElse(amountCanAfford));
     }
 
     @Override
