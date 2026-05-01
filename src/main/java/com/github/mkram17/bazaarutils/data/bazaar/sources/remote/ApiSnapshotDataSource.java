@@ -1,0 +1,65 @@
+package com.github.mkram17.bazaarutils.data.bazaar.sources.remote;
+
+import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
+import com.github.mkram17.bazaarutils.data.bazaar.pipeline.BookMutation;
+import com.github.mkram17.bazaarutils.data.bazaar.pipeline.FillInference;
+import com.github.mkram17.bazaarutils.data.bazaar.pipeline.SnapshotSource;
+import com.github.mkram17.bazaarutils.events.bazaar.data.BazaarDataBatchUpdateEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.remote.ApiSnapshotEvent;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.Priority;
+import com.github.mkram17.bazaarutils.utils.TimeUtil;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.DataSource;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+
+import java.util.*;
+
+@DataSource
+public final class ApiSnapshotDataSource extends SnapshotSource {
+    public ApiSnapshotDataSource() {}
+
+    private record SplicedProduct(String productId, BookMutation.MutationOutcome outcome) {}
+
+    @Subscription(priority = Priority.FIRST)
+    public void onApiSnapshot(ApiSnapshotEvent event) {
+        var origin = new BazaarDataOrigin.ApiSnapshot(event.getTimestamp());
+
+        var spliced = new ArrayList<SplicedProduct>(event.getSnapshot().size());
+
+        for (var entry : event.getSnapshot().entrySet()) {
+            String productId = entry.getKey();
+
+            var outcome = splice(
+                    productId,
+                    entry.getValue().asksLevels(),
+                    entry.getValue().bidsLevels(),
+                    origin
+            );
+
+            spliced.add(new SplicedProduct(productId, outcome));
+        }
+
+        var changed = new HashSet<String>();
+        for (var product : spliced) {
+            if (product.outcome().changed()) {
+                changed.add(product.productId());
+            }
+        }
+        var outcomes = spliced.stream().map(SplicedProduct::outcome).toList();
+
+        changed.addAll(FillInference.settle(outcomes, origin, sessionEligibility()).changedProducts());
+
+        if (!changed.isEmpty()) {
+            new BazaarDataBatchUpdateEvent(Collections.unmodifiableSet(changed), origin).post(BazaarUtils.EVENT_BUS);
+
+            PlayerActionUtil.notifyAll(
+                    "%s — %d products changed".formatted(origin.describe(), changed.size()),
+                    NotificationType.BAZAARDATA
+            );
+        }
+    }
+}

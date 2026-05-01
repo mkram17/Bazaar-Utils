@@ -17,14 +17,16 @@ public class TimeUtil {
     private static long timeToBazaarLimitReset;
 
     private static void updateTime() {
-        modInitTime = ZonedDateTime.now(ZoneOffset.UTC);
         nextBazaarLimitReset = modInitTime.toLocalDate().plusDays(1).atStartOfDay(ZoneOffset.UTC);
         timeToBazaarLimitReset = Duration.between(modInitTime, nextBazaarLimitReset).toSeconds();
     }
 
     @RunOnInit
     public static void startTimer() {
+        modInitTime = ZonedDateTime.now(ZoneOffset.UTC);
+
         updateTime();
+
         Timer timer = new Timer(10 * 1000, e -> {
             updateTime();
         });
