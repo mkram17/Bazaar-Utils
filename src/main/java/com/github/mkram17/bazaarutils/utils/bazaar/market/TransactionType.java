@@ -20,6 +20,14 @@ import lombok.Getter;
  */
 public class TransactionType {
 
+    public static final TransactionType SELL_OFFER = TransactionType.of(Side.SELL, Method.ORDER);
+
+    public static final TransactionType BUY_ORDER = TransactionType.of(Side.BUY, Method.ORDER);
+
+    public static final TransactionType INSTANT_SELL = TransactionType.of(Side.SELL, Method.INSTANT);
+
+    public static final TransactionType INSTANT_BUY = TransactionType.of(Side.BUY, Method.INSTANT);
+
     /**
      * Player intent side of the transaction.
      */
@@ -83,8 +91,12 @@ public class TransactionType {
      * Instant transactions use the same side; orders use the opposite side.
      */
     public static PriceType resolvePriceType(Side side, Method method) {
-        if(method == Method.INSTANT) return side.asPriceType();
+        if (method == Method.INSTANT) return side.asPriceType();
         else return side.asPriceType().opposite();
+    }
+
+    public boolean higherIsBetter() {
+        return priceType.higherIsBetter();
     }
 
     public boolean isInstant() {
