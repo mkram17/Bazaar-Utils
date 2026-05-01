@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.data.stored.BazaarProfileFlags;
 import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.Priority;
+import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import org.jetbrains.annotations.NotNull;
 import tech.thatgravyboat.skyblockapi.api.data.MayorPerks;
@@ -45,5 +46,17 @@ public class TaxContext extends BUListener {
      */
     public static double normalizeObserved(double observedPercent) {
         return isQuadTaxes() ? observedPercent / 4.0 : observedPercent;
+    }
+
+    private static volatile long lastTaxWarningMs = 0L;
+    private static final long TAX_WARN_COOLDOWN_MS = 60_000L;
+
+    public static void warnTaxMisconfiguration(String context) {
+        long now = System.currentTimeMillis();
+
+        if (now - lastTaxWarningMs < TAX_WARN_COOLDOWN_MS) return;
+        lastTaxWarningMs = now;
+
+        Util.notifyError(context + " Run /bu config to fix your Account Upgrade setting.", new Throwable());
     }
 }
