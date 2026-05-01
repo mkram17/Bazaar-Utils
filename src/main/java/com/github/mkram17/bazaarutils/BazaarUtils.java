@@ -57,6 +57,7 @@ public class BazaarUtils implements ClientModInitializer {
 
         BazaarUtilsModules.init();
 
+        BazaarUtilsDataSources.init();
         BazaarUtilsItemModifiers.init();
 
         // Persisted orders are decoded through Order.CODEC, which runs the Order constructor and
