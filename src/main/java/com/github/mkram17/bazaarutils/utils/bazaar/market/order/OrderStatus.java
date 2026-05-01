@@ -1,9 +1,11 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -20,24 +22,24 @@ public sealed interface OrderStatus permits
         OrderStatus.Actionable,
         OrderStatus.Terminal {
 
-    Codec<OrderStatus> CODEC = Codec.STRING.dispatch(
+    Codec<OrderStatus> CODEC = Codec.STRING.partialDispatch(
             "type",
-            status -> switch (status) {
+            status -> DataResult.success(switch (status) {
                 case Set ignored -> "set";
                 case Partial ignored -> "partial";
                 case Filled ignored -> "filled";
                 case Expired ignored -> "expired";
                 case Cancelled ignored -> "cancelled";
                 case Claimed ignored -> "claimed";
-            },
+            }),
             type -> switch (type) {
-                case "set" -> Set.CODEC;
-                case "partial" -> Partial.CODEC;
-                case "filled" -> Filled.CODEC;
-                case "expired" -> Expired.CODEC;
-                case "cancelled" -> Cancelled.CODEC;
-                case "claimed" -> Claimed.CODEC;
-                default -> throw new IllegalArgumentException("Unknown OrderStatus: " + type);
+                case "set" -> DataResult.success(Set.CODEC);
+                case "partial" -> DataResult.success(Partial.CODEC);
+                case "filled" -> DataResult.success(Filled.CODEC);
+                case "expired" -> DataResult.success(Expired.CODEC);
+                case "cancelled" -> DataResult.success(Cancelled.CODEC);
+                case "claimed" -> DataResult.success(Claimed.CODEC);
+                default -> DataResult.error(() -> "Unknown OrderStatus: " + type);
             }
     );
 
@@ -45,7 +47,7 @@ public sealed interface OrderStatus permits
      * Not yet {@link Terminal} — cancellation and claiming both remain possible actions,
      * even for an order that has {@link Expired} from the market.
      */
-    sealed interface Actionable extends OrderStatus permits BookState, Settled {}
+    sealed interface Actionable extends OrderStatus permits BookState, Settled, FillState {}
 
     /**
      * How far an order's fill has progressed — {@link Set} or {@link Partial} while
@@ -58,19 +60,19 @@ public sealed interface OrderStatus permits
      * {@code Expired} wrapping another {@code Expired} at the type level — {@code Expired}
      * itself is not a {@code FillState}.
      */
-    sealed interface FillState permits Set, Partial, Filled {
-        Codec<FillState> CODEC = Codec.STRING.dispatch(
+    sealed interface FillState extends Actionable permits Set, Partial, Filled {
+        Codec<FillState> CODEC = Codec.STRING.partialDispatch(
                 "type",
-                status -> switch (status) {
+                status -> DataResult.success(switch (status) {
                     case Set ignored -> "set";
                     case Partial ignored -> "partial";
                     case Filled ignored -> "filled";
-                },
+                }),
                 type -> switch (type) {
-                    case "set" -> Set.CODEC;
-                    case "partial" -> Partial.CODEC;
-                    case "filled" -> Filled.CODEC;
-                    default -> throw new IllegalArgumentException("Unknown FillState OrderStatus: " + type);
+                    case "set" -> DataResult.success(Set.CODEC);
+                    case "partial" -> DataResult.success(Partial.CODEC);
+                    case "filled" -> DataResult.success(Filled.CODEC);
+                    default -> DataResult.error(() -> "Unknown FillState OrderStatus: " + type);
                 }
         );
 
@@ -80,11 +82,11 @@ public sealed interface OrderStatus permits
         /**
          * The shape {@code newTotal} filled units represents, given this shape is the
          * current one and {@code currentTotal} is how many units it already reflects.
-         * Never regresses: {@code newTotal <= currentTotal} returns {@code this}
-         * unchanged, the SAME reference, so a caller can rely on reference-identity to
-         * detect "nothing genuinely changed." Preserves history where the target shape
-         * matches this one — {@link Partial#firstFilledAt()} carries forward across
-         * every subsequent partial fill; a target of {@link Filled} that's already
+         * Never regresses: {@code this instanceof Filled} or {@code newTotal <= currentTotal}
+         * returns {@code this} unchanged, the SAME reference, so a caller can rely on
+         * reference-identity to detect "nothing genuinely changed." Preserves history where
+         * the target shape matches this one — {@link Partial#firstFilledAt()} carries forward
+         * across every subsequent partial fill; a target of {@link Filled} that's already
          * {@link Filled} keeps its OWN {@code filledAt} rather than restamping, so the
          * first moment full completion was observed is never overwritten by a later one.
          *
@@ -94,7 +96,7 @@ public sealed interface OrderStatus permits
          * reimplementing the same switch independently.
          */
         default FillState advancedTo(int currentTotal, int newTotal, int volume, long timestamp) {
-            if (newTotal <= currentTotal) return this;
+            if (this instanceof Filled || newTotal <= currentTotal) return this;
 
             return newTotal >= volume
                     ? new Filled(timestamp)
@@ -105,10 +107,10 @@ public sealed interface OrderStatus permits
 
         /** Constructs the shape {@code filledAmount} (out of {@code volume}) implies, with no prior state to advance from — the synthesis-time case. */
         static FillState of(int filledAmount, int volume, long observedAt) {
+            if (volume <= 0 || filledAmount <= 0) return Set.INSTANCE;
             if (filledAmount >= volume) return new Filled(observedAt);
-            if (filledAmount > 0) return new Partial(observedAt, observedAt);
 
-            return new Set();
+            return new Partial(observedAt, observedAt);
         }
 
         default String describeFill() {
@@ -125,7 +127,8 @@ public sealed interface OrderStatus permits
 
     /** Placed; no fill has been processed yet. */
     record Set() implements BookState, FillState {
-        static final MapCodec<Set> CODEC = MapCodec.unit(new Set());
+        public static final Set INSTANCE = new Set();
+        static final MapCodec<Set> CODEC = MapCodec.unit(INSTANCE);
 
         @Override
         public boolean hasUnfilledRemainder() {
@@ -145,6 +148,13 @@ public sealed interface OrderStatus permits
                         Codec.LONG.fieldOf("firstFilledAt").forGetter(Partial::firstFilledAt),
                         Codec.LONG.fieldOf("lastFilledAt").forGetter(Partial::lastFilledAt)
                 ).apply(instance, Partial::new));
+
+        public Partial {
+            if (firstFilledAt > lastFilledAt) {
+                throw new IllegalArgumentException(
+                        "Partial.firstFilledAt (%d) must not exceed lastFilledAt (%d)".formatted(firstFilledAt, lastFilledAt));
+            }
+        }
 
         @Override
         public boolean hasUnfilledRemainder() {
@@ -184,6 +194,10 @@ public sealed interface OrderStatus permits
                         Codec.LONG.fieldOf("expiredAt").forGetter(Expired::expiredAt),
                         FillState.CODEC.fieldOf("interrupted").forGetter(Expired::interrupted)
                 ).apply(instance, Expired::new));
+
+        public Expired {
+            Objects.requireNonNull(interrupted, "interrupted");
+        }
     }
 
     /** Terminal — {@link Cancelled} or {@link Claimed}. Nothing further ever happens to the order. */
@@ -235,9 +249,10 @@ public sealed interface OrderStatus permits
      * the one place a screen or chat observation advances a status, whether or not
      * it's currently wrapped in {@link Expired}. Advances the wrapped {@link FillState}
      * via {@link FillState#advancedTo}, then wraps (or keeps wrapped) in {@link Expired}
-     * exactly when {@code nowExpired} says so — preserving an already-known
-     * {@code expiredAt} rather than restamping it, and reusing THIS SAME {@link Expired}
-     * instance outright when the observation implies no genuine change at all.
+     * whenever {@code nowExpired} is {@code true} or this status was already {@link Expired}
+     * (expiry is monotonic) — preserving an already-known {@code expiredAt} rather than
+     * restamping it, and reusing THIS SAME {@link Expired} instance outright when the
+     * observation implies no genuine change at all.
      *
      * @param priorFilledAmount the filledAmount this status's own fill state already reflects
      * @param reconciledFill    the (already floor/ceiling-clamped) fill total to advance to
@@ -251,7 +266,8 @@ public sealed interface OrderStatus permits
         var prior = fillState().orElseThrow(() -> new IllegalStateException("Cannot reconcile a terminal order's fill state: " + describe()));
         FillState advanced = prior.advancedTo(priorFilledAmount, reconciledFill, volume, observedAt);
 
-        if (!nowExpired) return (OrderStatus) advanced;
+        boolean effectiveExpired = nowExpired || this instanceof Expired;
+        if (!effectiveExpired) return advanced;
 
         var priorExpired = this instanceof Expired existing ? existing : null;
         if (priorExpired != null && priorExpired.interrupted().equals(advanced)) return priorExpired;
@@ -265,7 +281,7 @@ public sealed interface OrderStatus permits
     static OrderStatus observed(int filledAmount, int volume, boolean expired, long observedAt) {
         var fillState = FillState.of(filledAmount, volume, observedAt);
 
-        return expired ? new Expired(observedAt, fillState) : (OrderStatus) fillState;
+        return expired ? new Expired(observedAt, fillState) : fillState;
     }
 
     default String describe() {
