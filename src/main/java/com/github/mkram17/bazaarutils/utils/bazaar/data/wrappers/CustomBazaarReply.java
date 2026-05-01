@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers;
 
+import com.github.mkram17.bazaarutils.utils.bazaar.data.ProductData;
 import lombok.Getter;
 import net.hypixel.api.reply.AbstractReply;
 

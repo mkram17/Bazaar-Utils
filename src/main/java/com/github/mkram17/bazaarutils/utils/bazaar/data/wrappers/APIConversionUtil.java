@@ -1,6 +1,9 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers;
 
 import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.DataOrigin;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.PriceLevel;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.ProductData;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
 
@@ -32,37 +35,39 @@ public final class APIConversionUtil {
     }
 
     public static ProductData fromAPIProduct(String productId, SkyBlockBazaarReply.Product apiProduct) {
-        List<ProductOrder> sell = new ArrayList<>();
-        List<ProductOrder> buy = new ArrayList<>();
+        List<PriceLevel> sell = new ArrayList<>();
+        List<PriceLevel> buy = new ArrayList<>();
 
         if (apiProduct.getSellSummary() != null) {
-            var convertedSellSummaries = convertAPIProductSummaries(apiProduct.getSellSummary(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+            var convertedSellSummaries = convertAPIProductSummaries(apiProduct.getSellSummary());
             sell.addAll(convertedSellSummaries);
         }
 
         if (apiProduct.getBuySummary() != null) {
-            var convertedBuySummaries = convertAPIProductSummaries(apiProduct.getBuySummary(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT));
+            var convertedBuySummaries = convertAPIProductSummaries(apiProduct.getBuySummary());
             buy.addAll(convertedBuySummaries);
         }
 
         return new ProductData(productId, sell, buy);
     }
 
-    public static List<ProductOrder> convertAPIProductSummaries(List<SkyBlockBazaarReply.Product.Summary> apiSummaries, TransactionType transactionType) {
+    public static List<PriceLevel> convertAPIProductSummaries(List<SkyBlockBazaarReply.Product.Summary> apiSummaries) {
         if (apiSummaries == null || apiSummaries.isEmpty()) {
             return List.of();
         }
         return apiSummaries.stream()
-                .map(s -> fromAPIProductSummary(s, transactionType))
+                .map(APIConversionUtil::fromAPIProductSummary)
                 .toList();
     }
 
-    public static ProductOrder fromAPIProductSummary(SkyBlockBazaarReply.Product.Summary apiSummary, TransactionType transactionType) {
-        return new ProductOrder(
-                transactionType.getPriceType(),
+    public static PriceLevel fromAPIProductSummary(SkyBlockBazaarReply.Product.Summary apiSummary) {
+        long now = System.currentTimeMillis();
+
+        return new PriceLevel(
                 apiSummary.getPricePerUnit(),
                 apiSummary.getAmount(),
-                apiSummary.getOrders()
+                (int) apiSummary.getOrders(),
+                new DataOrigin.ApiSnapshot(now)
         );
     }
 }
