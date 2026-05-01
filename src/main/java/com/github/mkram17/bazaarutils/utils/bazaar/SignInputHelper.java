@@ -1,22 +1,20 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
+import com.github.mkram17.bazaarutils.data.HandledOrderAPI;
 import com.github.mkram17.bazaarutils.config.util.api.conditions.MethodEquals;
-import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
-import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
@@ -29,15 +27,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.profile.currency.CurrencyAPI;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 interface SignInputState {
     @NotNull
@@ -294,70 +288,19 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     }
 
     public abstract static class TransactionFlip extends TransactionCost {
-        public static final Pattern VOLUME_PATTERN = Pattern.compile("([\\d,]+)");
-        public static final int INPUT_LORE_LINE_VOLUME = 1;
-
-        public static final Pattern PRICE_PATTERN = Pattern.compile("([\\d,.]+) coins");
-        public static final int INPUT_LORE_LINE_PRICE = 3;
-
         public TransactionFlip(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
             super(name, inputSignRef);
         }
 
         @Override
-        protected Optional<String> getItemProductId(ItemInfo inputSign) {
-            List<Component> loreLines = LoreParser.lines(inputSign.itemStack());
-            if (loreLines.isEmpty()) return Optional.empty();
-            return matchToUserOrder(loreLines).map(Order::getProductID);
-        }
+        protected Optional<ProductInfo> getItemProductInfo(ItemInfo inputSign) {
+            var result = HandledOrderAPI.getForOptions()
+                    .flatMap(OrderInfo::of)
+                    .map((info) -> (ProductInfo) info);
 
-        private Optional<Order> matchToUserOrder(List<Component> loreLines) {
-            Optional<PriceInfo> priceInfo = getOrderPriceInfo(loreLines);
-            Optional<Integer> volume = getVolumeUnclaimed(loreLines);
+            if (result.isEmpty()) PlayerActionUtil.notifyAll("Flip helper found no current order selected in data layer — price will be unavailable", NotificationType.FEATURE);
 
-            if (priceInfo.isEmpty() || volume.isEmpty()) return Optional.empty();
-
-            OrderInfo tempOrder = new OrderInfo(
-                    null,
-                    priceInfo.get().getTransactionType().getSide(),
-                    null,
-                    volume.get(),
-                    priceInfo.get().getPricePerItem(),
-                    null
-            );
-
-            return tempOrder.findOrderInList(OrderUtil.getUserOrders());
-        }
-
-        private Optional<PriceInfo> getOrderPriceInfo(List<Component> loreLines) {
-            if (loreLines.size() <= INPUT_LORE_LINE_PRICE) return Optional.empty();
-
-            Matcher matcher = PRICE_PATTERN.matcher(loreLines.get(INPUT_LORE_LINE_PRICE).getString());
-            if (matcher.find()) {
-                try {
-                    // Flip orders are always on the buy side; the sell price is computed after matching
-                    return Optional.of(new PriceInfo(Double.parseDouble(matcher.group(1).replace(",", "")), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER)));
-                } catch (NumberFormatException e) {
-                    Util.notifyError("Error parsing order price in TransactionFlip", e);
-                }
-            }
-
-            return Optional.empty();
-        }
-
-        private Optional<Integer> getVolumeUnclaimed(List<Component> loreLines) {
-            if (loreLines.size() <= INPUT_LORE_LINE_VOLUME) return Optional.empty();
-
-            Matcher matcher = VOLUME_PATTERN.matcher(loreLines.get(INPUT_LORE_LINE_VOLUME).getString());
-            if (matcher.find()) {
-                try {
-                    return Optional.of(Integer.parseInt(matcher.group(1).replace(",", "")));
-                } catch (NumberFormatException e) {
-                    Util.notifyError("Error parsing order volume in TransactionFlip", e);
-                }
-            }
-
-            return Optional.empty();
+            return result;
         }
     }
 }
