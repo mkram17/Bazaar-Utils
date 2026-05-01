@@ -194,10 +194,10 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
 
         SellablePageLayout.getInstantSellItem(context).ifPresent(info -> {
             InstantSell.parse(info.itemStack(), context);
-            Targets.parse(event, InstantSell.orders(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+            Targets.parse(event, InstantSell.orders(), TransactionType.INSTANT_SELL);
 
             if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE)) {
-                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT)));
+                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), TransactionType.INSTANT_SELL));
             }
         });
 
@@ -218,13 +218,13 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
         if (name == null) return;
 
         if (InstantSell.orders().stream().anyMatch(order -> order.getName().equalsIgnoreCase(name))) {
-            Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+            Targets.stamp(item, TransactionType.INSTANT_SELL);
             return;
         }
 
         if (InstantSell.otherItems().isPresent()) {
             ProductInfo.fromDisplayName(name).ifPresent(productInfo -> {
-                if (Targets.hasActiveBuyOrders(productInfo)) Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+                if (Targets.hasActiveBuyOrders(productInfo)) Targets.stamp(item, TransactionType.INSTANT_SELL);
             });
         }
     }
