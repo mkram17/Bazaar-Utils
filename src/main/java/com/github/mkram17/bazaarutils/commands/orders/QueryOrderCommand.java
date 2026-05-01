@@ -2,6 +2,8 @@ package com.github.mkram17.bazaarutils.commands.orders;
 
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.OrdersCommands;
+import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -32,10 +34,12 @@ public final class QueryOrderCommand implements BUCommand {
     private int queryByIndex(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
 
-        Optional<Order> order = OrdersCommands.orderAt(index);
+        ProfileKey key = ProfileKey.requireProfile("QueryOrderCommand"); if (key == null) return 0;
+
+        Optional<Order> order = OrdersCommands.orderAt(index, key);
         if (order.isEmpty()) return 0;
 
-        PlayerActionUtil.notifyAll(order.get().toString());
+        PlayerActionUtil.notifyAll(order.get().describe());
 
         return 1;
     }

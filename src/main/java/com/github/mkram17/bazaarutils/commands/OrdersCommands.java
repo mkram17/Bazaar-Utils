@@ -1,11 +1,11 @@
 package com.github.mkram17.bazaarutils.commands;
 
-
+import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -28,8 +28,8 @@ public final class OrdersCommands implements BUCommand {
      * Resolves a tracked order by its list index, notifying the player and returning empty when the
      * index is out of range instead of throwing an {@link IndexOutOfBoundsException}.
      */
-    public static Optional<Order> orderAt(int index) {
-        List<Order> orders = OrderUtil.getUserOrders();
+    public static Optional<Order> orderAt(int index, ProfileKey key) {
+        List<Order> orders = UserOrdersStorage.orders(key);
 
         if (index < 0 || index >= orders.size()) {
             PlayerActionUtil.notifyAll("Invalid order index " + index + " — you have " + orders.size() + " tracked order(s).", NotificationType.COMMAND);

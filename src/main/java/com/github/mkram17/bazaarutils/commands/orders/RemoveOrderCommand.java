@@ -2,9 +2,12 @@ package com.github.mkram17.bazaarutils.commands.orders;
 
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.OrdersCommands;
+import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -33,11 +36,15 @@ public final class RemoveOrderCommand implements BUCommand {
     private int removeByIndex(CommandContext<FabricClientCommandSource> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
 
-        Optional<Order> order = OrdersCommands.orderAt(index);
+        ProfileKey key = ProfileKey.requireProfile("RemoveOrderCommand"); if (key == null) return 0;
+
+        Optional<Order> order = OrdersCommands.orderAt(index, key);
         if (order.isEmpty()) return 0;
 
-        order.get().removeFromUserOrders();
-        PlayerActionUtil.notifyAll("Removed " + order.get(), NotificationType.COMMAND);
+        UserOrdersStorage.apply(key, UserOrdersStorage.StorageOp.cancel(order.get(), new BazaarDataOrigin.OrderCancelled(System.currentTimeMillis()))
+                        .then(UserOrdersStorage.StorageOp.reindex()));
+
+        PlayerActionUtil.notifyAll("Removed " + order, NotificationType.COMMAND);
 
         return 1;
     }

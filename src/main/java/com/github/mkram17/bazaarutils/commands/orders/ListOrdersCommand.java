@@ -2,9 +2,12 @@ package com.github.mkram17.bazaarutils.commands.orders;
 
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.OrdersCommands;
+import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
+import com.github.mkram17.bazaarutils.utils.resources.BazaarConversions;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
@@ -26,8 +29,24 @@ public final class ListOrdersCommand implements BUCommand {
     }
 
     private int queryAll(CommandContext<FabricClientCommandSource> context) {
-        PlayerActionUtil.notifyAll(Order.getVariables(Order::getName).toString());
+        ProfileKey key = ProfileKey.requireProfile("ListOrdersCommand"); if (key == null) return 0;
+        var storage = UserOrdersStorage.orders(key);
 
+        if (storage.isEmpty()) {
+            PlayerActionUtil.notifyAll("No orders loaded for the active profile.");
+
+            return 1;
+        }
+
+        BazaarConversions.ensureLoaded();
+
+        for (int i = 0; i < storage.size(); i++) {
+            Order order = storage.get(i);
+
+            String name = BazaarConversions.getProductIdToNameCache().getOrDefault(order.productId(), order.productId());
+
+            PlayerActionUtil.notifyAll("[" + i + "] " + name + " | " + order.side() + " | " + order.pricePerItem() + " x" + order.originalAmount() + " | " + order.status());
+        }
         return 1;
     }
 }

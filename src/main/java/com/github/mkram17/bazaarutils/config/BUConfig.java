@@ -77,20 +77,6 @@ public final class BUConfig {
     public static boolean AUTOMATIC_UPDATES_TOGGLE = true;
 
     @ConfigEntry(
-            id = "bazaar_flipper_account_upgrade",
-            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.label"
-    )
-    @Comment(
-            value = """
-                    The tier of your §6Bazaar Flipper§r Account Upgrade, which is factored in on tax calculation and current order limits.
-                    
-                    Your Bazaar Flipper level can be upgraded by talking to §dElizabeth§r, at the §bCommunity Center§r, in the §bSkyBlock Hub§r.
-                    """,
-            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.hint"
-    )
-    public static PlayerAccountUpgrades.BazaarFlipper USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE = PlayerAccountUpgrades.BazaarFlipper.NOT_UPGRADED;
-
-    @ConfigEntry(
             id = "modify_indicator",
             translation = "bazaarutils.config.modify_indicator.label"
     )
