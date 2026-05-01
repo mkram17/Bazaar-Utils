@@ -10,7 +10,8 @@ import lombok.Getter;
 public class TimeUtil {
     @Getter
     private static ZonedDateTime modInitTime;
-    /** UTC midnight captured at class initialization; does not advance during the session. */
+    @Getter
+    private static long modInitEpochMs;
     public static final ZonedDateTime LAST_BAZAAR_LIMIT_RESET_TIME = ZonedDateTime.of(LocalDate.now(ZoneOffset.UTC), LocalTime.MIDNIGHT, ZoneOffset.UTC);
     @Getter
     private static ZonedDateTime nextBazaarLimitReset;
@@ -18,14 +19,17 @@ public class TimeUtil {
     private static long timeToBazaarLimitReset;
 
     private static void updateTime() {
-        modInitTime = ZonedDateTime.now(ZoneOffset.UTC);
         nextBazaarLimitReset = modInitTime.toLocalDate().plusDays(1).atStartOfDay(ZoneOffset.UTC);
         timeToBazaarLimitReset = Duration.between(modInitTime, nextBazaarLimitReset).toSeconds();
     }
 
     @RunOnInit
     public static void startTimer() {
+        modInitTime = ZonedDateTime.now(ZoneOffset.UTC);
+        modInitEpochMs = modInitTime.toInstant().toEpochMilli();
+
         updateTime();
+
         Timer timer = new Timer(10 * 1000, e -> {
             updateTime();
         });
