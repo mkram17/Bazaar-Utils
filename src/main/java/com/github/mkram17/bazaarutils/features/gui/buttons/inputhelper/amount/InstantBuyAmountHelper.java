@@ -79,7 +79,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
     @ShowIf(SignInputHelper.TransactionAmount.WhenFixedStrategy.class)
     public int fixedAmount = 1;
 
-    public TransactionType transactionType = TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT);
+    public TransactionType transactionType = TransactionType.INSTANT_BUY;
 
     @Override
     public ItemRef getItemRef() {
