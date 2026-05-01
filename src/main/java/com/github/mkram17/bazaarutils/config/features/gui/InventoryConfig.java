@@ -84,6 +84,17 @@ public final class InventoryConfig {
     public static SlotHighlight.HighlightStyle ORDER_STATUS_HIGHLIGHT_STYLE = SlotHighlight.HighlightStyle.BACKGROUND;
 
     @ConfigEntry(
+            id = "order_status_highlight:filled_color",
+            translation = "bazaarutils.config.inventory.order_status_highlight.filled_color.label"
+    )
+    @Comment(
+            value = "The color to highlight orders which have been fully filled and are awaiting claim.",
+            translation = "bazaarutils.config.inventory.order_status_highlight.filled_color.hint"
+    )
+    @ConfigOption.Color(alpha = true)
+    public static int ORDER_STATUS_HIGHLIGHT_FILLED_COLOR = 0xFFEEEEEE;
+
+    @ConfigEntry(
             id = "order_status_highlight:competitive_color",
             translation = "bazaarutils.config.inventory.order_status_highlight.competitive_color.label"
     )
