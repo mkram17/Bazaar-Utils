@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.data.bazaar.book.remote;
 
-import com.github.mkram17.bazaarutils.data.bazaar.book.ProductData;
+import com.github.mkram17.bazaarutils.data.bazaar.book.ProductOrder;
 import lombok.Getter;
 import net.hypixel.api.reply.AbstractReply;
 
@@ -10,14 +10,14 @@ public class CustomBazaarReply extends AbstractReply {
     @Getter
     private final long lastUpdated;
     @Getter
-    private final Map<String, ProductData> products;
+    private final Map<String, ProductOrder> products;
 
-    public CustomBazaarReply(long lastUpdated, Map<String, ProductData> products) {
+    public CustomBazaarReply(long lastUpdated, Map<String, ProductOrder> products) {
         this.lastUpdated = lastUpdated;
         this.products = products;
     }
 
-    public ProductData getProduct(String productId) {
+    public ProductOrder getProduct(String productId) {
         return products.get(productId);
     }
 }
