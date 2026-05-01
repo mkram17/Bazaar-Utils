@@ -9,21 +9,21 @@ import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
-import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.google.common.collect.MapMaker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import tech.thatgravyboat.skyblockapi.api.datatype.DataTypeItemStackKt;
-import tech.thatgravyboat.skyblockapi.api.datatype.DataTypes;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.PlayerInventoryChangeEvent;
@@ -39,33 +39,38 @@ import java.util.stream.Collectors;
  * <ul>
  *   <li>{@link InstantSell} — parsed Instant Sell orders for the context.</li>
  *   <li>{@link SellSacks} — parsed Sell Sacks orders for the context.</li>
- *   <li>{@link Targets} — the players held stacks which would be sold per an Instant Sell</li>
+ *   <li>{@link Targets} — the player's held stacks which would be sold by an Instant Sell.</li>
  * </ul>
  *
- * Do note the following:
+ * <p>{@code SellSacks} is imprecise as players can hold well over 1,300 products in their sacks,
+ * and thus for any sellable context (a scoped catalog page or the direct Bazaar overview),
+ * most items will be folded into {@link SellSacksParser.SellSacksResult.OtherItems}.
  *
- * {@code SellSacks} is imprecise as players can hold very well over 1300 products on their sacks,
- * and thus for any sellable context (a scoped catalog page or the direct bazaar overview),
- * most items will be folded onto {@link SellSacksParser.SellSacksResult.OtherItems}.
- *
- * This is a limitation per the lack of a proper {@code BazaarScreenType} -> {@code CATALOGS} reference
- * to simply index via {@link SacksAPI}, because Hypixel doesn't offer a proper endpoint of the Bazaar Catalogs/Products.
+ * <p>This is a limitation per the lack of a proper {@code BazaarScreenType} → {@code CATALOGS}
+ * reference to index via {@link SacksAPI}, because Hypixel doesn't offer a proper endpoint of
+ * the Bazaar Catalogs/Products.
  */
 @Module
-public class SellableAPI extends BUListener implements ScreenConstrained {
+public final class SellableAPI extends BUListener implements ScreenConstrained {
     private record SellDataState(
             @Nullable InstantSellParser.InstantSellResult instantSell,
             @Nullable SellSacksParser.SellSacksResult sellSacks,
             Map<ItemStack, TransactionType> targets
     ) {
+        static Map<ItemStack, TransactionType> newTargetsMap() {
+            return new MapMaker().weakKeys().concurrencyLevel(1).makeMap();
+        }
+
         static SellDataState empty() {
-            return new SellDataState(null, null, new MapMaker().weakKeys().concurrencyLevel(1).makeMap());
+            return new SellDataState(null, null, newTargetsMap());
         }
     }
 
     private static final AtomicReference<SellDataState> STATE = new AtomicReference<>(SellDataState.empty());
 
     public static final class InstantSell {
+        private InstantSell() {}
+
         public static boolean hasResult() {
             return STATE.get().instantSell() != null;
         }
@@ -87,11 +92,13 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
                     ? InstantSellParser.parseProductPageOrder(stack).orElse(new InstantSellParser.InstantSellResult(List.of(), Optional.empty()))
                     : InstantSellParser.parseInstantSellOrders(stack);
 
-            STATE.updateAndGet(data -> new SellDataState(result, data.sellSacks(), data.targets()));
+            STATE.updateAndGet(data -> new SellDataState(result, data.sellSacks(), SellDataState.newTargetsMap()));
         }
     }
 
     public static final class SellSacks {
+        private SellSacks() {}
+
         public static boolean hasResult() {
             return STATE.get().sellSacks() != null;
         }
@@ -116,6 +123,8 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
     }
 
     public static final class Targets {
+        private Targets() {}
+
         static void stamp(ItemStack stack, TransactionType type) {
             STATE.get().targets().put(stack, type);
         }
@@ -143,11 +152,9 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
 
                 if (slot.container != client.player.getInventory()) continue;
 
-                String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
-
-                if (name != null && names.contains(name)) {
-                    stamp(item, type);
-                }
+                ProductInfo.fromItemStack(item)
+                        .filter(p -> names.contains(p.getName()))
+                        .ifPresent(p -> stamp(item, type));
             }
         }
 
@@ -164,27 +171,29 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
                 if (slot.container != client.player.getInventory()) continue;
                 if (Targets.containsKey(item)) continue;
 
-                String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
-                if (name == null || !hasActiveBuyOrders(name)) continue;
+                Optional<ProductInfo> productInfo = ProductInfo.fromItemStack(item);
+                if (productInfo.isEmpty()) continue;
+                if (!hasActiveBuyOrders(productInfo.get())) continue;
 
                 stamp(item, type);
                 remaining -= item.getCount();
             }
         }
 
-        private static boolean hasActiveBuyOrders(String name) {
-            Optional<String> productId = BazaarDataUtil.findProductIdOptional(name);
-            if (productId.isEmpty()) return false;
-
-            OptionalDouble topPrice = BazaarDataUtil.findItemPriceOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
+        private static boolean hasActiveBuyOrders(ProductInfo productInfo) {
+            OptionalDouble topPrice = PriceInfo.marketPrice(productInfo.getProductId(), TransactionType.BUY_ORDER);
             if (topPrice.isEmpty() || topPrice.getAsDouble() == 0.0) return false;
 
-            OptionalInt orderCount = BazaarDataUtil.getOrderCountOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER), topPrice.getAsDouble());
+            OptionalInt orderCount = PriceInfo.orderCount(productInfo.getProductId(), TransactionType.BUY_ORDER, topPrice.getAsDouble());
             return orderCount.isPresent() && orderCount.getAsInt() > 0;
         }
     }
 
-    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(
+            BazaarScreenType.MAIN_PAGE,
+            BazaarScreenType.SEARCH_PAGE,
+            BazaarScreenType.PRODUCTS_CATALOG_PAGE,
+            BazaarScreenType.PRODUCT_PAGE);
 
     @Override
     public ScreenMatcher<BazaarScreenType> screenConstraints() {
@@ -202,33 +211,37 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
             Targets.parse(event, InstantSell.orders(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
 
             if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE)) {
-                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT)));
+                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), TransactionType.of(TransactionType.Side.SELL,
+                        TransactionType.Method.INSTANT)));
             }
         });
 
-        SellablePageLayout.getSellSacksItem(context).ifPresent(info -> {
-            SellSacks.parse(info.itemStack());
-        });
+        SellablePageLayout.getSellSacksItem(context).ifPresent(info -> SellSacks.parse(info.itemStack()));
     }
 
     @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
     private void onInventoryChange(PlayerInventoryChangeEvent event) {
-        if (InstantSell.orders().isEmpty() && SellSacks.orders().isEmpty()) return;
+        if (!InstantSell.hasResult()) return;
 
         ItemStack item = event.getItem();
-        if (Targets.get(item).isPresent()) return;
+        if (Targets.containsKey(item)) return;
 
-        String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
-        if (name == null) return;
+        ProductInfo product = ProductInfo.fromItemStack(item).orElse(null);
+        if (product == null) return;
 
-        if (InstantSell.orders().stream().anyMatch(order -> order.getName().equalsIgnoreCase(name))) {
+        if (InstantSell.orders().stream().anyMatch(order -> order.getName().equalsIgnoreCase(product.getName()))) {
             Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
             return;
         }
 
-        if (InstantSell.otherItems().isPresent() && Targets.hasActiveBuyOrders(name)) {
-            Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+        if (InstantSell.otherItems().isPresent()) {
+            var current = ScreenManager.getInstance().currentOrNull();
+            if (current != null && (current.is(BazaarScreenType.MAIN_PAGE) || current.is(BazaarScreenType.SEARCH_PAGE))) {
+                if (Targets.hasActiveBuyOrders(product)) {
+                    Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+                }
+            }
         }
     }
 
