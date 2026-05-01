@@ -3,10 +3,9 @@ package com.github.mkram17.bazaarutils.features.gui.overlays;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.utils.*;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.ItemModifier;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.AbstractItemModifier;
@@ -19,23 +18,15 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import tech.thatgravyboat.skyblockapi.api.datatype.DataTypeItemStackKt;
-import tech.thatgravyboat.skyblockapi.api.datatype.DataTypes;
-import tech.thatgravyboat.skyblockapi.impl.tagkey.ItemTag;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 @ItemModifier
 public class PriceCharts implements LoreModifier, AbstractItemModifier {
-    // Cache: sanitized item name -> should show tooltip
-    private static final Map<String, Boolean> SHOW_CACHE = new ConcurrentHashMap<>();
-
     @Override
     public boolean isEnabled() {
         return OverlaysConfig.PRICE_CHARTS_TOGGLE;
@@ -58,33 +49,24 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
         return OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR || LoreModifier.super.appliesToScreen(context);
     }
 
-    public final List<ModifierSource> MODIFIER_SOURCES = List.of(ModifierSource.CONTAINER, ModifierSource.PLAYER_INVENTORY, ModifierSource.HOTBAR);
+    public final EnumSet<ModifierSource> MODIFIER_SOURCES = EnumSet.of(ModifierSource.CONTAINER, ModifierSource.PLAYER_INVENTORY, ModifierSource.HOTBAR);
 
     @Override
-    public List<ModifierSource> getModifierSources() {
+    public EnumSet<ModifierSource> getModifierSources() {
         return MODIFIER_SOURCES; // to prevent instantiating the list very single iteration
     }
 
     public PriceCharts() {}
 
-    private static @Nullable String cleanName(ItemStack stack) {
-        return DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
-    }
-
-    private static boolean shouldShow(@Nullable String key) {
-        return key != null && SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName);
-    }
-
     @Override
     public boolean appliesTo(ItemStack stack) {
-        if (stack.isEmpty() || ItemTag.GLASS_PANES.contains(stack)) return false;
-
-        return shouldShow(cleanName(stack));
+        return ProductInfo.fromItemStack(stack).isPresent();
     }
 
     @Override
     public Result modifyLore(ItemStack stack, List<Component> lore, @Nullable Result previous, @Nullable ScreenContext context) {
-        if (!shouldShow(cleanName(stack))) return Result.UNMODIFIED;
+        Optional<ProductInfo> product = ProductInfo.fromItemStack(stack);
+        if (product.isEmpty()) return Result.UNMODIFIED;
 
         return withMerger(lore, merger -> {
             copyAll(merger);
@@ -111,14 +93,10 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
     public Result onClick(ItemStack stack, int button, @Nullable Slot slot, @Nullable ScreenContext context) {
         if (!Minecraft.getInstance().hasShiftDown() || !Minecraft.getInstance().hasControlDown()) return Result.UNMODIFIED;
 
-        String key = cleanName(stack);
+        Optional<ProductInfo> productInfo = ProductInfo.fromItemStack(stack);
+        if (productInfo.isEmpty()) return Result.UNMODIFIED;
 
-        if (key == null || !SHOW_CACHE.getOrDefault(key, false)) return Result.UNMODIFIED;
-
-        Optional<String> productId = BazaarDataUtil.findProductIdOptional(key); // All cached items are safe
-        if (productId.isEmpty()) return Result.UNMODIFIED;
-
-        String link = "https://skyblock.finance/items/" + productId.get();
+        String link = "https://skyblock.finance/items/" + productInfo.get().getProductId();
 
         Minecraft.getInstance().setScreen(new ConfirmLinkScreen(confirmed -> {
             if (confirmed) {
