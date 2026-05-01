@@ -155,14 +155,22 @@ public class Util {
     }
 
     public static int parseNumber(String input) {
-        input = input.toUpperCase();
+        return (int) parseDoubleNumber(input);
+    }
+
+    /**
+     * Parses a possibly k/M/B-suffixed numeric string into a {@code double}, preserving
+     * decimals and avoiding 32-bit integer truncation/overflow for large coin totals.
+     */
+    public static double parseDoubleNumber(String input) {
+        input = input.toUpperCase(java.util.Locale.ROOT).trim();
         double value = Double.parseDouble(input.replaceAll("[^0-9.]", ""));
 
-        if (input.endsWith("K")) return (int) (value * 1_000);
-        if (input.endsWith("M")) return (int) (value * 1_000_000);
-        if (input.endsWith("B")) return (int) (value * 1_000_000_000);
+        if (input.endsWith("K")) return value * 1_000.0;
+        if (input.endsWith("M")) return value * 1_000_000.0;
+        if (input.endsWith("B")) return value * 1_000_000_000.0;
 
-        return (int) value;
+        return value;
     }
 
     public static String formatNumberWithPrefix(double number) {
@@ -217,5 +225,26 @@ public class Util {
         return BigDecimal.valueOf(num)
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
+    }
+
+    /**
+     * Returns {@code true} when {@code price} conforms to Hypixel's Bazaar price invariant.
+     *
+     * <p>Hypixel enforces that all order prices have at most one decimal digit
+     * (e.g. {@code 4.6}, {@code 41727.8}), making any result with more precision
+     * a signal that a tax reversal or arithmetic operation was given a wrong input —
+     * most commonly a misconfigured {@code userBazaarTax}, or a unresolvable value per truncated data sent from Hypixel.
+     *
+     * <p>The check multiplies by 10 and compares the result to its nearest integer
+     * within a tolerance of {@code 1e-4} to absorb floating-point residuals without
+     * admitting genuinely fractional prices.
+     *
+     * @param price the recovered or computed per-unit price to validate
+     * @return {@code true} if {@code price} is a valid Hypixel price; {@code false} otherwise
+     */
+    public static boolean isValidHypixelPrice(double price) {
+        return Double.isFinite(price)
+                && price >= com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo.MINIMUM_PRICE
+                && Math.abs(price * 10.0 - Math.round(price * 10.0)) < 1e-4;
     }
 }
