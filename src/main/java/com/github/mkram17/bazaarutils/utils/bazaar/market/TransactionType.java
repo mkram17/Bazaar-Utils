@@ -1,7 +1,10 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import lombok.Getter;
+
+import java.util.Objects;
 
 /**
  * Describes a bazaar transaction using both its side (buy/sell) and method (instant/order).
@@ -18,7 +21,15 @@ import lombok.Getter;
  *       same {@link Method} and the same {@link Side} (exact side+method equality).</li>
  * </ul>
  */
-public class TransactionType {
+public final class TransactionType {
+
+    public static final TransactionType SELL_OFFER = new TransactionType(Side.SELL, Method.ORDER);
+
+    public static final TransactionType BUY_ORDER = new TransactionType(Side.BUY, Method.ORDER);
+
+    public static final TransactionType INSTANT_SELL = new TransactionType(Side.SELL, Method.INSTANT);
+
+    public static final TransactionType INSTANT_BUY = new TransactionType(Side.BUY, Method.INSTANT);
 
     /**
      * Player intent side of the transaction.
@@ -27,7 +38,16 @@ public class TransactionType {
         BUY,
         SELL;
 
-        public static final Codec<Side> CODEC = Codec.STRING.xmap(TransactionType.Side::valueOf, Enum::name);
+        public static final Codec<Side> CODEC = Codec.STRING.comapFlatMap(
+                raw -> {
+                    try {
+                        return DataResult.success(Side.valueOf(raw));
+                    } catch (IllegalArgumentException e) {
+                        return DataResult.error(() -> "Unknown TransactionType.Side: " + raw);
+                    }
+                },
+                Enum::name
+        );
 
         /**
          * Returns the opposite player intent side.
@@ -75,7 +95,10 @@ public class TransactionType {
     }
 
     public static TransactionType of(Side side, Method method) {
-        return new TransactionType(side, method);
+        return switch (method) {
+            case ORDER -> side == Side.BUY ? BUY_ORDER : SELL_OFFER;
+            case INSTANT -> side == Side.BUY ? INSTANT_BUY : INSTANT_SELL;
+        };
     }
 
     /**
@@ -83,8 +106,12 @@ public class TransactionType {
      * Instant transactions use the same side; orders use the opposite side.
      */
     public static PriceType resolvePriceType(Side side, Method method) {
-        if(method == Method.INSTANT) return side.asPriceType();
+        if (method == Method.INSTANT) return side.asPriceType();
         else return side.asPriceType().opposite();
+    }
+
+    public boolean higherIsBetter() {
+        return priceType.higherIsBetter();
     }
 
     public boolean isInstant() {
@@ -125,8 +152,8 @@ public class TransactionType {
      * <p>Unlike {@link #is(TransactionType)}, which considers two transactions equivalent when
      * they resolve to the same market {@link PriceType}, this method requires exact equality
      * of both the {@link Method} (INSTANT/ORDER) and the {@link Side} (BUY/SELL). Use this
-     * when you need to distinguish, for example, an ORDER-buy from an INSTANT-buy even though
-     * they map to the same price bucket.</p>
+     * when you need to distinguish, for example, an ORDER-buy ({@link #BUY_ORDER}) from an
+     * INSTANT-sell ({@link #INSTANT_SELL}) even though both map to {@link PriceType#INSTASELL}.</p>
      *
      * @param targetTransactionType transaction to compare against
      * @return {@code true} when method and side are identical
@@ -135,7 +162,18 @@ public class TransactionType {
         return this.method == targetTransactionType.getMethod() && this.side == targetTransactionType.getSide();
     }
 
-    public String getString() {
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj || (obj instanceof TransactionType other && this.side == other.side && this.method == other.method);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(side, method);
+    }
+
+    @Override
+    public String toString() {
         return method + " " + side;
     }
 }

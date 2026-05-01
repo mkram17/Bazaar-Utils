@@ -58,17 +58,17 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip implem
     )
     @Comment(
             value = """
-                    The strategy with which to calculate the price to ask per item
-                    
-                    COMPETITIVE: The bid will be +0.1 the current best offer on the market
-                    MATCHED: The bid will be equal to that of the current best offer on the market
-                    OUTBID: The bid will be -0.1 the current best offer on the market
+                    The strategy with which to calculate the ask price per item
+
+                    COMPETITIVE: The ask will be -0.1 below the current best sell offer on the market
+                    MATCHED: The ask will be equal to the current best sell offer on the market
+                    OUTBID: The ask will be +0.1 above the current best sell offer on the market
                     """,
             translation = "bazaarutils.config.buttons.button.container.pricing_position.hint"
     )
     public PricingPosition pricingPosition;
 
-    public TransactionType transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
+    public TransactionType transactionType = TransactionType.SELL_OFFER;
 
     @Override
     public ItemRef getItemRef() {
@@ -100,9 +100,9 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip implem
     @Override
     public Component getTitle(int index) {
         return Component.literal(switch (pricingPosition) {
-            case COMPETITIVE -> "Flips asking +0.1 above best bid";
-            case MATCHED -> "Flips asking equal to best bid";
-            case OUTBID -> "Flips asking -0.1 below best bid";
+            case COMPETITIVE -> "Flips asking -0.1 below best offer";
+            case MATCHED -> "Flips asking equal to best offer";
+            case OUTBID -> "Flips asking +0.1 above best offer";
         });
     }
 

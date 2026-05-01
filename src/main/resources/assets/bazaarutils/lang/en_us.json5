@@ -224,7 +224,7 @@
           },
           "pricing_position.{}": {
             "label": "Pricing Position",
-            "hint": "The strategy with which to calculate the price to bid per item\n\nCOMPETITIVE: The bid will be +0.1 the current best offer on the market\nMATCHED: The bid will be equal to that of the current best offer on the market\nOUTBID: The bid will be -0.1 the current best offer on the market"
+            "hint": "The strategy with which to calculate the unit price relative to top of book\n\nCOMPETITIVE: Improves on the current best order by 0.1 coins (+0.1 for buys, -0.1 for sells)\nMATCHED: Matches the current best order on the market\nOUTBID: Steps behind the current best order by 0.1 coins (-0.1 for buys, +0.1 for sells)"
           },
           "fixed_amount.{}": {
             "label": "Fixed Amount",
