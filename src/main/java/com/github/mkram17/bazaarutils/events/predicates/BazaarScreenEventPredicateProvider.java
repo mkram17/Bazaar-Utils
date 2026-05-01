@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.events.predicates;
 
 import com.github.mkram17.bazaarutils.events.RegistrationScope;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -9,6 +10,7 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import kotlin.jvm.functions.Function2;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.EventPredicateProvider;
 import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
@@ -22,15 +24,20 @@ public class BazaarScreenEventPredicateProvider implements EventPredicateProvide
         if (!method.isAnnotationPresent(OnlyBazaarScreen.class)) return null;
 
         OnlyBazaarScreen annotation = method.getAnnotation(OnlyBazaarScreen.class);
+        boolean previous = annotation.previous();
 
         if (annotation.useConstraintsInterface()) {
             ScreenConstrained constrained = resolveConstrained(method);
+
             ScreenMatcher<BazaarScreenType> exclusions = annotation.except().length > 0
                     ? BazaarScreenMatcher.any().except(annotation.except())
                     : null;
+
             return (event, ctx) -> {
-                ScreenContext context = resolveContext(event);
+                ScreenContext context = resolveContext(event, previous);
+
                 if (exclusions != null && !exclusions.matches(context)) return false;
+
                 return constrained.appliesToScreen(context);
             };
         }
@@ -47,12 +54,25 @@ public class BazaarScreenEventPredicateProvider implements EventPredicateProvide
 
         ScreenMatcher<BazaarScreenType> finalMatcher = matcher;
 
-        return (event, ctx) -> finalMatcher.matches(resolveContext(event));
+        return (event, ctx) -> finalMatcher.matches(resolveContext(event, previous));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private static @Nullable ScreenContext resolveContext(SkyBlockEvent event) {
+    /**
+     * Resolves the {@link ScreenContext} a predicate should test against.
+     *
+     * <p>{@code previous=true} resolves the screen the player just left rather than the current
+     * one. Only {@link ScreenChangeEvent} carries that, and its {@code oldScreen} {@link Screen}
+     * is resolved to the entry {@link ScreenManager} recorded for that instance.
+     */
+    private static @Nullable ScreenContext resolveContext(SkyBlockEvent event, boolean previous) {
+        if (previous) {
+            if (!(event instanceof ScreenChangeEvent sce)) return null;
+
+            return ScreenManager.getInstance().find(sce.getOldScreen()).orElse(null);
+        }
+
         if (event instanceof ContainerLoadedEvent cle) return cle.asContext();
 
         return ScreenManager.getInstance().currentOrNull();
