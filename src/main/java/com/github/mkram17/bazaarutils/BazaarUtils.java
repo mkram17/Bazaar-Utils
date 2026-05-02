@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.*;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsRepo;
 import com.github.mkram17.bazaarutils.utils.update.UpdateUtil;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
@@ -24,6 +25,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BazaarUtils implements ClientModInitializer {
+    public static final BazaarLogger LOG = BazaarLogger.of(BazaarUtils.class);
+
     public static final String MOD_ID = "bazaarutils";
     public static final String MOD_NAME = "Bazaar Utils";
 
