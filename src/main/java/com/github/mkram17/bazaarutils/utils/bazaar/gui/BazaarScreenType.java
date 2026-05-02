@@ -13,7 +13,7 @@ public enum BazaarScreenType implements ScreenType {
 
     SETTINGS_PAGE(
             ScreenType.named("SETTINGS_PAGE", ScreenType.isContainer())
-                    .and(ScreenType.hasTitle("Settings"))
+                    .and(ScreenType.hasTitle("Bazaar ➜ Settings"))
     ),
 
     ORDERS_PAGE(
