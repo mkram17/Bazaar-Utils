@@ -6,7 +6,7 @@ import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.bazaar.data.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,13 +18,12 @@ import java.util.List;
  * and return early before any resolution that reads the order list.
  */
 public abstract class ChatOrderSource extends BUListener {
-
     @Nullable
     protected final List<Order> requireStorage(BazaarDataOrigin origin) {
         var storage = UserOrdersStorage.get();
 
         if (storage == null) {
-            Util.notifyError(origin.describe() + " skipped — profile storage not loaded", new Throwable());
+            PlayerLogger.sendError(origin.describe() + " skipped — profile storage not loaded", new Throwable());
         }
 
         return storage;

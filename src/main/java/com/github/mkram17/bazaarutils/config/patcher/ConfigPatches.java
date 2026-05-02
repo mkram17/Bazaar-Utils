@@ -6,6 +6,8 @@ import com.github.mkram17.bazaarutils.config.patcher.ops.AddListPatch;
 import com.github.mkram17.bazaarutils.config.patcher.ops.CompoundPatch;
 import com.github.mkram17.bazaarutils.config.patcher.ops.MovePatch;
 import com.github.mkram17.bazaarutils.config.patcher.ops.RemovePatch;
+import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
@@ -19,6 +21,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public final class ConfigPatches {
+    private static final BazaarLogger LOG = BazaarLogger.of(ConfigPatches.class);
+
     private static final Map<Identifier, MapCodec<? extends Patch>> REGISTRY = new LinkedHashMap<>();
     public static final Codec<Patch> CODEC = Identifier.CODEC.dispatch(Patch::id, REGISTRY::get);
 
@@ -52,7 +56,9 @@ public final class ConfigPatches {
                 try {
                     JsonElement json = gson.fromJson(Files.readString(path), JsonObject.class);
                     Patch patch = CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
-                    Util.logMessage(String.format("Loaded patch #%d (%s) from %s", id, patch.id(), path.getFileName()));
+
+                    LOG.info("Loaded patch #{} ({}) from {}", id, patch.id(), path.getFileName());
+
                     patches.add(Map.entry(id, patch));
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to load patch: " + path, e);

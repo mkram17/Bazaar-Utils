@@ -5,8 +5,9 @@ import com.github.mkram17.bazaarutils.data.bazaar.pipeline.ChatOrderSource;
 import com.github.mkram17.bazaarutils.data.bazaar.pipeline.OrderDelta;
 import com.github.mkram17.bazaarutils.data.bazaar.pipeline.OrderResolver;
 import com.github.mkram17.bazaarutils.events.bazaar.chat.BazaarChatEvent;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.DataSource;
@@ -24,6 +25,8 @@ import java.util.UUID;
  */
 @DataSource
 public final class OrderFlippedDataSource extends ChatOrderSource {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrderFlippedDataSource.class);
+
     @Subscription(priority = Priority.FIRST)
     public void onOrderFlipped(BazaarChatEvent.BuyOrderFlipped event) {
         var origin = new BazaarDataOrigin.OrderFlipped(event.receivedAt);
@@ -31,7 +34,7 @@ public final class OrderFlippedDataSource extends ChatOrderSource {
 
         var product = ProductInfo.fromDisplayName(event.product).orElse(null);
         if (product == null) {
-            Util.logMessage("Flip skipped — unknown product: %s".formatted(event.product));
+            LOG.warn("Flip skipped — unknown product: {}", event.product);
 
             return;
         }
@@ -42,7 +45,7 @@ public final class OrderFlippedDataSource extends ChatOrderSource {
 
         var matchedBuy = OrderResolver.forFlip(productId, flipVolume, storage).orElse(null);
         if (matchedBuy == null) {
-            Util.notifyError("Flip match not found — %s vol=%d profitPerUnit=%.4f".formatted(productId, flipVolume, profitPerUnit), new Throwable());
+            PlayerLogger.sendError("Flip match not found — %s %dx (Δprofit/unit=%.4f)".formatted(productId, flipVolume, profitPerUnit), null);
 
             return;
         }
@@ -61,14 +64,14 @@ public final class OrderFlippedDataSource extends ChatOrderSource {
                 new OrderStatus.Set(), origin.confirmedAt(), origin.confirmedAt(), false,
                 expiresAt);
 
-        PlayerActionUtil.notifyAll("%s — Flipped %s %dx: buy @ %.4f → sell @ %.4f (Δprofit/unit=%.4f)".formatted(
+        PlayerLogger.debug("%s — Flipped %s %dx: buy @ %.4f → sell @ %.4f (Δprofit/unit=%.4f)".formatted(
                 origin.describe(), productId, flipVolume,
-                matchedBuy.pricePerItem(), sellPrice, profitPerUnit), NotificationType.ORDERDATA);
+                matchedBuy.pricePerItem(), sellPrice, profitPerUnit), NotificationType.ORDER_LIFECYCLE, LOG);
 
-        PlayerActionUtil.notifyAll("%s — Book place: %s %s Δ%d @ %.4f (flip)".formatted(
+        PlayerLogger.debug("%s — Book place: %s %s Δ%d @ %.4f (flip)".formatted(
                 origin.describe(),
                 TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER).getPriceType(),
-                productId, flipVolume, sellPrice), NotificationType.BAZAARDATA);
+                productId, flipVolume, sellPrice), NotificationType.PRICE_DATA, LOG);
 
         commit(new OrderDelta.Swap(
                 matchedBuy, claimedBuy, newSell,

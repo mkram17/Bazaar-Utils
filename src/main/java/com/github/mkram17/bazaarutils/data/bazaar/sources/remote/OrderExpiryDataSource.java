@@ -8,7 +8,8 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.data.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
  */
 @Module
 public final class OrderExpiryDataSource extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrderExpiryDataSource.class);
+
     public OrderExpiryDataSource() {}
 
     /**
@@ -67,11 +70,11 @@ public final class OrderExpiryDataSource extends BUListener {
                         true  // terminal — unfilled volume is permanently gone
                 ).apply(order.productId(), origin);
 
-                PlayerActionUtil.notifyAll("%s — Book decrement: %s %s Δ%d @ %.4f (order expired)".formatted(
+                PlayerLogger.debug("%s — Book decrement: %s %s Δ%d @ %.4f (order expired)".formatted(
                                 origin.describe(),
                                 TransactionType.of(order.side(), TransactionType.Method.ORDER).getPriceType(),
                                 order.productId(), order.unfilledAmount(), order.pricePerItem()),
-                        NotificationType.BAZAARDATA);
+                        NotificationType.PRICE_DATA, LOG);
             }
         }
 
@@ -96,9 +99,9 @@ public final class OrderExpiryDataSource extends BUListener {
                     new UserOrderEvent.Expired(order).post(BazaarUtils.EVENT_BUS);
                     changedProducts.add(order.productId());
 
-                    PlayerActionUtil.notifyAll("%s — Expired (time-based): %s".formatted(
+                    PlayerLogger.debug("%s — Expired (time-based): %s".formatted(
                                     origin.describe(), order.describe()),
-                            NotificationType.ORDERDATA);
+                            NotificationType.ORDER_LIFECYCLE, LOG);
                 });
 
         // One BazaarDataUpdateEvent per product — not one per order.

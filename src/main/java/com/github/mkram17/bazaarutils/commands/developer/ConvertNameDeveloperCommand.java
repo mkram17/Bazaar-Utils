@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.commands.developer;
 
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.DeveloperCommands;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -28,12 +28,11 @@ public final class ConvertNameDeveloperCommand implements BUCommand {
     }
 
     private int convertNameToId(CommandContext<FabricClientCommandSource> context) {
-        if (!DeveloperCommands.isEnabled()) return 0;
+        String name = StringArgumentType.getString(context, "item name").replace("_", " ");
 
-        String name = StringArgumentType.getString(context, "item name").replaceAll("_", " ");
         ProductInfo.fromDisplayName(name).ifPresentOrElse(
-                id -> PlayerActionUtil.notifyAll(name + ": " + id),
-                () -> PlayerActionUtil.notifyAll("Could not find product ID for " + name)
+                id -> PlayerLogger.send(name + ": " + id.getProductId()),
+                () -> PlayerLogger.send("Could not find product ID for " + name)
         );
 
         return 1;

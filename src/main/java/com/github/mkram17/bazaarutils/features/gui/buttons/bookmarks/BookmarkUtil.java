@@ -6,8 +6,7 @@ import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
@@ -23,6 +22,8 @@ import java.util.Optional;
 
 @Module
 public final class BookmarkUtil extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(BookmarkUtil.class);
+
     record PageContext(ProductInfo info, ItemStack itemStack, String name, @Nullable Bookmark bookmark) {
         boolean isBookmarked() {
             return bookmark != null;
@@ -60,7 +61,7 @@ public final class BookmarkUtil extends BUListener {
         var name = Optional.ofNullable(stack).map(ItemStack::getCustomName).map(Component::getString).orElse(null);
 
         if (info == null || name == null) {
-            Util.logMessage("BookmarkUtil: no product info on ITEM_PAGE — clearing currentPage");
+            LOG.warn("No product info on ITEM_PAGE — clearing currentPage");
             currentPage = null;
 
             return;
@@ -70,7 +71,7 @@ public final class BookmarkUtil extends BUListener {
                 .filter(bookmark -> bookmark.productId().equals(info.getProductId()))
                 .findFirst().orElse(null);
 
-        PlayerActionUtil.notifyAll("%s — bookmarked=%b".formatted(info, existing != null), NotificationType.FEATURE);
+        LOG.debug("%s — bookmarked=%b".formatted(info, existing != null), NotificationType.FEATURE);
 
         currentPage = new PageContext(info, stack, name, existing);
     }

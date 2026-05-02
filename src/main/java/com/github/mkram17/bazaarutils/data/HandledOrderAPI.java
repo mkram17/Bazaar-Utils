@@ -3,8 +3,8 @@ package com.github.mkram17.bazaarutils.data;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -22,6 +22,8 @@ import java.util.Optional;
  */
 @Module
 public final class HandledOrderAPI extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(HandledOrderAPI.class);
+
     public enum OrderClick {
         OPTIONS,
         CLAIM
@@ -42,7 +44,7 @@ public final class HandledOrderAPI extends BUListener {
         Order order = RenderedOrdersIndex.get(event.getSlot().getContainerSlot()).orElse(null);
 
         if (order == null) {
-            Util.logMessage("Current order selected cleared — no order at clicked slot");
+            LOG.debug("Current order selected cleared — no order at clicked slot");
             clear();
 
             return;
@@ -51,21 +53,21 @@ public final class HandledOrderAPI extends BUListener {
         OrderClick action = resolveAction(order, event.getButton());
 
         if (action == null) {
-            Util.logMessage("Current order selected cleared — unresolvable intent | side=%s claimable=%s filled=%b button=%d".formatted(order.side(), order.isClaimable(), order.isFilled(), event.getButton()));
+            LOG.warn("Current order selected cleared — unresolvable intent | side={} claimable={} filled={} button={}", order.side(), order.isClaimable(), order.isFilled(), event.getButton());
             clear();
 
             return;
         }
 
         selection = new Selection(order, action);
-        Util.logMessage("Order captured — action=%s: %s".formatted(action, order.describe()));
+        LOG.debug("Order captured — action=%s: %s".formatted(action, order.describe()));
     }
 
     @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
     @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
     public void onOrdersPageOpen(ContainerLoadedEvent ignored) {
-        Util.logMessage("Current order selected cleared — orders page re-opened");
+        LOG.debug("Current order selected cleared — orders page re-opened");
         clear();
     }
 

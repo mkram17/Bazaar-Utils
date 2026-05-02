@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -33,7 +33,7 @@ public final class HelpCommand implements BUCommand {
         }
         message.append(Component.literal("---------------------").withStyle(ChatFormatting.DARK_GRAY));
 
-        PlayerActionUtil.notifyAll(message.getString());
+        PlayerLogger.send(message.getString());
 
         return 1;
     }

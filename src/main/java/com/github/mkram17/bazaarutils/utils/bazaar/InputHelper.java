@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -20,6 +21,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public abstract class InputHelper<T> implements ItemButton {
+    protected static final BazaarLogger LOG = BazaarLogger.of(InputHelper.class);
+
     @Getter
     protected String name;
 
@@ -70,11 +73,13 @@ public abstract class InputHelper<T> implements ItemButton {
         }
 
         state = makeState(event);
+
+        if (state.isEmpty()) LOG.info("{}: makeState returned empty", name);
     }
 
     public Result onButtonClicked(int button) {
         if (state.isEmpty()) {
-            Util.logMessage("Cannot handle action for " + name + ", state is empty.");
+            LOG.warn("Button clicked with no state — action dropped for '{}'", name);
 
             return Result.CANCELLED;
         }

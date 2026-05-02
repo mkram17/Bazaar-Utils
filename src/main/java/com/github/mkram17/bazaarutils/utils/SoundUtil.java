@@ -9,6 +9,8 @@ import net.minecraft.sounds.SoundEvents;
 import java.util.concurrent.CompletableFuture;
 
 public class SoundUtil {
+    private static final BazaarLogger LOG = BazaarLogger.of(SoundUtil.class);
+
     public static void playSound(SoundEvent sound, float volume) {
         Minecraft client = Minecraft.getInstance();
         var player = client.player;
@@ -28,7 +30,7 @@ public class SoundUtil {
         Minecraft client = Minecraft.getInstance();
 
         if (client == null || client.getSoundManager() == null || client.level == null) {
-            Util.logError("Failed to play sound due to null value", new Throwable());
+            LOG.warn("Sound playback deferred — level or sound manager not ready");
             Util.tickExecuteLater(20, () -> playSound(soundEntry, volume));
             return;
         }

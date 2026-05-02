@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts;
 
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
  * Logical position {@code n} maps to screen slot {@code 10 + (n/7)*9 + (n%7)}.
  */
 public final class OrdersPageLayout {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrdersPageLayout.class);
+
     private static final int CONTENT_START = 10;
     private static final int ROW_STRIDE = 9;
     private static final int COLS = 7;
@@ -65,7 +67,7 @@ public final class OrdersPageLayout {
                 .filter(Order::isLive)
                 .toList();
 
-        Util.logMessage("reindexActive — %d orders (%d live)".formatted(orders.size(), live.size()));
+        LOG.debug("reindexActive — {} orders ({} active)", orders.size(), live.size());
 
         return orders.stream()
                 .map(order -> {
@@ -78,9 +80,7 @@ public final class OrdersPageLayout {
                             order.productId(), order.side(), order.pricePerItem(),
                             order.placedAt(), isFilled, others);
 
-                    Util.logMessage("reindex %s %s @%f filled=%s %s → %s".formatted(
-                            order.productId(), order.side(), order.pricePerItem(),
-                            isFilled, order.slotPosition().describe(), computed.describe()));
+                    LOG.debug("reindex {} {} @{} filled={} slot {} → {}", order.productId(), order.side(), order.pricePerItem(), isFilled, order.slotPosition().describe(), computed);
 
                     return order.reanchored(computed);
                 })

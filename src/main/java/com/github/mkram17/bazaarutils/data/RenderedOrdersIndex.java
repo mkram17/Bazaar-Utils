@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.data;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -35,6 +36,8 @@ import java.util.stream.Collectors;
  */
 @Module
 public final class RenderedOrdersIndex extends BUListener implements ScreenConstrained {
+    private static final BazaarLogger LOG = BazaarLogger.of(RenderedOrdersIndex.class);
+
     /**
      * Snapshot of index state. {@code open} is {@code true} after {@link #update} has
      * stamped confirmed reconciliation data; {@code false} permits {@link #refresh} to
@@ -55,7 +58,7 @@ public final class RenderedOrdersIndex extends BUListener implements ScreenConst
      */
     public static void update(Map<Integer, Order> onScreenBySlot) {
         STATE.set(new RenderedState(true, Map.copyOf(onScreenBySlot)));
-        Util.logMessage("RenderedOrdersIndex: %d slots confirmed".formatted(onScreenBySlot.size()));
+        LOG.info("RenderedOrdersIndex: %d slots confirmed".formatted(onScreenBySlot.size()));
     }
 
     /**

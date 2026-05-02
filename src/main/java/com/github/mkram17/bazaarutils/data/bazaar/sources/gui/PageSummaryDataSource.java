@@ -9,9 +9,9 @@ import com.github.mkram17.bazaarutils.events.bazaar.data.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.DataSource;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.PageSummaryParser;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
@@ -32,6 +32,12 @@ import java.util.NavigableMap;
  */
 @DataSource
 public final class PageSummaryDataSource extends SnapshotSource {
+    private static final BazaarLogger LOG = BazaarLogger.of(PageSummaryDataSource.class);
+
+    public BazaarLogger log() {
+        return LOG;
+    }
+
     public PageSummaryDataSource() {}
 
     /**
@@ -66,12 +72,12 @@ public final class PageSummaryDataSource extends SnapshotSource {
                 result.askLevels(),
                 result.bidLevels(),
                 activeOrders,
-                NotificationType.ORDERDATA,
+                NotificationType.ORDER_LIFECYCLE,
                 origin);
 
-        PlayerActionUtil.notifyAll("%s: %s — %d buy levels, %d sell levels".formatted(
+        PlayerLogger.debug("%s: %s — %d buy levels, %d sell levels".formatted(
                 origin.describe(), productId,
-                result.askLevels().size(), result.bidLevels().size()), NotificationType.GUI);
+                result.askLevels().size(), result.bidLevels().size()), NotificationType.SCREEN_PARSING);
 
         if (changed) {
             new BazaarDataUpdateEvent(productId, origin).post(BazaarUtils.EVENT_BUS);
@@ -79,7 +85,7 @@ public final class PageSummaryDataSource extends SnapshotSource {
 
         var data = BazaarDataRegistry.get(productId); if (data == null) return;
 
-        Util.logMessage("%s: %s buyBook=%s sellBook=%s".formatted(origin.describe(), productId, bestPrice(data.getAsksBook()), bestPrice(data.getBidsBook())));
+        LOG.debug("%s: %s buyBook=%s sellBook=%s".formatted(origin.describe(), productId, bestPrice(data.getAsksBook()), bestPrice(data.getBidsBook())));
     }
 
     private static String bestPrice(NavigableMap<Double, PriceLevel> book) {

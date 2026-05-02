@@ -9,9 +9,9 @@ import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.DataSource;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.PageOrderParser;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
@@ -69,6 +69,12 @@ import java.util.stream.Collectors;
  */
 @DataSource
 public final class OrdersScreenDataSource extends SnapshotSource {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrdersScreenDataSource.class);
+
+    public BazaarLogger log() {
+        return LOG;
+    }
+
     /**
      * Minimum age of the last update, in milliseconds, before a stored order can be evicted by
      * screen absence. Guards against the race where a chat event (fill, claim, cancel) stamps
@@ -175,10 +181,10 @@ public final class OrdersScreenDataSource extends SnapshotSource {
                 reconciledById.put(match.id(), after);
 
                 if (!match.slotPosition().equals(after.slotPosition())) {
-                    PlayerActionUtil.notifyAll("%s — Reanchored %s → %s: %s".formatted(
+                    PlayerLogger.debug("%s — Reanchored %s → %s: %s".formatted(
                             origin.describe(),
                             match.slotPosition().describe(), after.slotPosition().describe(),
-                            after.describe()), NotificationType.ORDERDATA);
+                            after.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
                 }
             } else {
                 // Entries earlier in this product's slot-ascending list get an older
@@ -187,7 +193,7 @@ public final class OrdersScreenDataSource extends SnapshotSource {
                 var synth = synthesizeNew(entry, productId, origin, placedAt);
                 reconciledById.put(synth.id(), synth);
 
-                PlayerActionUtil.notifyAll("%s — Synthesized untracked order: %s".formatted(origin.describe(), synth.describe()), NotificationType.ORDERDATA);
+                PlayerLogger.debug("%s — Synthesized untracked order: %s".formatted(origin.describe(), synth.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
             }
         }
 
@@ -260,17 +266,17 @@ public final class OrdersScreenDataSource extends SnapshotSource {
                     var demoted = order.reanchored(new OrderSlotPosition.OffScreen(0));
                     deltas.add(new OrderDelta.Reanchor(order, demoted));
 
-                    PlayerActionUtil.notifyAll("%s — Reanchored off-screen (position only — order is newer than this scan) — slot confirmed held by %s: %s".formatted(
+                    PlayerLogger.debug("%s — Reanchored off-screen (position only — order is newer than this scan) — slot confirmed held by %s: %s".formatted(
                             origin.describe(), (sibling != null ? sibling : screenOccupant).describe(),
-                            order.describe()), NotificationType.ORDERDATA);
+                            order.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
                 } else {
-                    PlayerActionUtil.notifyAll("%s — Skipped — updated after observation window: %s".formatted(origin.describe(), order.describe()), NotificationType.ORDERDATA);
+                    PlayerLogger.debug("%s — Skipped — updated after observation window: %s".formatted(origin.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
 
                     preserved.add(order);
                 }
 
             } else if (!order.isVisible()) {
-                PlayerActionUtil.notifyAll("%s — Skipped — off-screen unanchored: %s".formatted(origin.describe(), order.describe()), NotificationType.ORDERDATA);
+                PlayerLogger.debug("%s — Skipped — off-screen unanchored: %s".formatted(origin.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
 
                 offScreen.add(order);
 
@@ -283,14 +289,14 @@ public final class OrdersScreenDataSource extends SnapshotSource {
                     var claimed = order.withClaim(order.unclaimedFilled(), origin);
                     deltas.add(OrderDelta.Update.claim(order, claimed));
 
-                    PlayerActionUtil.notifyAll("%s — Auto-claimed %d units (left screen filled%s): %s".formatted(
+                    PlayerLogger.debug("%s — Auto-claimed %d units (left screen filled%s): %s".formatted(
                             origin.describe(), order.unclaimedFilled(),
                             sibling != null ? " — slot confirmed held by " + sibling.describe() : "",
-                            order.describe()), NotificationType.ORDERDATA);
+                            order.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
                 } else if (order.isExpired()) {
                     deltas.add(new OrderDelta.Evict(order.cancelled(origin), BookMutation.NONE));
 
-                    PlayerActionUtil.notifyAll("%s — Expired order left screen (escrow recovered): %s".formatted(origin.describe(), order.describe()), NotificationType.ORDERDATA);
+                    PlayerLogger.debug("%s — Expired order left screen (escrow recovered): %s".formatted(origin.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
                 } else {
                     // Cancelled eviction: decrement the book.
                     var cancelMutation = BookMutation.decrement(
@@ -302,16 +308,16 @@ public final class OrdersScreenDataSource extends SnapshotSource {
                     mutation = mutation.then(cancelMutation);
                     deltas.add(new OrderDelta.Evict(order.cancelled(origin), cancelMutation));
 
-                    PlayerActionUtil.notifyAll("%s — Cancelled — %s: %s".formatted(
+                    PlayerLogger.debug("%s — Cancelled — %s: %s".formatted(
                             origin.describe(),
                             sibling != null ? "slot confirmed held by a different order of this same product" : "disappeared from screen",
-                            order.describe()), NotificationType.ORDERDATA);
+                            order.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
 
-                    PlayerActionUtil.notifyAll("%s — Book decrement: %s %s Δ%d @ %.4f (evicted)".formatted(
+                    PlayerLogger.debug("%s — Book decrement: %s %s Δ%d @ %.4f (evicted)".formatted(
                                     origin.describe(),
                                     TransactionType.of(order.side(), TransactionType.Method.ORDER).getPriceType(),
                                     productId, order.originalAmount() - order.claimedAmount(), order.pricePerItem()),
-                            NotificationType.BAZAARDATA);
+                            NotificationType.PRICE_DATA, LOG);
                 }
             } else if (screenOccupant != null) {
                 // Contradicted by a different product's order but within the grace window.
@@ -320,8 +326,8 @@ public final class OrdersScreenDataSource extends SnapshotSource {
                 var demoted = order.reanchored(new OrderSlotPosition.OffScreen(0));
                 deltas.add(new OrderDelta.Reanchor(order, demoted));
 
-                PlayerActionUtil.notifyAll("%s — Reanchored off-screen (position only — inside grace window) — slot confirmed held by %s: %s".formatted(
-                        origin.describe(), screenOccupant.describe(), order.describe()), NotificationType.ORDERDATA);
+                PlayerLogger.debug("%s — Reanchored off-screen (position only — inside grace window) — slot confirmed held by %s: %s".formatted(
+                        origin.describe(), screenOccupant.describe(), order.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
             } else {
                 // Terminal or inside grace period, uncontradicted — retain without change.
                 preserved.add(order);
@@ -354,15 +360,15 @@ public final class OrdersScreenDataSource extends SnapshotSource {
                 mutation = mutation.then(repriceMutation);
                 deltas.add(new OrderDelta.PriceCorrection(before, after, repriceMutation));
 
-                PlayerActionUtil.notifyAll("%s — Price corrected %.4f → %.4f: %s".formatted(
+                PlayerLogger.debug("%s — Price corrected %.4f → %.4f: %s".formatted(
                         origin.describe(), before.pricePerItem(), after.pricePerItem(),
-                        after.describe()), NotificationType.ORDERDATA);
+                        after.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
 
-                PlayerActionUtil.notifyAll("%s — Book re-priced: %s %s Δ%d @ %.4f → %.4f".formatted(
+                PlayerLogger.debug("%s — Book re-priced: %s %s Δ%d @ %.4f → %.4f".formatted(
                                 origin.describe(),
                                 TransactionType.of(before.side(), TransactionType.Method.ORDER).getPriceType(),
                                 productId, before.unfilledAmount(), before.pricePerItem(), after.pricePerItem()),
-                        NotificationType.BAZAARDATA);
+                        NotificationType.PRICE_DATA, LOG);
             } else if (after.filledAmount() > before.filledAmount()) {
                 int fillDelta = after.filledAmount() - before.filledAmount();
                 var fillMutation = BookMutation.decrement(
@@ -372,15 +378,15 @@ public final class OrdersScreenDataSource extends SnapshotSource {
                 mutation = mutation.then(fillMutation);
                 deltas.add(OrderDelta.Update.fill(before, after, fillMutation));
 
-                PlayerActionUtil.notifyAll("%s — Fill advanced %d → %d (Δ%d): %s".formatted(
+                PlayerLogger.debug("%s — Fill advanced %d → %d (Δ%d): %s".formatted(
                         origin.describe(), before.filledAmount(), after.filledAmount(),
-                        fillDelta, after.describe()), NotificationType.ORDERDATA);
+                        fillDelta, after.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
 
-                PlayerActionUtil.notifyAll("%s — Book decrement: %s %s Δ%d @ %.4f (fill advance)".formatted(
+                PlayerLogger.debug("%s — Book decrement: %s %s Δ%d @ %.4f (fill advance)".formatted(
                                 origin.describe(),
                                 TransactionType.of(after.side(), TransactionType.Method.ORDER).getPriceType(),
                                 productId, fillDelta, after.pricePerItem()),
-                        NotificationType.BAZAARDATA);
+                        NotificationType.PRICE_DATA, LOG);
 
             } else if (after.isExpired() && !before.isExpired()) {
                 // Decrement the unfilled volume Hypixel removed from the book at expiry.
@@ -396,15 +402,15 @@ public final class OrdersScreenDataSource extends SnapshotSource {
                 mutation = mutation.then(expiryMutation);
                 deltas.add(OrderDelta.Update.expiry(before, after, expiryMutation));
 
-                PlayerActionUtil.notifyAll("%s — Expired (Δunfilled=%d @ %.4f decremented from book): %s".formatted(
+                PlayerLogger.debug("%s — Expired (Δunfilled=%d @ %.4f decremented from book): %s".formatted(
                         origin.describe(), after.unfilledAmount(), after.pricePerItem(),
-                        after.describe()), NotificationType.ORDERDATA);
+                        after.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
 
-                PlayerActionUtil.notifyAll("%s — Book decrement: %s %s Δ%d @ %.4f (order expired)".formatted(
+                PlayerLogger.debug("%s — Book decrement: %s %s Δ%d @ %.4f (order expired)".formatted(
                                 origin.describe(),
                                 TransactionType.of(after.side(), TransactionType.Method.ORDER).getPriceType(),
                                 productId, after.unfilledAmount(), after.pricePerItem()),
-                        NotificationType.BAZAARDATA);
+                        NotificationType.PRICE_DATA, LOG);
             } else if (after.claimedAmount() > before.claimedAmount()) {
                 // Claim advance with no concurrent fill change.
                 deltas.add(OrderDelta.Update.claim(before, after));

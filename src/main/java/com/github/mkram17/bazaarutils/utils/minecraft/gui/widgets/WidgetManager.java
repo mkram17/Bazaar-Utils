@@ -7,7 +7,7 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.mixin.AccessorScreen;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -78,7 +78,7 @@ public class WidgetManager extends BUListener {
         int backgroundWidth = screen.getImageWidth();
 
         if (backgroundWidth <= 0) {
-            PlayerActionUtil.notifyAll("BackgroundWidth not yet initialized for " + ContainerManager.getTitle(), NotificationType.GUI);
+            PlayerLogger.debug("BackgroundWidth not yet initialized for " + ContainerManager.getTitle(), NotificationType.GUI);
         }
 
         return Optional.of(new ScreenWidgetDimensions(x, y, backgroundWidth));

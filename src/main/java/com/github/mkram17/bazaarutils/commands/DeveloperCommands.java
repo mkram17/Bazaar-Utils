@@ -3,8 +3,8 @@ package com.github.mkram17.bazaarutils.commands;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
@@ -48,7 +48,7 @@ public final class DeveloperCommands implements BUCommand {
 
         ConfigUtil.scheduleConfigSave();
 
-        PlayerActionUtil.notifyAll(
+        PlayerLogger.send(
                 DeveloperConfig.DEVELOPER_MODE_TOGGLE
                         ? "Developer mode enabled."
                         : "Developer mode disabled. Restart for all changes to take effect"

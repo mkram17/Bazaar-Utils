@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.mojang.serialization.Codec;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +12,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class FolderStorage<T> {
+    private static final BazaarLogger LOG = BazaarLogger.of(FolderStorage.class);
+
     private final String folder;
     private final Codec<T> codec;
     private final Map<String, DataStorage<T>> storages = new LinkedHashMap<>();
@@ -66,7 +69,7 @@ public class FolderStorage<T> {
         try {
             Files.createDirectories(folderPath);
         } catch (IOException e) {
-            Util.logError("Failed to create folder storage directory — path=%s".formatted(folderPath), e);
+            LOG.error("Failed to create folder storage directory — path={}", folderPath, e);
 
             return;
         }
@@ -81,15 +84,15 @@ public class FolderStorage<T> {
                                     folder + "/" + id, codec
                             ));
                         } catch (Exception exception) {
-                            Util.logError("Failed to load folder entry — skipping file=%s".formatted(file), exception);
+                            LOG.warn("Failed to load folder entry — skipping file={}", file, exception);
                         }
                     });
         } catch (IOException exception) {
-            Util.logError("Failed to list folder storage directory — path=%s".formatted(folderPath), exception);
+            LOG.error("Failed to list folder storage directory — path={}", folderPath, exception);
 
             return;
         }
 
-        Util.logMessage("FolderStorage loaded — folder=%s entries=%s".formatted(folder, storages.size()));
+        LOG.info("FolderStorage loaded — folder={} entries={}", folder, storages.size());
     }
 }

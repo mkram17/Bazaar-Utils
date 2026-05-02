@@ -127,7 +127,7 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
     protected int computeMaxValue(TransactionAmount.TransactionState state) {
         double competitive = PriceInfo.priceForPosition(state.productInfo().getProductId(), getTransactionType(), PricingPosition.COMPETITIVE).orElseGet(() -> {
             double fallback = Math.max(PriceInfo.MINIMUM_PRICE, emptyMarketPrice);
-            Util.logMessage("%s.computeMaxValue: book empty for %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), fallback));
+            LOG.info("{}.computeMaxValue: book empty for {} — using fallback price {}", name, state.productInfo().getProductId(), fallback);
 
             return fallback;
         });

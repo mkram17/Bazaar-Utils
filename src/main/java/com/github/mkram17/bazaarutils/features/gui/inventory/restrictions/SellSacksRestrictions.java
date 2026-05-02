@@ -70,13 +70,20 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
 
     @Override
     protected Optional<SellSacksState> makeState(ContainerLoadedEvent event) {
-        if (!SellableAPI.SellSacks.hasResult()) return Optional.empty();
+        if (!SellableAPI.SellSacks.hasResult()) {
+            LOG.warn("SellSacksRestrictions.makeState: SellableAPI.SellSacks result is null — data not yet parsed");
+
+            return Optional.empty();
+        }
 
         ScreenContext context = event.asContext();
 
         Optional<ItemInfo> sellSacksItem = SellablePageLayout.getSellSacksItem(context);
+        if (sellSacksItem.isEmpty()) {
+            LOG.warn("SellSacksRestrictions.makeState: no sell sacks item in layout for screen '{}'", context);
 
-        if (sellSacksItem.isEmpty()) return Optional.empty();
+            return Optional.empty();
+        }
 
         List<OrderInfo> items = SellableAPI.SellSacks.orders();
         Optional<SellSacksParser.SellSacksResult.OtherItems> otherItems = SellableAPI.SellSacks.otherItems();

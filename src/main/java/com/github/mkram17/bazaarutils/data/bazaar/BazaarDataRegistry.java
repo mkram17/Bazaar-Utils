@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.data.bazaar;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsDataSources;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
 import com.github.mkram17.bazaarutils.data.bazaar.book.ProductData;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @LateInitModule
 public final class BazaarDataRegistry {
+    private static final BazaarLogger LOG = BazaarLogger.of(BazaarDataRegistry.class);
+
     public static List<BUListener> SOURCES = new ArrayList<>(List.of());
 
     private static final ConcurrentHashMap<String, ProductData> REGISTRY = new ConcurrentHashMap<>();
@@ -34,7 +36,7 @@ public final class BazaarDataRegistry {
                 .map(it -> (BUListener) it)
                 .toList();
 
-        Util.logMessage("BazaarDataRegistry initialised — %d sources registered".formatted(SOURCES.size()));
+        LOG.info("BazaarDataRegistry initialised — {} sources registered", SOURCES.size());
     }
 
     public static @NotNull ProductData getOrCreate(@NotNull String productId) {

@@ -4,7 +4,8 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
@@ -26,6 +27,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ScreenManager {
+    private static final BazaarLogger LOG = BazaarLogger.of(ScreenManager.class);
+
     @Getter
     private static final ScreenManager instance = new ScreenManager();
 
@@ -42,7 +45,7 @@ public class ScreenManager {
 
     public static void register(ScreenType type) {
         if (!types.add(type)) {
-            Util.notifyError("ScreenType registered twice: " + type, new Throwable());
+            LOG.error("ScreenType registered twice: " + type.name(), new Throwable());
         }
     }
 
@@ -151,7 +154,7 @@ public class ScreenManager {
     private void logHistory(String trigger) {
         if (!NotificationType.GUI.isEnabled()) return;
 
-        PlayerActionUtil.notifyAll("[" + trigger.strip() + "] " + history.toBreadcrumb(), NotificationType.GUI);
+        PlayerLogger.debug("[" + trigger.strip() + "] " + history.toBreadcrumb(), NotificationType.GUI, LOG);
     }
 
     public Optional<ScreenContext> current() {
@@ -218,10 +221,10 @@ public class ScreenManager {
     }
 
     public static void closeScreen() {
-        PlayerActionUtil.notifyAll("Closing GUI", NotificationType.GUI);
+        PlayerLogger.debug("Closing GUI", NotificationType.GUI);
 
         if (getScreen(AbstractContainerScreen.class).isEmpty()) {
-            Util.notifyError("Current screen does not implement HandledScreen", new Throwable());
+            PlayerLogger.sendError("Current screen does not implement HandledScreen", new Throwable());
 
             return;
         }
@@ -231,7 +234,7 @@ public class ScreenManager {
 
             client.execute(ScreenManager::doCloseScreen);
         } catch (Exception exception) {
-            Util.notifyError("Error closing GUI", exception);
+            PlayerLogger.sendError("Error closing GUI", exception);
         }
     }
 
@@ -240,7 +243,8 @@ public class ScreenManager {
             Minecraft client = Minecraft.getInstance();
 
             if (client.player == null) {
-                Util.notifyError("Player is null, cannot close screen", new Throwable());
+                PlayerLogger.sendError("Player is null, cannot close screen", new Throwable());
+
                 return;
             }
 
@@ -248,7 +252,8 @@ public class ScreenManager {
             client.setScreen(null);
             client.player.containerMenu = client.player.inventoryMenu;
         } catch (Exception exception) {
-            Util.notifyError("Error encountered while closing screen with custom method", exception);
+            PlayerLogger.sendError("Error encountered while closing screen with custom method", exception);
+
             throw new RuntimeException(exception);
         }
     }

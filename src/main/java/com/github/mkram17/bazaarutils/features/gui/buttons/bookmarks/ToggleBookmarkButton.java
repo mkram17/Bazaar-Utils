@@ -3,7 +3,8 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 import com.github.mkram17.bazaarutils.data.stored.BookmarksStorage;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.ItemModifier;
@@ -25,6 +26,8 @@ import java.util.Optional;
 
 @ItemModifier
 public class ToggleBookmarkButton extends BUListener implements ItemButton {
+    private static final BazaarLogger LOG = BazaarLogger.of(ToggleBookmarkButton.class);
+
     @Override
     public int getSlotIndex() {
         return 0;
@@ -83,7 +86,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
             BookmarkUtil.setCurrentBookmark(bookmark);
         }
 
-        PlayerActionUtil.notifyAll("%s bookmark: %s".formatted(page.isBookmarked() ? "removed" : "added", page.name()), NotificationType.FEATURE);
+        PlayerLogger.debug("%s bookmark: %s".formatted(page.isBookmarked() ? "removed" : "added", page.name()), NotificationType.FEATURE, LOG);
 
         retriggerModifier();
     }

@@ -51,45 +51,6 @@ public class Util {
                 }
             });
 
-    public static void logMessage(String message) {
-        String callingName = getCallingClassName();
-        LogManager.getLogger(callingName).info("[" + BazaarUtils.MOD_NAME + "] Message [{}]", message);
-    }
-
-    public static void logError(String message, Throwable e) {
-        String callingName = getCallingClassName();
-        logError(message, callingName, e);
-    }
-
-    private static void logError(String message, String callingName, Throwable e) {
-        if (e == null) {
-            LogManager.getLogger(callingName).error("[" + BazaarUtils.MOD_NAME + " Error]({}) Developer Message: {}", callingName, message);
-        } else {
-            LogManager.getLogger(callingName).error("[" + BazaarUtils.MOD_NAME + " Error]({}) Developer Message: {}\n Throwable Message {}\n Stacktrace: {}", callingName, message, e.getMessage(), Arrays.toString(e.getStackTrace()));
-        }
-    }
-
-    public static void notifyError(String message, Throwable e) {
-        String callingName = getCallingClassName();
-        String simpleCallingName = callingName.substring(callingName.lastIndexOf(".") + 1);
-        Component messageText = Component.literal("[" + BazaarUtils.MOD_NAME + " Error]: " + message + ". Click here for support.")
-                .withStyle(style -> {
-                    try {
-                        return style.withColor(ChatFormatting.RED)
-                                .withClickEvent(new ClickEvent.OpenUrl(new URI("https://discord.gg/xDKjvm5hQd")))
-                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to join the Discord for support")));
-                    } catch (URISyntaxException uriSyntaxException) {
-                        throw new RuntimeException(uriSyntaxException);
-                    }
-                });
-
-        if (!BazaarUtilsModules.DisableErrorNotifications.isEnabled()) {
-            PlayerActionUtil.sendPlayerMessage(messageText);
-        }
-
-        logError(message, simpleCallingName, e);
-    }
-
     @RunOnInit
     public static void subscribeTicks() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -112,8 +73,8 @@ public class Util {
             for (Runnable action : actionsToRun) {
                 try {
                     action.run();
-                } catch (Exception e) {
-                    notifyError("Error executing scheduled task", e);
+                } catch (Exception exception) {
+                    PlayerLogger.sendError("Error executing scheduled task", exception);
                 }
             }
         });

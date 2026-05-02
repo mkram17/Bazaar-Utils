@@ -5,8 +5,8 @@ import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.BUListener;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -33,6 +33,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @PreInitModule
 public final class BazaarConversionsUpdater extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(BazaarConversionsUpdater.class);
 
     private static final Path MOD_CONFIG_DIR =
             FabricLoader.getInstance().getConfigDir().resolve(BazaarUtils.MOD_ID);
@@ -52,7 +53,7 @@ public final class BazaarConversionsUpdater extends BUListener {
     }
 
     private static void initialize() {
-        Util.logMessage("BazaarConversionsUpdater initialising — local path=%s".formatted(LOCAL_RESOURCES_PATH));
+        LOG.info("BazaarConversionsUpdater initialising — local path={}", LOCAL_RESOURCES_PATH);
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -63,7 +64,7 @@ public final class BazaarConversionsUpdater extends BUListener {
                 if (!DeveloperConfig.DEVELOPER_MODE_DISABLE_AUTO_RESOURCE_UPDATES) checkForUpdates(false);
                 BazaarConversions.ensureLoaded();
             } catch (IOException exception) {
-                Util.notifyError("Failed to initialize resource manager", exception);
+                PlayerLogger.sendError("Failed to initialize resource manager", exception);
             }
         });
     }
@@ -83,8 +84,8 @@ public final class BazaarConversionsUpdater extends BUListener {
                 connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
 
                 if (connection.getResponseCode() != 200) {
-                    Util.logError("GitHub API responded with code %s — skipping update check".formatted(connection.getResponseCode()), null);
-                    if (manual) Util.notifyError("Failed to check for resource updates (HTTP " + connection.getResponseCode() + ")", new Exception());
+                    LOG.warn("GitHub API responded with code {} — skipping update check", connection.getResponseCode());
+                    if (manual) PlayerLogger.sendError("Failed to check for resource updates (HTTP " + connection.getResponseCode() + ")", new Throwable());
 
                     return;
                 }
@@ -96,25 +97,25 @@ public final class BazaarConversionsUpdater extends BUListener {
                     String downloadUrl = json.get("download_url").getAsString();
 
                     if (!latestSha.equals(MetadataConfig.RESOURCES_SHA)) {
-                        Util.logMessage("Resource update available — downloading (sha=%s)".formatted(latestSha));
-                        if (manual) PlayerActionUtil.notifyAll("New resources found, downloading...");
+                        LOG.info("Resource update available — downloading (sha={})", latestSha);
+                        if (manual) PlayerLogger.send("New resources found, downloading...");
 
                         downloadAndReplace(downloadUrl, latestSha);
                     } else {
-                        Util.logMessage("Resources up to date (sha=%s)".formatted(latestSha));
-                        if (manual) PlayerActionUtil.notifyAll("Resources are already up-to-date.");
+                        LOG.info("Resources up to date (sha={})", latestSha);
+                        if (manual) PlayerLogger.send("Resources are already up to date.");
                     }
                 }
             } catch (Exception exception) {
-                Util.logError("Failed to check for resource updates", exception);
-                if (manual) Util.notifyError("Failed to check for resource updates", new Exception());
+                LOG.warn("Failed to check for resource updates", exception);
+                if (manual) PlayerLogger.sendError("Failed to check for resource updates", exception);
             }
         });
     }
 
     private static void copyBundledIfMissing() throws IOException {
         if (Files.exists(LOCAL_RESOURCES_PATH)) return;
-        Util.logMessage("Local resources file not found — copying from bundled resources");
+        LOG.info("Local resources file not found — copying from bundled resources");
 
         Optional<Resource> resource = Minecraft.getInstance()
                 .getResourceManager()
@@ -128,7 +129,7 @@ public final class BazaarConversionsUpdater extends BUListener {
                 ConfigUtil.scheduleConfigSave();
             }
         } else {
-            Util.notifyError("Could not find bundled bazaar-resources.json — mod installation may be corrupted", null);
+            PlayerLogger.sendError("Could not find bundled bazaar-resources.json — mod may be corrupted", new Throwable());
         }
     }
 
@@ -147,14 +148,15 @@ public final class BazaarConversionsUpdater extends BUListener {
             BazaarConversions.invalidate();
             BazaarConversions.ensureLoaded();
 
-            Util.logMessage("Resources updated successfully — sha=%s".formatted(latestSha));
-            PlayerActionUtil.notifyAll("Successfully updated Bazaar resources!");
+            LOG.info("Resources updated successfully — sha={}", latestSha);
+            PlayerLogger.send("Bazaar resources updated successfully.");
         } catch (Exception exception) {
-            Util.notifyError("Failed to download resource update", exception);
+            PlayerLogger.sendError("Failed to download resource update", exception);
+
             try {
                 Files.deleteIfExists(tempPath);
             } catch (IOException ex) {
-                Util.logError("Failed to delete temporary resource file — path=%s".formatted(tempPath), ex);
+                LOG.warn("Failed to delete temporary resource file — path={}", tempPath, ex);
             }
         }
     }
@@ -168,7 +170,7 @@ public final class BazaarConversionsUpdater extends BUListener {
         try {
             return JsonParser.parseString(Files.readString(LOCAL_RESOURCES_PATH)).getAsJsonObject();
         } catch (IOException exception) {
-            Util.logError("Could not read local bazaar-resources.json — falling back to bundled", exception);
+            LOG.warn("Could not read local bazaar-resources.json — falling back to bundled", exception);
         }
 
         try {
@@ -181,8 +183,8 @@ public final class BazaarConversionsUpdater extends BUListener {
                     return JsonParser.parseString(new String(in.readAllBytes())).getAsJsonObject();
                 }
             }
-        } catch (IOException ex) {
-            Util.notifyError("Failed to read resource file and bundled fallback also failed", ex);
+        } catch (IOException exception) {
+            PlayerLogger.sendError("Failed to read resource file and bundled fallback also failed", exception);
         }
 
         return new JsonObject();

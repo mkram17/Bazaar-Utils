@@ -4,8 +4,8 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import moe.nea.libautoupdate.*;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.SemanticVersion;
@@ -15,6 +15,8 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import java.util.concurrent.CompletableFuture;
 
 public final class UpdateUtil {
+    private static final BazaarLogger LOG = BazaarLogger.of(UpdateUtil.class);
+
     private static UpdateContext updateContext;
 
     private static UpdateContext getUpdateContext() {
@@ -74,7 +76,7 @@ public final class UpdateUtil {
 
             return newMinor > oldMinor || newMajor > oldMajor;
         } catch (Exception exception) {
-            Util.logMessage("Could not compare versions '%s' and '%s': %s".formatted(oldRaw, newRaw, exception.getMessage()));
+            LOG.warn("Could not compare versions '{}' and '{}': {}", oldRaw, newRaw, exception);
 
             return false;
         }
@@ -92,15 +94,15 @@ public final class UpdateUtil {
             context.checkUpdate(getUpdateStream().toAutoUpdateKey())
                     .thenCompose(update -> {
                         if (!update.isUpdateAvailable()) {
-                            Util.logMessage("Already up to date.");
+                            LOG.info("Already up to date.");
 
                             return CompletableFuture.completedFuture(null);
                         }
 
                         if (BUConfig.AUTOMATIC_UPDATES_TOGGLE) {
-                            return update.launchUpdate().thenRun(() -> PlayerActionUtil.notifyAll("Update downloaded! Restart to apply."));
+                            return update.launchUpdate().thenRun(() -> PlayerLogger.send("Update downloaded! Restart to apply."));
                         } else {
-                            PlayerActionUtil.notifyAll(
+                            PlayerLogger.send(
                                     "A new Bazaar Utils version is available! " +
                                             "Download it from Modrinth/GitHub, or enable auto-update in settings."
                             );
@@ -109,7 +111,7 @@ public final class UpdateUtil {
                         }
                     })
                     .exceptionally(exception -> {
-                        Util.logMessage("Update check failed: %s".formatted(exception.getMessage()));
+                        LOG.warn("Update check failed: {}", exception);
 
                         return null;
                     });

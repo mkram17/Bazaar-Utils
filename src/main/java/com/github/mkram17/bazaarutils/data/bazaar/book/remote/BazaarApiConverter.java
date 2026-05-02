@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.data.bazaar.book.remote;
 
 import com.github.mkram17.bazaarutils.events.bazaar.remote.ApiSnapshotEvent;
 import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
 import com.github.mkram17.bazaarutils.data.bazaar.book.PriceLevel;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  * and {@link com.github.mkram17.bazaarutils.data.bazaar.book.BookLevels#bidLevels()} respectively.
  */
 public final class BazaarApiConverter {
+    private static final BazaarLogger LOG = BazaarLogger.of(BazaarApiConverter.class);
 
     public static ApiSnapshotEvent convert(SkyBlockBazaarReply reply) {
         long timestamp = ((AccessorSkyBlockBazaarReply) reply).getLastUpdated();
@@ -29,7 +31,7 @@ public final class BazaarApiConverter {
 
         Map<String, SkyBlockBazaarReply.Product> products = reply.getProducts();
 
-        Util.logMessage("Converting API reply — ts=%d products=%d".formatted(timestamp, products != null ? products.size() : 0));
+        LOG.debug("Converting API reply — ts={} products={}", timestamp, products != null ? products.size() : 0);
 
         Map<String, BookLevels> batch = transformProducts(products, origin);
 

@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.price;
 
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -28,6 +29,8 @@ import java.util.OptionalInt;
 @Getter
 @ToString
 public class PriceInfo implements ProductInfo {
+    private static final BazaarLogger LOG = BazaarLogger.of(PriceInfo.class);
+
     /** Absolute game floor — {@code 0.0} is never a valid Bazaar order price. */
     public static final double MINIMUM_PRICE = 0.1;
 
@@ -74,7 +77,7 @@ public class PriceInfo implements ProductInfo {
     /** Returns the top-of-book price for the given product and transaction, or empty if no data exists. */
     public static @NotNull OptionalDouble marketPrice(@Nullable String productId, @NotNull TransactionType transaction) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.logMessage("Query skipped — invalid product ID: %s".formatted(productId));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalDouble.empty();
         }
@@ -91,7 +94,7 @@ public class PriceInfo implements ProductInfo {
     /** Returns the open order count at the given price level, or empty if the level is absent. */
     public static @NotNull OptionalInt orderCount(@Nullable String productId, @NotNull TransactionType transaction, double pricePerUnit) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.logMessage("Query skipped — invalid product ID: %s".formatted(productId));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalInt.empty();
         }
@@ -107,7 +110,7 @@ public class PriceInfo implements ProductInfo {
 
     public static @NotNull OptionalInt totalVolume(@Nullable String productId, @NotNull TransactionType transaction, double pricePerUnit) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.logMessage("Query skipped — invalid product ID: %s".formatted(productId));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalInt.empty();
         }
@@ -129,7 +132,7 @@ public class PriceInfo implements ProductInfo {
      */
     public static OptionalDouble priceForPosition(@Nullable String productId, @NotNull TransactionType transaction, @NotNull PricingPosition position) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.logMessage("Query skipped — invalid product ID: %s".formatted(productId));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalDouble.empty();
         }
@@ -158,7 +161,7 @@ public class PriceInfo implements ProductInfo {
      */
     public static OptionalDouble priceForPosition(@Nullable String productId, @NotNull TransactionType transaction, @NotNull PricingPosition position, @NotNull List<Order> userOrders, boolean selfOutbid) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.logMessage("Query skipped — invalid product ID: %s".formatted(productId));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return OptionalDouble.empty();
         }
@@ -183,7 +186,7 @@ public class PriceInfo implements ProductInfo {
     /** Returns the competitive standing of {@code pricePerUnit} relative to the current top of book. */
     public static Optional<PricingPosition> position(@Nullable String productId, @NotNull TransactionType transaction, double pricePerUnit) {
         if (!ProductInfo.isValidProductId(productId)) {
-            Util.logMessage("Query skipped — invalid product ID: %s".formatted(productId));
+            LOG.warn("Query skipped — invalid product ID: {}", productId);
 
             return Optional.empty();
         }

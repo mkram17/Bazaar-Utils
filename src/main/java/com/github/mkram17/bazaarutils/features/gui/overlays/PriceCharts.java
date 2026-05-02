@@ -27,6 +27,8 @@ import java.util.Optional;
 
 @ItemModifier
 public class PriceCharts implements LoreModifier, AbstractItemModifier {
+    private static final BazaarLogger LOG = BazaarLogger.of(PriceCharts.class);
+
     @Override
     public boolean isEnabled() {
         return OverlaysConfig.PRICE_CHARTS_TOGGLE;
@@ -94,7 +96,11 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
         if (!Minecraft.getInstance().hasShiftDown() || !Minecraft.getInstance().hasControlDown()) return Result.UNMODIFIED;
 
         Optional<ProductInfo> productInfo = ProductInfo.fromItemStack(stack);
-        if (productInfo.isEmpty()) return Result.UNMODIFIED;
+        if (productInfo.isEmpty()) {
+            PlayerLogger.sendError("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(stack.getDisplayName().toString()), new Throwable());
+
+            return Result.UNMODIFIED;
+        }
 
         String link = "https://skyblock.finance/items/" + productInfo.get().getProductId();
 
@@ -102,8 +108,8 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
             if (confirmed) {
                 try {
                     net.minecraft.util.Util.getPlatform().openUri(new URI(link));
-                } catch (URISyntaxException ex) {
-                    Util.notifyError("Failed to open skyblock.finance link.", ex);
+                } catch (URISyntaxException exception) {
+                    PlayerLogger.sendError("Failed to open skyblock.finance link", exception);
                 }
             }
 

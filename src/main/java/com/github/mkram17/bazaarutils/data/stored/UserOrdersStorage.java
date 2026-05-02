@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.data.stored;
 
 import com.github.mkram17.bazaarutils.data.RenderedOrdersIndex;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.OrdersPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
  * returns the post-persist list. No other code path may write to storage.
  */
 public final class UserOrdersStorage {
+    private static final BazaarLogger LOG = BazaarLogger.of(UserOrdersStorage.class);
+
     private static final Object WRITE_LOCK = new Object();
 
     private static final ProfileStorage<List<Order>> INSTANCE = new ProfileStorage<>(
@@ -83,7 +85,7 @@ public final class UserOrdersStorage {
                     .filter(Order::isLive)
                     .collect(Collectors.toCollection(ArrayList::new));
 
-            Util.logMessage("Persist: %d → %d orders (dropped %d terminal)".formatted(transformed.size(), filtered.size(), transformed.size() - filtered.size()));
+            LOG.info("Persist: {} → {} orders (dropped {} terminal)", transformed.size(), filtered.size(), transformed.size() - filtered.size());
 
             INSTANCE.set(filtered);
             RenderedOrdersIndex.refresh(filtered);

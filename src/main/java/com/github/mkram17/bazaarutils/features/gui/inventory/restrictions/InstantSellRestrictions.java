@@ -70,13 +70,21 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
 
     @Override
     protected Optional<InstantSellState> makeState(ContainerLoadedEvent event) {
-        if (!SellableAPI.InstantSell.hasResult()) return Optional.empty();
+        if (!SellableAPI.InstantSell.hasResult()) {
+            LOG.warn("{}.makeState: SellableAPI.InstantSell result is null — data parse failed", name);
+
+            return Optional.empty();
+        }
 
         ScreenContext context = event.asContext();
 
         Optional<ItemInfo> instantSellItem = SellablePageLayout.getInstantSellItem(context);
+        if (instantSellItem.isEmpty()) {
+            LOG.warn("{}.makeState: no instant sell item in layout for screen '{}'", name, context);
 
-        if (instantSellItem.isEmpty()) return Optional.empty();
+            return Optional.empty();
+        }
+
 
         List<OrderInfo> items = SellableAPI.InstantSell.orders();
         Optional<InstantSellParser.InstantSellResult.OtherItems> otherItems = SellableAPI.InstantSell.otherItems();
