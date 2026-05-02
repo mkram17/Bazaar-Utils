@@ -8,7 +8,7 @@ import com.github.mkram17.bazaarutils.config.util.api.conditions.MethodEquals;
 import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -183,19 +183,29 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             Container container = event.getContainer();
 
             Optional<ItemInfo> inputSign = getInputSign(container);
-            if (inputSign.isEmpty()) return Optional.empty();
+            if (inputSign.isEmpty()) {
+                LOG.warn("{}.makeState: no input sign item in layout for screen '{}'", name, container);
+
+                return Optional.empty();
+            }
 
             Optional<ItemInfo> productItem = ScreenManager.getInstance()
                     .findBack(BazaarScreenType.PRODUCT_PAGE)
                     .flatMap(ProductPageLayout::getDisplayItem);
+            if (productItem.isEmpty() || productItem.get().itemStack().isEmpty()) {
+                LOG.warn("{}.makeState: no product item in screen history for screen '{}'", name, container);
 
-            if (productItem.isEmpty()) return Optional.empty();
+                return Optional.empty();
+            }
 
             Optional<ProductInfo> productInfo = ScreenManager.getInstance()
                     .findBack(BazaarScreenType.PRODUCT_PAGE)
                     .flatMap(ProductPageLayout::getDisplayProductInfo);
+            if (productInfo.isEmpty()) {
+                LOG.warn("{}.makeState: no product info in stack '{}'", name, productItem.get().itemStack().getHoverName().getString());
 
-            if (productInfo.isEmpty()) return Optional.empty();
+                return Optional.empty();
+            }
 
             double purse = CurrencyAPI.INSTANCE.getPurse();
 
@@ -203,7 +213,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                     .flatMap(client -> Optional.ofNullable(client.player))
                     .map(LocalPlayer::getInventory);
 
-            if (playerInventory.isEmpty()) return Optional.empty();
+            if (playerInventory.isEmpty()) {
+                LOG.warn("{}.makeState: no player inventory available", name);
+
+                return Optional.empty();
+            }
 
             return Optional.of(new TransactionState(purse, productInfo.get(), productItem.get(), inputSign.get(), playerInventory.get(), container, event.getScreen()));
         }
@@ -293,10 +307,19 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             Container container = event.getContainer();
 
             Optional<ItemInfo> inputSign = getInputSign(container);
-            if (inputSign.isEmpty()) return Optional.empty();
+            if (inputSign.isEmpty()) {
+                LOG.warn("{}.makeState: no input sign item in layout for screen '{}'", name, container);
+
+                return Optional.empty();
+            }
 
             Optional<ProductInfo> productInfo = getItemProductInfo(inputSign.get());
-            if (productInfo.isEmpty()) return Optional.empty();
+            if (productInfo.isEmpty()) {
+                LOG.warn("{}.makeState: no product info resolved by helper", name);
+
+                return Optional.empty();
+            }
+
 
             return Optional.of(new TransactionState(productInfo.get(), inputSign.get(), container, event.getScreen()));
         }
@@ -324,7 +347,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             double resolved = price.orElseGet(() -> {
                 double market = Math.max(PriceInfo.MINIMUM_PRICE, getEmptyMarketPrice());
                 double fallback = getPricingPosition().adjust(market, getTransactionType());
-                Util.logMessage("%s.resolveInput: book empty for %s %s @ %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), getTransactionType(), getPricingPosition(), fallback));
+                LOG.debug("{}.resolveInput: book empty for {} {} @ {} — using fallback price {}", name, state.productInfo().getProductId(), getTransactionType(), getPricingPosition(), fallback);
 
                 return fallback;
             });
@@ -344,7 +367,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                     .flatMap(OrderInfo::of)
                     .map((info) -> (ProductInfo) info);
 
-            if (result.isEmpty()) PlayerActionUtil.notifyAll("Flip helper found no current order selected in data layer — price will be unavailable", NotificationType.FEATURE);
+            if (result.isEmpty()) PlayerLogger.debug("Flip helper found no current order selected in data layer — price will be unavailable", NotificationType.FEATURE, LOG);
 
             return result;
         }

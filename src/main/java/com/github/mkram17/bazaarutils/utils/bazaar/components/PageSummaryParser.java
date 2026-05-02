@@ -1,7 +1,8 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
 import com.github.mkram17.bazaarutils.data.bazaar.book.PriceLevel;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public final class PageSummaryParser {
+    private static final BazaarLogger LOG = BazaarLogger.of(PageSummaryParser.class);
 
     public record PageSummaryResult(List<PriceLevel> bidLevels, List<PriceLevel> askLevels, long observedAt) {}
 
@@ -21,7 +23,7 @@ public final class PageSummaryParser {
     public static PageSummaryResult parseItemPage(ItemStack buyOrderStack, ItemStack sellOfferStack, long now) {
         var result = new PageSummaryResult(parsePriceLevels(buyOrderStack, now), parsePriceLevels(sellOfferStack, now), now);
 
-        PlayerActionUtil.notifyAll("Page summary parsed: %d bid levels, %d ask levels".formatted(result.bidLevels().size(), result.askLevels().size()), NotificationType.GUI);
+        PlayerLogger.debug("Page summary parsed: %d bid levels, %d ask levels".formatted(result.bidLevels().size(), result.askLevels().size()), NotificationType.SCREEN_PARSING, LOG);
 
         return result;
     }
@@ -29,7 +31,7 @@ public final class PageSummaryParser {
     private static List<PriceLevel> parsePriceLevels(ItemStack stack, long observedAt) {
         var lines = LoreParser.lines(stack);
 
-        Util.logMessage("parsePriceLevels: %d lore lines from '%s'".formatted(lines.size(), stack.getDisplayName().getString()));
+        LOG.debug("parsePriceLevels: {} lore lines from '{}'", lines.size(), stack.getDisplayName().getString());
 
         return lines.stream()
                 .filter(line -> line.getSiblings().size() == 8)
@@ -52,7 +54,7 @@ public final class PageSummaryParser {
 
             return Optional.of(result);
         } catch (Exception exception) {
-            Util.logError("parsePriceLevel failed — siblings=[%s]".formatted(siblings.stream().map(Component::getString).collect(java.util.stream.Collectors.joining(", "))), exception);
+            LOG.warn("parsePriceLevel failed — siblings=[{}] error={}", siblings.stream().map(Component::getString).collect(java.util.stream.Collectors.joining(", ")), exception.getMessage());
 
             return Optional.empty();
         }

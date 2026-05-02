@@ -6,7 +6,8 @@ import com.github.mkram17.bazaarutils.data.bazaar.pipeline.ChatOrderSource;
 import com.github.mkram17.bazaarutils.data.bazaar.pipeline.OrderDelta;
 import com.github.mkram17.bazaarutils.events.bazaar.chat.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.DataSource;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
@@ -15,7 +16,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TaxContext;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.data.bazaar.pipeline.OrderResolver;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
@@ -35,11 +35,13 @@ import java.util.UUID;
  */
 @DataSource
 public final class OrderPlacedDataSource extends ChatOrderSource {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrderPlacedDataSource.class);
+
     @Subscription
     public void onBuyOrderCreated(BazaarChatEvent.BuyOrderCreated event) {
         var product = ProductInfo.fromDisplayName(event.product).orElse(null);
         if (product == null) {
-            Util.logMessage("Placement skipped — unknown product: %s".formatted(event.product));
+            LOG.warn("Placement skipped — unknown product: {}", event.product);
 
             return;
         }
@@ -53,7 +55,7 @@ public final class OrderPlacedDataSource extends ChatOrderSource {
     public void onSellOfferCreated(BazaarChatEvent.SellOfferCreated event) {
         var product = ProductInfo.fromDisplayName(event.product).orElse(null);
         if (product == null) {
-            Util.logMessage("Placement skipped — unknown product: %s".formatted(event.product));
+            LOG.warn("Placement skipped — unknown product: {}", event.product);
 
             return;
         }
@@ -100,18 +102,18 @@ public final class OrderPlacedDataSource extends ChatOrderSource {
                 price, volume, (int) crossed, 0, slotPosition,
                 initialStatus, origin.confirmedAt(), origin.confirmedAt(), false);
 
-        PlayerActionUtil.notifyAll("%s — Placed %s %s %dx @ %.4f".formatted(
+        PlayerLogger.debug("%s — Placed %s %s %dx @ %.4f".formatted(
                 origin.describe(), type,
-                productId, volume, price), NotificationType.ORDERDATA);
+                productId, volume, price), NotificationType.ORDER_LIFECYCLE, LOG);
 
-        PlayerActionUtil.notifyAll("%s — Book place: %s %s Δ%d @ %.4f".formatted(
+        PlayerLogger.debug("%s — Book place: %s %s Δ%d @ %.4f".formatted(
                 origin.describe(), type,
-                productId, (int) (volume - crossed), price), NotificationType.BAZAARDATA);
+                productId, (int) (volume - crossed), price), NotificationType.PRICE_DATA, LOG);
 
         if (crossed > 0) {
-            PlayerActionUtil.notifyAll("%s — Book walk: %s %s Δ%d crossed ≤ %.4f".formatted(
+            PlayerLogger.debug("%s — Book walk: %s %s Δ%d crossed ≤ %.4f".formatted(
                     origin.describe(), oppositeType,
-                    productId, (int) crossed, price), NotificationType.BAZAARDATA);
+                    productId, (int) crossed, price), NotificationType.PRICE_DATA, LOG);
         }
 
         commit(new OrderDelta.Place(order,

@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
 import com.github.mkram17.bazaarutils.config.util.client.ItemRendererProvider;
 import com.github.mkram17.bazaarutils.config.util.client.SlotRendererProvider;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.JsonObject;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen;
@@ -23,6 +24,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.CONFIGURATOR;
 
 
 public class ConfigUtil {
+    private static final BazaarLogger LOG = BazaarLogger.of(ConfigUtil.class);
 
     public static final Map<Integer, UnaryOperator<JsonObject>> PATCHES = ConfigPatches.loadPatches();
     public static final int VERSION = 1;
@@ -71,9 +73,10 @@ public class ConfigUtil {
         configurator.register(BUConfig.class, event ->
                 PATCHES.forEach((version, patch) ->
                         event.register(version, json -> {
-                            Util.logMessage("Applying patch " + version);
+                            LOG.info("Applying config patch v{}", version);
                             JsonObject result = patch.apply(json);
-                            Util.logMessage("[BUConfig] Patch " + version + " applied successfully");
+                            LOG.info("Config patch v{} applied", version);
+
                             return result;
                         })
                 )

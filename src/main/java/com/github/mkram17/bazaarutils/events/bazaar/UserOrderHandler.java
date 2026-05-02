@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.bazaar.data.BazaarDataBatchUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.data.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
@@ -54,19 +54,19 @@ public final class UserOrderHandler extends BUListener {
     private void checkOrder(Order order, List<Order> userOrders) {
         var current = order.positionContext(userOrders).orElse(null);
         if (current == null) {
-            PlayerActionUtil.notifyAll("%s — no market data, position check skipped".formatted(order.describe()), NotificationType.ORDERDATA);
+            PlayerLogger.debug("%s — no market data, position check skipped".formatted(order.describe()), NotificationType.ORDER_POSITION);
 
             return;
         }
 
         var previous = lastKnown.put(order.id(), current);
         if (Objects.equals(current, previous)) {
-            PlayerActionUtil.notifyAll("%s — position unchanged (%s)".formatted(order.describe(), current), NotificationType.ORDERDATA);
+            PlayerLogger.debug("%s — position unchanged (%s)".formatted(order.describe(), current), NotificationType.ORDER_POSITION);
 
             return;
         }
 
-        PlayerActionUtil.notifyAll("%s — transition: %s → %s".formatted(order.describe(), previous, current), NotificationType.ORDERDATA);
+        PlayerLogger.debug("%s — transition: %s → %s".formatted(order.describe(), previous, current), NotificationType.ORDER_POSITION);
 
         new UserOrderPositionEvent(order, previous, current).post(EVENT_BUS);
     }

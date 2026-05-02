@@ -1,8 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.resources;
 
-import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * In-memory lookup cache for Bazaar product conversions.
  */
 public final class BazaarConversions {
+    private static final BazaarLogger LOG = BazaarLogger.of(BazaarConversions.class);
 
     private BazaarConversions() {}
 
@@ -63,9 +63,9 @@ public final class BazaarConversions {
                     Collections.unmodifiableMap(idToName)
             ));
 
-            PlayerActionUtil.notifyAll("Resource cache loaded — %d entries".formatted(nameToId.size()), NotificationType.BAZAARDATA);
+            LOG.info("Resource cache loaded — {} entries", nameToId.size());
         } catch (Exception exception) {
-            Util.notifyError("Failed to load resource cache — most features will not work. Try /bu updateresources or restart the game.", exception);
+            PlayerLogger.sendError("Failed to load resource cache — most features will not work. Try /bu updateresources or restart the game.", exception);
             CACHE.set(ConversionCache.EMPTY);
         }
     }

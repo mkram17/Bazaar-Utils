@@ -2,8 +2,8 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import tech.thatgravyboat.skyblockapi.api.data.MayorPerks;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
@@ -54,6 +54,6 @@ public class TaxContext extends BUListener {
         if (now - lastTaxWarningMs < TAX_WARN_COOLDOWN_MS) return;
         lastTaxWarningMs = now;
 
-        Util.notifyError(context + " Run /bu config to fix your Account Upgrade setting.", new Throwable());
+        PlayerLogger.sendError(context + " Run /bu config to fix your Account Upgrade setting.", new Throwable());
     }
 }

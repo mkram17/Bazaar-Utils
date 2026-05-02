@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.features.chat;
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
@@ -64,7 +64,7 @@ public class UselessBazaarNotificationsRemover extends BUListener implements Tog
             if (firstTimeRemoved) {
                 firstTimeRemoved = false;
 
-                Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyAll("TIP - Useless Bazaar notifications such as \"Putting goods in escrow...\" are removed by default! " +
+                Util.tickExecuteLater(2, () -> PlayerLogger.send("TIP - Useless Bazaar notifications such as \"Putting goods in escrow...\" are removed by default! " +
                         "To disable this feature, uncheck the \"Remove Useless Bazaar Notifications\" option in the Bazaar Utils settings."));
             }
 

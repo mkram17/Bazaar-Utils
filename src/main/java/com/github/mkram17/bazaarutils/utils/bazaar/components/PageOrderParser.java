@@ -2,7 +2,8 @@ package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.OrdersPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TaxContext;
@@ -26,6 +27,8 @@ import java.util.regex.Pattern;
  * frame and border glass slots are structurally excluded before any parsing.
  */
 public final class PageOrderParser {
+    private static final BazaarLogger LOG = BazaarLogger.of(PageOrderParser.class);
+
     /**
      * Maximum units by which a k/M-abbreviated fill line can under-report the true value.
      * Hypixel displays "71.7k" for any fill in [71,700 … 71,799], so the parsed integer
@@ -114,9 +117,9 @@ public final class PageOrderParser {
                 .filter(Objects::nonNull)
                 .toList();
 
-        if (NotificationType.GUI.isEnabled()) {
+        if (NotificationType.SCREEN_PARSING.isEnabled()) {
             for (var entry : result) {
-                PlayerActionUtil.notifyAll(
+                PlayerLogger.debug(
                         "Slot#%d coop=%b → %s %s %dx @ %.4f | filled=%d claimable=%d claimed=%d".formatted(
                                 entry.item().slotIndex(),
                                 entry.coopOrder(),
@@ -127,7 +130,7 @@ public final class PageOrderParser {
                                 entry.filledAmount(),
                                 entry.claimableAmount(),
                                 entry.claimedAmount()),
-                        NotificationType.GUI);
+                        NotificationType.SCREEN_PARSING, LOG);
             }
         }
 
@@ -137,7 +140,7 @@ public final class PageOrderParser {
     private static @Nullable ParsedEntry parseEntry(ItemInfo item, String localPlayerName) {
         var name = item.itemStack().getCustomName();
         if (name == null) {
-            Util.logMessage("Slot#%d → null custom name (unexpected after slot filter)".formatted(item.slotIndex()));
+            LOG.warn("Slot#{} → null custom name (unexpected after slot filter)", item.slotIndex());
 
             return null;
         }
@@ -145,7 +148,7 @@ public final class PageOrderParser {
         TransactionType.Side side = parseSide(name);
         if (side == null) {
             // All decoration slots are pre-filtered — null side here means Hypixel changed the format.
-            Util.logMessage("Slot#%d → null side (unexpected after slot filter) — name='%s'".formatted(item.slotIndex(), name.getString()));
+            LOG.warn("Slot#{} → null side (unexpected after slot filter) — name='{}'", item.slotIndex(), name.getString());
 
             return null;
         }
@@ -191,7 +194,7 @@ public final class PageOrderParser {
         }
 
         if (totalStr == null || priceStr == null) {
-            Util.logMessage("Slot#%d → pattern miss — lore=%s".formatted(item.slotIndex(), lore.toString()));
+            LOG.warn("Slot#{} → pattern miss — lore={}", item.slotIndex(), lore.toString());
 
             return null;
         }
@@ -207,8 +210,8 @@ public final class PageOrderParser {
 
         Optional<OrderInfo> info = OrderInfo.of(itemName, side, price, totalAmount);
         if (info.isEmpty()) {
-            Util.logMessage("Slot#%d → name resolution failed for '%s'".formatted(item.slotIndex(), itemName));
-            PlayerActionUtil.notifyAll("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(itemName));
+            LOG.warn("Slot#{} → name resolution failed for '{}'", item.slotIndex(), itemName);
+            PlayerLogger.send("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(itemName));
 
             return null;
         }

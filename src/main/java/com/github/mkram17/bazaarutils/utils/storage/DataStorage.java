@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.utils.storage;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
@@ -25,6 +26,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DataStorage<T> {
+    private static final BazaarLogger LOG = BazaarLogger.of(DataStorage.class);
+
     public static final Path DEFAULT_PATH = FabricLoader.getInstance().getConfigDir().resolve(BazaarUtils.MOD_ID).resolve("data");
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -89,9 +92,9 @@ public class DataStorage<T> {
     public void delete() {
         try {
             Files.deleteIfExists(path);
-            Util.logMessage("Deleted %s".formatted(path));
-        } catch (IOException e) {
-            Util.logError("Failed to delete " + path, e);
+            LOG.info("Deleted {}", DataStorage.DEFAULT_PATH.relativize(path));
+        } catch (IOException exception) {
+            LOG.error("Failed to delete {}", DataStorage.DEFAULT_PATH.relativize(path), exception);
         }
     }
 
@@ -99,10 +102,10 @@ public class DataStorage<T> {
         if (!Files.exists(path)) {
             try {
                 Files.createDirectories(path.getParent());
-            } catch (IOException e) {
-                Util.logError("Failed to create data directory", e);
+            } catch (IOException exception) {
+                LOG.error("Failed to create data directory — path={}", path, exception);
             }
-            Util.logError("No existing data at %s — initialising defaults".formatted(path), null);
+            LOG.info("No existing data at {} — initialising defaults", path);
 
             return defaultData.get();
         }
@@ -116,7 +119,7 @@ public class DataStorage<T> {
             JsonElement data = root.get("@bazaarutils:data");
 
             if (fileVersion < this.version) {
-                Util.logMessage("Migrating %s v%d → v%d".formatted(path.getFileName(), fileVersion, this.version));
+                LOG.info("Migrating {} v{} → v{}", path.getFileName(), fileVersion, this.version);
             }
 
             for (int v = fileVersion; v < this.version; v++) {
@@ -126,18 +129,19 @@ public class DataStorage<T> {
 
             T result = codec.apply(this.version).parse(JsonOps.INSTANCE, data).getOrThrow();
 
-            Util.logMessage("Loaded %s (v%d)".formatted(DataStorage.DEFAULT_PATH.relativize(path), this.version));
+            LOG.info("Loaded {} (v{})", DataStorage.DEFAULT_PATH.relativize(path), this.version);
 
             return result;
         } catch (Exception e) {
-            Util.logError("Failed to load " + DEFAULT_PATH.relativize(path) + ", using defaults.", e);
+            LOG.error("Failed to load {} — using defaults", DataStorage.DEFAULT_PATH.relativize(path), e);
 
             return defaultData.get();
         }
     }
 
     private void saveToSystem() {
-        Util.logMessage("Saving " + path);
+        LOG.info("Saving " + path);
+
         try {
             Files.createDirectories(path.getParent());
             JsonElement encoded = currentCodec.encodeStart(JsonOps.INSTANCE, data).getOrThrow();
@@ -145,9 +149,9 @@ public class DataStorage<T> {
             root.addProperty("@bazaarutils:version", version);
             root.add("@bazaarutils:data", encoded);
             Files.writeString(path, GSON.toJson(root), StandardCharsets.UTF_8);
-            Util.logMessage("Saved %s (v%d)".formatted(DataStorage.DEFAULT_PATH.relativize(path), version));
+            LOG.info("Saved {} (v{})", DataStorage.DEFAULT_PATH.relativize(path), version);
         } catch (Exception exception) {
-            Util.logError("Failed to save %s — data may be lost".formatted(DataStorage.DEFAULT_PATH.relativize(path)), exception);
+            LOG.error("Failed to save {} — data may be lost", DataStorage.DEFAULT_PATH.relativize(path), exception);
         }
     }
 }

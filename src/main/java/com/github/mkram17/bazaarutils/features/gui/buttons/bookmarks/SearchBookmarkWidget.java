@@ -3,10 +3,10 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.data.stored.BookmarksStorage;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
@@ -73,7 +73,7 @@ public class SearchBookmarkWidget {
                     SLOT_BUTTON_TEXTURES,
                     (btn) -> {
                         if (Minecraft.getInstance().hasShiftDown()) {
-                            PlayerActionUtil.notifyAll("Removed " + bookmark.name() + " bookmark from shift-click. Open Bazaar again to display changes.");
+                            PlayerLogger.send("Removed " + bookmark.name() + " bookmark from shift-click. Open Bazaar again to display changes.");
                             onWidgetShiftClick(bookmark);
                         } else {
                             onWidgetLeftClick(bookmark);
@@ -105,6 +105,6 @@ public class SearchBookmarkWidget {
             return;
         }
 
-        PlayerActionUtil.runCommand("bz " + bookmark.name());
+        PlayerLogger.runCommand("bz " + bookmark.name());
     }
 }

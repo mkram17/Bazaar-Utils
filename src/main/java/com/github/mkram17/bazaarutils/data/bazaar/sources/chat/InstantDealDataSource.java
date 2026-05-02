@@ -5,15 +5,14 @@ import com.github.mkram17.bazaarutils.data.bazaar.pipeline.ChatOrderSource;
 import com.github.mkram17.bazaarutils.data.bazaar.pipeline.OrderDelta;
 import com.github.mkram17.bazaarutils.events.bazaar.chat.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.DataSource;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.PriceType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 /**
@@ -25,6 +24,8 @@ import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
  */
 @DataSource
 public final class InstantDealDataSource extends ChatOrderSource {
+    private static final BazaarLogger LOG = BazaarLogger.of(InstantDealDataSource.class);
+
     @Subscription(priority = Priority.FIRST)
     public void onInstantBuy(BazaarChatEvent.InstantBuy event) {
         // Player consumed sell offers → book side decremented is SELL.
@@ -40,7 +41,7 @@ public final class InstantDealDataSource extends ChatOrderSource {
     private void applyDeal(String product, TransactionType.Side consumedSide, double pricePerUnit, int volume, long receivedAt) {
         var productInfo = ProductInfo.fromDisplayName(product).orElse(null);
         if (productInfo == null) {
-            Util.logMessage("Instant deal skipped (unknown product) — name=%s".formatted(product));
+            LOG.info("Instant deal skipped — unknown product: {}", product);
 
             return;
         }
@@ -48,9 +49,9 @@ public final class InstantDealDataSource extends ChatOrderSource {
         var origin = new BazaarDataOrigin.InstantDeal(receivedAt);
         var transaction = TransactionType.of(consumedSide, TransactionType.Method.ORDER);
 
-        PlayerActionUtil.notifyAll("%s — Book walk: %s %s Δ%d @ %.4f".formatted(
+        PlayerLogger.debug("%s — Book walk: %s %s Δ%d @ %.4f".formatted(
                 origin.describe(), transaction.getPriceType(),
-                productInfo.getProductId(), volume, pricePerUnit), NotificationType.ORDERDATA);
+                productInfo.getProductId(), volume, pricePerUnit), NotificationType.PRICE_DATA, LOG);
 
         commit(new OrderDelta.BookOnly(
                 productInfo.getProductId(), BookMutation.walk(transaction, volume)), origin);

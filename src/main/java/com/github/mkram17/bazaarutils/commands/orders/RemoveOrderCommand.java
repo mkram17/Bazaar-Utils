@@ -3,8 +3,7 @@ package com.github.mkram17.bazaarutils.commands.orders;
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.OrdersCommands;
 import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -37,8 +36,7 @@ public final class RemoveOrderCommand implements BUCommand {
         int index = IntegerArgumentType.getInteger(context, "index");
 
         if (index >= orders.size()) {
-            PlayerActionUtil.notifyAll("No order at index " + index + ".", NotificationType.COMMAND);
-
+            PlayerLogger.send("No order at index %d.".formatted(index));
             return 0;
         }
 
@@ -46,7 +44,7 @@ public final class RemoveOrderCommand implements BUCommand {
         UserOrdersStorage.apply(
                 UserOrdersStorage.StorageOp.cancel(order, new BazaarDataOrigin.OrderCancelled(System.currentTimeMillis()))
                         .then(UserOrdersStorage.StorageOp.reindex()));
-        PlayerActionUtil.notifyAll("Removed " + order, NotificationType.COMMAND);
+        PlayerLogger.send("Removed %s".formatted(order.describe()));
 
         return 1;
     }

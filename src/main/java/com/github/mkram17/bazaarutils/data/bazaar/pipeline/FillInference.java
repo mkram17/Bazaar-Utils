@@ -2,15 +2,12 @@ package com.github.mkram17.bazaarutils.data.bazaar.pipeline;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
-import com.github.mkram17.bazaarutils.data.bazaar.sources.gui.PageSummaryDataSource;
-import com.github.mkram17.bazaarutils.data.bazaar.sources.remote.ApiSnapshotDataSource;
 import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.data.bazaar.book.ProductData;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.OrdersPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
@@ -20,6 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class FillInference {
+    private static final BazaarLogger LOG = BazaarLogger.of(FillInference.class);
+
     private FillInference() {}
 
     public record Result(Order order, int delta) {
@@ -87,9 +86,9 @@ public final class FillInference {
                         if (!vanishIsAuthoritative) return Stream.empty();
 
                         int totalRemaining = sorted.stream().mapToInt(Order::unfilledAmount).sum();
-                        sorted.forEach(order -> PlayerActionUtil.notifyAll("%s — Fill advanced %d → %d (Δ%d, level vanished): %s".formatted(
+                        sorted.forEach(order -> PlayerLogger.debug("%s — Fill advanced %d → %d (Δ%d, level vanished): %s".formatted(
                                 origin.describe(), order.filledAmount(), order.originalAmount(),
-                                order.unfilledAmount(), order.describe()), notifType));
+                                order.unfilledAmount(), order.describe()), notifType, LOG));
 
                         return distributeFIFO(sorted, totalRemaining).stream();
                     }
@@ -104,12 +103,12 @@ public final class FillInference {
                     if (group.size() == 1) {
                         var order = sorted.getFirst();
                         int inferredFilled = order.originalAmount() - (int) level.totalVolume();
-                        PlayerActionUtil.notifyAll("%s — Fill advanced %d → %d (Δ%d, sole order): %s".formatted(
+                        PlayerLogger.debug("%s — Fill advanced %d → %d (Δ%d, sole order): %s".formatted(
                                 origin.describe(), order.filledAmount(), inferredFilled,
-                                inferredFilled - order.filledAmount(), order.describe()), notifType);
+                                inferredFilled - order.filledAmount(), order.describe()), notifType, LOG);
                     } else {
-                        PlayerActionUtil.notifyAll("%s — Fill inference (FIFO, %d orders @ %.4f, Δ%d)".formatted(
-                                origin.describe(), group.size(), price, totalDelta), notifType);
+                        PlayerLogger.debug("%s — Fill inference (FIFO, %d orders @ %.4f, Δ%d)".formatted(
+                                origin.describe(), group.size(), price, totalDelta), notifType, LOG);
                     }
 
                     return distributeFIFO(sorted, totalDelta).stream();
@@ -135,7 +134,7 @@ public final class FillInference {
                 .map(order -> fillMap.getOrDefault(order.id(), order))
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        Util.logMessage("Applying Δ%d inferred fills".formatted(fillMap.size()));
+        LOG.debug("Applying Δ{} inferred fills", fillMap.size());
 
         var result = UserOrdersStorage.apply(operation.then(UserOrdersStorage.StorageOp.reindex()));
 
@@ -157,7 +156,7 @@ public final class FillInference {
 
                     event.post(BazaarUtils.EVENT_BUS);
 
-                    PlayerActionUtil.notifyAll(msg, NotificationType.ORDERDATA);
+                    PlayerLogger.debug(msg, NotificationType.ORDER_LIFECYCLE, LOG);
                 });
 
         return true;

@@ -3,9 +3,8 @@ package com.github.mkram17.bazaarutils.commands.orders;
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.OrdersCommands;
 import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -14,8 +13,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-
-import java.util.List;
 
 @Command(parent = OrdersCommands.class)
 public final class QueryOrderCommand implements BUCommand {
@@ -35,12 +32,12 @@ public final class QueryOrderCommand implements BUCommand {
         int index = IntegerArgumentType.getInteger(context, "index");
 
         if (index >= storage.size()) {
-            PlayerActionUtil.notifyAll("No order at index " + index + ".");
+            PlayerLogger.send("No order at index " + index + ".");
 
             return 0;
         }
 
-        PlayerActionUtil.notifyAll(storage.get(index).toString());
+        PlayerLogger.send(storage.get(index).toString());
 
         return 1;
     }

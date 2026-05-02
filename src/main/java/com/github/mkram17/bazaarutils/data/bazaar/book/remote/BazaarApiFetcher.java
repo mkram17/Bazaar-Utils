@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public final class BazaarApiFetcher {
+    private static final BazaarLogger LOG = BazaarLogger.of(BazaarApiFetcher.class);
+
     private static final BazaarApiFetcherSettings FETCH_SETTINGS = new BazaarApiFetcherSettings();
 
     // Serializes schedule/cancel so only one pending fetch task exists at a time.
@@ -30,7 +32,7 @@ public final class BazaarApiFetcher {
     @RunOnInit
     public static void init() {
         scheduleFetch(0);
-        Util.logMessage("BazaarApiFetcher initialized (simple fixed-interval poller) — base interval {%d}ms, post-offset {%d}ms".formatted(FETCH_SETTINGS.BASE_INTERVAL_MS, FETCH_SETTINGS.POST_OFFSET_MS));
+        LOG.info("BazaarApiFetcher initialized (simple fixed-interval poller) — base interval {}ms, post-offset {}ms", FETCH_SETTINGS.BASE_INTERVAL_MS, FETCH_SETTINGS.POST_OFFSET_MS);
     }
 
     private static void scheduleFetch(long delayMs) {
@@ -47,7 +49,7 @@ public final class BazaarApiFetcher {
         try {
             fetchOnce();
         } catch (Throwable throwable) {
-            Util.logError("Unexpected throwable escaped fetch loop — scheduling retry", throwable);
+            LOG.error("Unexpected throwable escaped fetch loop — scheduling retry", throwable);
             scheduleFailureRetry();
         }
     }
@@ -89,10 +91,10 @@ public final class BazaarApiFetcher {
     private static void handleFetchFailure(String reason, Throwable cause, boolean countFailures) {
         int failureCount = countFailures ? consecutiveFailures.incrementAndGet() : consecutiveFailures.get();
 
-        Util.logError("Fetch failure: %s — retry in %dms (consecutive=%d)".formatted(reason, FETCH_SETTINGS.FAILURE_RETRY_MS, failureCount), cause);
+        LOG.warn("Fetch failure: {} — retry in {}ms (consecutive={})", reason, FETCH_SETTINGS.FAILURE_RETRY_MS, failureCount, cause);
 
         if (countFailures && failureCount >= FETCH_SETTINGS.FAILURE_ERROR_THRESHOLD) {
-            Util.notifyError("API fetch has failed " + failureCount + " times in a row — price data is stale.", cause);
+            PlayerLogger.sendError("API fetch has failed " + failureCount + " times in a row — price data is stale.", cause);
         }
 
         scheduleFailureRetry();
@@ -123,21 +125,21 @@ public final class BazaarApiFetcher {
         Minecraft.getInstance().execute(() -> event.post(EVENT_BUS));
 
         if (previousSnapshotTs == -1) {
-            Util.logMessage("First API snapshot received — ts=%d".formatted(snapshotTs));
+            LOG.info("First API snapshot received — ts={}", snapshotTs);
 
             return;
         }
 
-        PlayerActionUtil.notifyAll("API snapshot received — ts=" + snapshotTs + " (Δ" + (snapshotTs - previousSnapshotTs) + "ms)", NotificationType.BAZAARDATA);
+        PlayerLogger.debug("API snapshot received — ts=" + snapshotTs + " (Δ" + (snapshotTs - previousSnapshotTs) + "ms)", NotificationType.API, LOG);
     }
 
     private static void handleUnchangedSnapshot(long snapshotTs) {
         int count = consecutiveIdenticalSnapshots.incrementAndGet();
 
-        Util.logMessage("Snapshot unchanged — ts=%d x%d".formatted(snapshotTs, count));
+        LOG.debug("Snapshot unchanged — ts={} x{}", snapshotTs, count);
 
         if (count == FETCH_SETTINGS.STALE_WARNING_THRESHOLD) {
-            Util.logMessage("API stale snapshot x%d — ts=%d — server may be lagging or BASE_INTERVAL_MS too short".formatted(count, snapshotTs));
+            LOG.warn("API stale snapshot x{} — ts={} — server may be lagging or BASE_INTERVAL_MS too short", count, snapshotTs);
         }
     }
 
@@ -153,7 +155,7 @@ public final class BazaarApiFetcher {
             nextDelayMs = Math.max(idealDelayMs, FETCH_SETTINGS.STALE_BACKOFF_MS);
         }
 
-        Util.logMessage("Next fetch in %dms — expected=%d now=%d".formatted(nextDelayMs, expectedNextFetchAtMs, nowMs));
+        LOG.debug("Next fetch in {}ms — expected={} now={}", nextDelayMs, expectedNextFetchAtMs, nowMs);
 
         scheduleFetch(nextDelayMs);
     }

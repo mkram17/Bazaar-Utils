@@ -1,7 +1,8 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
@@ -12,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
  * @see com.github.mkram17.bazaarutils.data.SellableAPI
  */
 public final class SellSacksParser {
+    private static final BazaarLogger LOG = BazaarLogger.of(SellSacksParser.class);
+
     public record SellSacksResult(List<OrderInfo> items, Optional<OtherItems> otherItems) {
         public record OtherItems(int volume, double totalValue) {}
     }
@@ -64,7 +66,7 @@ public final class SellSacksParser {
                     Optional<OrderInfo> result = OrderInfo.of(product, TransactionType.Side.BUY, pricePerUnit, volume);
 
                     if (result.isEmpty()) {
-                        PlayerActionUtil.notifyAll("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
+                        PlayerLogger.send("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
 
                         continue;
                     }
@@ -72,11 +74,11 @@ public final class SellSacksParser {
                     items.add(result.get());
                 }
             } catch (Exception exception) {
-                Util.logError("parseSackOrders: failed to parse lore line — value=[%s]".formatted(line.getString()), exception);
+                LOG.warn("parseSacksOrders: failed to parse lore line — value=[{}]", line.getString(), exception);
             }
         }
 
-        PlayerActionUtil.notifyAll("SellSacks parsed: %d known items | %d folded to \"Other Items\"".formatted(items.size(), otherItems.map(SellSacksResult.OtherItems::volume).orElse(0)), NotificationType.GUI);
+        PlayerLogger.debug("SellSacks parsed: %d known items | %d folded to \"Other Items\"".formatted(items.size(), otherItems.map(SellSacksResult.OtherItems::volume).orElse(0)), NotificationType.SCREEN_PARSING, LOG);
 
         return new SellSacksResult(List.copyOf(items), otherItems);
     }

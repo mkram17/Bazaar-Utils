@@ -6,9 +6,9 @@ import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.features.ItemModifiers;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Result;
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionState> extends BUListener implements LoreModifier, AbstractItemModifier {
+    protected static final BazaarLogger LOG = BazaarLogger.of(RestrictionHelper.class);
+
     public interface RestrictionState {
         @NotNull
         ItemInfo targetItem();
@@ -131,12 +133,12 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
             clicks++;
 
             retriggerModifier();
-            state.ifPresent(state -> PlayerActionUtil.notifyAll(getMessage(state)));
+            state.ifPresent(state -> PlayerLogger.send(getMessage(state)));
 
             return Result.CONSUMED;
         }
 
-        Util.logMessage("%s: override threshold reached (%d) — action proceeding".formatted(name, getClicksOverride()));
+        LOG.info("%s: override threshold reached ({}) — action proceeding", name, getClicksOverride());
 
         return Result.UNMODIFIED;
     }

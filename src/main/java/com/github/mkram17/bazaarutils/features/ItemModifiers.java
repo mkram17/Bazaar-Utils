@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsItemModifiers;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -48,6 +49,8 @@ import java.util.stream.Stream;
 
 @LateInitModule
 public class ItemModifiers extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(ItemModifiers.class);
+
     public static List<AbstractItemModifier> MODIFIERS = new ArrayList<>(List.of());
     public static final ConcurrentMap<ItemStack, List<AbstractItemModifier>> MODIFIED_ITEMS = new MapMaker().weakKeys().makeMap();
 
@@ -62,7 +65,7 @@ public class ItemModifiers extends BUListener {
                 .sorted(Comparator.comparingInt(AbstractItemModifier::getPriority))
                 .toList();
 
-        Util.logMessage("ItemModifiers initialized — %d modifiers registered".formatted(MODIFIERS.size()));
+        LOG.info("ItemModifiers initialised — {} modifiers registered", MODIFIERS.size());
     }
 
     private static final Set<AbstractItemModifier> DYNAMIC_MODIFIERS = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());

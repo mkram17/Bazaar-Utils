@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.resources.BazaarConversions;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public final class ItemsRepo {
+    private static final BazaarLogger LOG = BazaarLogger.of(ItemsRepo.class);
 
     private static final Map<String, ItemStack> RESOLVED_CACHE = new HashMap<>();
     private static List<ItemStack> SKYBLOCK_ITEMS_CACHE = List.of();
@@ -67,7 +69,7 @@ public final class ItemsRepo {
             Identifier id = Identifier.tryParse(normalized);
 
             if (id == null) {
-                Util.logMessage("ItemFilter: unparseable tag value '%s', falling back to All".formatted(raw));
+                LOG.warn("ItemFilter: unparseable tag value '%s', falling back to All".formatted(raw));
 
                 return new All();
             }
@@ -84,10 +86,10 @@ public final class ItemsRepo {
 
     public static void buildSkyBlockItemsCache() {
         if (SKYBLOCK_REPO_READY) return;
-        SKYBLOCK_REPO_READY = true;
+        else SKYBLOCK_REPO_READY = true;
 
         SKYBLOCK_ITEMS_CACHE = buildSkyBlockItems();
-        Util.logMessage("SkyBlock items cache built — %s items".formatted(SKYBLOCK_ITEMS_CACHE.size()));
+        LOG.info("SkyBlock items cache built — {} items", SKYBLOCK_ITEMS_CACHE.size());
     }
 
     /**
@@ -204,7 +206,7 @@ public final class ItemsRepo {
         Map<String, String> conversions = BazaarConversions.getNameToProductIdCache();
 
         if (conversions.isEmpty()) {
-            Util.logMessage("ItemsRepo/bazaar: conversions cache empty — check BazaarConversions/updater init");
+            LOG.warn("ItemsRepo/bazaar: conversions cache empty — check BazaarConversions/updater init");
 
             return List.of();
         }

@@ -3,8 +3,8 @@ package com.github.mkram17.bazaarutils.data;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.TransactionConfirmationParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -34,6 +34,8 @@ import java.util.Optional;
  */
 @Module
 public final class TransactionAPI extends BUListener {
+    private static final BazaarLogger LOG = BazaarLogger.of(TransactionAPI.class);
+
     @Nullable
     private static OrderInfo pending = null;
 
@@ -49,9 +51,9 @@ public final class TransactionAPI extends BUListener {
                 .ifPresentOrElse(
                         info -> {
                             pending = info;
-                            Util.logMessage("Buy confirmation captured: " + info);
+                            LOG.debug("Buy confirmation captured: " + info);
                         },
-                        () -> Util.logMessage("Buy confirmation screen visible but parse produced no result")
+                        () -> LOG.warn("Buy confirmation screen visible but parse produced no result")
                 );
     }
 
@@ -67,9 +69,9 @@ public final class TransactionAPI extends BUListener {
                 .ifPresentOrElse(
                         info -> {
                             pending = info;
-                            Util.logMessage("Sell confirmation captured: " + info);
+                            LOG.debug("Sell confirmation captured: " + info);
                         },
-                        () -> Util.logMessage("Sell confirmation screen visible but parse produced no result")
+                        () -> LOG.warn("Sell confirmation screen visible but parse produced no result")
                 );
     }
 
@@ -94,7 +96,7 @@ public final class TransactionAPI extends BUListener {
     public static Optional<OrderInfo> consume() {
         OrderInfo value = pending;
         pending = null;
-        if (value != null) Util.logMessage("Order transaction consumed: " + value);
+        if (value != null) LOG.debug("Order transaction consumed: " + value);
 
         return Optional.ofNullable(value);
     }
@@ -107,6 +109,6 @@ public final class TransactionAPI extends BUListener {
     private static void clear() {
         OrderInfo value = pending;
         pending = null;
-        if (value != null) Util.logMessage("Pending transaction cleared: " + value);
+        if (value != null) LOG.debug("Pending transaction cleared: " + value);
     }
 }

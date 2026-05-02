@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.misc;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.events.BUListener;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -40,16 +40,16 @@ public final class JoinMessages extends BUListener {
     }
 
     private void sendFirstLoadMessages() {
-        Util.tickExecuteLater(40, () -> PlayerActionUtil.notifyAll(WELCOME_MESSAGE));
-        Util.tickExecuteLater(100, () -> PlayerActionUtil.notifyAll(DISCORD_MESSAGE));
+        Util.tickExecuteLater(40, () -> PlayerLogger.send(WELCOME_MESSAGE));
+        Util.tickExecuteLater(100, () -> PlayerLogger.send(DISCORD_MESSAGE));
 
         MetadataConfig.IS_FIRST_LOAD = false;
         ConfigUtil.scheduleConfigSave();
     }
 
     private void sendSignificantUpdateMessages() {
-        Util.tickExecuteLater(40, () -> PlayerActionUtil.notifyAll(updateMessage));
-        Util.tickExecuteLater(41, () -> PlayerActionUtil.notifyAll(Util.CHANGELOG));
+        Util.tickExecuteLater(40, () -> PlayerLogger.send(updateMessage));
+        Util.tickExecuteLater(41, () -> PlayerLogger.send(Util.CHANGELOG));
 
         MetadataConfig.SIGNIFICANT_VERSION_UPGRADE = false;
         ConfigUtil.scheduleConfigSave();

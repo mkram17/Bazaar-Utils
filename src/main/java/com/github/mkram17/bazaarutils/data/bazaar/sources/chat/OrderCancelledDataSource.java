@@ -4,10 +4,10 @@ import com.github.mkram17.bazaarutils.data.bazaar.pipeline.BookMutation;
 import com.github.mkram17.bazaarutils.data.bazaar.pipeline.ChatOrderSource;
 import com.github.mkram17.bazaarutils.data.bazaar.pipeline.OrderDelta;
 import com.github.mkram17.bazaarutils.events.bazaar.chat.BazaarChatEvent;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.DataSource;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
@@ -28,6 +28,8 @@ import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
  */
 @DataSource
 public final class OrderCancelledDataSource extends ChatOrderSource {
+    private static final BazaarLogger LOG = BazaarLogger.of(OrderCancelledDataSource.class);
+
     @Subscription(priority = Priority.FIRST)
     private void onBuyOrderCancelled(BazaarChatEvent.BuyOrderCancelled event) {
         var origin = new BazaarDataOrigin.OrderCancelled(event.receivedAt);
@@ -39,17 +41,17 @@ public final class OrderCancelledDataSource extends ChatOrderSource {
         if (matched == null) {
             // Not an error: the orders screen may have reconciled and evicted this order
             // before the chat cancellation message arrived.
-            Util.logMessage("Buy cancel skipped (already screen-reconciled) — coinsRefunded=%f".formatted(event.refundedCoins));
+            LOG.info("Buy cancel skipped (already screen-reconciled) — coinsRefunded={}", event.refundedCoins);
 
             return;
         }
 
-        PlayerActionUtil.notifyAll("%s — Cancelled — buy order: %s".formatted(origin.describe(), matched.describe()), NotificationType.ORDERDATA);
+        PlayerLogger.debug("%s — Cancelled — buy order: %s".formatted(origin.describe(), matched.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
 
-        PlayerActionUtil.notifyAll("%s — Book decrement: %s %s Δ%d @ %.4f (cancelled)".formatted(
+        PlayerLogger.debug("%s — Book decrement: %s %s Δ%d @ %.4f (cancelled)".formatted(
                 origin.describe(),
                 TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER).getPriceType(),
-                matched.productId(), matched.unfilledAmount(), matched.pricePerItem()), NotificationType.BAZAARDATA);
+                matched.productId(), matched.unfilledAmount(), matched.pricePerItem()), NotificationType.PRICE_DATA, LOG);
 
         commit(new OrderDelta.Evict(matched, BookMutation.decrement(TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER), matched.pricePerItem(), matched.unfilledAmount(), true)), origin);
     }
@@ -61,24 +63,24 @@ public final class OrderCancelledDataSource extends ChatOrderSource {
 
         var product = ProductInfo.fromDisplayName(event.product).orElse(null);
         if (product == null) {
-            Util.logMessage("Sell cancel skipped — unknown product: %s".formatted(event.product));
+            LOG.info("Sell cancel skipped — unknown product: {}", event.product);
 
             return;
         }
 
         var matched = OrderResolver.forSellCancel(product.getProductId(), event.amount, storage).orElse(null);
         if (matched == null) {
-            Util.logMessage("Sell cancel skipped (already screen-reconciled) — productId=%s".formatted(product.getProductId()));
+            LOG.info("Sell cancel skipped (already screen-reconciled) — productId={}", product.getProductId());
 
             return;
         }
 
-        PlayerActionUtil.notifyAll("%s — Cancelled — sell offer: %s".formatted(origin.describe(), matched.describe()), NotificationType.ORDERDATA);
+        PlayerLogger.debug("%s — Cancelled — sell offer: %s".formatted(origin.describe(), matched.describe()), NotificationType.ORDER_LIFECYCLE, LOG);
 
-        PlayerActionUtil.notifyAll("%s — Book decrement: %s %s Δ%d @ %.4f (cancelled)".formatted(
+        PlayerLogger.debug("%s — Book decrement: %s %s Δ%d @ %.4f (cancelled)".formatted(
                 origin.describe(),
                 TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER).getPriceType(),
-                matched.productId(), matched.unfilledAmount(), matched.pricePerItem()), NotificationType.BAZAARDATA);
+                matched.productId(), matched.unfilledAmount(), matched.pricePerItem()), NotificationType.PRICE_DATA, LOG);
 
         commit(new OrderDelta.Evict(matched, BookMutation.decrement(
                 TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER),

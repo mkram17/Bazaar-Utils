@@ -3,7 +3,8 @@ package com.github.mkram17.bazaarutils.utils.bazaar.components;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TaxContext;
@@ -23,6 +24,8 @@ import java.util.regex.Pattern;
  * @see com.github.mkram17.bazaarutils.data.SellableAPI
  */
 public final class InstantSellParser {
+    private static final BazaarLogger LOG = BazaarLogger.of(InstantSellParser.class);
+
     /** Parsed result from an Instant Sell container. */
     public record InstantSellResult(List<OrderInfo> items, Optional<OtherItems> otherItems) {
         /** Volume folded under the "Other items" aggregation line — volume and total value actionable only, no per-product breakdown. */
@@ -63,7 +66,7 @@ public final class InstantSellParser {
                 // Items with no buy orders appear with 0 quantity — skip them
                 // rather than dividing by zero or producing a meaningless order.
                 if (volume == 0) {
-                    Util.logMessage("parseInstantSellOrders: skipping '%s' — 0 quantity (no buy orders)".formatted(product));
+                    LOG.info("parseInstantSellOrders: skipping '{}' — 0 quantity (no buy orders)", product);
 
                     continue;
                 }
@@ -77,7 +80,7 @@ public final class InstantSellParser {
                     Optional<OrderInfo> result = OrderInfo.of(product, TransactionType.Side.BUY, pricePerUnit, volume);
 
                     if (result.isEmpty()) {
-                        PlayerActionUtil.notifyAll("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
+                        PlayerLogger.send("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
 
                         continue;
                     }
@@ -85,12 +88,12 @@ public final class InstantSellParser {
                     items.add(result.get());
                 }
             } catch (Exception exception) {
-                Util.logError("parseInstantSellOrders: failed to parse lore line — value=[%s]".formatted(line.getString()), exception);
+                LOG.warn("parseInstantSellOrders: failed to parse lore line — value=[{}]", line.getString(), exception);
             }
 
         }
 
-        PlayerActionUtil.notifyAll("InstantSell (overview page) parsed: %d known items | %d folded to \"Other Items\"".formatted(items.size(), otherItems.map(InstantSellResult.OtherItems::volume).orElse(0)), NotificationType.GUI);
+        PlayerLogger.debug("InstantSell (overview page) parsed: %d known items | %d folded to \"Other Items\"".formatted(items.size(), otherItems.map(InstantSellResult.OtherItems::volume).orElse(0)), NotificationType.SCREEN_PARSING, LOG);
 
         return new InstantSellResult(List.copyOf(items), otherItems);
     }
@@ -133,7 +136,7 @@ public final class InstantSellParser {
                   .orElse(null);
 
         if (product == null) {
-            Util.logMessage("parseProductPageOrder: could not read item name from lore");
+            LOG.warn("parseItemPageOrder: could not read item name from lore");
 
             return Optional.empty();
         }
@@ -168,19 +171,19 @@ public final class InstantSellParser {
         }
 
         if (noInventory) {
-            Util.logMessage("parseProductPageOrder: no inventory for '%s' — skipping".formatted(product));
+            LOG.info("parseProductPageOrder: no inventory for '{}' — skipping", product);
 
             return Optional.empty();
         }
 
         if (noOrders) {
-            Util.logMessage("parseProductPageOrder: no buy orders for '%s' — skipping".formatted(product));
+            LOG.info("parseProductPageOrder: no buy orders for '{}' — skipping", product);
 
             return Optional.empty();
         }
 
         if (amountStr == null || priceStr == null) {
-            Util.logMessage("parseProductPageOrder: pattern miss for '%s' — amount=%s price=%s".formatted(product, amountStr, priceStr));
+            LOG.warn("parseProductPageOrder: pattern miss for '{}' — amount={} price={}", product, amountStr, priceStr);
 
             return Optional.empty();
         }
@@ -193,23 +196,24 @@ public final class InstantSellParser {
             Optional<OrderInfo> result = OrderInfo.of(product, TransactionType.Side.BUY, pricePerUnit, volume);
 
             if (result.isEmpty()) {
-                PlayerActionUtil.notifyAll("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
+                PlayerLogger.send("Could not resolve '%s' — try /bu updateresources or restart the game.".formatted(product));
                 return Optional.empty();
             }
 
+            PlayerLogger.debug("InstantSell (item page) parsed: %s %dx@%.4f".formatted(result.get().getName(), result.get().getVolume(), result.get().getPricePerItem()), NotificationType.SCREEN_PARSING, LOG);
             if (taxStr != null) {
                 try {
                     reconcileTax(Double.parseDouble(taxStr.trim()));
                 } catch (Exception e) {
-                    Util.logError("parseProductPageOrder: failed to parse tax '%s'".formatted(taxStr), e);
+                    LOG.error("parseItemPageOrder: failed to parse tax '%s'".formatted(taxStr), e);
                 }
             }
 
-            PlayerActionUtil.notifyAll("InstantSell (item page) parsed: %s %dx@%.4f".formatted(result.get().getName(), result.get().getVolume(), result.get().getPricePerItem()), NotificationType.GUI);
+            PlayerLogger.debug("InstantSell (item page) parsed: %s %dx@%.4f".formatted(result.get().getName(), result.get().getVolume(), result.get().getPricePerItem()), NotificationType.SCREEN_PARSING, LOG);
 
             return Optional.of(new InstantSellResult(List.of(result.get()), Optional.empty()));
         } catch (Exception exception) {
-            Util.logError("parseProductPageOrder: arithmetic failed for '%s' — amount='%s' price='%s'".formatted(product, amountStr, priceStr), exception);
+            LOG.warn("parseItemPageOrder: arithmetic failed for '{}' — amount='{}' price='{}'", product, amountStr, priceStr, exception);
 
             return Optional.empty();
         }
@@ -221,18 +225,18 @@ public final class InstantSellParser {
         for (PlayerAccountUpgrades.BazaarFlipper tier : PlayerAccountUpgrades.BazaarFlipper.values()) {
             if (Math.round(tier.getUserBazaarTax() * 10) == Math.round(normalizedTax * 10)) {
                 if (BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE != tier) {
-                    Util.logMessage("reconcileTax: %s → %s (observed %.4g%%%s)".formatted(BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE, tier, observedPercent, TaxContext.isQuadTaxes() ? " [quad taxes /4 → " + normalizedTax + "%]" : ""));
+                    LOG.info("reconcileTax: {} → {} (observed {}% [quad taxes /4 → {}%])", BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE, tier, observedPercent, normalizedTax);
 
                     BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE = tier;
                     ConfigUtil.scheduleConfigSave();
 
-                    PlayerActionUtil.notifyAll("Bazaar Flipper tier auto-detected as %s from observed tax; saved to your configuration file.".formatted(tier.name()));
+                    PlayerLogger.send("Bazaar Flipper tier auto-detected as %s from observed tax; saved to your configuration file.".formatted(tier.name()));
                 }
 
                 return;
             }
         }
 
-        Util.logMessage("reconcileTax: observed %.4g%% (normalized %.4g%%) matches no BazaarFlipper tier — ignoring".formatted(observedPercent, normalizedTax));
+        LOG.warn("reconcileTax: observed %.4g%% (normalized %.4g%%) matches no BazaarFlipper tier — ignoring".formatted(observedPercent, normalizedTax));
     }
 }

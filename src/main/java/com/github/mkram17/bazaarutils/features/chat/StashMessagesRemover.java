@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.features.chat;
 
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.minecraft.SequenceChatFilter;
@@ -38,7 +38,7 @@ public class StashMessagesRemover extends BUListener implements ToggleableFeatur
             if (!stashPreviouslyClaimed) {
                 stashPreviouslyClaimed = true;
 
-                Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyAll(
+                Util.tickExecuteLater(2, () -> PlayerLogger.send(
                         "TIP - To claim stash more easily, use the Stash Helper keybind. " +
                                 "To disable stash messages, enable \"Disable Stash Messages\" in the Bazaar Utils config."));
             }

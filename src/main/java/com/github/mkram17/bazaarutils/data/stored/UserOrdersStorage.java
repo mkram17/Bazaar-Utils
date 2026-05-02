@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.data.stored;
 
-import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.OrdersPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -16,6 +16,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public final class UserOrdersStorage {
+    private static final BazaarLogger LOG = BazaarLogger.of(UserOrdersStorage.class);
+
     private static final ProfileStorage<List<Order>> INSTANCE = new ProfileStorage<>(
             0,
             ArrayList::new,
@@ -29,7 +31,7 @@ public final class UserOrdersStorage {
     private static void rebuildSlotIndex(List<Order> orders) {
         if (orders == null) {
             slotIndex = Map.of();
-            Util.logMessage("rebuildSlotIndex: orders null — cleared index");
+            LOG.debug("rebuildSlotIndex: orders null — cleared index");
 
             return;
         }
@@ -41,7 +43,7 @@ public final class UserOrdersStorage {
                 order -> order.slotPosition().indexIfVisible().getAsInt() // safe as per #isVisible
         );
 
-        Util.logMessage("rebuildSlotIndex: %d anchored entries from %d orders".formatted(slotIndex.size(), orders.size()));
+        LOG.debug("rebuildSlotIndex: {} anchored entries from {} orders", slotIndex.size(), orders.size());
     }
 
     public static Optional<Order> bySlot(int slot) {
@@ -97,7 +99,7 @@ public final class UserOrdersStorage {
                 .filter(Order::isLive)
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        Util.logMessage("Persist: %d → %d orders (dropped %d terminal)".formatted(transformed.size(), filtered.size(), transformed.size() - filtered.size()));
+        LOG.info("Persist: {} → {} orders (dropped {} terminal)", transformed.size(), filtered.size(), transformed.size() - filtered.size());
 
         INSTANCE.set(filtered);
         rebuildSlotIndex(filtered);

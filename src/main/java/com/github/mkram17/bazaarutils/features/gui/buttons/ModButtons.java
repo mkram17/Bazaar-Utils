@@ -4,7 +4,7 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -95,7 +95,7 @@ public class ModButtons implements ToggleableFeature {
                 currentButtonY,
                 config.size, config.size,
                 SLOT_ORDERS_BUTTON_TEXTURES,
-                (widget) -> PlayerActionUtil.runCommand("managebazaarorders"),
+                (widget) -> PlayerLogger.runCommand("managebazaarorders"),
                 Items.BOOK.getDefaultInstance(),
                 Component.literal("Go to Orders (Requires Cookie)")
         );

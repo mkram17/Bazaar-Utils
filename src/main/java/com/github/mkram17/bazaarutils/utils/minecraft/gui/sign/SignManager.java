@@ -4,7 +4,8 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.minecraft.SignOpenEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.BazaarLogger;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -19,6 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class SignManager {
+    private static final BazaarLogger LOG = BazaarLogger.of(SignManager.class);
+
     private static final AtomicBoolean listenerPending = new AtomicBoolean(false);
 
     public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
@@ -49,10 +52,10 @@ public class SignManager {
         setSignTextInternal(text, closeAfter, 5);
     }
 
-
     private static void setSignTextInternal(String text, boolean closeAfter, int attemptsLeft) {
         if (attemptsLeft <= 0) {
-            Util.notifyError("Failed to set sign text: max attempts reached.", new Throwable());
+            LOG.warn("Failed to set sign text: max attempts reached.", new Throwable());
+
             return;
         }
 
@@ -70,6 +73,7 @@ public class SignManager {
             try {
                 AccessorSignEditScreen signScreen = (AccessorSignEditScreen) context.get().screen();
                 String[] lines = text.split("\n", 4);
+
                 int originalRow = signScreen.getLine();
 
                 for (int i = 0; i < 4; i++) {
@@ -81,14 +85,14 @@ public class SignManager {
 
                 if (closeAfter) closeSign();
             } catch (Exception exception) {
-                Util.notifyError("Error executing sign text update", exception);
+                LOG.warn("Error executing sign text update", exception);
             }
         });
     }
 
     public static void closeSign() {
         try {
-            PlayerActionUtil.notifyAll("Closing sign", NotificationType.GUI);
+            PlayerLogger.debug("Closing sign", NotificationType.GUI, LOG);
 
             syncSignScreen();
 
@@ -96,10 +100,10 @@ public class SignManager {
                     .map(ScreenContext::screen)
                     .ifPresentOrElse(
                             screen -> Minecraft.getInstance().execute(screen::onClose),
-                            () -> Util.notifyError("Error closing sign: not in a sign screen", new Throwable())
+                            () -> PlayerLogger.sendError("Error closing sign: not in a sign screen", new Throwable())
                     );
-        } catch (Exception e) {
-            Util.notifyError("Unknown error while closing sign", e);
+        } catch (Exception exception) {
+            PlayerLogger.sendError("Unknown error while closing sign", exception);
         }
     }
 

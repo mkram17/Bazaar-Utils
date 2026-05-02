@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.commands.registry;
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.RegistryCommands;
 import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataRegistry;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.PlayerLogger;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.github.mkram17.bazaarutils.data.bazaar.book.PriceLevel;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.PriceType;
@@ -74,20 +74,20 @@ public final class QueryRegistryCommand implements BUCommand {
 
     private static int printBook(CommandContext<FabricClientCommandSource> context, PriceType type, int from, int to) {
         String productId = StringArgumentType.getString(context, "productId");
-        var data = BazaarDataRegistry.get(productId);
 
+        var data = BazaarDataRegistry.get(productId);
         if (data == null) {
-            PlayerActionUtil.notifyAll("No data for: " + productId);
+            PlayerLogger.send("No data for %s".formatted(productId));
 
             return 0;
         }
 
         var book = data.bookFor(type);
 
-        PlayerActionUtil.notifyAll(Component.literal(type + " Book:").withStyle(ChatFormatting.GREEN));
+        PlayerLogger.send(Component.literal("%s Book:".formatted(type)).withStyle(ChatFormatting.GREEN));
 
         if (book.isEmpty()) {
-            PlayerActionUtil.notifyAll(Component.literal("(empty)").withStyle(ChatFormatting.GRAY));
+            PlayerLogger.send(Component.literal("(empty)").withStyle(ChatFormatting.GRAY));
 
             return 1;
         }
@@ -95,7 +95,7 @@ public final class QueryRegistryCommand implements BUCommand {
         book.entrySet().stream()
                 .skip(from - 1)
                 .limit(to - from + 1)
-                .forEach(entry -> PlayerActionUtil.notifyAll(formatLevel(entry.getKey(), entry.getValue())));
+                .forEach(entry -> PlayerLogger.send(formatLevel(entry.getKey(), entry.getValue())));
 
         return 1;
     }
