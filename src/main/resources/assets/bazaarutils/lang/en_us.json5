@@ -83,6 +83,8 @@
     }
   },
 
+  "bazaarutils.keybind.stash_helper": "Stash Helper",
+
   "bazaarutils.hypixel.{}": {
     "account_upgrades.bazaar_flipper.{}": {
       "not_upgraded.label": "Not Upgraded",
