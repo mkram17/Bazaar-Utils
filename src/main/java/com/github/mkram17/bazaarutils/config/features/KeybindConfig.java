@@ -1,21 +1,24 @@
 package com.github.mkram17.bazaarutils.config.features;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.features.keybinds.StashHelper;
-import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
-public class KeybindConfig {
+public final class KeybindConfig {
 
     public static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.parse(BazaarUtils.MOD_ID));
 
-    //Keybinds get registered on object creation.
-    public StashHelper stashHelper = new StashHelper(new KeyMapping(
-            "Pick Up Stash",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_V,
-            CATEGORY
-    ));
+    public static final KeyMapping STASH_HELPER = KeyBindingHelper.registerKeyBinding(
+            new KeyMapping(
+                    "bazaarutils.keybind.stash_helper",
+                    InputConstants.Type.KEYSYM,
+                    GLFW.GLFW_KEY_V,
+                    CATEGORY
+            )
+    );
+
+    private KeybindConfig() {}
 }
