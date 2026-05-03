@@ -30,6 +30,17 @@ import java.util.stream.Stream;
 )
 public final class InventoryConfig {
     @ConfigEntry(
+            id = "dim_non_bazaar_items",
+            translation = "bazaarutils.config.inventory.dim_non_bazaar_items.label"
+    )
+    @Comment(
+            value = "When on the Bazaar, dims items in your inventory that cannot be traded on the Bazaar.",
+            translation = "bazaarutils.config.inventory.dim_non_bazaar_items.hint"
+    )
+    @ConfigOption.Separator(value = "bazaarutils.config.inventory.separator.dim_non_bazaar_items.label")
+    public static boolean DIM_NON_BAZAAR_ITEMS_TOGGLE = true;
+
+    @ConfigEntry(
             id = "instant_sell_highlight",
             translation = "bazaarutils.config.inventory.instant_sell_highlight.label"
     )

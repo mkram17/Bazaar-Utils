@@ -351,6 +351,12 @@
       "category.label": "Inventory",
       "category.hint": "Configurations for the inventory features of the mod",
 
+      "separator.dim_non_bazaar_items.label": "Dim Non-Bazaar Items",
+      "dim_non_bazaar_items.{}": {
+        "label": "Dim Non-Bazaar Items",
+        "hint": "When on the Bazaar, dims items in your inventory that cannot be traded on the Bazaar."
+      },
+
       "separator.instant_sell_highlight.label": "Instant Sell Highlight",
       "instant_sell_highlight.{}": {
         "label": "Instant Sell Highlight",
