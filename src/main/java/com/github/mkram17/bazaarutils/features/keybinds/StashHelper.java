@@ -1,32 +1,36 @@
 package com.github.mkram17.bazaarutils.features.keybinds;
 
-import com.github.mkram17.bazaarutils.features.util.BUKeybinding;
+import com.github.mkram17.bazaarutils.config.features.KeybindConfig;
+import com.github.mkram17.bazaarutils.events.BUKeybinding;
 import com.github.mkram17.bazaarutils.utils.PlayerLogger;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import lombok.Getter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.KeyMapping;
 
+@Module
 public class StashHelper extends BUKeybinding {
-    @Getter
-    private int ticksBetweenPresses;
 
-    public StashHelper(KeyMapping keyBinding) {
-        super(keyBinding);
+    private static final int COOLDOWN_TICKS = 10;
+
+    private int cooldown = COOLDOWN_TICKS;
+
+    public StashHelper() {
+        super(KeybindConfig.STASH_HELPER);
     }
 
     @Override
-    protected void registerOnPressed(){
+    protected void registerFabricEvents() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            ticksBetweenPresses++;
-            if(!keyBinding.isDown()) {
+            if (cooldown < COOLDOWN_TICKS) {
+                cooldown++;
                 return;
             }
-            if(ticksBetweenPresses > 10) {
-                ticksBetweenPresses = 0;
-                ScreenManager.closeScreen();
-                PlayerLogger.runCommand("pickupstash");
-            }
+
+            if (!keyMapping.isDown()) return;
+            cooldown = 0;
+
+            ScreenManager.closeScreen();
+            PlayerLogger.runCommand("pickupstash");
         });
     }
 }
