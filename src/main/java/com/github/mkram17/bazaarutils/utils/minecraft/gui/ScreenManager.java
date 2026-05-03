@@ -85,6 +85,9 @@ public class ScreenManager {
 
             // A screen closed. We check whether it is a known overlay which double nulls currentScreen
             instance.expectingServerFollowUp = isFollowUpScreen(prev);
+            if (!instance.expectingServerFollowUp) {
+                instance.history.clear(); // context is gone, currentOrNull() now returns null
+            }
             instance.logHistory("CLOSE");
 
             return;
