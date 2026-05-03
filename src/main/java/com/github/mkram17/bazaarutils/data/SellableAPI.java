@@ -24,7 +24,6 @@ import tech.thatgravyboat.skyblockapi.api.datatype.DataTypes;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
-import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.PlayerInventoryChangeEvent;
 
 import java.util.*;

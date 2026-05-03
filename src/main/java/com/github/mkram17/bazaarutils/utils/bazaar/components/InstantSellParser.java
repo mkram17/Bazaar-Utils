@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
@@ -10,6 +12,8 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class InstantSellParser {
     public record InstantSellResult(List<OrderInfo> items, Optional<OtherItems> otherItems) {
@@ -30,6 +34,15 @@ public final class InstantSellParser {
 
             try {
                 int volume = Util.parseNumber(siblings.get(1).getString());
+
+                // Items with no buy orders appear with 0 quantity — skip them
+                // rather than dividing by zero or producing a meaningless order.
+                if (volume == 0) {
+                    Util.logMessage("parseOrders: skipping '%s' — 0 quantity (no buy orders)".formatted(name));
+
+                    continue;
+                }
+
                 double totalPrice = Double.parseDouble(siblings.get(5).getString().replace(" coins", "").replace(",", ""));
                 double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
 
@@ -44,17 +57,92 @@ public final class InstantSellParser {
         return new InstantSellResult(List.copyOf(items), otherItems);
     }
 
+    /** "Amount: 896x" — the "x" is a separate sibling but getString() concatenates */
+    private static final Pattern AMOUNT_PATTERN = Pattern.compile("Amount: (?<amount>[\\d,]+)x");
+
+    /** "Total: 532.2 coins" — confirmed from lore dump */
+    private static final Pattern PRICE_PATTERN = Pattern.compile("Total: (?<price>[\\d,.]+) coins");
+
+    /** Present when there are no buy orders for this item */
+    private static final Pattern NO_ORDERS_PATTERN = Pattern.compile("There are no Buy Orders!");
+
+    /** "Inventory: 896 items" or "Inventory: None" */
+    private static final Pattern INVENTORY_PATTERN = Pattern.compile("Inventory: (?<inv>.+)");
+
     public static Optional<InstantSellResult> parseProductPageOrder(ItemStack sellInstantlyStack) {
         List<Component> lines = LoreParser.lines(sellInstantlyStack);
-        if (lines.size() < 6) return Optional.empty();
+
+        // Name is still read positionally — line 0 is always the item name
+        // and is structurally stable across both the orders/no-orders cases.
+        String name = lines.isEmpty() ? null
+                : lines.get(0).getSiblings().stream()
+                  .map(Component::getString)
+                  .map(String::trim)
+                  .filter(s -> !s.isEmpty())
+                  .findFirst()
+                  .orElse(null);
+
+        if (name == null) {
+            Util.logMessage("parseProductPageOrder: could not read item name from lore");
+
+            return Optional.empty();
+        }
+
+        String amountStr = null;
+        String priceStr  = null;
+        boolean noInventory = false;
+        boolean noOrders    = false;
+
+        for (Component line : lines) {
+            String plain = line.getString();
+            Matcher m;
+
+            if (!noInventory && (m = INVENTORY_PATTERN.matcher(plain)).find()) {
+                noInventory = m.group("inv").trim().equalsIgnoreCase("None");
+            } else if (NO_ORDERS_PATTERN.matcher(plain).find()) {
+                noOrders = true;
+                break;
+            } else if (amountStr == null && (m = AMOUNT_PATTERN.matcher(plain)).find()) {
+                amountStr = m.group("amount");
+            } else if (priceStr == null && (m = PRICE_PATTERN.matcher(plain)).find()) {
+                priceStr = m.group("price");
+            }
+
+            if (amountStr != null && priceStr != null) break;
+        }
+
+        if (noInventory) {
+            Util.logMessage("parseProductPageOrder: no inventory for '%s' — skipping".formatted(name));
+
+            return Optional.empty();
+        }
+
+        if (noOrders) {
+            Util.logMessage("parseProductPageOrder: no buy orders for '%s' — skipping".formatted(name));
+
+            return Optional.empty();
+        }
+
+        if (amountStr == null || priceStr == null) {
+            Util.logMessage("parseProductPageOrder: pattern miss for '%s' — amount=%s price=%s".formatted(name, amountStr, priceStr));
+
+            return Optional.empty();
+        }
 
         try {
-            String name = lines.get(0).getSiblings().getFirst().getString().trim();
-            int volume = Util.parseNumber(lines.get(4).getSiblings().get(1).getString());
-            double totalPrice = Double.parseDouble(lines.get(5).getSiblings().get(1).getString().replace(" coins", "").replace(",", ""));
+            int volume          = Integer.parseInt(amountStr.replace(",", "").trim());
+            double totalPrice   = Double.parseDouble(priceStr.replace(",", "").trim());
             double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
-            return Optional.of(new InstantSellResult(List.of(new OrderInfo(name, TransactionType.Side.BUY, null, volume, pricePerUnit, null)), Optional.empty()));
-        } catch (Exception ignored) {
+
+            OrderInfo result = new OrderInfo(name, TransactionType.Side.BUY, null, volume, pricePerUnit, null);
+
+            PlayerActionUtil.notifyAll("InstantSell (item page) parsed: %s %dx@%.4f".formatted(name, result.getVolume(), result.getPricePerItem()), NotificationType.GUI);
+
+            return Optional.of(new InstantSellResult(List.of(result), Optional.empty()));
+
+        } catch (Exception exception) {
+            Util.logError("parseProductPageOrder: arithmetic failed for '%s' — amount='%s' price='%s'".formatted(name, amountStr, priceStr), exception);
+
             return Optional.empty();
         }
     }
