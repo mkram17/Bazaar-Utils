@@ -11,6 +11,11 @@ public enum BazaarScreenType implements ScreenType {
                     .and(ScreenType.hasTitle("Bazaar ➜ "))
     ),
 
+    SEARCH_ITEM_INPUT(
+            ScreenType.named("SEARCH_ITEM_INPUT", ScreenType.isSign())
+                    .and(ScreenType.hasSignLine(3, "Enter query"))
+    ),
+
     SETTINGS_PAGE(
             ScreenType.named("SETTINGS_PAGE", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("Bazaar ➜ Settings"))
@@ -38,9 +43,22 @@ public enum BazaarScreenType implements ScreenType {
                     .and(ScreenType.hasTitle("How many do you want?"))
     ),
 
+    BUY_ORDER_CUSTOM_AMOUNT_INPUT(
+            ScreenType.named("BUY_ORDER_CUSTOM_AMOUNT_INPUT", ScreenType.isSign())
+                    .and(ScreenType.hasSignLine(2, "Enter amount"))
+                    .and(ScreenType.hasSignLine(3, "to order"))
+                    .and(ScreenType.hasPreviousScreen(BUY_ORDER_AMOUNT))
+    ),
+
     BUY_ORDER_PRICE(
             ScreenType.named("BUY_ORDER_PRICE", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("How much do you want to pay?"))
+    ),
+
+    BUY_ORDER_CUSTOM_PRICE_INPUT(
+            ScreenType.named("BUY_ORDER_CUSTOM_PRICE_INPUT", ScreenType.isSign())
+                    .and(ScreenType.hasSignLine(2, "Enter price"))
+                    .and(ScreenType.hasSignLine(3, "big nerd"))
     ),
 
     BUY_ORDER_CONFIRMATION(
@@ -62,10 +80,23 @@ public enum BazaarScreenType implements ScreenType {
                     .and(ScreenType.hasSlot("CANCEL_FILLED_BUY_ORDER", BazaarSlots.ORDER_OPTIONS.CANCEL_FILLED_BUY_ORDER::query))
     ),
 
+    COMPLETED_BUY_ORDER_FLIP_PRICE_INPUT(
+            ScreenType.named("COMPLETED_BUY_ORDER_FLIP_PRICE_INPUT", ScreenType.isSign())
+                    .and(ScreenType.hasSignLine(1, "^^Flipping^^"))
+                    .and(ScreenType.hasSignLine(2, "Previous price:"))
+    ),
+
     INSTANT_BUY(
             ScreenType.named("INSTANT_BUY", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("➜ Inst"))
                     .and(ScreenType.hasSlot("INPUT_CUSTOM_AMOUNT", BazaarSlots.INSTANT_BUY.INPUT_CUSTOM_AMOUNT::query))
+    ),
+
+    INSTANT_BUY_CUSTOM_AMOUNT_INPUT(
+            ScreenType.named("INSTANT_BUY_CUSTOM_AMOUNT_INPUT", ScreenType.isSign())
+                    .and(ScreenType.hasSignLine(2, "Enter amount"))
+                    .and(ScreenType.hasSignLine(3, "to order"))
+                    .and(ScreenType.hasPreviousScreen(INSTANT_BUY))
     ),
 
     SELL_OFFER_AMOUNT(
@@ -73,9 +104,21 @@ public enum BazaarScreenType implements ScreenType {
                     .and(ScreenType.hasTitle("How many are you selling?"))
     ),
 
+    SELL_OFFER_CUSTOM_AMOUNT_INPUT(
+            ScreenType.named("SELL_OFFER_CUSTOM_AMOUNT_INPUT", ScreenType.isSign())
+                    .and(ScreenType.hasSignLine(2, "Enter amount"))
+                    .and(ScreenType.hasSignLine(3, "to sell"))
+    ),
+
     SELL_OFFER_PRICE(
             ScreenType.named("SELL_OFFER_PRICE", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("At what price are you selling?"))
+    ),
+
+    SELL_OFFER_CUSTOM_PRICE_INPUT(
+            ScreenType.named("SELL_OFFER_CUSTOM_PRICE_INPUT", ScreenType.isSign())
+                    .and(ScreenType.hasSignLine(2, "Enter price"))
+                    .and(ScreenType.hasSignLine(3, "per unit"))
     ),
 
     SELL_OFFER_CONFIRMATION(

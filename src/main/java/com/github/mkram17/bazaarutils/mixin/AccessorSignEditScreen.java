@@ -20,4 +20,7 @@ public interface AccessorSignEditScreen {
 
     @Accessor("line")
     void setLine(int row);
+
+    @Accessor("messages")
+    String[] getMessages();
 }

@@ -1,9 +1,12 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
+import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQuery;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
+import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.Item;
@@ -40,8 +43,27 @@ public interface ScreenType extends Predicate<Screen> {
         return screen -> screen instanceof AbstractContainerScreen<?>;
     }
 
+    static Predicate<Screen> isSign() {
+        return screen -> screen instanceof AbstractSignEditScreen;
+    }
+
+    static Predicate<Screen> hasPreviousScreen(ScreenType wanted) {
+        // Runs at match time, albeit whereof the to-be-computed entry hasnt been yet inserted to the screen,
+        // alas that the .current() screen for history is the previous to the one we're computing.
+        return screen -> ScreenManager.getInstance().current()
+                .map(ctx -> ctx.is(wanted))
+                .orElse(false);
+    }
+
     static Predicate<Screen> hasTitle(String fragment) {
         return screen -> Util.removeFormatting(screen.getTitle().getString()).contains(fragment);
+    }
+
+    static Predicate<Screen> hasSignLine(int line, String content) {
+        return screen -> screen instanceof AbstractSignEditScreen sign
+                && Util.removeFormatting(
+                ((AccessorSignEditScreen) sign).getMessages()[line]
+        ).equals(content);
     }
 
     static Predicate<Screen> hasItem(MinMaxBounds.Ints slotRange, Item... wanted) {
