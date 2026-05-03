@@ -84,6 +84,7 @@
   },
 
   "bazaarutils.keybind.stash_helper": "Stash Helper",
+  "bazaarutils.keybind.dimmed_expand": "Expand Dimmed Item",
 
   "bazaarutils.hypixel.{}": {
     "account_upgrades.bazaar_flipper.{}": {

@@ -20,5 +20,14 @@ public final class KeybindConfig {
             )
     );
 
+    public static final KeyMapping DIMMED_EXPAND = KeyBindingHelper.registerKeyBinding(
+            new KeyMapping(
+                    "bazaarutils.keybind.dimmed_expand",
+                    InputConstants.Type.KEYSYM,
+                    GLFW.GLFW_KEY_LEFT_ALT,
+                    CATEGORY
+            )
+    );
+
     private KeybindConfig() {}
 }
