@@ -24,7 +24,7 @@ public class BazaarSlots {
                 SlotLookup.IndexReference.fixed(47),
                 (query) -> query
                         .itemType(Items.CHEST)
-                        .withCustomName("Sell Inventory Now")
+                        .withCustomName("Sell Inventory Now", "Sell Essence Now")
                 )
         ),
 
@@ -112,7 +112,7 @@ public class BazaarSlots {
                         SlotLookup.IndexReference.negativeOffset(6),
                         (query) -> query
                                 .itemType(Items.CHEST)
-                                .withCustomName("Sell Inventory Now")
+                                .withCustomName("Sell Inventory Now", "Sell Essence Now")
                 )
         ),
 
