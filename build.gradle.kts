@@ -77,6 +77,7 @@ val lombokVersion = deps["lombok_version"]
 val mixinConstraintsVersion = deps["mixinconstraints_version"]
 val gsonExtrasVersion = deps["gson_extras_version"]
 val hypixelModApiVersion = deps["hypixel_mod_api_version"]
+val owoLibVersion = deps["owo_version"]
 group = property("maven_group")!!
 val versionNumber = property("mod_version").toString().trim()
 val releaseChannel = property("mod_release_channel").toString().trim().ifEmpty { "stable" }.lowercase()
@@ -148,6 +149,9 @@ dependencies {
     include("org.danilopianini:gson-extras:$gsonExtrasVersion")
     // Skyblocker for compatibility
     modCompileOnly("maven.modrinth:skyblocker-liap:v${deps["skyblocker_version"]}")
+
+    // Owo Lib for lang features
+    modImplementation("io.wispforest:owo-lib:${deps["owo_version"]}")
 }
 
 val buildtimeInjectionTask = tasks.register<com.github.mkram17.bazaarutils.build.BuildtimeInjectionTask>("processInitAnnotations") {
