@@ -80,6 +80,13 @@ public interface ScreenType extends Predicate<Screen> {
         };
     }
 
+    /** Some containers have their name built from a product/items' name, which if too long would be naturally truncated by Minecraft */
+    static Predicate<Screen> isTruncatedTitle() {
+        return screen -> Util.removeFormatting(
+                screen.getTitle().getString()
+        ).length() >= 30;
+    }
+
     static Predicate<Screen> hasSignLine(int line, String content) {
         return screen -> screen instanceof AbstractSignEditScreen sign
                 && Util.removeFormatting(

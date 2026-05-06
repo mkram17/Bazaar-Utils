@@ -1,10 +1,14 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui;
 
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import lombok.Getter;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
+import tech.thatgravyboat.skyblockapi.api.location.LocationAPI;
+
+import java.util.function.Predicate;
 
 public enum BazaarScreenType implements ScreenType {
 
@@ -20,7 +24,8 @@ public enum BazaarScreenType implements ScreenType {
      */
     CATALOG(true, ScreenType.named("CATALOG",
             ScreenType.isContainer()
-                    .and(ScreenType.hasTitle(" ➜ ", "➜ Inst"))
+                    .and(ScreenType.hasTitle(" ➜ ", "➜ Inst").or(ScreenType.isTruncatedTitle()))
+                    .and(inBazaarFlow())
             )
     ),
 
@@ -30,7 +35,8 @@ public enum BazaarScreenType implements ScreenType {
      */
     INSTANT_TRANSACTION(true, ScreenType.named("INSTANT_TRANSACTION",
             ScreenType.isContainer()
-                    .and(ScreenType.hasTitle("➜ Inst"))
+                    .and(ScreenType.hasTitle("➜ Inst").or(ScreenType.isTruncatedTitle()))
+                    .and(inBazaarFlow())
             )
     ),
 
@@ -118,21 +124,21 @@ public enum BazaarScreenType implements ScreenType {
     PRODUCT_PAGE(
             BazaarScreenType.CATALOG,
             ScreenType.named("PRODUCT_PAGE", ScreenType.isContainer())
-                    .and(ScreenType.hasTitle(" ➜ "))
+                    .and(ScreenType.hasTitle(" ➜ ").or(ScreenType.isTruncatedTitle()))
                     .and(ScreenType.hasSlot("VIEW_GRAPHS", BazaarSlots.PRODUCT_PAGE.VIEW_GRAPHS::query))
     ),
 
     PRODUCT_GRAPHS_PAGE(
             BazaarScreenType.CATALOG,
             ScreenType.named("PRODUCT_GRAPHS_PAGE", ScreenType.isContainer())
-                    .and(ScreenType.hasTitle(" ➜ Grap"))
+                    .and(ScreenType.hasTitle(" ➜ Grap").or(ScreenType.isTruncatedTitle()))
                     .and(ScreenType.hasSlot("INSTANT_SELL_MOVING_COINS_REPORT", BazaarSlots.GRAPHS_PAGE.INSTANT_SELL_MOVING_COINS_REPORT::query))
     ),
 
     INSTANT_BUY(
             BazaarScreenType.INSTANT_TRANSACTION,
             ScreenType.named("INSTANT_BUY", ScreenType.isContainer())
-                    .and(ScreenType.hasTitle("➜ Inst"))
+                    .and(ScreenType.hasTitle("➜ Inst").or(ScreenType.isTruncatedTitle()))
                     .and(ScreenType.hasSlot("INPUT_CUSTOM_AMOUNT", BazaarSlots.INSTANT_BUY.INPUT_CUSTOM_AMOUNT::query))
     ),
     INSTANT_BUY_CUSTOM_AMOUNT_INPUT(
@@ -145,7 +151,7 @@ public enum BazaarScreenType implements ScreenType {
     INSTANT_SELL(
             BazaarScreenType.INSTANT_TRANSACTION,
             ScreenType.named("INSTANT_SELL", ScreenType.isContainer())
-                    .and(ScreenType.hasTitle("➜ Inst"))
+                    .and(ScreenType.hasTitle("➜ Inst").or(ScreenType.isTruncatedTitle()))
                     .and(ScreenType.hasSlot("SELL_INVENTORY", BazaarSlots.INSTANT_SELL_PRODUCT.SELL_INVENTORY::query))
     ),
 
@@ -281,5 +287,12 @@ public enum BazaarScreenType implements ScreenType {
         for (BazaarScreenType type : values()) {
             ScreenManager.register(type);
         }
+    }
+
+    private static Predicate<Screen> inBazaarFlow() {
+        return screen -> ScreenManager.getInstance().current()
+                .flatMap(ScreenContext::type)
+                .map(it -> it instanceof BazaarScreenType)
+                .orElse(false);
     }
 }
