@@ -82,6 +82,9 @@ val mixinConstraintsVersion = deps["mixinconstraints_version"]
 val gsonExtrasVersion = deps["gson_extras_version"]
 val hypixelModApiVersion = deps["hypixel_mod_api_version"]
 val owoLibVersion = deps["owo_version"]
+val resourcefulConfigVersion = deps["resourcefulconfig_version"]
+val autoUpdateVersion = deps["autoupdate_version"]
+val skyblockerVersion = deps["skyblocker_version"]
 group = property("maven_group")!!
 val versionNumber = property("mod_version").toString().trim()
 val releaseChannel = property("mod_release_channel").toString().trim().ifEmpty { "stable" }.lowercase()
@@ -135,7 +138,7 @@ dependencies {
     include("commons-codec:commons-codec:$commonsCodecVersion")
 
     // Config lib and settings screen
-    modImplementation("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-${deps["resourcefulconfig_version"]}")
+    modImplementation("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-$resourcefulConfigVersion")
 
     modCompileOnly("com.terraformersmc:modmenu:$modMenuVersion")
 
@@ -152,14 +155,14 @@ dependencies {
     implementation("org.danilopianini:gson-extras:$gsonExtrasVersion")
     include("org.danilopianini:gson-extras:$gsonExtrasVersion")
     // Skyblocker for compatibility
-    modCompileOnly("maven.modrinth:skyblocker-liap:v${deps["skyblocker_version"]}")
+    modCompileOnly("maven.modrinth:skyblocker-liap:v$skyblockerVersion")
 
     // Owo Lib for lang features
-    modImplementation("io.wispforest:owo-lib:${deps["owo_version"]}")
+    modImplementation("io.wispforest:owo-lib:$owoLibVersion")
 
     // Auto Update Library
-    implementation("moe.nea:libautoupdate:1.3.1")
-    shadow("moe.nea:libautoupdate:1.3.1")
+    implementation("moe.nea:libautoupdate:$autoUpdateVersion")
+    shadow("moe.nea:libautoupdate:$autoUpdateVersion")
 }
 
 val buildtimeInjectionTask = tasks.register<com.github.mkram17.bazaarutils.build.BuildtimeInjectionTask>("processInitAnnotations") {
