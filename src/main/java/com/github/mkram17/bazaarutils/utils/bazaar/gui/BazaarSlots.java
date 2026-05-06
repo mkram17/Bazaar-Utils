@@ -44,7 +44,7 @@ public class BazaarSlots {
     }
 
     @AllArgsConstructor
-    public enum ITEM_PAGE {
+    public enum PRODUCT_PAGE {
         BUY_INSTANTLY(new BazaarSlot(
                 SlotLookup.IndexReference.fixed(10),
                 (query) -> query
@@ -123,7 +123,7 @@ public class BazaarSlots {
     }
 
     @AllArgsConstructor
-    public enum ITEMS_GROUP_PAGE {
+    public enum PRODUCTS_CATALOG_PAGE {
         SELL_INVENTORY(
                 new BazaarSlot(
                         SlotLookup.IndexReference.negativeOffset(6),
@@ -310,7 +310,7 @@ public class BazaarSlots {
     }
 
     @AllArgsConstructor
-    public enum INSTANT_SELL_ITEM {
+    public enum INSTANT_SELL_PRODUCT {
         SELL_INVENTORY(new BazaarSlot(
                 SlotLookup.IndexReference.fixed(15),
                 (query) -> query
@@ -335,7 +335,7 @@ public class BazaarSlots {
     }
 
     @AllArgsConstructor
-    public enum INSTANT_SELL_GROUP {
+    public enum INSTANT_SELL_CATALOG {
         CONFIRM_SELL(new BazaarSlot(
                 SlotLookup.IndexReference.fixed(11),
                 (query) -> query

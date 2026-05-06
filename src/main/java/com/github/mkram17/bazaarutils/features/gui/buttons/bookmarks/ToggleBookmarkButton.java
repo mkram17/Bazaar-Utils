@@ -38,7 +38,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
         return ItemRef.of(BookmarkUtil.currentBookmarkOpt::isEmpty, ItemGroups.BOOKMARKED_STATE_GROUP);
     }
 
-    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.ITEM_PAGE);
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.PRODUCT_PAGE);
 
     @Override
     public ScreenMatcher<BazaarScreenType> screenConstrains() {

@@ -48,7 +48,7 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
         return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.INSTANT_SELL);
     }
 
-    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE);
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
 
     @Override
     public ScreenMatcher<BazaarScreenType> screenConstrains() {
@@ -67,11 +67,11 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
 
         if (instantSellItem.isEmpty()) return Optional.empty();
 
-        List<OrderInfo> orders = context.is(BazaarScreenType.ITEM_PAGE)
-                ? InstantSellParser.parseItemPageOrder(instantSellItem.get().itemStack())
+        List<OrderInfo> orders = context.is(BazaarScreenType.PRODUCT_PAGE)
+                ? InstantSellParser.parseProductPageOrder(instantSellItem.get().itemStack())
                         .map(InstantSellParser.InstantSellResult::items)
                         .orElse(List.of())
-                : InstantSellParser.parseOrders(instantSellItem.get().itemStack())
+                : InstantSellParser.parseInstantSellOrders(instantSellItem.get().itemStack())
                         .items();
 
         List<RestrictionControl<?>> triggered = getRestrictors().stream()

@@ -137,13 +137,13 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             if (inputSign.isEmpty()) return Optional.empty();
 
             Optional<ItemInfo> productItem = ScreenManager.getInstance()
-                    .findBack(BazaarScreenType.ITEM_PAGE)
+                    .findBack(BazaarScreenType.PRODUCT_PAGE)
                     .flatMap(ProductPageLayout::getDisplayItem);
 
             if (productItem.isEmpty()) return Optional.empty();
 
             Optional<String> productId = ScreenManager.getInstance()
-                    .findBack(BazaarScreenType.ITEM_PAGE)
+                    .findBack(BazaarScreenType.PRODUCT_PAGE)
                     .flatMap(ProductPageLayout::getDisplayProductInfo);
 
             if (productId.isEmpty()) return Optional.empty();
@@ -293,7 +293,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         protected Optional<String> getItemProductId(ItemInfo inputSign) {
             return ScreenManager.getInstance()
-                    .findBack(BazaarScreenType.ITEM_PAGE)
+                    .findBack(BazaarScreenType.PRODUCT_PAGE)
                     .flatMap(ProductPageLayout::getDisplayProductInfo);
         }
 

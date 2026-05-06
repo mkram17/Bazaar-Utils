@@ -25,11 +25,11 @@ public final class SellablePageLayout {
         if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE))
             return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot);
 
-        if (context.is(BazaarScreenType.ITEM_PAGE))
-            return getSlot(context, BazaarSlots.ITEM_PAGE.SELL_INSTANTLY.slot);
+        if (context.is(BazaarScreenType.PRODUCT_PAGE))
+            return getSlot(context, BazaarSlots.PRODUCT_PAGE.SELL_INSTANTLY.slot);
 
-        if (context.is(BazaarScreenType.ITEMS_GROUP_PAGE))
-            return getSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_INVENTORY.slot);
+        if (context.is(BazaarScreenType.PRODUCTS_CATALOG_PAGE))
+            return getSlot(context, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_INVENTORY.slot);
 
         return Optional.empty();
     }
@@ -38,11 +38,11 @@ public final class SellablePageLayout {
         if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE))
             return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot);
 
-        if (context.is(BazaarScreenType.ITEM_PAGE))
-            return getSlot(context, BazaarSlots.ITEM_PAGE.SELL_SACKS.slot);
+        if (context.is(BazaarScreenType.PRODUCT_PAGE))
+            return getSlot(context, BazaarSlots.PRODUCT_PAGE.SELL_SACKS.slot);
 
-        if (context.is(BazaarScreenType.ITEMS_GROUP_PAGE))
-            return getSlot(context, BazaarSlots.ITEMS_GROUP_PAGE.SELL_SACKS.slot);
+        if (context.is(BazaarScreenType.PRODUCTS_CATALOG_PAGE))
+            return getSlot(context, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_SACKS.slot);
 
         return Optional.empty();
     }

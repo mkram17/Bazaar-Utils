@@ -75,7 +75,7 @@ public abstract class MixinAbstractContainerScreen extends Screen {
 	@Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItem(Lnet/minecraft/world/item/ItemStack;III)V"))
 	private void drawOnItem_InstantSellHighlight(GuiGraphics context, Slot slot, int x, int y, CallbackInfo ci) {
 		if (slot == null || !slot.hasItem() || !BazaarUtilsModules.InstantSellHighlight.isEnabled()
-				|| !ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE)) {
+				|| !ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE)) {
 			return;
 		}
 

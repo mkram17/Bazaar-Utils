@@ -15,7 +15,7 @@ public final class InstantSellParser {
 
     private InstantSellParser() {}
 
-    public static InstantSellResult parseOrders(ItemStack instantSellStack) {
+    public static InstantSellResult parseInstantSellOrders(ItemStack instantSellStack) {
         List<OrderInfo> items = LoreParser.lines(instantSellStack).stream()
                 .filter(line -> line.getSiblings().size() == 6)
                 .map(InstantSellParser::parseLine)
@@ -25,7 +25,7 @@ public final class InstantSellParser {
         return new InstantSellResult(items);
     }
 
-    public static Optional<InstantSellResult> parseItemPageOrder(ItemStack sellInstantlyStack) {
+    public static Optional<InstantSellResult> parseProductPageOrder(ItemStack sellInstantlyStack) {
         List<Component> lines = LoreParser.lines(sellInstantlyStack);
         if (lines.size() < 6) return Optional.empty();
 

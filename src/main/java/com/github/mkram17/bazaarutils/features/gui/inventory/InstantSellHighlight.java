@@ -65,7 +65,7 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
         return colorCache.get(slotIndex);
     }
 
-    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE);
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
 
     @Override
     public ScreenMatcher<BazaarScreenType> screenConstrains() {
@@ -109,12 +109,12 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
     private static List<OrderInfo> resolveOrders(ScreenContext context) {
         var instantSellItem = SellablePageLayout.getInstantSellItem(context).map(ItemInfo::itemStack);
 
-        if (context.is(BazaarScreenType.ITEM_PAGE))
-            return instantSellItem.flatMap(InstantSellParser::parseItemPageOrder)
+        if (context.is(BazaarScreenType.PRODUCT_PAGE))
+            return instantSellItem.flatMap(InstantSellParser::parseProductPageOrder)
                     .map(InstantSellParser.InstantSellResult::items)
                     .orElse(List.of());
 
-        return instantSellItem.map(InstantSellParser::parseOrders)
+        return instantSellItem.map(InstantSellParser::parseInstantSellOrders)
                 .map(InstantSellParser.InstantSellResult::items)
                 .orElse(List.of());
     }

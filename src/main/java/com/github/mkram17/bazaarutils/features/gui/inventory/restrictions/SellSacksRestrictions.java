@@ -47,7 +47,7 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
         return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.SELL_SACKS);
     }
 
-    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE);
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
 
     @Override
     public ScreenMatcher<BazaarScreenType> screenConstrains() {
@@ -66,7 +66,7 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
 
         if (sellSacksItem.isEmpty()) return Optional.empty();
 
-        SellSacksParser.SellSacksResult result = SellSacksParser.parseOrders(sellSacksItem.get().itemStack());
+        SellSacksParser.SellSacksResult result = SellSacksParser.parseSackOrders(sellSacksItem.get().itemStack());
 
         Set<RestrictionControl<?>> triggered = new LinkedHashSet<>(getRestrictors().stream()
                 .filter(control -> control.anyMatch(result.items()))
