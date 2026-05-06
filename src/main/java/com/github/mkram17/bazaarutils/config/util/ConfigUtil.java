@@ -29,7 +29,7 @@ public class ConfigUtil {
     private static boolean configSaveScheduled = false;
 
     public static Screen createGUI(Screen parent) {
-        return ResourcefulConfigScreen.make(BazaarUtils.config)
+        return ResourcefulConfigScreen.make(BazaarUtils.CONFIG)
                 .withParent(parent)
                 .build();
     }

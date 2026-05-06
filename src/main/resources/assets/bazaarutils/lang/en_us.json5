@@ -403,6 +403,15 @@
       }
     },
 
+    "advanced.{}": {
+      "category.label": "Advanced Settings",
+      "category.hint": "Advanced configurations for routines & features of the mod",
+      "auto_update.{}": {
+        "label": "Auto Update",
+        "hint": "Automatically update the mod when an update is found."
+      }
+    },
+
     "developer.{}": {
       "category.label": "Developer Config",
       "category.hint": "Developer configurations & toggleable tools of the mod",

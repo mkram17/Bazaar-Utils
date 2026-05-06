@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     java
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
+    id("com.gradleup.shadow") version "9.2.2"
 }
 
 base {
@@ -33,6 +34,9 @@ repositories {
     }
     maven("https://maven.fabricmc.net/") {
         name = "FabricMC"
+    }
+    maven("https://repo.nea.moe/releases"){
+        name = "Nea Repo for Auto Update"
     }
 
     exclusiveContent {
@@ -78,6 +82,9 @@ val mixinConstraintsVersion = deps["mixinconstraints_version"]
 val gsonExtrasVersion = deps["gson_extras_version"]
 val hypixelModApiVersion = deps["hypixel_mod_api_version"]
 val owoLibVersion = deps["owo_version"]
+val resourcefulConfigVersion = deps["resourcefulconfig_version"]
+val autoUpdateVersion = deps["autoupdate_version"]
+val skyblockerVersion = deps["skyblocker_version"]
 group = property("maven_group")!!
 val versionNumber = property("mod_version").toString().trim()
 val releaseChannel = property("mod_release_channel").toString().trim().ifEmpty { "stable" }.lowercase()
@@ -131,7 +138,7 @@ dependencies {
     include("commons-codec:commons-codec:$commonsCodecVersion")
 
     // Config lib and settings screen
-    modImplementation("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-${deps["resourcefulconfig_version"]}")
+    modImplementation("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-$resourcefulConfigVersion")
 
     modCompileOnly("com.terraformersmc:modmenu:$modMenuVersion")
 
@@ -148,10 +155,14 @@ dependencies {
     implementation("org.danilopianini:gson-extras:$gsonExtrasVersion")
     include("org.danilopianini:gson-extras:$gsonExtrasVersion")
     // Skyblocker for compatibility
-    modCompileOnly("maven.modrinth:skyblocker-liap:v${deps["skyblocker_version"]}")
+    modCompileOnly("maven.modrinth:skyblocker-liap:v$skyblockerVersion")
 
     // Owo Lib for lang features
-    modImplementation("io.wispforest:owo-lib:${deps["owo_version"]}")
+    modImplementation("io.wispforest:owo-lib:$owoLibVersion")
+
+    // Auto Update Library
+    implementation("moe.nea:libautoupdate:$autoUpdateVersion")
+    shadow("moe.nea:libautoupdate:$autoUpdateVersion")
 }
 
 val buildtimeInjectionTask = tasks.register<com.github.mkram17.bazaarutils.build.BuildtimeInjectionTask>("processInitAnnotations") {
@@ -183,7 +194,7 @@ tasks {
     processResources {
         inputs.property("version", project.version)
         inputs.property("mcVersion", mcVersion)
-        inputs.property("major_update_notes", rootProject.property("major_update_notes") as String)
+        inputs.property("minor_update_notes", rootProject.property("minor_update_notes") as String)
 
         filesMatching("fabric.mod.json") {
             expand(mapOf(
@@ -191,7 +202,7 @@ tasks {
                 "mod_version" to rootProject.property("mod_version"),
                 "mcVersion" to mcVersion,
                 "maxMcVersion" to maxMcVersion,
-                "major_update_notes" to rootProject.property("major_update_notes")
+                "minor_update_notes" to rootProject.property("minor_update_notes")
             ))
         }
     }
@@ -200,6 +211,14 @@ tasks {
         from("LICENSE"){
             rename { "${it}_${archiveBaseName.get()}" }
         }
+    }
+
+    shadowJar {
+        configurations = listOf(project.configurations.shadow.get())
+    }
+    remapJar {
+        dependsOn(shadowJar)
+        inputFile.set(shadowJar.get().archiveFile)
     }
 }
 loom {

@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.config;
 
+import com.github.mkram17.bazaarutils.config.features.AdvancedConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
@@ -23,6 +24,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
                 InventoryConfig.class,
                 OverlaysConfig.class,
                 NotificationsConfig.class,
+                AdvancedConfig.class,
                 DeveloperConfig.class
         },
         version = ConfigUtil.VERSION
