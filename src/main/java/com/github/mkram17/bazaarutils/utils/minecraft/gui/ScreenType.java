@@ -55,8 +55,18 @@ public interface ScreenType extends Predicate<Screen> {
                 .orElse(false);
     }
 
-    static Predicate<Screen> hasTitle(String fragment) {
-        return screen -> Util.removeFormatting(screen.getTitle().getString()).contains(fragment);
+    static Predicate<Screen> hasTitle(String fragment, String... exclude) {
+        return screen -> {
+            String title = Util.removeFormatting(screen.getTitle().getString());
+
+            if (!title.contains(fragment)) return false;
+
+            for (String excluded : exclude) {
+                if (title.contains(excluded)) return false;
+            }
+
+            return true;
+        };
     }
 
     static Predicate<Screen> hasSignLine(int line, String content) {
