@@ -106,6 +106,23 @@ public class BazaarSlots {
     }
 
     @AllArgsConstructor
+    public enum GRAPHS_PAGE {
+        INSTANT_SELL_MOVING_COINS_REPORT(new BazaarSlot(
+                SlotLookup.IndexReference.fixed(16),
+                (query) -> query
+                        .itemType(Items.PAPER)
+                        .withCustomName("Instant Sell Moving Coins")
+            )
+        );
+
+        public final BazaarSlot slot;
+
+        public ContainerQuery query(Container container) {
+            return slot.query(container);
+        }
+    }
+
+    @AllArgsConstructor
     public enum ITEMS_GROUP_PAGE {
         SELL_INVENTORY(
                 new BazaarSlot(

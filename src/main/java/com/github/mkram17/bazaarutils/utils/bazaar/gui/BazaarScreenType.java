@@ -37,6 +37,12 @@ public enum BazaarScreenType implements ScreenType {
                     .and(ScreenType.hasSlot("VIEW_GRAPHS", BazaarSlots.ITEM_PAGE.VIEW_GRAPHS::query))
     ),
 
+    GRAPHS_PAGE(
+            ScreenType.named("GRAPHS_PAGE", ScreenType.isContainer())
+                    .and(ScreenType.hasTitle(" ➜ Grap"))
+                    .and(ScreenType.hasSlot("INSTANT_SELL_MOVING_COINS_REPORT", BazaarSlots.GRAPHS_PAGE.INSTANT_SELL_MOVING_COINS_REPORT::query))
+    ),
+
     ITEMS_GROUP_PAGE(
             ScreenType.named("ITEMS_GROUP_PAGE", ScreenType.isContainer())
                     .and(ScreenType.hasTitle(" ➜ "))
