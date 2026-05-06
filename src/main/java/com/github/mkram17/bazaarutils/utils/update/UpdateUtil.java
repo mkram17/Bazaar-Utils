@@ -11,8 +11,6 @@ import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.fabricmc.loader.api.metadata.version.VersionComparisonOperator;
-import net.fabricmc.loader.api.metadata.version.VersionPredicate;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -54,12 +52,11 @@ public final class UpdateUtil {
     }
 
     /**
-     * Detects a minor version bump using Fabric's VersionPredicate API.
-     * Strategy: parse both versions, extract the old major and minor numbers, then build
-     * a VersionPredicate ">= <oldMajor>.<oldMinor+1>.0" and test the new version against it.
+     * Checks if the new version is a major or minor upgrade compared to the old version.
+     * This ignores patch updates and pre-release suffixes.
      */
     private static boolean isMinorVersionChanged(String oldRaw, String newRaw) {
-        if (oldRaw == null || oldRaw.isBlank()) return false;
+        if (oldRaw == null || oldRaw.isBlank() || newRaw == null || newRaw.isBlank()) return false;
 
         try {
             Version oldVersion = Version.parse(stripLeadingV(oldRaw));
@@ -72,11 +69,10 @@ public final class UpdateUtil {
             int oldMajor = oldSemantic.getVersionComponent(0);
             int oldMinor = oldSemantic.getVersionComponent(1);
 
-            // Build predicate: ">= <oldMajor>.<oldMinor+1>.0"
-            String predicateStr = VersionComparisonOperator.GREATER_EQUAL.getSerialized() + oldMajor + "." + (oldMinor + 1) + ".0";
-            VersionPredicate nextMinorBoundary = VersionPredicate.parse(predicateStr);
+            int newMajor = newSemantic.getVersionComponent(0);
+            int newMinor = newSemantic.getVersionComponent(1);
 
-            return nextMinorBoundary.test(newSemantic);
+            return newMinor > oldMinor || newMajor > oldMajor;
         } catch (Exception exception) {
             Util.logMessage("Could not compare versions '%s' and '%s': %s".formatted(oldRaw, newRaw, exception.getMessage()));
 
