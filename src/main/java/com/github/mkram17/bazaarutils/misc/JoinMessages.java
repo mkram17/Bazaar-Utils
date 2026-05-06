@@ -33,8 +33,8 @@ public final class JoinMessages extends BUListener {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             if (MetadataConfig.IS_FIRST_LOAD) {
                 sendFirstLoadMessages();
-            } else if (MetadataConfig.UPDATED_MINOR_VERSION) {
-                sendMinorUpdateMessages();
+            } else if (MetadataConfig.SIGNIFICANT_VERSION_UPGRADE) {
+                sendSignificantUpdateMessages();
             }
         });
     }
@@ -47,11 +47,11 @@ public final class JoinMessages extends BUListener {
         ConfigUtil.scheduleConfigSave();
     }
 
-    private void sendMinorUpdateMessages() {
+    private void sendSignificantUpdateMessages() {
         Util.tickExecuteLater(40, () -> PlayerActionUtil.notifyAll(updateMessage));
         Util.tickExecuteLater(41, () -> PlayerActionUtil.notifyAll(Util.CHANGELOG));
 
-        MetadataConfig.UPDATED_MINOR_VERSION = false;
+        MetadataConfig.SIGNIFICANT_VERSION_UPGRADE = false;
         ConfigUtil.scheduleConfigSave();
     }
 }

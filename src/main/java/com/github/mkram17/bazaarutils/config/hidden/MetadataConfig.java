@@ -19,9 +19,10 @@ public final class MetadataConfig {
     @ConfigOption.Hidden
     public static boolean IS_FIRST_LOAD = true;
 
-    @ConfigEntry(id = "updated_minor_version")
+    // Whether the mod has been updated with a new significant version (major or minor bump) since the last load, which can be used to trigger update-related notifications or changelogs.
+    @ConfigEntry(id = "significant_version_upgrade")
     @ConfigOption.Hidden
-    public static boolean UPDATED_MINOR_VERSION = false;
+    public static boolean SIGNIFICANT_VERSION_UPGRADE = false;
 
     @ConfigEntry(id = "update_notes")
     @ConfigOption.Hidden

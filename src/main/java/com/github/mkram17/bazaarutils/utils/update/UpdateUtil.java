@@ -44,8 +44,8 @@ public final class UpdateUtil {
         String currentVersion = metadata.getVersion().getFriendlyString();
         MetadataConfig.MOD_VERSION = currentVersion;
 
-        if (isMinorVersionChanged(oldVersion, currentVersion)) {
-            MetadataConfig.UPDATED_MINOR_VERSION = true;
+        if (isMajorOrMinorUpgrade(oldVersion, currentVersion)) {
+            MetadataConfig.SIGNIFICANT_VERSION_UPGRADE = true;
         }
 
         ConfigUtil.scheduleConfigSave();
@@ -55,7 +55,7 @@ public final class UpdateUtil {
      * Checks if the new version is a major or minor upgrade compared to the old version.
      * This ignores patch updates and pre-release suffixes.
      */
-    private static boolean isMinorVersionChanged(String oldRaw, String newRaw) {
+    private static boolean isMajorOrMinorUpgrade(String oldRaw, String newRaw) {
         if (oldRaw == null || oldRaw.isBlank() || newRaw == null || newRaw.isBlank()) return false;
 
         try {
