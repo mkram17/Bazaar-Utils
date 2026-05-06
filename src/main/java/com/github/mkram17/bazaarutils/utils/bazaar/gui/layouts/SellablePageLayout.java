@@ -22,7 +22,7 @@ public final class SellablePageLayout {
     private SellablePageLayout() {}
 
     public static Optional<ItemInfo> getInstantSellItem(@NotNull ScreenContext context) {
-        if (context.is(BazaarScreenType.MAIN_PAGE))
+        if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE))
             return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot);
 
         if (context.is(BazaarScreenType.ITEM_PAGE))
@@ -35,7 +35,7 @@ public final class SellablePageLayout {
     }
 
     public static Optional<ItemInfo> getSellSacksItem(@NotNull ScreenContext context) {
-        if (context.is(BazaarScreenType.MAIN_PAGE))
+        if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE))
             return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot);
 
         if (context.is(BazaarScreenType.ITEM_PAGE))

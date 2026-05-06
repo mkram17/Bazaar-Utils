@@ -16,6 +16,11 @@ public enum BazaarScreenType implements ScreenType {
                     .and(ScreenType.hasSignLine(3, "Enter query"))
     ),
 
+    SEARCH_PAGE(
+            ScreenType.named("SEARCH_PAGE", ScreenType.isContainer())
+                    .and(ScreenType.hasTitle("Bazaar ➜ \""))
+    ),
+
     SETTINGS_PAGE(
             ScreenType.named("SETTINGS_PAGE", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("Bazaar ➜ Settings"))

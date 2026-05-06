@@ -48,7 +48,7 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
         return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.INSTANT_SELL);
     }
 
-    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE);
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.ITEMS_GROUP_PAGE, BazaarScreenType.ITEM_PAGE);
 
     @Override
     public ScreenMatcher<BazaarScreenType> screenConstrains() {
