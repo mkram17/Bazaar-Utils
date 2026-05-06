@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import moe.nea.libautoupdate.*;
 import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.fabricmc.loader.api.metadata.version.VersionComparisonOperator;
@@ -64,14 +65,18 @@ public final class UpdateUtil {
             Version oldVersion = Version.parse(stripLeadingV(oldRaw));
             Version newVersion = Version.parse(stripLeadingV(newRaw));
 
-            int oldMajor = extractMajor(oldVersion);
-            int oldMinor = extractMinor(oldVersion);
+            if (!(oldVersion instanceof SemanticVersion oldSemantic && newVersion instanceof SemanticVersion newSemantic)) {
+                return false;
+            }
+
+            int oldMajor = oldSemantic.getVersionComponent(0);
+            int oldMinor = oldSemantic.getVersionComponent(1);
 
             // Build predicate: ">= <oldMajor>.<oldMinor+1>.0"
             String predicateStr = VersionComparisonOperator.GREATER_EQUAL.getSerialized() + oldMajor + "." + (oldMinor + 1) + ".0";
             VersionPredicate nextMinorBoundary = VersionPredicate.parse(predicateStr);
 
-            return nextMinorBoundary.test(newVersion);
+            return nextMinorBoundary.test(newSemantic);
         } catch (Exception exception) {
             Util.logMessage("Could not compare versions '%s' and '%s': %s".formatted(oldRaw, newRaw, exception.getMessage()));
 
@@ -114,24 +119,6 @@ public final class UpdateUtil {
                     });
 
         }, BazaarUtils.BUExecutorService);
-    }
-
-    private static int extractMajor(Version version) {
-        String[] parts = version.getFriendlyString().split("[.\\-+]", 2);
-        try {
-            return Integer.parseInt(parts[0]);
-        } catch (NumberFormatException exception) {
-            return 0;
-        }
-    }
-
-    private static int extractMinor(Version version) {
-        String[] parts = version.getFriendlyString().split("[.\\-+]", 3);
-        try {
-            return parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-        } catch (NumberFormatException exception) {
-            return 0;
-        }
     }
 
     private static String stripLeadingV(String version) {
