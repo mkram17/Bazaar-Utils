@@ -19,6 +19,17 @@ import java.util.function.Predicate;
 public interface ScreenType extends Predicate<Screen> {
     String name();
 
+    /**
+     * Returns true if this type semantically covers {@code other}.
+     *
+     * <p>The default is identity: a type covers only itself. Subtypes that
+     * represent a structural group (e.g. an eager {@code BazaarScreenType})
+     * can override to cover all concrete members of that group.
+     */
+    default boolean includes(ScreenType other) {
+        return this == other;
+    }
+
     static ScreenType named(String name, Predicate<Screen> test) {
         return new ScreenType() {
             public String name() {

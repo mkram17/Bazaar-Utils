@@ -48,13 +48,20 @@ public class ScreenManager {
     }
 
     public static Optional<ScreenType> matchType(Screen screen) {
+        ScreenType fallback = null;
+
         for (ScreenType type : types) {
             try {
-                if (type.test(screen)) return Optional.of(type);
-            } catch (Exception ignored) {
-            }
+                if (!type.test(screen)) continue;
+                if (type instanceof BazaarScreenType bst && bst.isEager()) {
+                    if (fallback == null) fallback = type;
+                } else {
+                    return Optional.of(type);
+                }
+            } catch (Exception ignored) {}
         }
-        return Optional.empty();
+
+        return Optional.ofNullable(fallback);
     }
 
     public record ScreenSnapshot(Screen screen, ScreenType type) {}
@@ -118,6 +125,8 @@ public class ScreenManager {
 
         AbstractContainerScreen<ChestMenu> screen = event.getScreen();
         ScreenType resolved = event.getType().orElse(null);
+
+        if (resolved instanceof BazaarScreenType bst && bst.isEager()) resolved = null;
 
         List<ScreenSnapshot> list = instance.getHistorySnapshot();
 
@@ -192,11 +201,10 @@ public class ScreenManager {
         if (it.hasNext()) it.next();
 
         while (it.hasNext()) {
-            ScreenSnapshot snap = it.next();
-            if (snap.type() != null) {
-                for (ScreenType w : wanted) {
-                    if (snap.type() == w) return Optional.of(new ScreenContext(snap));
-                }
+            ScreenContext ctx = new ScreenContext(it.next());
+
+            for (ScreenType w : wanted) {
+                if (ctx.is(w)) return Optional.of(ctx);
             }
         }
 

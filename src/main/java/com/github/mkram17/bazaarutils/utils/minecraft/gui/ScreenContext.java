@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,9 @@ public final class ScreenContext {
     }
 
     public boolean is(@NotNull ScreenType wanted) {
-        return type == wanted;
+        if (type == null) return false;
+
+        return wanted.includes(type);
     }
 
     public <T extends AbstractContainerScreen<?>> Optional<T> as(Class<T> type) {
@@ -47,14 +50,10 @@ public final class ScreenContext {
     }
 
     public boolean isAnyOf(ScreenType... wanted) {
-        if (type == null) {
-            return false;
-        }
+        if (type == null) return false;
 
-        for (ScreenType type : wanted) {
-            if (type == this.type) {
-                return true;
-            }
+        for (ScreenType w : wanted) {
+            if (is(w)) return true; // delegate to is() for hierarchy
         }
 
         return false;
