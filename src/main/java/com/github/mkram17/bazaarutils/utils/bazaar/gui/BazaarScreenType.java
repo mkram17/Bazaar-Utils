@@ -269,6 +269,8 @@ public enum BazaarScreenType implements ScreenType {
 
     @Override
     public boolean test(Screen screen) {
+        if (!LocationAPI.INSTANCE.isOnSkyBlock()) return false;
+
         return delegate.test(screen);
     }
 
