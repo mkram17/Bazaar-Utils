@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TaxContext;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
@@ -168,20 +169,23 @@ public final class InstantSellParser {
     }
 
     private static void reconcileTax(double observedPercent) {
+        double normalizedTax = TaxContext.normalizeObserved(observedPercent);
+
         for (PlayerAccountUpgrades.BazaarFlipper tier : PlayerAccountUpgrades.BazaarFlipper.values()) {
-            if (Math.round(tier.getUserBazaarTax() * 10) == Math.round(observedPercent * 10)) {
+            if (Math.round(tier.getUserBazaarTax() * 10) == Math.round(normalizedTax * 10)) {
                 if (BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE != tier) {
-                    Util.logMessage("reconcileTax: %s → %s (observed %.4g%%)".formatted(BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE, tier, observedPercent));
+                    Util.logMessage("reconcileTax: %s → %s (observed %.4g%%%s)".formatted(BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE, tier, observedPercent, TaxContext.isQuadTaxes() ? " [quad taxes /4 → " + normalizedTax + "%]" : ""));
 
                     BUConfig.USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE = tier;
                     ConfigUtil.scheduleConfigSave();
 
                     PlayerActionUtil.notifyAll("Bazaar Flipper tier auto-detected as %s from observed tax; saved to your configuration file.".formatted(tier.name()));
                 }
+
                 return;
             }
         }
 
-        Util.logMessage("reconcileTax: observed %.4g%% matches no BazaarFlipper tier — ignoring".formatted(observedPercent));
+        Util.logMessage("reconcileTax: observed %.4g%% (normalized %.4g%%) matches no BazaarFlipper tier — ignoring".formatted(observedPercent, normalizedTax));
     }
 }
