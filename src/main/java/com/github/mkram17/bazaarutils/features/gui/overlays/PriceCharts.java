@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.features.gui.overlays;
 
-import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
+import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.utils.*;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
@@ -31,7 +31,7 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
 
     @Override
     public boolean isEnabled() {
-        return OverlaysConfig.PRICE_CHARTS_TOGGLE;
+        return InventoryConfig.PRICE_CHARTS_TOGGLE;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
 
     @Override
     public boolean appliesToScreen(@Nullable ScreenContext context) {
-        return OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR || LoreModifier.super.appliesToScreen(context);
+        return InventoryConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR || LoreModifier.super.appliesToScreen(context);
     }
 
     public final EnumSet<ModifierSource> MODIFIER_SOURCES = EnumSet.of(ModifierSource.CONTAINER, ModifierSource.PLAYER_INVENTORY, ModifierSource.HOTBAR);

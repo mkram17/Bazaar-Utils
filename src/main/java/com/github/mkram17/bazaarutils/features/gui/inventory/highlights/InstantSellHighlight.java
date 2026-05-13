@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.features.gui.inventory;
+package com.github.mkram17.bazaarutils.features.gui.inventory.highlights;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.data.SellableAPI;
@@ -17,12 +17,12 @@ import java.util.*;
 public class InstantSellHighlight implements SlotHighlight {
     @Override
     public boolean isEnabled() {
-        return InventoryConfig.INSTANT_SELL_HIGHLIGHT_TOGGLE;
+        return InventoryConfig.Highlights.INSTANT_SELL_HIGHLIGHT_TOGGLE;
     }
 
     @Override
     public HighlightStyle getHighlightStyle() {
-        return InventoryConfig.INSTANT_SELL_HIGHLIGHT_STYLE;
+        return InventoryConfig.Highlights.INSTANT_SELL_HIGHLIGHT_STYLE;
     }
 
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
@@ -52,6 +52,6 @@ public class InstantSellHighlight implements SlotHighlight {
 
     @Override
     public Optional<Integer> highlightColor(ItemStack stack, @Nullable Slot slot) {
-        return Optional.of(InventoryConfig.INSTANT_SELL_HIGHLIGHT_COLOR);
+        return Optional.of(InventoryConfig.Highlights.INSTANT_SELL_HIGHLIGHT_COLOR);
     }
 }

@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.config.features.gui;
 
 import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
-import com.github.mkram17.bazaarutils.features.gui.overlays.PriceCharts;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 
 @Category(value = "overlays_config")
@@ -13,28 +12,6 @@ import com.teamresourceful.resourcefulconfig.api.annotations.*;
         icon = "sidebar"
 )
 public class OverlaysConfig {
-
-    @ConfigEntry(
-            id = "price_charts",
-            translation = "bazaarutils.config.overlays.price_charts.label"
-    )
-    @Comment(
-            value = "Injects a link to every Bazaar Items' tooltip to quick access relevant market charts.",
-            translation = "bazaarutils.config.overlays.price_charts.hint"
-    )
-    @ConfigOption.Separator(value = "bazaarutils.config.overlays.separator.price_charts.label")
-    public static boolean PRICE_CHARTS_TOGGLE = false;
-
-    @ConfigEntry(
-            id = "price_charts:show_outside_bazaar",
-            translation = "bazaarutils.config.overlays.price_charts.show_outside_bazaar.label"
-    )
-    @Comment(
-            value = "Whether to render the charts on items when outside of a Bazaar screen.",
-            translation = "bazaarutils.config.overlays.price_charts.show_outside_bazaar.hint"
-    )
-    public static boolean PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR = true;
-
     @ConfigEntry(
             id = "bazaar_limits_visualizer",
             translation = "bazaarutils.config.overlays.bazaar_limits_visualizer.label"

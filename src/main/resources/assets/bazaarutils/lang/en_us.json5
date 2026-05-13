@@ -357,55 +357,69 @@
         "hint": "When on the Bazaar, dims items in your inventory that cannot be traded on the Bazaar."
       },
 
+      "separator.price_charts.label": "Price Charts",
+      "price_charts.{}": {
+        "label": "Price Charts",
+        "hint": "Adds a link to Bazaar item tooltips for quick access to market price charts.",
+        "show_outside_bazaar.{}": {
+          "label": "Show Outside of Bazaar",
+          "hint": "Whether to show price charts in tooltips when outside of a Bazaar menu."
+        }
+      },
+
       "separator.summary_order_indicator.label": "Order Indicator on Summaries",
       "summary_order_indicator.{}": {
         "label": "Order Indicator on Summaries",
         "hint": "When hovering over the summary of a products' price, inject information about your current bids/asks next to where they sit at."
       },
 
-      "separator.instant_sell_highlight.label": "Instant Sell Highlight",
-      "instant_sell_highlight.{}": {
-        "label": "Instant Sell Highlight",
-        "hint": "Highlights items in your inventory that would be sold by the Instant Sell button.",
-        "style.{}": {
-          "label": "Highlight Style",
-          "hint": "Determines how the highlight color is rendered on matching inventory slots."
-        },
-        "color.label": "Highlight Color"
-      },
+      "highlights.{}": {
+        "category.label": "Inventory Highlights",
 
-      "separator.order_status_highlight.label": "Order Status Highlight",
-      "order_status_highlight.{}": {
-        "label": "Order Status Highlight",
-        "hint": "Highlights the status of your Bazaar Orders by coloring the items with representative colors.",
-        "style.{}": {
-          "label": "Highlight Style",
-          "hint": "Determines how the status colors are rendered on your order slots."
+        "separator.instant_sell_highlight.label": "Instant Sell Highlight",
+        "instant_sell_highlight.{}": {
+          "label": "Instant Sell Highlight",
+          "hint": "Highlights items in your inventory that would be sold by the Instant Sell button.",
+          "style.{}": {
+            "label": "Highlight Style",
+            "hint": "Determines how the highlight color is rendered on matching inventory slots."
+          },
+          "color.label": "Highlight Color"
         },
 
-        "self_outbid.{}": {
-          "label": "Self Outbid",
-          "hint": "By default, your own volume at a price level doesn't count against you — so a spot you hold alone still shows as COMPETITIVE. Enable this if you'd rather any shared price level report MATCHED regardless of who owns the volume."
-        },
+        "separator.order_status_highlight.label": "Order Status Highlight",
+        "order_status_highlight.{}": {
+          "label": "Order Status Highlight",
+          "hint": "Highlights the status of your Bazaar Orders by coloring the items with representative colors.",
+          "style.{}": {
+            "label": "Highlight Style",
+            "hint": "Determines how the status colors are rendered on your order slots."
+          },
 
-        "filled_color.{}": {
-          "label": "Filled Color",
-          "hint": "The color to highlight orders which have been fully filled and are awaiting claim."
-        },
+          "self_outbid.{}": {
+            "label": "Self Outbid",
+            "hint": "By default, your own volume at a price level doesn't count against you — so a spot you hold alone still shows as COMPETITIVE. Enable this if you'd rather any shared price level report MATCHED regardless of who owns the volume."
+          },
 
-        "competitive_color.{}": {
-          "label": "Competitive Color",
-          "hint": "The highlight color for orders that are currently the best market offer."
-        },
+          "filled_color.{}": {
+            "label": "Filled Color",
+            "hint": "The color to highlight orders which have been fully filled and are awaiting claim."
+          },
 
-        "matched_color.{}": {
-          "label": "Matched Color",
-          "hint": "The highlight color for orders that match the current market price."
-        },
+          "competitive_color.{}": {
+            "label": "Competitive Color",
+            "hint": "The highlight color for orders that are currently the best market offer."
+          },
 
-        "outbid_color.{}": {
-          "label": "Outbid Color",
-          "hint": "The highlight color for orders that have been outbid."
+          "matched_color.{}": {
+            "label": "Matched Color",
+            "hint": "The highlight color for orders that match the current market price."
+          },
+
+          "outbid_color.{}": {
+            "label": "Outbid Color",
+            "hint": "The highlight color for orders that have been outbid."
+          }
         }
       },
 
@@ -481,16 +495,6 @@
     "overlays.{}": {
       "category.label": "Overlays",
       "category.hint": "Configurations for the overlays created by the mod",
-
-      "separator.price_charts.label": "Price Charts",
-      "price_charts.{}": {
-        "label": "Price Charts",
-        "hint": "Adds a link to Bazaar item tooltips for quick access to market price charts.",
-        "show_outside_bazaar.{}": {
-          "label": "Show Outside of Bazaar",
-          "hint": "Whether to show price charts in tooltips when outside of a Bazaar menu."
-        }
-      },
 
       "separator.bazaar_limits_visualizer.label": "Bazaar Limits",
       "bazaar_limits_visualizer.{}": {

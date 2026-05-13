@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.features.gui.inventory;
+package com.github.mkram17.bazaarutils.features.gui.inventory.highlights;
 
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
@@ -41,12 +41,12 @@ public class OrderStatusHighlight implements LoreModifier, SlotHighlight {
 
     @Override
     public boolean isEnabled() {
-        return InventoryConfig.ORDER_STATUS_HIGHLIGHT_TOGGLE;
+        return InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_TOGGLE;
     }
 
     @Override
     public HighlightStyle getHighlightStyle() {
-        return InventoryConfig.ORDER_STATUS_HIGHLIGHT_STYLE;
+        return InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_STYLE;
     }
 
     public final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.ORDERS_PAGE);
@@ -99,14 +99,14 @@ public class OrderStatusHighlight implements LoreModifier, SlotHighlight {
             merger.copy();
 
             switch (highlight) {
-                case HighlightState.FilledAwaitingClaim ignored -> merger.add(styledText("FILLED", InventoryConfig.ORDER_STATUS_HIGHLIGHT_FILLED_COLOR, true));
+                case HighlightState.FilledAwaitingClaim ignored -> merger.add(styledText("FILLED", InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_FILLED_COLOR, true));
                 case HighlightState.Position position -> {
                     switch (position.position()) {
-                        case COMPETITIVE -> merger.add(styledText("COMPETITIVE", InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR, true));
-                        case MATCHED -> merger.add(styledText("MATCHED", InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR, true));
+                        case COMPETITIVE -> merger.add(styledText("COMPETITIVE", InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR, true));
+                        case MATCHED -> merger.add(styledText("MATCHED", InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR, true));
                         case OUTBID -> {
-                            merger.add(styledText("OUTBID", InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, true));
-                            PriceInfo.marketPrice(order.productId(), transaction).ifPresent(price -> merger.add(styledText("Market Price: " + Util.getPrettyString(price), InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, false)));
+                            merger.add(styledText("OUTBID", InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, true));
+                            PriceInfo.marketPrice(order.productId(), transaction).ifPresent(price -> merger.add(styledText("Market Price: " + Util.getPrettyString(price), InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR, false)));
                         }
                     }
                 }
@@ -132,8 +132,8 @@ public class OrderStatusHighlight implements LoreModifier, SlotHighlight {
 
         return switch (order.status()) {
             case OrderStatus.Filled ignored -> Optional.of(new HighlightState.FilledAwaitingClaim());
-            case OrderStatus.Set ignored -> order.position(storage, InventoryConfig.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(HighlightState.Position::new);
-            case OrderStatus.Partial ignored -> order.position(storage, InventoryConfig.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(HighlightState.Position::new);
+            case OrderStatus.Set ignored -> order.position(storage, InventoryConfig.Highlights.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(HighlightState.Position::new);
+            case OrderStatus.Partial ignored -> order.position(storage, InventoryConfig.Highlights.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(HighlightState.Position::new);
             default -> Optional.empty();
         };
     }
@@ -159,11 +159,11 @@ public class OrderStatusHighlight implements LoreModifier, SlotHighlight {
     private static int colorFor(HighlightState state) {
         return switch (state) {
             case HighlightState.Position position -> switch (position.position()) {
-                case COMPETITIVE -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR;
-                case MATCHED -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR;
-                case OUTBID -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR;
+                case COMPETITIVE -> InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_COMPETITIVE_COLOR;
+                case MATCHED -> InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_MATCHED_COLOR;
+                case OUTBID -> InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR;
             };
-            case HighlightState.FilledAwaitingClaim ignored -> InventoryConfig.ORDER_STATUS_HIGHLIGHT_FILLED_COLOR;
+            case HighlightState.FilledAwaitingClaim ignored -> InventoryConfig.Highlights.ORDER_STATUS_HIGHLIGHT_FILLED_COLOR;
         };
     }
 
