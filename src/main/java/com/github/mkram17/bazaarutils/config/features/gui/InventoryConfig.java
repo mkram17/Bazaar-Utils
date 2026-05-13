@@ -41,6 +41,17 @@ public final class InventoryConfig {
     public static boolean DIM_NON_BAZAAR_ITEMS_TOGGLE = true;
 
     @ConfigEntry(
+            id = "summary_order_indicator",
+            translation = "bazaarutils.config.inventory.summary_order_indicator.label"
+    )
+    @Comment(
+            value = "When hovering over the summary of a products' price, inject information about your current bids/asks next to where they sit at.",
+            translation = "bazaarutils.config.inventory.summary_order_indicator.hint"
+    )
+    @ConfigOption.Separator(value = "bazaarutils.config.inventory.separator.summary_order_indicator.label")
+    public static boolean SUMMARY_ORDER_INDICATOR_TOGGLE = true;
+
+    @ConfigEntry(
             id = "instant_sell_highlight",
             translation = "bazaarutils.config.inventory.instant_sell_highlight.label"
     )

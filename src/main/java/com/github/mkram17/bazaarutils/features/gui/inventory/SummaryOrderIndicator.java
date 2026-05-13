@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory;
 
+import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.data.HandledOrderAPI;
 import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.Result;
@@ -37,7 +38,7 @@ import java.util.concurrent.ExecutionException;
 public class SummaryOrderIndicator implements LoreModifier {
     @Override
     public boolean isEnabled() {
-        return true;
+        return InventoryConfig.SUMMARY_ORDER_INDICATOR_TOGGLE;
     }
 
     @Override
