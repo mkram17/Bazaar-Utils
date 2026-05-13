@@ -357,6 +357,12 @@
         "hint": "When on the Bazaar, dims items in your inventory that cannot be traded on the Bazaar."
       },
 
+      "separator.summary_order_indicator.label": "Order Indicator on Summaries",
+      "summary_order_indicator.{}": {
+        "label": "Order Indicator on Summaries",
+        "hint": "When hovering over the summary of a products' price, inject information about your current bids/asks next to where they sit at."
+      },
+
       "separator.instant_sell_highlight.label": "Instant Sell Highlight",
       "instant_sell_highlight.{}": {
         "label": "Instant Sell Highlight",
