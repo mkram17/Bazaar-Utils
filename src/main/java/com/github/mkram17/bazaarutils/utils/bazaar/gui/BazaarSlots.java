@@ -227,6 +227,7 @@ public class BazaarSlots {
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Price")
+                        .withLore("Buy Order Setup")
                 )
         ),
 
@@ -292,6 +293,7 @@ public class BazaarSlots {
                 (query) -> query
                         .itemType(Items.OAK_SIGN)
                         .withCustomName("Custom Price")
+                        .withLore("Sell Offer Setup")
                 )
         ),
 
