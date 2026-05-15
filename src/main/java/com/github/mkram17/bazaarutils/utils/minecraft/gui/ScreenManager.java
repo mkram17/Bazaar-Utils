@@ -66,9 +66,7 @@ public class ScreenManager {
 
     public record ScreenSnapshot(Screen screen, ScreenType type) {}
 
-    private static final int MAX_HISTORY = 8;
-
-    private final ArrayDeque<ScreenSnapshot> history = new ArrayDeque<>(MAX_HISTORY);
+    private final ScreenHistory history = new ScreenHistory();
 
     /**
      * True immediately after a screen closes that is known to cause the server to
@@ -128,13 +126,11 @@ public class ScreenManager {
 
         if (resolved instanceof BazaarScreenType bst && bst.isEager()) resolved = null;
 
-        List<ScreenSnapshot> list = instance.getHistorySnapshot();
+        for (int i = 0; i < instance.history.size(); i++) {
+            ScreenManager.ScreenSnapshot snap = instance.history.get(i);
 
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).screen() == screen) {
-                list.set(i, new ScreenSnapshot(screen, resolved));
-                instance.history.clear();
-                instance.history.addAll(list);
+            if (snap != null && snap.screen() == screen) {
+                instance.history.set(i, new ScreenSnapshot(screen, resolved));
                 instance.logHistory("LOADED");
                 return;
             }
@@ -146,31 +142,23 @@ public class ScreenManager {
 
         ScreenSnapshot snapshot = new ScreenSnapshot(screen, matchType(screen).orElse(null));
 
-        ScreenSnapshot head = history.peekFirst();
         // ScreenEvents.AFTER_INIT fires after setScreen — same screen instance arriving twice is a no-op
         // we no longer check for a RETYPE op as the cases were we fall to that are generally ones where
         // we depend on off ContainerQuery, and that solely is handled by #onContainerLoaded
-        if (head != null && head.screen() == screen) return;
+        if (history.peek() != null && history.peek().screen() == screen) return;
 
-        if (history.size() >= MAX_HISTORY) history.removeLast();
-        history.addFirst(snapshot);
+        history.push(snapshot);
         logHistory("PUSH");
     }
 
     private void logHistory(String trigger) {
         if (!NotificationType.GUI.isEnabled()) return;
 
-        StringJoiner breadcrumb = new StringJoiner(" › ");
-
-        for (ScreenSnapshot snap : history) {
-            breadcrumb.add(snap.type() != null ? snap.type().name() : "???");
-        }
-
-        PlayerActionUtil.notifyAll("[" + trigger.strip() + "] " + breadcrumb, NotificationType.GUI);
+        PlayerActionUtil.notifyAll("[" + trigger.strip() + "] " + history.toBreadcrumb(), NotificationType.GUI);
     }
 
     public Optional<ScreenContext> current() {
-        return Optional.ofNullable(history.peekFirst()).map(ScreenContext::new);
+        return Optional.ofNullable(history.peek()).map(ScreenContext::new);
     }
 
     public @Nullable ScreenContext currentOrNull() {
@@ -180,28 +168,16 @@ public class ScreenManager {
     public Optional<ScreenContext> getAtDepth(int depth) {
         if (depth < 0 || depth >= history.size()) return Optional.empty();
 
-        Iterator<ScreenSnapshot> it = history.iterator();
-        ScreenSnapshot target = null;
-
-        for (int i = 0; i <= depth; i++) {
-            if (!it.hasNext()) return Optional.empty();
-            target = it.next();
-        }
-
-        return Optional.ofNullable(target).map(ScreenContext::new);
+        return Optional.ofNullable(history.get(depth)).map(ScreenContext::new);
     }
 
     public Optional<ScreenContext> previous() {
         return getAtDepth(1);
     }
-    
+
     public Optional<ScreenContext> findBack(ScreenType... wanted) {
-        Iterator<ScreenSnapshot> it = history.iterator();
-
-        if (it.hasNext()) it.next();
-
-        while (it.hasNext()) {
-            ScreenContext ctx = new ScreenContext(it.next());
+        for (int i = 1; i < history.size(); i++) {
+            ScreenContext ctx = new ScreenContext(history.get(i));
 
             for (ScreenType w : wanted) {
                 if (ctx.is(w)) return Optional.of(ctx);
@@ -212,7 +188,11 @@ public class ScreenManager {
     }
 
     public List<ScreenSnapshot> getHistorySnapshot() {
-        return new ArrayList<>(history);
+        List<ScreenSnapshot> list = new ArrayList<>(history.size());
+
+        for (int i = 0; i < history.size(); i++) list.add(history.get(i));
+
+        return list;
     }
 
     public boolean isCurrent(ScreenType... wanted) {
