@@ -64,8 +64,6 @@ public class ScreenManager {
         return Optional.ofNullable(fallback);
     }
 
-    public record ScreenSnapshot(Screen screen, ScreenType type) {}
-
     private final ScreenHistory history = new ScreenHistory();
 
     /**
@@ -127,10 +125,10 @@ public class ScreenManager {
         if (resolved instanceof BazaarScreenType bst && bst.isEager()) resolved = null;
 
         for (int i = 0; i < instance.history.size(); i++) {
-            ScreenManager.ScreenSnapshot snap = instance.history.get(i);
+            ScreenContext ctx = instance.history.get(i);
 
-            if (snap != null && snap.screen() == screen) {
-                instance.history.set(i, new ScreenSnapshot(screen, resolved));
+            if (ctx != null && ctx.screen() == screen) {
+                instance.history.set(i, new ScreenContext(screen, resolved));
                 instance.logHistory("LOADED");
                 return;
             }
@@ -140,14 +138,14 @@ public class ScreenManager {
     public void setCurrentScreen(Screen screen) {
         if (screen == null) return;
 
-        ScreenSnapshot snapshot = new ScreenSnapshot(screen, matchType(screen).orElse(null));
+        ScreenContext context = new ScreenContext(screen, matchType(screen).orElse(null));
 
         // ScreenEvents.AFTER_INIT fires after setScreen — same screen instance arriving twice is a no-op
         // we no longer check for a RETYPE op as the cases were we fall to that are generally ones where
         // we depend on off ContainerQuery, and that solely is handled by #onContainerLoaded
         if (history.peek() != null && history.peek().screen() == screen) return;
 
-        history.push(snapshot);
+        history.push(context);
         logHistory("PUSH");
     }
 
@@ -158,7 +156,7 @@ public class ScreenManager {
     }
 
     public Optional<ScreenContext> current() {
-        return Optional.ofNullable(history.peek()).map(ScreenContext::new);
+        return Optional.ofNullable(history.peek());
     }
 
     public @Nullable ScreenContext currentOrNull() {
@@ -168,7 +166,7 @@ public class ScreenManager {
     public Optional<ScreenContext> getAtDepth(int depth) {
         if (depth < 0 || depth >= history.size()) return Optional.empty();
 
-        return Optional.ofNullable(history.get(depth)).map(ScreenContext::new);
+        return Optional.ofNullable(history.get(depth));
     }
 
     public Optional<ScreenContext> previous() {
@@ -177,7 +175,8 @@ public class ScreenManager {
 
     public Optional<ScreenContext> findBack(ScreenType... wanted) {
         for (int i = 1; i < history.size(); i++) {
-            ScreenContext ctx = new ScreenContext(history.get(i));
+            ScreenContext ctx = history.get(i);
+            if (ctx == null) continue;
 
             for (ScreenType w : wanted) {
                 if (ctx.is(w)) return Optional.of(ctx);
@@ -187,8 +186,8 @@ public class ScreenManager {
         return Optional.empty();
     }
 
-    public List<ScreenSnapshot> getHistorySnapshot() {
-        List<ScreenSnapshot> list = new ArrayList<>(history.size());
+    public List<ScreenContext> getHistorySnapshot() {
+        List<ScreenContext> list = new ArrayList<>(history.size());
 
         for (int i = 0; i < history.size(); i++) list.add(history.get(i));
 

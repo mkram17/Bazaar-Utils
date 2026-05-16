@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.jetbrains.annotations.NotNull;
@@ -12,11 +11,6 @@ public final class ScreenContext {
     private final Screen screen;
 
     private final ScreenType type;
-
-    public ScreenContext(ScreenManager.ScreenSnapshot snapshot) {
-        this.screen = snapshot.screen();
-        this.type = snapshot.type();
-    }
 
     public ScreenContext(Screen screen, @Nullable ScreenType type) {
         this.screen = screen;
