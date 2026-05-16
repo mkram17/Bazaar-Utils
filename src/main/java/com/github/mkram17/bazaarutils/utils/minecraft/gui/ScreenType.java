@@ -6,7 +6,6 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQue
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
-import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.Item;
@@ -120,9 +119,5 @@ public interface ScreenType extends Predicate<Screen> {
         return screen -> screen instanceof AbstractContainerScreen<?> container
                 && container.getMenu() instanceof ChestMenu chest
                 && query.apply(chest.getContainer()).first(chest.getContainer()).isPresent();
-    }
-
-    static Predicate<Screen> hasSlot(String label, Function<Container, ContainerQuery> query) {
-        return hasSlot(query);
     }
 }

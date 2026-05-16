@@ -102,14 +102,14 @@ public enum BazaarScreenType implements ScreenType {
             BazaarScreenType.INSTANT_SELL_PRODUCT_CONFIRMATION_PAGE,
             ScreenType.named("INSTANT_SELL_PRODUCT_CONFIRMATION", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("Confirm"))
-                    .and(ScreenType.hasSlot("CONFIRM_SELL", BazaarSlots.INSTANT_SELL_PRODUCT.CONFIRM_SELL::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.INSTANT_SELL_PRODUCT.CONFIRM_SELL::query))
     ),
 
     INSTANT_SELL_CATALOG_CONFIRMATION(
             BazaarScreenType.INSTANT_SELL_CATALOG_CONFIRMATION_PAGE,
             ScreenType.named("INSTANT_SELL_CATALOG_CONFIRMATION", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("Are you sure?"))
-                    .and(ScreenType.hasSlot("CONFIRM_SELL", BazaarSlots.INSTANT_SELL_CATALOG.CONFIRM_SELL::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.INSTANT_SELL_CATALOG.CONFIRM_SELL::query))
     ),
 
     // ── Catalog & product navigation ─────────────────────────────────────────────
@@ -118,28 +118,28 @@ public enum BazaarScreenType implements ScreenType {
             BazaarScreenType.CATALOG,
             ScreenType.named("PRODUCTS_CATALOG_PAGE", ScreenType.isContainer())
                     .and(ScreenType.hasTitle(" ➜ "))
-                    .and(ScreenType.hasSlot("SWITCH_VIEW_MODE", BazaarSlots.PRODUCTS_CATALOG_PAGE.SWITCH_VIEW_MODE::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.PRODUCTS_CATALOG_PAGE.SWITCH_VIEW_MODE::query))
     ),
 
     PRODUCT_PAGE(
             BazaarScreenType.CATALOG,
             ScreenType.named("PRODUCT_PAGE", ScreenType.isContainer())
                     .and(ScreenType.hasTitle(" ➜ ").or(ScreenType.isTruncatedTitle()))
-                    .and(ScreenType.hasSlot("VIEW_GRAPHS", BazaarSlots.PRODUCT_PAGE.VIEW_GRAPHS::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.PRODUCT_PAGE.VIEW_GRAPHS::query))
     ),
 
     PRODUCT_GRAPHS_PAGE(
             BazaarScreenType.CATALOG,
             ScreenType.named("PRODUCT_GRAPHS_PAGE", ScreenType.isContainer())
                     .and(ScreenType.hasTitle(" ➜ Grap").or(ScreenType.isTruncatedTitle()))
-                    .and(ScreenType.hasSlot("INSTANT_SELL_MOVING_COINS_REPORT", BazaarSlots.GRAPHS_PAGE.INSTANT_SELL_MOVING_COINS_REPORT::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.GRAPHS_PAGE.INSTANT_SELL_MOVING_COINS_REPORT::query))
     ),
 
     INSTANT_BUY(
             BazaarScreenType.INSTANT_TRANSACTION,
             ScreenType.named("INSTANT_BUY", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("➜ Inst").or(ScreenType.isTruncatedTitle()))
-                    .and(ScreenType.hasSlot("INPUT_CUSTOM_AMOUNT", BazaarSlots.INSTANT_BUY.INPUT_CUSTOM_AMOUNT::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.INSTANT_BUY.INPUT_CUSTOM_AMOUNT::query))
     ),
     INSTANT_BUY_CUSTOM_AMOUNT_INPUT(
             ScreenType.named("INSTANT_BUY_CUSTOM_AMOUNT_INPUT", ScreenType.isSign())
@@ -152,7 +152,7 @@ public enum BazaarScreenType implements ScreenType {
             BazaarScreenType.INSTANT_TRANSACTION,
             ScreenType.named("INSTANT_SELL", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("➜ Inst").or(ScreenType.isTruncatedTitle()))
-                    .and(ScreenType.hasSlot("SELL_INVENTORY", BazaarSlots.INSTANT_SELL_PRODUCT.SELL_INVENTORY::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.INSTANT_SELL_PRODUCT.SELL_INVENTORY::query))
     ),
 
     // ── Buy order flow ────────────────────────────────────────────────────────────
@@ -221,23 +221,23 @@ public enum BazaarScreenType implements ScreenType {
             BazaarScreenType.ORDER_OPTIONS,
             ScreenType.named("SELL_OFFER_OPTIONS", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("Order options"))
-                    .and(ScreenType.hasSlot("CANCEL_SELL_OFFER", BazaarSlots.ORDER_OPTIONS.CANCEL_SELL_OFFER::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.ORDER_OPTIONS.CANCEL_SELL_OFFER::query))
     ),
 
     PENDING_BUY_ORDER_OPTIONS(
             BazaarScreenType.ORDER_OPTIONS,
             ScreenType.named("PENDING_BUY_ORDER_OPTIONS", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("Order options"))
-                    .and(ScreenType.hasSlot("FLIP_UNFILLED_BUY_ORDER", BazaarSlots.ORDER_OPTIONS.FLIP_UNFILLED_BUY_ORDER::query))
-                    .and(ScreenType.hasSlot("CANCEL_UNFILLED_BUY_ORDER", BazaarSlots.ORDER_OPTIONS.CANCEL_UNFILLED_BUY_ORDER::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.ORDER_OPTIONS.FLIP_UNFILLED_BUY_ORDER::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.ORDER_OPTIONS.CANCEL_UNFILLED_BUY_ORDER::query))
     ),
 
     COMPLETED_BUY_ORDER_OPTIONS(
             BazaarScreenType.ORDER_OPTIONS,
             ScreenType.named("COMPLETED_BUY_ORDER_OPTIONS", ScreenType.isContainer())
                     .and(ScreenType.hasTitle("Order options"))
-                    .and(ScreenType.hasSlot("FLIP_FILLED_BUY_ORDER", BazaarSlots.ORDER_OPTIONS.FLIP_FILLED_BUY_ORDER::query))
-                    .and(ScreenType.hasSlot("CANCEL_FILLED_BUY_ORDER", BazaarSlots.ORDER_OPTIONS.CANCEL_FILLED_BUY_ORDER::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.ORDER_OPTIONS.FLIP_FILLED_BUY_ORDER::query))
+                    .and(ScreenType.hasSlot(BazaarSlots.ORDER_OPTIONS.CANCEL_FILLED_BUY_ORDER::query))
     ),
     COMPLETED_BUY_ORDER_FLIP_PRICE_INPUT(
             ScreenType.named("COMPLETED_BUY_ORDER_FLIP_PRICE_INPUT", ScreenType.isSign())
