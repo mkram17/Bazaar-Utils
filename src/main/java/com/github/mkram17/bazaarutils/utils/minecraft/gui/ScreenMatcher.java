@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +36,7 @@ public final class ScreenMatcher<T extends Enum<T> & ScreenType>
     private final Class<T> enumClass;
     private final EnumSet<T> included;
     private final EnumSet<T> excluded;
+    @Getter
     private final boolean anyMode;
 
     private ScreenMatcher(Class<T> enumClass, EnumSet<T> included, EnumSet<T> excluded, boolean anyMode) {
@@ -108,10 +110,6 @@ public final class ScreenMatcher<T extends Enum<T> & ScreenType>
     /** Defensive copy. Empty when {@link #isAnyMode()}. */
     public EnumSet<T> excludesAsEnumSet() {
         return excluded.isEmpty() ? EnumSet.noneOf(enumClass) : EnumSet.copyOf(excluded);
-    }
-
-    public boolean isAnyMode() {
-        return anyMode;
     }
 
     @Override
