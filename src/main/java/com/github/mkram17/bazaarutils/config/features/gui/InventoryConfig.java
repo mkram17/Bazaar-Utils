@@ -244,7 +244,30 @@ public final class InventoryConfig {
                 value = "Rules checking numeric conditions (e.g., total items or coins) to restrict targeted actions.",
                 translation = "bazaarutils.config.inventory.restrictions.numeric_restrictions.hint"
         )
-        public static final List<DoubleRestrictionControl> RESTRICTIONS_NUMERIC_RULES = new ArrayList<>(List.of((new DoubleRestrictionControl(NumericRestrictBy.PRICE, 0))));
+        public static final List<DoubleRestrictionControl> RESTRICTIONS_NUMERIC_RULES = new ArrayList<>(List.of(
+                new DoubleRestrictionControl(
+                        NumericRestrictBy.PRICE,
+                        1_000_000,
+                        new RestrictionTarget[] {
+                                RestrictionTarget.INSTANT_SELL,
+                                RestrictionTarget.SELL_SACKS
+                        }
+                ),
+                new DoubleRestrictionControl(
+                        NumericRestrictBy.PRICE,
+                        67_676_676,
+                        new RestrictionTarget[] {
+                                RestrictionTarget.BUY_ORDER
+                        }
+                ),
+                new DoubleRestrictionControl(
+                        NumericRestrictBy.PRICE,
+                        10_000_000,
+                        new RestrictionTarget[] {
+                                RestrictionTarget.SELL_OFFER
+                        }
+                )
+        ));
 
         @ConfigEntry(
                 id = "string_restrictions",
