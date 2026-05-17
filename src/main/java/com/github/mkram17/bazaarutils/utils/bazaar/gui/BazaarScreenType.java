@@ -57,7 +57,7 @@ public enum BazaarScreenType implements ScreenType {
     INSTANT_SELL_PRODUCT_CONFIRMATION_PAGE(true, ScreenType.named("INSTANT_SELL_PRODUCT_CONFIRMATION_PAGE",
             ScreenType.isContainer()
                     .and(ScreenType.hasTitle("Confirm"))
-                    .and(ScreenType.hasPreviousScreen(CATALOG))
+                    .and(ScreenType.hasPreviousScreen(CATALOG).or(ScreenType.hasPreviousScreen(INSTANT_TRANSACTION)))
             )
     ),
 
