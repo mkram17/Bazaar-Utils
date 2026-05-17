@@ -45,18 +45,16 @@ public final class DoubleRestrictionControl implements RestrictionControl<Numeri
             value = "The features for which this rule is enabled",
             translation = "bazaarutils.config.inventory.restrictions.control.targets.hint"
     )
-    public RestrictionTarget[] targets = new RestrictionTarget[] {
-            RestrictionTarget.INSTANT_SELL,
-            RestrictionTarget.SELL_SACKS
-    };
+    public RestrictionTarget[] targets;
 
-    public DoubleRestrictionControl(NumericRestrictBy rule, double amount) {
+    public DoubleRestrictionControl(NumericRestrictBy rule, double amount, RestrictionTarget[] targets) {
         this.rule = rule;
         this.amount = amount;
+        this.targets = targets;
     }
 
     public DoubleRestrictionControl() {
-        this(NumericRestrictBy.PRICE, 0);
+        this(NumericRestrictBy.PRICE, 0, new RestrictionTarget[]{});
     }
 
     @Override

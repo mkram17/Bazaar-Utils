@@ -32,19 +32,17 @@ public final class StringRestrictionControl implements RestrictionControl<String
             value = "The features for which this rule is active",
             translation = "bazaarutils.config.inventory.restrictions.control.targets.hint"
     )
-    public RestrictionTarget[] targets = new RestrictionTarget[] {
-            RestrictionTarget.INSTANT_SELL,
-            RestrictionTarget.SELL_SACKS
-    };
+    public RestrictionTarget[] targets;
 
     private StringRestrictBy rule = StringRestrictBy.NAME;
 
-    public StringRestrictionControl(String name) {
+    public StringRestrictionControl(String name, RestrictionTarget[] targets) {
         this.name = name;
+        this.targets = targets;
     }
 
     public StringRestrictionControl() {
-        this("");
+        this("", new RestrictionTarget[]{});
     }
 
     @Override
