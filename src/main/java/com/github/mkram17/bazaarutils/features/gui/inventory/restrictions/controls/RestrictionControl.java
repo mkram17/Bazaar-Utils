@@ -26,6 +26,8 @@ public sealed interface RestrictionControl<T extends Enum<T>> extends Restrictor
             String pretty = switch (targets[i]) {
                 case INSTANT_SELL -> "Instant Sell";
                 case SELL_SACKS -> "Sell Sacks";
+                case BUY_ORDER -> "Buy Order";
+                case SELL_OFFER -> "Sell Offer";
             };
 
             builder.append(pretty);

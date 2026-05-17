@@ -442,6 +442,8 @@
           "target.{}": {
             "instant_sell.label": "Instant Sell",
             "sell_sacks.label": "Sell Sacks",
+            "buy_order.label": "Buy Order",
+            "sell_offer.label": "Sell Offer"
           }
         },
 

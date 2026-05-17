@@ -214,6 +214,8 @@ public final class InventoryConfig {
         public static RestrictionTarget[] RESTRICTIONS_ENABLED_FEATURES = new RestrictionTarget[]{
                 RestrictionTarget.INSTANT_SELL,
                 RestrictionTarget.SELL_SACKS,
+                RestrictionTarget.BUY_ORDER,
+                RestrictionTarget.SELL_OFFER
         };
 
         @ConfigEntry(
