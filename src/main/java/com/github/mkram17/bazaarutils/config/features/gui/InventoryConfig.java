@@ -211,7 +211,10 @@ public final class InventoryConfig {
                 value = "The inventory buttons for which restrictions are enabled.",
                 translation = "bazaarutils.config.inventory.restrictions.features.hint"
         )
-        public static RestrictionTarget[] RESTRICTIONS_ENABLED_FEATURES = new RestrictionTarget[]{};
+        public static RestrictionTarget[] RESTRICTIONS_ENABLED_FEATURES = new RestrictionTarget[]{
+                RestrictionTarget.INSTANT_SELL,
+                RestrictionTarget.SELL_SACKS,
+        };
 
         @ConfigEntry(
                 id = "clicks_required",
