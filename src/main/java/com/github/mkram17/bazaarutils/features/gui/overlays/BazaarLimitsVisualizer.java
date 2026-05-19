@@ -6,45 +6,26 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
-import com.github.mkram17.bazaarutils.utils.codecs.ZonedDateTimeCodec;
-import com.github.mkram17.bazaarutils.data.stored.BazaarLimitsStorage;
+import com.github.mkram17.bazaarutils.data.bazaar.activity.BazaarActivityFold;
+import com.github.mkram17.bazaarutils.data.bazaar.activity.BazaarActivityRecord;
+import com.github.mkram17.bazaarutils.data.stored.BazaarActivityStorage;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
-import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.TextDisplayWidget;
 import com.github.mkram17.bazaarutils.utils.TimeUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 
 @Module
 public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeature {
     private static final double COIN_LIMIT = 15_000_000_000d;
-
-    public record OrderLimitEntry(double price, ZonedDateTime time) {
-        public static final Codec<OrderLimitEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.DOUBLE.fieldOf("price").forGetter(OrderLimitEntry::price),
-                ZonedDateTimeCodec.CODEC.fieldOf("time").forGetter(OrderLimitEntry::time)
-        ).apply(instance, OrderLimitEntry::new));
-    }
-
-    public static void saveLimits() {
-        BazaarLimitsStorage.INSTANCE.save();
-    }
-
-    public static List<OrderLimitEntry> limits() {
-        return BazaarLimitsStorage.INSTANCE.get();
-    }
 
     @Override
     public boolean isEnabled() {
@@ -53,42 +34,30 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
 
     public BazaarLimitsVisualizer() {}
 
-    @RunOnInit
-    public static void registerBazaarOpen() {
-        ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
-            if (!ScreenManager.getInstance().isCurrent(BazaarScreenType.values())) {
-                return;
-            }
+    private static final BazaarActivityFold<Double> ORDER_VALUE = BazaarActivityFold.filtering(
+            record -> record instanceof BazaarActivityRecord.BuyOrderActivity
+                    || record instanceof BazaarActivityRecord.SellOfferActivity
+                    || record instanceof BazaarActivityRecord.FlipSellActivity,
+            BazaarActivityFold.summingDouble(record -> switch (record) {
+                case BazaarActivityRecord.BuyOrderActivity buy   -> buy.pricePerItem() * buy.originalAmount();
+                case BazaarActivityRecord.SellOfferActivity sell -> sell.pricePerItem() * sell.originalAmount();
+                case BazaarActivityRecord.FlipSellActivity flip  -> flip.pricePerItem() * flip.originalAmount();
+                default -> 0d;
+            }));
 
-            BazaarLimitsVisualizer.removeOldEntries();
-        });
-    }
+    private static final BazaarActivityFold<Double> INSTANT_VALUE = BazaarActivityFold.filtering(
+            record -> record instanceof BazaarActivityRecord.InstantBuy
+                    || record instanceof BazaarActivityRecord.InstantSell,
+            BazaarActivityFold.summingDouble(record -> switch (record) {
+                case BazaarActivityRecord.InstantBuy buy   -> buy.pricePerUnit() * buy.volume();
+                case BazaarActivityRecord.InstantSell sell -> sell.pricePerUnit() * sell.volume();
+                default -> 0d;
+            }));
 
-    public static void addOrderToLimit(double price) {
-        if (price > Integer.MAX_VALUE) {
-            price = Integer.MAX_VALUE;
-        }
-
-        limits().add(new OrderLimitEntry(price, ZonedDateTime.now()));
-
-        saveLimits();
-    }
-
-    public static void removeOldEntries() {
-        limits()
-                .stream()
-                .filter((entry) -> entry.time().isBefore(TimeUtil.LAST_BAZAAR_LIMIT_RESET_TIME))
-                .toList()
-                .forEach(limits()::remove);
-
-        saveLimits();
-    }
+    private static final BazaarActivityFold<Double> TOTAL_LIMIT_VALUE = BazaarActivityFold.teeing(ORDER_VALUE, INSTANT_VALUE, Double::sum);
 
     private static double getTotalOrderedCoins() {
-        return limits()
-                .stream()
-                .mapToDouble(OrderLimitEntry::price)
-                .sum();
+        return BazaarActivityStorage.foldToday(TOTAL_LIMIT_VALUE);
     }
 
     private static final int TEXT_HEIGHT = 8;

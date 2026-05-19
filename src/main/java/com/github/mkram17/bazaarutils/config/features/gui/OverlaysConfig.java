@@ -26,13 +26,4 @@ public class OverlaysConfig {
     )
     @ConfigOption.Separator(value = "bazaarutils.config.overlays.separator.bazaar_limits_visualizer.label")
     public static boolean BAZAAR_LIMITS_VISUALIZER_TOGGLE = true;
-
-    @ConfigButton(
-            text = "bazaarutils.config.overlays.bazaar_limits_visualizer.reset_limits.runnable",
-            title = "bazaarutils.config.overlays.bazaar_limits_visualizer.reset_limits.label"
-    )
-    public static final Runnable RESET_LIMITS_BUTTON = () -> {
-        BazaarLimitsVisualizer.limits().clear();
-        BazaarLimitsVisualizer.saveLimits();
-    };
 }
