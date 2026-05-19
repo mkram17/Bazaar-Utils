@@ -99,4 +99,29 @@ public final class BUConfig {
             translation = "bazaarutils.config.modify_indicator.hint"
     )
     public static ModifyIndicator MODIFY_INDICATOR = ModifyIndicator.AT_MODIFICATION;
+
+    @ConfigEntry(id = "data_policy_separator")
+    @ConfigOption.Hidden
+    @ConfigOption.Separator(value = "bazaarutils.config.separator.data_policy.label")
+    public static boolean DATA_POLICY_SEPARATOR = true;
+
+    @ConfigEntry(
+            id = "activity_retention_days",
+            translation = "bazaarutils.config.activity_retention_days.label"
+    )
+    @Comment(
+            value = """
+                    How many days of Bazaar activity to retain. Minimum is 2 days.
+                    
+                    Retained records are used by the Limits Visualizer and any enabled or consumed integrations.
+                    Records older than this window are subject to be permanently dropped.
+                    """,
+            translation = "bazaarutils.config.activity_retention_days.hint"
+    )
+    @ConfigOption.Range(min = 2, max = 356)
+    public static int ACTIVITY_RETENTION_DAYS = 2;
+
+    public static long activityRetentionMs() {
+        return Math.max(2, ACTIVITY_RETENTION_DAYS) * 24L * 60L * 60L * 1000L;
+    }
 }

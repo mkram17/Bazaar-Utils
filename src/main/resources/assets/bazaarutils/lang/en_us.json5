@@ -149,6 +149,17 @@
       "disabled.label": "No indicator"
     },
 
+    "separator.data_policy.label": "Data Policy",
+
+    "activity_retention_days.{}": {
+      "label": "Bazaar Activity Retention",
+      "hint": [
+        "How many days of Bazaar activity to retain. Minimum is 2 Days.\n\n",
+        "Retained records are used by the Limits Visualizer and any enabled or consumed integrations.\n",
+        "Records older than this window are subject to be permanently dropped."
+      ]
+    },
+
     "highlight.{}": {
       "style.{}": {
         "background.label": "Background Fill",
