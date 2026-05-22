@@ -134,7 +134,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
 
     @Override
     protected Component getButtonItemText(TransactionState state) {
-        return Component.nullToEmpty("Offer " + getButtonItemStackSize(state) + " items.");
+        return Component.nullToEmpty("Purchase " + getButtonItemStackSize(state) + " items.");
     }
 
     @Override
