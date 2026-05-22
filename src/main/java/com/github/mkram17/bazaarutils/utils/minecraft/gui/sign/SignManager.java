@@ -12,22 +12,37 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class SignManager {
+    private static final AtomicBoolean listenerPending = new AtomicBoolean(false);
+
     public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
-        BazaarUtils.EVENT_BUS.register(new Object() {
+        if (!listenerPending.compareAndSet(false, true)) return;
+
+        Object listener = new Object() {
             @Subscription(priority = Priority.FIRST)
             private void onSignOpen(SignOpenEvent event) {
                 try {
                     action.accept(event);
                 } finally {
+                    listenerPending.set(false);
                     BazaarUtils.EVENT_BUS.unregister(this);
                 }
             }
-        });
+
+            @Subscription(priority = Priority.FIRST)
+            private void onContainerClosed(ContainerCloseEvent event) {
+                listenerPending.set(false);
+                BazaarUtils.EVENT_BUS.unregister(this);
+            }
+        };
+
+        BazaarUtils.EVENT_BUS.register(listener);
     }
 
     public static void setSignText(String text, boolean closeAfter) {
