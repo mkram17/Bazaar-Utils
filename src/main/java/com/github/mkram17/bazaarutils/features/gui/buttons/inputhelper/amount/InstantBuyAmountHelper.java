@@ -3,10 +3,14 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
+import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
@@ -17,7 +21,10 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Getter
@@ -98,6 +105,20 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
     @Override
     protected int computeFixedValue(TransactionState state) {
         return getFixedAmount();
+    }
+
+    @Override
+    protected int computeMaxValue(TransactionAmount.TransactionState state) {
+        return SlotLookup.getInventoryItem(state.container(), BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot)
+                .map(ItemInfo::itemStack)
+                .flatMap(TransactionPageLayout::findOptionAmount)
+                .map(value -> (int) Math.floor(value))
+                .orElse((int) state.playerInventory()
+                        .getNonEquipmentItems()
+                        .stream()
+                        .filter(ItemStack::isEmpty)
+                        .count()
+                );
     }
 
     @Override

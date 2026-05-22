@@ -6,6 +6,9 @@ import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
@@ -98,6 +101,15 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
     @Override
     protected int computeFixedValue(TransactionState state) {
         return getFixedAmount();
+    }
+
+    @Override
+    protected int computeMaxValue(TransactionAmount.TransactionState state) {
+        int amountCanAfford = (int) (state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()));
+
+        return TransactionPageLayout.findBuyOrderAmountLimit(state.inputSign().itemStack())
+                            .map(limit -> Math.min(amountCanAfford, limit))
+                            .orElse(amountCanAfford);
     }
 
     @Override

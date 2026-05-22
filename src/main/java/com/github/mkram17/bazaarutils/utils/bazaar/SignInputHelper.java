@@ -2,10 +2,8 @@ package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
 import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -15,7 +13,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
-import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
@@ -26,7 +23,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -175,45 +171,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         protected abstract int computeFixedValue(TransactionState state);
 
-        protected int computeMaxValue(TransactionState state) {
-            return switch (getTransactionType().getMethod()) {
-                case INSTANT -> {
-                    if (getTransactionType().isBuy()) {
-                        yield SlotLookup.getInventoryItem(state.container(), BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot)
-                            .map(ItemInfo::itemStack)
-                            .flatMap(TransactionPageLayout::findOptionAmount)
-                            .map(value -> (int) Math.floor(value))
-                            .orElse((int) state.playerInventory()
-                                    .getNonEquipmentItems()
-                                    .stream()
-                                    .filter(ItemStack::isEmpty)
-                                    .count()
-                            );
-                    }
-                    // Should be impossible to reach, as there is no sign to input a custom amount on items to instant sell.
-                    // TODO: consider refactors needed for this case not to exist
-                    yield 0;
-                }
-                case ORDER -> {
-                    if (getTransactionType().isBuy()) {
-                        int amountCanAfford = (int) (state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()));
-
-                        yield TransactionPageLayout.findBuyOrderAmountLimit(state.inputSign().itemStack())
-                                .map(limit -> Math.min(amountCanAfford, limit))
-                                .orElse(amountCanAfford);
-                    }
-                    yield state.playerInventory().getNonEquipmentItems().stream()
-                            .filter(stack -> !stack.isEmpty())
-                            .filter(stack -> Optional.ofNullable(stack.getCustomName())
-                                    .map(Component::getString)
-                                    .flatMap(BazaarDataUtil::findProductIdOptional)
-                                    .map(productId -> productId.equals(state.productId()))
-                                    .orElse(false))
-                            .mapToInt(ItemStack::getCount)
-                            .sum();
-                }
-            };
-        }
+        protected abstract int computeMaxValue(TransactionState state);
     }
 
     public abstract static class TransactionCost extends SignInputHelper<TransactionCost.TransactionState> {
