@@ -122,12 +122,16 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     }
 
     @Override
-    protected void handleAction(T state) {
+    protected void handleAction(T state, Runnable resetState) {
         ContainerManager.clickSlot(state.inputSign().slotIndex(), 0);
 
         ResolvedInput input = getWorkingValue(state).get();
 
-        SignManager.runOnNextSignOpen(event -> SignManager.setSignText(input.format(), true));
+        SignManager.runOnNextSignOpen(event -> {
+            SignManager.setSignText(input.format(), true);
+
+            resetState.run();
+        });
     }
 
     protected abstract ResolvedInput resolveInput(T state);

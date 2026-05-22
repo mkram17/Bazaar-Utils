@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 public abstract class InputHelper<T> implements ItemButton {
     @Getter
@@ -80,8 +81,7 @@ public abstract class InputHelper<T> implements ItemButton {
 
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
 
-        handleAction(state.get());
-        resetState();
+        handleAction(state.get(), this::resetState);
 
         return Result.CONSUMED;
     }
@@ -94,5 +94,5 @@ public abstract class InputHelper<T> implements ItemButton {
 
     //    Action stuff
 
-    protected abstract void handleAction(T state);
+    protected abstract void handleAction(T state, Runnable callback);
 }
