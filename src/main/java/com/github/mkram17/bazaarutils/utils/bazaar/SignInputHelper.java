@@ -16,6 +16,8 @@ import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -25,6 +27,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.profile.currency.CurrencyAPI;
 
 import java.util.List;
@@ -42,6 +45,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         record Value(Number amount) implements ResolvedInput {
             public String format() {
                 double d = amount.doubleValue();
+
                 return d == (long) d
                         ? String.valueOf((long) d)
                         : String.valueOf(Util.truncateNum(d));
@@ -57,13 +61,33 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         String format();
     }
 
+    /**
+     * Wraps the lazily-computed, memoized result of {@link #resolveInput}.
+     *
+     * <p>On first {@link #get()} call the memoized supplier fires {@code resolveInput} exactly
+     * once and caches the result for the lifetime of this container load.
+     */
+    protected class WorkingValue {
+        private final Supplier<ResolvedInput> resolver;
+
+        WorkingValue(T state) {
+            this.resolver = Suppliers.memoize(() -> resolveInput(state));
+        }
+
+        public ResolvedInput get() {
+            return resolver.get();
+        }
+    }
+
     @Getter
     @NotNull
     protected BazaarSlots.BazaarSlot inputSignRef;
 
+    @Nullable
+    private WorkingValue workingValue;
+
     public SignInputHelper(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
         super(name);
-
         this.inputSignRef = inputSignRef;
     }
 
@@ -71,11 +95,36 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         return inputSignRef.query(inventory).first(inventory);
     }
 
+    /**
+     * Returns the live {@link WorkingValue} for this container load, creating it on first access.
+     * All render and action paths read through here so {@link #resolveInput} is called at most once.
+     */
+    protected WorkingValue getWorkingValue(T state) {
+        if (workingValue == null) workingValue = createWorkingValue(state);
+
+        return workingValue;
+    }
+
+    /**
+     * Factory method for subclasses that need custom step/clamp logic for scroll.
+     * The default implementation returns a plain {@link WorkingValue} backed by
+     * {@link #resolveInput}.
+     */
+    protected WorkingValue createWorkingValue(T state) {
+        return new WorkingValue(state);
+    }
+
+    @Override
+    protected void resetState() {
+        workingValue = null;
+        super.resetState();
+    }
+
     @Override
     protected void handleAction(T state) {
         ContainerManager.clickSlot(state.inputSign().slotIndex(), 0);
 
-        ResolvedInput input = resolveInput(state);
+        ResolvedInput input = getWorkingValue(state).get();
 
         SignManager.runOnNextSignOpen(event -> SignManager.setSignText(input.format(), true));
     }
@@ -153,9 +202,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected String getButtonItemStackSize(TransactionState state) {
-            ResolvedInput input = resolveInput(state);
-
-            return input.format();
+            return getWorkingValue(state).get().format();
         }
 
         @Override
@@ -205,11 +252,9 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             Container container = event.getContainer();
 
             Optional<ItemInfo> inputSign = getInputSign(container);
-
             if (inputSign.isEmpty()) return Optional.empty();
 
             Optional<String> productId = getItemProductId(inputSign.get());
-
             if (productId.isEmpty()) return Optional.empty();
 
             return Optional.of(new TransactionState(productId.get(), inputSign.get(), container, event.getScreen()));
@@ -221,14 +266,14 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected String getButtonItemStackSize(TransactionState state) {
-            ResolvedInput input = resolveInput(state);
-
-            return input.format();
+            return getWorkingValue(state).get().format();
         }
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            return new ResolvedInput.Value(OrderUtil.getPriceForPosition(state.productId(), getPricingPosition(), getTransactionType()));
+            return new ResolvedInput.Value(
+                    OrderUtil.getPriceForPosition(state.productId(), getPricingPosition(), getTransactionType())
+            );
         }
     }
 
