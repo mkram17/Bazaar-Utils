@@ -113,11 +113,22 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
                 .map(ItemInfo::itemStack)
                 .flatMap(TransactionPageLayout::findOptionAmount)
                 .map(value -> (int) Math.floor(value))
-                .orElse((int) state.playerInventory()
+                .orElse(state.playerInventory()
                         .getNonEquipmentItems()
                         .stream()
-                        .filter(ItemStack::isEmpty)
-                        .count()
+                        .mapToInt(stack -> {
+                            int maxStackSize = state.productItem().itemStack().getMaxStackSize();
+                            if (stack.isEmpty()) return maxStackSize;
+
+                            boolean isSameItem = Optional.ofNullable(stack.getCustomName())
+                                    .map(Component::getString)
+                                    .flatMap(BazaarDataUtil::findProductIdOptional)
+                                    .map(id -> id.equals(state.productId()))
+                                    .orElse(false);
+
+                            return isSameItem ? maxStackSize - stack.getCount() : 0;
+                        })
+                        .sum()
                 );
     }
 
