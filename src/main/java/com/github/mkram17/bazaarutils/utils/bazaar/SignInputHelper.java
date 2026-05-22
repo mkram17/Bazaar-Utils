@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -121,12 +122,18 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     }
 
     @Override
-    protected void handleAction(T state) {
+    protected void handleAction(T state, Runnable resetState) {
         ContainerManager.clickSlot(state.inputSign().slotIndex(), 0);
 
         ResolvedInput input = getWorkingValue(state).get();
 
-        SignManager.runOnNextSignOpen(event -> SignManager.setSignText(input.format(), true));
+        SignManager.runOnNextSignOpen(event -> {
+            SignManager.setSignText(input.format(), true);
+
+            resetState.run();
+
+            return Result.CONSUMED;
+        });
     }
 
     protected abstract ResolvedInput resolveInput(T state);

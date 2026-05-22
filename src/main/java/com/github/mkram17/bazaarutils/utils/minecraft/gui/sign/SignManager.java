@@ -6,39 +6,54 @@ import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Priority;
+import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
 
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class SignManager {
-    /** One-shot callbacks to run the next time a sign opens; drained by {@link SignOpenDispatcher}. */
-    private static final Queue<Consumer<SignOpenEvent>> PENDING = new ConcurrentLinkedQueue<>();
+    /** Handlers queued for the next sign open; drained by {@link SignQueueDispatcher} in order. */
+    private static final Queue<Function<SignOpenEvent, Result>> PENDING = new ConcurrentLinkedQueue<>();
 
     static {
-        BazaarUtils.EVENT_BUS.register(new SignOpenDispatcher());
+        BazaarUtils.EVENT_BUS.register(new SignQueueDispatcher());
     }
 
-    private static final class SignOpenDispatcher {
+    private static final class SignQueueDispatcher {
         @Subscription(priority = Priority.FIRST)
         private void onSignOpen(SignOpenEvent event) {
-            Consumer<SignOpenEvent> action;
+            Function<SignOpenEvent, Result> handler;
 
-            while ((action = PENDING.poll()) != null) {
-                action.accept(event);
+            while ((handler = PENDING.poll()) != null) {
+                Result result = handler.apply(event);
+
+                if (!result.propagate()) break;
             }
+        }
+
+        @Subscription(priority = Priority.FIRST)
+        private void onContainerClosed(ContainerCloseEvent event) {
+            PENDING.clear();
         }
     }
 
-    public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
-        PENDING.add(action);
+    /**
+     * Queues a handler for the next sign that opens. Handlers run in order against a single
+     * {@link SignOpenEvent}; return {@link Result#CONSUMED} once you've claimed the sign so
+     * nothing else queued fires on it. The whole queue clears on {@link ContainerCloseEvent},
+     * so a handler waiting on a sign that never opens doesn't fire on some later, unrelated one.
+     */
+    public static void runOnNextSignOpen(Function<SignOpenEvent, Result> handler) {
+        PENDING.add(handler);
     }
 
     public static void setSignText(String text, boolean closeAfter) {
