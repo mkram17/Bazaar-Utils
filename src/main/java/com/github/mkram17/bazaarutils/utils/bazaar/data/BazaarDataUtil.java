@@ -5,11 +5,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.data.wrappers.CustomBazaarRep
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.resources.BazaarConversions;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
+import java.util.*;
 
 public class BazaarDataUtil {
     /**
@@ -36,18 +32,14 @@ public class BazaarDataUtil {
                 return OptionalInt.empty();
             }
 
-            List<PriceLevel> list = switch (priceType) {
-                case INSTABUY -> product.getBuyOrders();
-                case INSTASELL -> product.getSellOrders();
+            NavigableMap<Double, PriceLevel> book = switch (priceType) {
+                case INSTABUY -> product.getBuyBook();
+                case INSTASELL -> product.getSellBook();
             };
 
-            if (list == null) {
-                return OptionalInt.empty();
-            }
-
-            for (PriceLevel s : list) {
-                if (Double.compare(s.pricePerUnit(), price) == 0) {
-                    return OptionalInt.of((int) s.totalVolume());
+            for (Map.Entry<Double, PriceLevel> entry : book.entrySet()) {
+                if (Double.compare(entry.getKey(), price) == 0) {
+                    return OptionalInt.of((int) entry.getValue().totalVolume());
                 }
             }
 
@@ -90,22 +82,22 @@ public class BazaarDataUtil {
 
             return switch (priceType) {
                 case INSTABUY -> {
-                    List<PriceLevel> buySummary = product.getBuyOrders();
+                    NavigableMap<Double, PriceLevel> buySummary = product.getBuyBook();
 
                     if (buySummary == null || buySummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
                     }
 
-                    yield OptionalDouble.of(buySummary.getFirst().pricePerUnit());
+                    yield OptionalDouble.of(buySummary.descendingKeySet().getFirst());
                 }
                 case INSTASELL -> {
-                    List<PriceLevel> sellSummary = product.getSellOrders();
+                    NavigableMap<Double, PriceLevel> sellSummary = product.getSellBook();
 
                     if (sellSummary == null || sellSummary.isEmpty()) {
                         yield OptionalDouble.of(0.0);
                     }
 
-                    yield OptionalDouble.of(sellSummary.getFirst().pricePerUnit());
+                    yield OptionalDouble.of(sellSummary.descendingKeySet().getFirst());
                 }
             };
         } catch (Exception e) {
