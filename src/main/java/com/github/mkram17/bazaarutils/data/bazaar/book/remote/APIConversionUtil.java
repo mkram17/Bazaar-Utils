@@ -50,7 +50,7 @@ public final class APIConversionUtil {
             buy.addAll(convertedBuySummaries);
         }
 
-        return new ProductData(productId, sell, buy);
+        return new ProductData(productId);
     }
 
     public static List<PriceLevel> convertAPIProductSummaries(List<SkyBlockBazaarReply.Product.Summary> apiSummaries) {
