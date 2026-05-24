@@ -6,7 +6,7 @@ import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenSwitch;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -26,11 +26,15 @@ public final class TransactionPageLayout {
     private TransactionPageLayout() {}
 
     public static Optional<ItemInfo> getConfirmSellOfferItem(@NotNull ScreenContext context) {
-        return getIf(context, BazaarScreenType.BUY_ORDER_CONFIRMATION, BazaarSlots.SELL_OFFER.CONFIRM_SELL_OFFER.slot);
+        return ScreenSwitch.<Optional<ItemInfo>>on(context)
+                .when(BazaarScreenType.SELL_OFFER_CONFIRMATION, ctx -> getSlot(ctx, BazaarSlots.SELL_OFFER.CONFIRM_SELL_OFFER.slot))
+                .orElse(Optional.empty());
     }
 
     public static Optional<ItemInfo> getConfirmBuyOrderItem(@NotNull ScreenContext context) {
-        return getIf(context, BazaarScreenType.BUY_ORDER_CONFIRMATION, BazaarSlots.BUY_ORDER.CONFIRM_BUY_ORDER.slot);
+        return ScreenSwitch.<Optional<ItemInfo>>on(context)
+                .when(BazaarScreenType.BUY_ORDER_CONFIRMATION, ctx -> getSlot(ctx, BazaarSlots.BUY_ORDER.CONFIRM_BUY_ORDER.slot))
+                .orElse(Optional.empty());
     }
 
     public static Optional<Double> findOptionAmount(ItemStack option) {
@@ -45,12 +49,9 @@ public final class TransactionPageLayout {
         return LoreParser.matchInt(inputSign, SELL_LIMIT_PATTERN, "amount", "sell limit on " + inputSign.getCustomName());
     }
 
-    private static Optional<ItemInfo> getIf(
+    private static Optional<ItemInfo> getSlot(
             @NotNull ScreenContext context,
-            ScreenType type,
             BazaarSlots.BazaarSlot slot) {
-        if (!context.is(type)) return Optional.empty();
-
         return context.as(ContainerScreen.class).flatMap(screen -> SlotLookup.getInventoryItem(screen.getMenu().getContainer(), slot));
     }
 }

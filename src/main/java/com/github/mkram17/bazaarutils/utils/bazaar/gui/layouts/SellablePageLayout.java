@@ -1,10 +1,13 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts;
 
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenSwitch;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,30 +24,22 @@ public final class SellablePageLayout {
 
     private SellablePageLayout() {}
 
+    private static final ScreenMatcher<BazaarScreenType> OVERVIEW_SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE);
+
     public static Optional<ItemInfo> getInstantSellItem(@NotNull ScreenContext context) {
-        if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE))
-            return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot);
-
-        if (context.is(BazaarScreenType.PRODUCT_PAGE))
-            return getSlot(context, BazaarSlots.PRODUCT_PAGE.SELL_INSTANTLY.slot);
-
-        if (context.is(BazaarScreenType.PRODUCTS_CATALOG_PAGE))
-            return getSlot(context, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_INVENTORY.slot);
-
-        return Optional.empty();
+        return ScreenSwitch.<Optional<ItemInfo>>on(context)
+                .when(OVERVIEW_SCREENS, ctx -> getSlot(ctx, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot))
+                .when(BazaarScreenType.PRODUCT_PAGE, ctx -> getSlot(ctx, BazaarSlots.PRODUCT_PAGE.SELL_INSTANTLY.slot))
+                .when(BazaarScreenType.PRODUCTS_CATALOG_PAGE, ctx -> getSlot(ctx, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_INVENTORY.slot))
+                .orElse(Optional.empty());
     }
 
     public static Optional<ItemInfo> getSellSacksItem(@NotNull ScreenContext context) {
-        if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE))
-            return getSlot(context, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot);
-
-        if (context.is(BazaarScreenType.PRODUCT_PAGE))
-            return getSlot(context, BazaarSlots.PRODUCT_PAGE.SELL_SACKS.slot);
-
-        if (context.is(BazaarScreenType.PRODUCTS_CATALOG_PAGE))
-            return getSlot(context, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_SACKS.slot);
-
-        return Optional.empty();
+        return ScreenSwitch.<Optional<ItemInfo>>on(context)
+                .when(OVERVIEW_SCREENS, ctx -> getSlot(ctx, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot))
+                .when(BazaarScreenType.PRODUCT_PAGE, ctx -> getSlot(ctx, BazaarSlots.PRODUCT_PAGE.SELL_SACKS.slot))
+                .when(BazaarScreenType.PRODUCTS_CATALOG_PAGE, ctx -> getSlot(ctx, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_SACKS.slot))
+                .orElse(Optional.empty());
     }
 
     private static Optional<ItemInfo> getSlot(
