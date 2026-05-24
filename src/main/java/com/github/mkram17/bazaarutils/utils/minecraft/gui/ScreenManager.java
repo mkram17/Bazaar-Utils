@@ -78,7 +78,7 @@ public class ScreenManager {
     private boolean expectingServerFollowUp = false;
 
     @Subscription(priority = Priority.FIRST)
-    private void onScreenChange(ScreenChangeEvent event) {
+    private void onScreenChange(ScreenChangeEvent.Pre event) {
         Screen next = event.getNewScreen();
         Screen prev = event.getOldScreen();
 

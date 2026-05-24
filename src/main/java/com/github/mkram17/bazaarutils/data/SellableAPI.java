@@ -235,7 +235,7 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
 
     @Subscription
     @OnlyOnSkyBlock
-    private void onScreenChange(ScreenChangeEvent ignored) {
+    private void onScreenChange(ScreenChangeEvent.Post ignored) {
         clearAll();
     }
 

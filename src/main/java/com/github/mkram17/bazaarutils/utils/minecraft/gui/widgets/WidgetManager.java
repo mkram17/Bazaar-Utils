@@ -28,7 +28,7 @@ public class WidgetManager extends BUListener {
     public record ScreenWidgetDimensions(int x, int y, int backgroundWidth) {}
 
     @Subscription
-    private void onScreenChange(ScreenChangeEvent event) {
+    private void onScreenChange(ScreenChangeEvent.Pre event) {
         if (event.getOldScreen() != null) removeWidgetsFrom(event.getOldScreen());
 
         // causes a flash when onContainerLoaded removes and re-adds immediately after.
