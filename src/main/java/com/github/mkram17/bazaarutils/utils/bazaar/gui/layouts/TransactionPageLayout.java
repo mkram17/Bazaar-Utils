@@ -51,7 +51,6 @@ public final class TransactionPageLayout {
             BazaarSlots.BazaarSlot slot) {
         if (!context.is(type)) return Optional.empty();
 
-        return context.as(ContainerScreen.class)
-                .map(screen -> SlotLookup.getInventoryItem(screen.getMenu().getContainer(), slot));
+        return context.as(ContainerScreen.class).flatMap(screen -> SlotLookup.getInventoryItem(screen.getMenu().getContainer(), slot));
     }
 }

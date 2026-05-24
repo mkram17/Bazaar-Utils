@@ -232,8 +232,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             return switch (getTransactionType().getMethod()) {
                 case INSTANT -> {
                     if (getTransactionType().isBuy()) {
-                        yield Optional.of(state.container())
-                            .map(inventory -> SlotLookup.getInventoryItem(inventory, BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot))
+                        yield SlotLookup.getInventoryItem(state.container(), BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot)
                             .map(ItemInfo::itemStack)
                             .flatMap(TransactionPageLayout::findOptionAmount)
                             .map(value -> (int) Math.floor(value))

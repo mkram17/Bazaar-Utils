@@ -18,8 +18,10 @@ public class SlotLookup {
         return new ItemInfo(chestSlot, inventory.getItem(chestSlot));
     }
 
-    public static ItemInfo getInventoryItem(Container inventory, BazaarSlots.BazaarSlot slot) {
-        return slot.query(inventory).first(inventory).orElse(ItemInfo.empty(-1));
+    public static Optional<ItemInfo> getInventoryItem(Container inventory, BazaarSlots.BazaarSlot slot) {
+        return slot.query(inventory)
+                .first(inventory)
+                .filter(item -> !item.isEmpty());
     }
 
     public static Optional<Integer> getInventorySlotFromItemStack(Container inventory, ItemStack wanted) {

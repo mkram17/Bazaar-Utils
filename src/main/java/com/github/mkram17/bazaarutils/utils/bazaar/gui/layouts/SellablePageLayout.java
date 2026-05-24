@@ -50,7 +50,6 @@ public final class SellablePageLayout {
     private static Optional<ItemInfo> getSlot(
             @NotNull ScreenContext context,
             BazaarSlots.BazaarSlot slot) {
-        return context.as(ContainerScreen.class)
-                .map(screen -> SlotLookup.getInventoryItem(screen.getMenu().getContainer(), slot));
+        return context.as(ContainerScreen.class).flatMap(screen -> SlotLookup.getInventoryItem(screen.getMenu().getContainer(), slot));
     }
 }
