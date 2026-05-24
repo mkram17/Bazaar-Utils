@@ -13,6 +13,9 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @see com.github.mkram17.bazaarutils.data.SellableAPI
+ */
 public final class SellSacksParser {
     public record SellSacksResult(List<OrderInfo> items, Optional<OtherItems> otherItems) {
         public record OtherItems(int volume, double totalValue) {}
@@ -27,6 +30,16 @@ public final class SellSacksParser {
      */
     private static final Pattern ITEM_LINE_PATTERN = Pattern.compile("(?<volume>[\\d,]+)x (?<product>.+?) for (?<price>[\\d,.]+) coins");
 
+    /**
+     * Parses the sell-sacks button present on catalog/overview pages
+     * for data of what's currently sellable under the current screen context.
+     *
+     * <p>Targets</p>
+     * <ul>
+     *  <li>{@code MAIN_PAGE | SEARCH_PAGE}: {@code BazaarSlots.OVERVIEW_PAGE.SELL_SACKS},</li>
+     *  <li>{@code PRODUCTS_CATALOG_PAGE}: {@code BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_SACKS}</li>
+     * </ul>
+     */
     public static SellSacksResult parseSackOrders(ItemStack sellSacksStack) {
         List<OrderInfo> items = new ArrayList<>();
         Optional<SellSacksResult.OtherItems> otherItems = Optional.empty();

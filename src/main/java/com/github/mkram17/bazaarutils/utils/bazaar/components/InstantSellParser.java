@@ -19,8 +19,13 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @see com.github.mkram17.bazaarutils.data.SellableAPI
+ */
 public final class InstantSellParser {
+    /** Parsed result from an Instant Sell container. */
     public record InstantSellResult(List<OrderInfo> items, Optional<OtherItems> otherItems) {
+        /** Volume folded under the "Other items" aggregation line — volume and total value actionable only, no per-product breakdown. */
         public record OtherItems(int volume, double totalValue) {}
     }
 
@@ -32,6 +37,16 @@ public final class InstantSellParser {
      */
     private static final Pattern ITEM_LINE_PATTERN = Pattern.compile("(?<volume>[\\d,]+)x (?<product>.+?) for (?<price>[\\d,.]+) coins");
 
+    /**
+     * Parses the instant-sell button present on catalog/overview pages
+     * for data of what's currently sellable under the current screen context.
+     *
+     * <p>Targets</p>
+     * <ul>
+     *  <li>{@code MAIN_PAGE | SEARCH_PAGE}: {@code BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY},</li>
+     *  <li>{@code PRODUCTS_CATALOG_PAGE}: {@code BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_INVENTORY}</li>
+     * </ul>
+     */
     public static InstantSellResult parseInstantSellOrders(ItemStack instantSellStack) {
         List<OrderInfo> items = new ArrayList<>();
         Optional<InstantSellResult.OtherItems> otherItems = Optional.empty();
@@ -82,6 +97,15 @@ public final class InstantSellParser {
     /** "Current tax: 1%" */
     private static final Pattern TAX_PATTERN = Pattern.compile("Current tax: (?<tax>[\\d.]+)%");
 
+    /**
+     * Parses the instant-sell button present on product pages
+     * for data of how much of the player-held volume is sellable instantly.
+     *
+     * <p>Targets</p>
+     * <ul>
+     *  <li>{@code PRODUCT_PAGE}: {@code BazaarSlots.PRODUCT_PAGE.SELL_INSTANTLY},</li>
+     * </ul>
+     */
     public static Optional<InstantSellResult> parseProductPageOrder(ItemStack sellInstantlyStack) {
         List<Component> lines = LoreParser.lines(sellInstantlyStack);
 

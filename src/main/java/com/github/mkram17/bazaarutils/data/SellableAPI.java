@@ -23,14 +23,29 @@ import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.PlayerInventoryChangeEvent;
+import tech.thatgravyboat.skyblockapi.api.profile.items.sacks.SacksAPI;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
- * Stamps {@link TransactionType} onto player inventory ItemStacks based on what
- * the current bazaar screen can sell. Pure data concern.
+ * Maintains the current Bazaar screen's player-sellable data across three namespaces:
+ *
+ * <ul>
+ *   <li>{@link InstantSell} — parsed Instant Sell orders for the context.</li>
+ *   <li>{@link SellSacks} — parsed Sell Sacks orders for the context.</li>
+ *   <li>{@link Targets} — the players held stacks which would be sold per an Instant Sell</li>
+ * </ul>
+ *
+ * Do note the following:
+ *
+ * {@code SellSacks} is imprecise as players can hold very well over 1300 products on their sacks,
+ * and thus for any sellable context (a scoped catalog page or the direct bazaar overview),
+ * most items will be folded onto {@link SellSacksParser.SellSacksResult.OtherItems}.
+ *
+ * This is a limitation per the lack of a proper {@code BazaarScreenType} -> {@code CATALOGS} reference
+ * to simply index via {@link SacksAPI}, because Hypixel doesn't offer a proper endpoint of the Bazaar Catalogs/Products.
  */
 @Module
 public class SellableAPI extends BUListener {
