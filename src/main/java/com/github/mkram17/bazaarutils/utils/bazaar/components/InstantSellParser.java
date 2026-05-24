@@ -26,34 +26,40 @@ public final class InstantSellParser {
 
     private InstantSellParser() {}
 
+    /** Each sellable-item entry in an instant-sell lore:
+     *  " 432x Fig Log for 1,296 coins"
+     *  Siblings: [" ", quantity(green), "x "(gray), product(white), "for "(gray), "NNN coins"(gold)]
+     */
+    private static final Pattern ITEM_LINE_PATTERN = Pattern.compile("(?<volume>[\\d,]+)x (?<product>.+?) for (?<price>[\\d,.]+) coins");
+
     public static InstantSellResult parseInstantSellOrders(ItemStack instantSellStack) {
         List<OrderInfo> items = new ArrayList<>();
         Optional<InstantSellResult.OtherItems> otherItems = Optional.empty();
 
         for (Component line : LoreParser.lines(instantSellStack)) {
-            List<Component> siblings = line.getSiblings();
-            if (siblings.size() != 6) continue;
+            Matcher matcher = ITEM_LINE_PATTERN.matcher(line.getString());
+            if (!matcher.find()) continue;
 
-            String name = siblings.get(3).getString().trim();
+            String product = matcher.group("product").trim();
 
             try {
-                int volume = Util.parseNumber(siblings.get(1).getString());
+                int volume = Util.parseNumber(matcher.group("volume"));
 
                 // Items with no buy orders appear with 0 quantity — skip them
                 // rather than dividing by zero or producing a meaningless order.
                 if (volume == 0) {
-                    Util.logMessage("parseOrders: skipping '%s' — 0 quantity (no buy orders)".formatted(name));
+                    Util.logMessage("parseOrders: skipping '%s' — 0 quantity (no buy orders)".formatted(product));
 
                     continue;
                 }
 
-                double totalPrice = Double.parseDouble(siblings.get(5).getString().replace(" coins", "").replace(",", ""));
+                double totalPrice = Double.parseDouble(matcher.group("price").replace(",", ""));
                 double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
 
-                if (name.equals("Other items")) {
+                if (product.equals("Other items")) {
                     otherItems = Optional.of(new InstantSellResult.OtherItems(volume, totalPrice));
                 } else {
-                    items.add(new OrderInfo(name, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
+                    items.add(new OrderInfo(product, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
                 }
             } catch (Exception ignored) {}
         }
