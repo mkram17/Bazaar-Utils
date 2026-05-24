@@ -4,7 +4,6 @@ import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.SellTarget;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
@@ -14,7 +13,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.google.common.collect.MapMaker;
-import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
- * Stamps SellTarget onto player inventory ItemStacks based on what
+ * Stamps {@link TransactionType} onto player inventory ItemStacks based on what
  * the current bazaar screen can sell. Pure data concern.
  */
 @Module
@@ -39,7 +37,7 @@ public class SellableAPI extends BUListener {
     private record SellDataState(
             @Nullable InstantSellParser.InstantSellResult instantSell,
             @Nullable SellSacksParser.SellSacksResult sellSacks,
-            Map<ItemStack, SellTarget> targets
+            Map<ItemStack, TransactionType> targets
     ) {
         static SellDataState empty() {
             return new SellDataState(null, null, new MapMaker().weakKeys().concurrencyLevel(1).makeMap());
@@ -99,11 +97,11 @@ public class SellableAPI extends BUListener {
     }
 
     public static final class Targets {
-        static void stamp(ItemStack stack, SellTarget type) {
+        static void stamp(ItemStack stack, TransactionType type) {
             STATE.get().targets().put(stack, type);
         }
 
-        public static Optional<SellTarget> get(ItemStack stack) {
+        public static Optional<TransactionType> get(ItemStack stack) {
             return Optional.ofNullable(STATE.get().targets().get(stack));
         }
 
@@ -111,7 +109,7 @@ public class SellableAPI extends BUListener {
             return STATE.get().targets().containsKey(stack);
         }
 
-        public static void parse(ContainerLoadedEvent event, List<OrderInfo> orders, SellTarget type) {
+        public static void parse(ContainerLoadedEvent event, List<OrderInfo> orders, TransactionType type) {
             if (orders.isEmpty()) return;
 
             Minecraft client = Minecraft.getInstance();
@@ -128,11 +126,13 @@ public class SellableAPI extends BUListener {
 
                 String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
 
-                if (name != null && names.contains(name)) stamp(item, type);
+                if (name != null && names.contains(name)) {
+                    stamp(item, type);
+                }
             }
         }
 
-        public static void parseOtherItems(ContainerLoadedEvent event, int volumeBound, SellTarget type) {
+        public static void parseOtherItems(ContainerLoadedEvent event, int volumeBound, TransactionType type) {
             Minecraft client = Minecraft.getInstance();
             if (client.player == null) return;
 
@@ -181,10 +181,10 @@ public class SellableAPI extends BUListener {
 
         SellablePageLayout.getInstantSellItem(context).ifPresent(info -> {
             InstantSell.parse(info.itemStack(), context);
-            Targets.parse(event, InstantSell.orders(), SellTarget.INSTANT_SELL);
+            Targets.parse(event, InstantSell.orders(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
 
             if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE)) {
-                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), SellTarget.INSTANT_SELL));
+                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT)));
             }
         });
 
@@ -205,12 +205,12 @@ public class SellableAPI extends BUListener {
         if (name == null) return;
 
         if (InstantSell.orders().stream().anyMatch(order -> order.getName().equalsIgnoreCase(name))) {
-            Targets.stamp(item, SellTarget.INSTANT_SELL);
+            Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
             return;
         }
 
         if (InstantSell.otherItems().isPresent() && Targets.hasActiveBuyOrders(name)) {
-            Targets.stamp(item, SellTarget.INSTANT_SELL);
+            Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
         }
     }
 
