@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
+import com.github.mkram17.bazaarutils.config.util.api.conditions.MethodEquals;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
@@ -172,6 +174,12 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
          * The prospect with which to resolve the output value.
          */
         protected abstract AmountStrategy getAmountStrategy();
+
+        public static final class WhenFixedStrategy extends MethodEquals<TransactionAmount, AmountStrategy> {
+            public WhenFixedStrategy() {
+                super(TransactionAmount.class, TransactionAmount::getAmountStrategy, AmountStrategy.FIXED);
+            }
+        }
 
         @Override
         protected Optional<TransactionState> makeState(ContainerLoadedEvent event) {

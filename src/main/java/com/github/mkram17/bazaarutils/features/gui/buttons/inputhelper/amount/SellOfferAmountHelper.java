@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
@@ -73,6 +74,7 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
             value = "Amount used for FIXED input strategy.",
             translation = "bazaarutils.config.buttons.button.container.fixed_amount.hint"
     )
+    @ShowIf(SignInputHelper.TransactionAmount.WhenFixedStrategy.class)
     public int fixedAmount = 1;
 
     public TransactionType transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
