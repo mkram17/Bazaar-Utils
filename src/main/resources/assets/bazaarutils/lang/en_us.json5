@@ -93,6 +93,11 @@
     "separator.introductory.label": "Welcome to Bazaar Utils!",
     "separator.introductory.hint": "Thank you for installing Bazaar Utils! This mod provides quality of life features for the Hypixel Bazaar.",
 
+    "advanced_configuration_mode.{}": {
+      "label": "Advanced Configuration Mode",
+      "hint": "Certain feature customization is hidden away from a normal configuration of the mod as they're options generally of no interest. Here you can toggle to see and configure them as well."
+    },
+
     "bazaar_flipper_account_upgrade.{}": {
       "label": "Bazaar Flipper Account Upgrade",
       "hint": [
