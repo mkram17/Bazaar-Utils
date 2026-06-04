@@ -15,5 +15,8 @@
     "MixinAbstractContainerScreen",
     "MixinSignEditScreen",
     "AccessorSkyBlockBazaarReply"
+  ],
+  "mixins": [
+    "AdvancedOptionsMixin"
   ]
 }
