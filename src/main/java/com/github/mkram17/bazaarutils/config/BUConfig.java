@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.config;
 
-import com.github.mkram17.bazaarutils.config.features.AdvancedConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
@@ -9,8 +8,6 @@ import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
-import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
 import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.ModifyIndicator;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
@@ -28,7 +25,6 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
                 InventoryConfig.class,
                 OverlaysConfig.class,
                 NotificationsConfig.class,
-                AdvancedConfig.class,
                 DeveloperConfig.class
         },
         version = ConfigUtil.VERSION
@@ -69,6 +65,16 @@ public final class BUConfig {
             translation = "bazaarutils.config.advanced_configuration_mode.hint"
     )
     public static Observable<Boolean> ADVANCED_CONFIGURATION_TOGGLE = Observable.of(true);
+
+    @ConfigEntry(
+            id = "automatic_updates",
+            translation = "bazaarutils.config.automatic_updates.label"
+    )
+    @Comment(
+            value = "Automatically update the mod when an update is found.",
+            translation = "bazaarutils.config.automatic_updates.hint"
+    )
+    public static boolean AUTOMATIC_UPDATES_TOGGLE = true;
 
     @ConfigEntry(
             id = "bazaar_flipper_account_upgrade",
