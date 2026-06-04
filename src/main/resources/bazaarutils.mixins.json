@@ -16,6 +16,7 @@
     "AccessorSkyBlockBazaarReply"
   ],
   "mixins": [
-    "AdvancedOptionsMixin"
+    "AdvancedOptionsMixin",
+    "ObservableConfigRefreshMixin"
   ]
 }
