@@ -98,6 +98,11 @@
       "hint": "Certain feature customization is hidden away from a normal configuration of the mod as they're options generally of no interest. Here you can toggle to see and configure them as well."
     },
 
+    "automatic_updates.{}": {
+      "label": "Automatic Updates",
+      "hint": "Automatically update the mod when an update is found."
+    },
+
     "bazaar_flipper_account_upgrade.{}": {
       "label": "Bazaar Flipper Account Upgrade",
       "hint": [
@@ -439,15 +444,6 @@
         "auto_open_bazaar.label": "Auto Open Bazaar",
         "emit_chat_message.label": "Emit Chat Message",
         "emit_client_sound.label": "Emit Client Sound"
-      }
-    },
-
-    "advanced.{}": {
-      "category.label": "Advanced Settings",
-      "category.hint": "Advanced configurations for routines & features of the mod",
-      "auto_update.{}": {
-        "label": "Auto Update",
-        "hint": "Automatically update the mod when an update is found."
       }
     },
 
