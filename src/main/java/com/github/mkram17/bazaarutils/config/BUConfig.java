@@ -9,9 +9,12 @@ import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
 import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.ModifyIndicator;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import com.teamresourceful.resourcefulconfig.api.types.entries.Observable;
 
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
@@ -56,6 +59,16 @@ public final class BUConfig {
             description = "bazaarutils.config.separator.introductory.hint"
     )
     public static boolean INTRODUCTORY_INFORMATION_SEPARATOR = true;
+
+    @ConfigEntry(
+            id = "advanced_configuration_mode",
+            translation = "bazaarutils.config.advanced_configuration_mode.label"
+    )
+    @Comment(
+            value = "Certain feature customization is hidden away from a normal configuration of the mod as they're options generally of no interest. Here you can toggle to see and configure them as well.",
+            translation = "bazaarutils.config.advanced_configuration_mode.hint"
+    )
+    public static Observable<Boolean> ADVANCED_CONFIGURATION_TOGGLE = Observable.of(true);
 
     @ConfigEntry(
             id = "bazaar_flipper_account_upgrade",
