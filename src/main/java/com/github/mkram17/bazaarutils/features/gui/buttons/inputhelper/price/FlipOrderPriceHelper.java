@@ -1,9 +1,9 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price;
 
-import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
-import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -67,6 +67,20 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip implem
             translation = "bazaarutils.config.buttons.button.container.pricing_position.hint"
     )
     public PricingPosition pricingPosition;
+
+    @ConfigEntry(
+            id = "self_outbid",
+            translation = "bazaarutils.config.buttons.button.container.self_outbid.label"
+    )
+    @Comment(
+            value = """
+                When you're already the lowest seller, stepping below yourself gains you nothing in the queue and only loses coins.
+                Leave this off and the helper holds steady when you're already ahead. Enable it if you want it to always price competitively, even against your own offers.
+                """,
+            translation = "bazaarutils.config.buttons.button.container.self_outbid.hint"
+    )
+    @ShowIf(SignInputHelper.TransactionCost.WhenCompetitivePosition.AndAdvancedMode.class)
+    public boolean selfOutbid = false;
 
     public TransactionType transactionType = TransactionType.SELL_OFFER;
 

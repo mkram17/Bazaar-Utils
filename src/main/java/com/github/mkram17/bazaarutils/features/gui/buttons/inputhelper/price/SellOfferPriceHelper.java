@@ -1,9 +1,8 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price;
 
-import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
-import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -58,15 +57,29 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implem
     )
     @Comment(
             value = """
-                    The strategy with which to calculate the price to bid per item
-                    
-                    COMPETITIVE: The bid will be +0.1 the current best offer on the market
-                    MATCHED: The bid will be equal to that of the current best offer on the market
-                    OUTBID: The bid will be -0.1 the current best offer on the market
+                    The strategy with which to calculate the ask price per item
+
+                    COMPETITIVE: The ask will be -0.1 below the current best sell offer on the market
+                    MATCHED: The ask will be equal to the current best sell offer on the market
+                    OUTBID: The ask will be +0.1 above the current best sell offer on the market
                     """,
             translation = "bazaarutils.config.buttons.button.container.pricing_position.hint"
     )
     public PricingPosition pricingPosition;
+
+    @ConfigEntry(
+            id = "self_outbid",
+            translation = "bazaarutils.config.buttons.button.container.self_outbid.label"
+    )
+    @Comment(
+            value = """
+                When you're already the lowest seller, stepping below yourself gains you nothing in the queue and only loses coins.
+                Leave this off and the helper holds steady when you're already ahead. Enable it if you want it to always price competitively, even against your own offers.
+                """,
+            translation = "bazaarutils.config.buttons.button.container.self_outbid.hint"
+    )
+    @ShowIf(SignInputHelper.TransactionCost.WhenCompetitivePosition.AndAdvancedMode.class)
+    public boolean selfOutbid = false;
 
     public TransactionType transactionType = TransactionType.SELL_OFFER;
 
@@ -100,9 +113,9 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implem
     @Override
     public Component getTitle(int index) {
         return Component.literal(switch (pricingPosition) {
-            case COMPETITIVE -> "Asks +0.1 above best bid";
-            case MATCHED -> "Asks equal to best bid";
-            case OUTBID -> "Asks -0.1 below best bid";
+            case COMPETITIVE -> "Asks -0.1 below best offer";
+            case MATCHED -> "Asks equal to best offer";
+            case OUTBID -> "Asks +0.1 above best offer";
         });
     }
 

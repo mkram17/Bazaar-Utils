@@ -38,7 +38,7 @@ public class OrderStatusHighlight implements LoreModifier, SlotHighlight {
             HighlightState.Settled {
         static Optional<HighlightState> create(Order order) {
             return switch (order.status()) {
-                case OrderStatus.Set _, OrderStatus.Partial _ -> order.position(RenderedOrdersAPI.orders(), true).map(Unsettled::new);
+                case OrderStatus.Set _, OrderStatus.Partial _ -> order.position(RenderedOrdersAPI.orders(), InventoryConfig.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(Unsettled::new);
                 case OrderStatus.Filled _, OrderStatus.Expired _ -> Optional.of(new Settled((OrderStatus.Settled) order.status()));
                 case OrderStatus.Cancelled _, OrderStatus.Claimed _ -> Optional.empty();
             };
