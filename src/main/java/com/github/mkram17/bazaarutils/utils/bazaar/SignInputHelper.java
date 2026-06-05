@@ -273,6 +273,15 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         /** Whether this button treats own top-of-book orders as external competitors when computing COMPETITIVE price. */
         protected abstract boolean isSelfOutbid();
 
+        /**
+         * Assumed market price per item when the Bazaar book has no orders.
+         * Treated as a hypothetical top-of-book and passed through
+         * {@link PricingPosition#adjust} — the actual sign value is offset and
+         * clamped to the bid/ask window anchored at this price.
+         * Clamped to at least {@link PriceInfo#MINIMUM_PRICE} at runtime.
+         */
+        protected abstract double getEmptyMarketPrice();
+
         protected Optional<ProductInfo> getItemProductInfo(ItemInfo inputSign) {
             return ScreenManager.getInstance()
                     .findBack(BazaarScreenType.PRODUCT_PAGE)
@@ -313,9 +322,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                     isSelfOutbid());
 
             double resolved = price.orElseGet(() -> {
-                Util.logMessage("%s.resolveInput: book empty for %s %s @ %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), getTransactionType(), getPricingPosition(), PriceInfo.MINIMUM_PRICE));
+                double market = Math.max(PriceInfo.MINIMUM_PRICE, getEmptyMarketPrice());
+                double fallback = getPricingPosition().adjust(market, getTransactionType());
+                Util.logMessage("%s.resolveInput: book empty for %s %s @ %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), getTransactionType(), getPricingPosition(), fallback));
 
-                return PriceInfo.MINIMUM_PRICE;
+                return fallback;
             });
 
             return new ResolvedInput.Value(resolved);
