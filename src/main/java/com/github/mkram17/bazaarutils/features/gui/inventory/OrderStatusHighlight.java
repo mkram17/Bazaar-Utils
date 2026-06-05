@@ -47,7 +47,7 @@ public class OrderStatusHighlight implements LoreModifier, SlotHighlight {
 
             return switch (order.status()) {
                 case OrderStatus.Filled _, OrderStatus.Expired _ -> Optional.of(new HighlightState.Settled(order.status()));
-                case OrderStatus.Set _, OrderStatus.Partial _ -> order.position(storage).map(HighlightState.Unsettled::new);
+                case OrderStatus.Set _, OrderStatus.Partial _ -> order.position(storage, InventoryConfig.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(HighlightState.Unsettled::new);
                 default -> Optional.empty();
             };
         }
@@ -153,8 +153,8 @@ public class OrderStatusHighlight implements LoreModifier, SlotHighlight {
 
         return switch (order.status()) {
             case OrderStatus.Filled ignored -> Optional.of(new HighlightState.Settled(order.status()));
-            case OrderStatus.Set ignored -> order.position(storage).map(HighlightState.Unsettled::new);
-            case OrderStatus.Partial ignored -> order.position(storage).map(HighlightState.Unsettled::new);
+            case OrderStatus.Set ignored -> order.position(storage, InventoryConfig.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(HighlightState.Unsettled::new);
+            case OrderStatus.Partial ignored -> order.position(storage, InventoryConfig.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(HighlightState.Unsettled::new);
             default -> Optional.empty();
         };
     }

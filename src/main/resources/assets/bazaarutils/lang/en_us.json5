@@ -212,6 +212,10 @@
           "fixed_amount.{}": {
             "label": "Fixed Amount",
             "hint": "The amount which will be used if FIXED is set as the amount strategy."
+          },
+          "self_outbid.{}": {
+            "label": "Self Outbid",
+            "hint": "When you're already the highest bidder, stepping above yourself gains you nothing in the queue and only costs more coins. Leave this off and the helper holds steady when you're already ahead. Enable it if you want it to always bid competitively, even against your own orders."
           }
         }
       },
@@ -292,7 +296,7 @@
 
         "settled_color.{}": {
           "label": "Settled Color",
-          "hint": "The color to highlight orders which have been fully filled or have expired and are awaiting flip or claim."
+          "hint": "The color to highlight orders which have been fully filled or have expired and are awaiting flip or claim.",
         },
 
         "competitive_color.{}": {
