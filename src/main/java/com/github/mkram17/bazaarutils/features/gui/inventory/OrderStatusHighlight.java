@@ -132,8 +132,8 @@ public class OrderStatusHighlight implements LoreModifier, SlotHighlight {
 
         return switch (order.status()) {
             case OrderStatus.Filled ignored -> Optional.of(new HighlightState.FilledAwaitingClaim());
-            case OrderStatus.Set ignored -> order.position(storage).map(HighlightState.Position::new);
-            case OrderStatus.Partial ignored -> order.position(storage).map(HighlightState.Position::new);
+            case OrderStatus.Set ignored -> order.position(storage, InventoryConfig.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(HighlightState.Position::new);
+            case OrderStatus.Partial ignored -> order.position(storage, InventoryConfig.ORDER_STATUS_SELF_OUTBID_TOGGLE).map(HighlightState.Position::new);
             default -> Optional.empty();
         };
     }
