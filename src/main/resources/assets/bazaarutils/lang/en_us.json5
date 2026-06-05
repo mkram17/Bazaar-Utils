@@ -82,10 +82,12 @@
     }
   },
 
-  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
-    "not_upgraded.label": "Not Upgraded",
-    "first_tier.label": "Bazaar Flipper I",
-    "second_tier.label": "Bazaar Flipper II"
+  "bazaarutils.hypixel.{}": {
+    "account_upgrades.bazaar_flipper.{}": {
+      "not_upgraded.label": "Not Upgraded",
+      "first_tier.label": "Bazaar Flipper I",
+      "second_tier.label": "Bazaar Flipper II"
+    }
   },
 
   "bazaarutils.config.{}": {
@@ -210,6 +212,18 @@
           "fixed_amount.{}": {
             "label": "Fixed Amount",
             "hint": "The amount which will be used if FIXED is set as the amount strategy."
+          },
+          "self_outbid.{}": {
+            "label": "Self Outbid",
+            "hint": "When you're already the highest bidder, stepping above yourself gains you nothing in the queue and only costs more coins. Leave this off and the helper holds steady when you're already ahead. Enable it if you want it to always bid competitively, even against your own orders."
+          },
+          "empty_market_price.{}": {
+            "label": "Empty Market Price",
+            "hint": [
+              "Assumed market price per item when the Bazaar book has no orders.",
+              "\n",
+              "The actual price is derived by applying the configured pricing position to this value, then clamped to Hypixel's bid/ask window."
+            ]
           }
         }
       },
@@ -281,6 +295,11 @@
         "style.{}": {
           "label": "Highlight Style",
           "hint": "Determines how the status colors are rendered on your order slots."
+        },
+
+        "self_outbid.{}": {
+          "label": "Self Outbid",
+          "hint": "By default, your own volume at a price level doesn't count against you — so a spot you hold alone still shows as COMPETITIVE. Enable this if you'd rather any shared price level report MATCHED regardless of who owns the volume."
         },
 
         "filled_color.{}": {
