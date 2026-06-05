@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.config.util.api.conditions.AllOf;
 import com.github.mkram17.bazaarutils.config.util.api.conditions.ConfigCondition;
 import com.github.mkram17.bazaarutils.data.HandledOrderAPI;
 import com.github.mkram17.bazaarutils.config.util.api.conditions.MethodEquals;
+import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
 import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
@@ -238,6 +239,9 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     public abstract static class TransactionCost extends SignInputHelper<TransactionCost.TransactionState> {
         public record TransactionState(
                 @NotNull
+                ProfileKey key,
+
+                @NotNull
                 ProductInfo productInfo,
 
                 @NotNull
@@ -276,6 +280,15 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         /** Whether this button treats own top-of-book orders as external competitors when computing COMPETITIVE price. */
         protected abstract boolean isSelfOutbid();
 
+        /**
+         * Assumed market price per item when the Bazaar book has no orders.
+         * Treated as a hypothetical top-of-book and passed through
+         * {@link PricingPosition#adjust} — the actual sign value is offset and
+         * clamped to the bid/ask window anchored at this price.
+         * Clamped to at least {@link PriceInfo#MINIMUM_PRICE} at runtime.
+         */
+        protected abstract double getEmptyMarketPrice();
+
         protected Optional<ProductInfo> getItemProductInfo(ItemInfo inputSign) {
             return ScreenManager.getInstance()
                     .findBack(BazaarScreenType.PRODUCT_PAGE)
@@ -286,13 +299,15 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         protected Optional<TransactionState> makeState(ContainerLoadedEvent event) {
             Container container = event.getContainer();
 
+            ProfileKey key = ProfileKey.requireProfile(this.name); if (key == null) return Optional.empty();
+
             Optional<ItemInfo> inputSign = getInputSign(container);
             if (inputSign.isEmpty()) return Optional.empty();
 
             Optional<ProductInfo> productInfo = getItemProductInfo(inputSign.get());
             if (productInfo.isEmpty()) return Optional.empty();
 
-            return Optional.of(new TransactionState(productInfo.get(), inputSign.get(), container, event.getScreen()));
+            return Optional.of(new TransactionState(key, productInfo.get(), inputSign.get(), container, event.getScreen()));
         }
 
         public TransactionCost(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
@@ -306,7 +321,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            var storage = UserOrdersStorage.orders();
+            var storage = UserOrdersStorage.orders(state.key());
 
             OptionalDouble price = PriceInfo.priceForPosition(
                     state.productInfo().getProductId(),
@@ -316,9 +331,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                     isSelfOutbid());
 
             double resolved = price.orElseGet(() -> {
-                Util.logMessage("%s.resolveInput: book empty for %s %s @ %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), getTransactionType(), getPricingPosition(), PriceInfo.MINIMUM_PRICE));
+                double market = Math.max(PriceInfo.MINIMUM_PRICE, getEmptyMarketPrice());
+                double fallback = getPricingPosition().adjust(market, getTransactionType());
+                Util.logMessage("%s.resolveInput: book empty for %s %s @ %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), getTransactionType(), getPricingPosition(), fallback));
 
-                return PriceInfo.MINIMUM_PRICE;
+                return fallback;
             });
 
             return new ResolvedInput.Value(resolved);

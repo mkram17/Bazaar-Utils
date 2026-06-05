@@ -216,6 +216,10 @@
           "self_outbid.{}": {
             "label": "Self Outbid",
             "hint": "When you're already the highest bidder, stepping above yourself gains you nothing in the queue and only costs more coins. Leave this off and the helper holds steady when you're already ahead. Enable it if you want it to always bid competitively, even against your own orders."
+          },
+          "empty_market_price.{}": {
+            "label": "Empty Market Price",
+            "hint": "When the order book is completely empty, the helper has no price to reference. Set this to a value you'd be comfortable starting from — it gets treated the same way a live market price would, with your position strategy applied on top."
           }
         }
       },
