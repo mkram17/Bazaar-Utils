@@ -219,11 +219,7 @@
           },
           "empty_market_price.{}": {
             "label": "Empty Market Price",
-            "hint": [
-              "Assumed market price per item when the Bazaar book has no orders.",
-              "\n",
-              "The actual price is derived by applying the configured pricing position to this value, then clamped to Hypixel's bid/ask window."
-            ]
+            "hint": "When the order book is completely empty, the helper has no price to reference. Set this to a value you'd be comfortable starting from — it gets treated the same way a live market price would, with your position strategy applied on top."
           }
         }
       },
