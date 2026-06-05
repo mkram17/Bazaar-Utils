@@ -1,9 +1,10 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 
-import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
+import com.github.mkram17.bazaarutils.data.bazaar.book.remote.BazaarApiFetcher;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
@@ -82,6 +83,22 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
     @ShowIf(SignInputHelper.TransactionAmount.WhenFixedStrategy.class)
     public int fixedAmount = 1;
 
+    @ConfigEntry(
+            id = "empty_market_price",
+            translation = "bazaarutils.config.buttons.button.container.empty_market_price.label"
+    )
+    @Comment(
+            value = """
+                    When the order book is completely empty, the helper has no price to reference.
+                    Set this to a value you'd be comfortable starting from — it gets treated
+                    the same way a live market price would, with your position strategy applied on top.
+                    """,
+            translation = "bazaarutils.config.buttons.button.container.empty_market_price.hint"
+    )
+    @ConfigOption.Range(min = 0.1, max = 1_000_000_000.0)
+    @ShowIf(AdvancedConfigurationMode.class)
+    public double emptyMarketPrice = PriceInfo.MINIMUM_PRICE;
+
     public TransactionType transactionType = TransactionType.BUY_ORDER;
 
     @Override
@@ -112,11 +129,19 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
 
     @Override
     protected OptionalInt computeMaxValue(TransactionAmount.TransactionState state) {
-        double competitive = PriceInfo.priceForPosition(state.productInfo().getProductId(), getTransactionType(), PricingPosition.COMPETITIVE).orElseGet(() -> {
-            Util.logMessage("%s.computeMaxValue: book empty for %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), PriceInfo.MINIMUM_PRICE));
+        var competitiveOpt = PriceInfo.priceForPosition(state.productInfo().getProductId(), getTransactionType(), PricingPosition.COMPETITIVE);
 
-            return PriceInfo.MINIMUM_PRICE;
-        });
+        double competitive;
+        if (competitiveOpt.isPresent()) {
+            competitive = competitiveOpt.getAsDouble();
+        } else {
+            if (BazaarApiFetcher.getLastSnapshotTs() < 0L) {
+                return OptionalInt.empty();
+            }
+
+            competitive = Math.max(PriceInfo.MINIMUM_PRICE, emptyMarketPrice);
+            Util.logMessage("%s.computeMaxValue: book empty for %s — using fallback price %.1f".formatted(name, state.productInfo().getProductId(), competitive));
+        }
 
         int amountCanAfford = (int) Math.min(state.purse() / competitive, 71680);
 

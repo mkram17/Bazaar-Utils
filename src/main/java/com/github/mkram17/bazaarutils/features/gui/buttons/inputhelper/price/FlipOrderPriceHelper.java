@@ -9,6 +9,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
@@ -67,6 +68,22 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip implem
             translation = "bazaarutils.config.buttons.button.container.pricing_position.hint"
     )
     public PricingPosition pricingPosition;
+
+    @ConfigEntry(
+            id = "empty_market_price",
+            translation = "bazaarutils.config.buttons.button.container.empty_market_price.label"
+    )
+    @Comment(
+            value = """
+                    When the order book is completely empty, the helper has no price to reference.
+                    Set this to a value you'd be comfortable starting from — it gets treated
+                    the same way a live market price would, with your position strategy applied on top.
+                    """,
+            translation = "bazaarutils.config.buttons.button.container.empty_market_price.hint"
+    )
+    @ConfigOption.Range(min = 0.1, max = 1_000_000_000.0)
+    @ShowIf(AdvancedConfigurationMode.class)
+    public double emptyMarketPrice = PriceInfo.MINIMUM_PRICE;
 
     @ConfigEntry(
             id = "self_outbid",

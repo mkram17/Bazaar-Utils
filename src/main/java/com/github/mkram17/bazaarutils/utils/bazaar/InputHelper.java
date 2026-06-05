@@ -68,8 +68,12 @@ public abstract class InputHelper<T> implements ItemButton {
             return;
         }
 
+        onStateReset();
         state = makeState(event);
     }
+
+    /** Hook invoked right before {@link #makeState} replaces state on a matching container reload. */
+    protected void onStateReset() {}
 
     public Result onButtonClicked(int button) {
         if (state.isEmpty()) {

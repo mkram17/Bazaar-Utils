@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigu
 import com.github.mkram17.bazaarutils.config.util.api.conditions.AllOf;
 import com.github.mkram17.bazaarutils.config.util.api.conditions.ConfigCondition;
 import com.github.mkram17.bazaarutils.data.HandledOrderAPI;
+import com.github.mkram17.bazaarutils.data.bazaar.book.remote.BazaarApiFetcher;
 import com.github.mkram17.bazaarutils.config.util.api.conditions.MethodEquals;
 import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
 import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
@@ -34,6 +35,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.profile.currency.CurrencyAPI;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -48,10 +51,14 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         record Value(Number amount) implements ResolvedInput {
             public String format() {
                 double d = amount.doubleValue();
+                if (!Double.isFinite(d)) return "0";
 
-                return d == (long) d
-                        ? String.valueOf((long) d)
-                        : String.valueOf(Util.truncateNum(d));
+                BigDecimal rounded = BigDecimal.valueOf(d).setScale(1, RoundingMode.HALF_UP);
+                if (rounded.remainder(BigDecimal.ONE).signum() == 0) {
+                    return rounded.setScale(0, RoundingMode.UNNECESSARY).toPlainString();
+                }
+
+                return rounded.toPlainString();
             }
         }
 
@@ -106,11 +113,13 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     }
 
     /**
-     * Returns the live {@link WorkingValue} for this container load, creating it on first access.
-     * All render and action paths read through here so {@link #resolveInput} is called at most once.
+     * Returns the live {@link WorkingValue} for this container load, rebuilding whenever
+     * {@code state} changes across container reloads.
      */
     protected WorkingValue getWorkingValue(T state) {
-        if (workingValue == null) workingValue = createWorkingValue(state);
+        if (workingValue == null || workingValue.state != state) {
+            workingValue = createWorkingValue(state);
+        }
 
         return workingValue;
     }
@@ -130,6 +139,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
      */
     protected String formatWorkingValue(T state) {
         return getWorkingValue(state).get().map(ResolvedInput::format).orElse("");
+    }
+
+    @Override
+    protected void onStateReset() {
+        workingValue = null;
     }
 
     @Override
@@ -303,6 +317,15 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         /** Whether this button treats own top-of-book orders as external competitors when computing COMPETITIVE price. */
         protected abstract boolean isSelfOutbid();
 
+        /**
+         * Assumed market price per item when the Bazaar book has no orders.
+         * Treated as a hypothetical top-of-book and passed through
+         * {@link PricingPosition#adjust} — the actual sign value is offset and
+         * clamped to the bid/ask window anchored at this price.
+         * Clamped to at least {@link PriceInfo#MINIMUM_PRICE} at runtime.
+         */
+        protected abstract double getEmptyMarketPrice();
+
         protected Optional<ProductInfo> getItemProductInfo(ItemInfo inputSign) {
             return ScreenManager.getInstance()
                     .findBack(BazaarScreenType.PRODUCT_PAGE)
@@ -313,7 +336,11 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         protected Optional<TransactionState> makeState(ContainerLoadedEvent event) {
             Container container = event.getContainer();
 
-            ProfileKey key = ProfileKey.requireProfile(this.name); if (key == null) return Optional.empty();
+            ProfileKey key = ProfileKey.current().orElse(null);
+            if (key == null) {
+                Util.logMessage("%s skipped — profile data not loaded yet".formatted(this.name));
+                return Optional.empty();
+            }
 
             Optional<ItemInfo> inputSign = getInputSign(container);
             if (inputSign.isEmpty()) return Optional.empty();
@@ -344,15 +371,21 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                     storage,
                     isSelfOutbid());
 
-            double resolved = price.orElseGet(() -> {
+            if (price.isEmpty()) {
+                // Before the first API snapshot lands, defer rather than caching emptyMarketPrice.
+                if (BazaarApiFetcher.getLastSnapshotTs() < 0L) {
+                    return Optional.empty();
+                }
+
                 double market = Math.max(PriceInfo.MINIMUM_PRICE, getEmptyMarketPrice());
                 double fallback = getPricingPosition().adjust(market, getTransactionType());
-                Util.logMessage("%s.resolveInput: book empty for %s %s @ %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), getTransactionType(), getPricingPosition(), fallback));
+                Util.logMessage("%s.resolveInput: book empty for %s %s @ %s — using fallback price %.1f"
+                        .formatted(name, state.productInfo().getProductId(), getTransactionType(), getPricingPosition(), fallback));
 
-                return fallback;
-            });
+                return Optional.of(new ResolvedInput.Value(fallback));
+            }
 
-            return Optional.of(new ResolvedInput.Value(resolved));
+            return Optional.of(new ResolvedInput.Value(price.getAsDouble()));
         }
     }
 

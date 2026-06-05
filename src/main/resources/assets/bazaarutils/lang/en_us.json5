@@ -218,6 +218,10 @@
           "self_outbid.{}": {
             "label": "Self Outbid",
             "hint": "When you're already the sole top-of-book order, stepping past yourself gains you nothing in the queue and only costs coins. Leave this off and the helper holds steady when you're already ahead. Enable it to always price competitively, even against your own orders."
+          },
+          "empty_market_price.{}": {
+            "label": "Empty Market Price",
+            "hint": "When the order book has no resting orders on this side, the helper has no live market price to reference. Set this to a fallback reference price — your pricing position offset and bounds are applied on top of it."
           }
         }
       },
