@@ -1,7 +1,11 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AllOf;
+import com.github.mkram17.bazaarutils.config.util.api.conditions.ConfigCondition;
 import com.github.mkram17.bazaarutils.data.HandledOrderAPI;
 import com.github.mkram17.bazaarutils.config.util.api.conditions.MethodEquals;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -11,7 +15,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -31,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.profile.CurrencyAPI;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 interface SignInputState {
     @NotNull
@@ -248,6 +253,26 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
          */
         protected abstract PricingPosition getPricingPosition();
 
+        public static final class WhenCompetitivePosition extends MethodEquals<TransactionCost, PricingPosition> {
+            public WhenCompetitivePosition() {
+                super(TransactionCost.class, TransactionCost::getPricingPosition, PricingPosition.COMPETITIVE);
+            }
+
+            public static final class AndAdvancedMode extends AllOf {
+                @Override
+                @SuppressWarnings("unchecked")
+                protected Class<? extends ConfigCondition>[] conditions() {
+                    return new Class[] {
+                            WhenCompetitivePosition.class,
+                            AdvancedConfigurationMode.class
+                    };
+                }
+            }
+        }
+
+        /** Whether this button treats own top-of-book orders as external competitors when computing COMPETITIVE price. */
+        protected abstract boolean isSelfOutbid();
+
         protected Optional<ProductInfo> getItemProductInfo(ItemInfo inputSign) {
             return ScreenManager.getInstance()
                     .findBack(BazaarScreenType.PRODUCT_PAGE)
@@ -278,9 +303,22 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            return new ResolvedInput.Value(
-                    OrderUtil.getPriceForPosition(state.productInfo().getProductId(), getPricingPosition(), getTransactionType())
-            );
+            var storage = UserOrdersStorage.orders();
+
+            OptionalDouble price = PriceInfo.priceForPosition(
+                    state.productInfo().getProductId(),
+                    getTransactionType(),
+                    getPricingPosition(),
+                    storage,
+                    isSelfOutbid());
+
+            double resolved = price.orElseGet(() -> {
+                Util.logMessage("%s.resolveInput: book empty for %s %s @ %s — using fallback price %f".formatted(name, state.productInfo().getProductId(), getTransactionType(), getPricingPosition(), PriceInfo.MINIMUM_PRICE));
+
+                return PriceInfo.MINIMUM_PRICE;
+            });
+
+            return new ResolvedInput.Value(resolved);
         }
     }
 
