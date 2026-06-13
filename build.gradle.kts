@@ -101,11 +101,8 @@ dependencies {
     modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
 
     // Project Lombok
-    compileOnly("org.projectlombok:lombok:1.18.36")
-    annotationProcessor("org.projectlombok:lombok:1.18.36")
-
-    testCompileOnly("org.projectlombok:lombok:1.18.36")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
+    compileOnly("org.projectlombok:lombok:1.18.40")
+    annotationProcessor("org.projectlombok:lombok:1.18.40")
     // Mixin Constraints
     include(implementation("com.moulberry:mixinconstraints:1.0.8")!!)
 
@@ -160,6 +157,7 @@ loom {
 }
 java {
     withSourcesJar()
+    toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 }
 
 publishMods {
