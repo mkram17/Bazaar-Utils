@@ -73,8 +73,9 @@ version = if (preReleaseNumber == 0) {
 }
 
 dependencies {
+    mappings(loom.officialMojangMappings())
+
     minecraft("com.mojang:minecraft:${mcVersion}")
-    mappings("net.fabricmc:yarn:${mcVersion}+build.${deps["yarn_build"]}:v2")
     modImplementation("net.fabricmc:fabric-loader:${deps["fabricLoaderVersion"]}")
 
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")

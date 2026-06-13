@@ -22,15 +22,15 @@ import lombok.Getter;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,8 +56,8 @@ public class FlipHelper extends CustomItemButton implements BUListener {
       OUTBIDDED;
 
       @Override
-      public Text getDisplayName() {
-        return Text.of(name());
+      public Component getDisplayName() {
+        return Component.nullToEmpty(name());
       }
     }
 
@@ -78,8 +78,8 @@ public class FlipHelper extends CustomItemButton implements BUListener {
 
     public static OptionGroup.Builder createFlipsGroup() {
       return OptionGroup.createBuilder()
-              .name(Text.literal("Flip Helper Options"))
-              .description(OptionDescription.of(Text.literal("Manage buttons of flip helper action.")));
+              .name(Component.literal("Flip Helper Options"))
+              .description(OptionDescription.of(Component.literal("Manage buttons of flip helper action.")));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -94,7 +94,7 @@ public class FlipHelper extends CustomItemButton implements BUListener {
 
         try {
             ItemStack flipOrderSign = getFlipSign(e.getItemStacks()).orElse(new ItemStack(Items.BARRIER, 1));
-            Optional<BazaarOrder> orderOptional = matchToUserOrder(flipOrderSign.getComponents().get(DataComponentTypes.LORE));
+            Optional<BazaarOrder> orderOptional = matchToUserOrder(flipOrderSign.getComponents().get(DataComponents.LORE));
             if (orderOptional.isEmpty()) {
                 return;
             }
@@ -106,7 +106,7 @@ public class FlipHelper extends CustomItemButton implements BUListener {
 
     @EventHandler
     public void onSlotClicked(SlotClickEvent event) {
-        if (!enabled || event.slot.getIndex() != slotNumber || !inCorrectScreen() || order == null) {
+        if (!enabled || event.slot.getContainerSlot() != slotNumber || !inCorrectScreen() || order == null) {
             return;
         }
 
@@ -121,19 +121,19 @@ public class FlipHelper extends CustomItemButton implements BUListener {
             return;
 
         ItemStack itemStack = new ItemStack(BUTTON_ITEM, 1);
-        itemStack.set(DataComponentTypes.CUSTOM_NAME, getButtonText());
+        itemStack.set(DataComponents.CUSTOM_NAME, getButtonText());
         itemStack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, getButtonStackSize());
         event.setReplacement(itemStack);
     }
 
-    private Text getButtonText() {
+    private Component getButtonText() {
         double flipPrice = computeFlipPrice(order);
         if (flipPrice == 0) {
-            return Text.literal("There are no competing sell offers.").formatted(Formatting.DARK_PURPLE);
+            return Component.literal("There are no competing sell offers.").withStyle(ChatFormatting.DARK_PURPLE);
         } else if (order == null) {
-            return Text.literal("Could not find order").formatted(Formatting.DARK_PURPLE);
+            return Component.literal("Could not find order").withStyle(ChatFormatting.DARK_PURPLE);
         } else {
-            return Text.literal("Flip order for " + Util.getPrettyString(flipPrice) + " coins").formatted(Formatting.DARK_PURPLE);
+            return Component.literal("Flip order for " + Util.getPrettyString(flipPrice) + " coins").withStyle(ChatFormatting.DARK_PURPLE);
         }
     }
 
@@ -185,8 +185,8 @@ public class FlipHelper extends CustomItemButton implements BUListener {
                 continue;
             }
 
-            if (itemStack.getName().getString().contains(FLIP_ORDER_IDENTIFIER)) {
-                LoreComponent lore = itemStack.getComponents().get(DataComponentTypes.LORE);
+            if (itemStack.getHoverName().getString().contains(FLIP_ORDER_IDENTIFIER)) {
+                ItemLore lore = itemStack.getComponents().get(DataComponents.LORE);
                 if (lore != null) {
                     return Optional.of(itemStack);
                 }
@@ -195,7 +195,7 @@ public class FlipHelper extends CustomItemButton implements BUListener {
         return Optional.empty();
     }
 
-    private Optional<PriceInfoContainer> getOrderPriceInfo(LoreComponent lore) {
+    private Optional<PriceInfoContainer> getOrderPriceInfo(ItemLore lore) {
         if (lore.lines().size() <= LORE_LINE_PRICE) return Optional.empty();
 
         String priceLine = lore.lines().get(LORE_LINE_PRICE).getString();
@@ -212,7 +212,7 @@ public class FlipHelper extends CustomItemButton implements BUListener {
         return Optional.empty();
     }
 
-    private Optional<Integer> getVolumeUnclaimed(LoreComponent lore) {
+    private Optional<Integer> getVolumeUnclaimed(ItemLore lore) {
         if (lore.lines().size() <= LORE_LINE_VOLUME) return Optional.empty();
 
         String volumeLine = lore.lines().get(LORE_LINE_VOLUME).getString();
@@ -228,7 +228,7 @@ public class FlipHelper extends CustomItemButton implements BUListener {
         return Optional.empty();
     }
 
-    private Optional<BazaarOrder> matchToUserOrder(LoreComponent lore) {
+    private Optional<BazaarOrder> matchToUserOrder(ItemLore lore) {
         Optional<PriceInfoContainer> priceInfoOpt = getOrderPriceInfo(lore);
         Optional<Integer> orderVolumeFilledOpt = getVolumeUnclaimed(lore);
 
@@ -246,7 +246,7 @@ public class FlipHelper extends CustomItemButton implements BUListener {
     }
 
     private static boolean inCancelOrderScreen() {
-        if (!(MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen inventory)) {
+        if (!(Minecraft.getInstance().screen instanceof ContainerScreen inventory)) {
             return false;
         }
 
@@ -258,18 +258,18 @@ public class FlipHelper extends CustomItemButton implements BUListener {
         }
     }
 
-    private static boolean cantBeFlippedLineIsPresent(GenericContainerScreen inventory, int slot){
-        ItemStack itemStack = inventory.getScreenHandler().getInventory().getStack(slot);
+    private static boolean cantBeFlippedLineIsPresent(ContainerScreen inventory, int slot){
+        ItemStack itemStack = inventory.getMenu().getContainer().getItem(slot);
         if (itemStack.isEmpty()) {
             return false;
         }
 
-        Text customName = itemStack.get(DataComponentTypes.CUSTOM_NAME);
+        Component customName = itemStack.get(DataComponents.CUSTOM_NAME);
         if (customName == null || !customName.getString().contains(FLIP_ORDER_IDENTIFIER)) {
             return false;
         }
 
-        LoreComponent lore = itemStack.get(DataComponentTypes.LORE);
+        ItemLore lore = itemStack.get(DataComponents.LORE);
         if (lore == null || lore.lines().isEmpty()) {
             return false;
         }

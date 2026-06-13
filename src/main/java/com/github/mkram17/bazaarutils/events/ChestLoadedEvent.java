@@ -8,14 +8,14 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import lombok.Getter;
 import meteordevelopment.orbit.ICancellable;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChestLoadedEvent {
     @Getter
-    private Inventory lowerChestInventory;
+    private Container lowerChestInventory;
     @Getter
     private List<ItemStack> itemStacks = new ArrayList<>();
     @Getter
@@ -32,7 +32,7 @@ public class ChestLoadedEvent {
     @RunOnInit
     public static void registerScreenEvent() {
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
-            if (screen instanceof GenericContainerScreen genericContainerScreen) {
+            if (screen instanceof ContainerScreen genericContainerScreen) {
                 // Use an AtomicInteger for mutable integer in lambda
                 final AtomicInteger attempts = new AtomicInteger(0);
                 final int MAX_ATTEMPTS = 50; // ~2.5 seconds timeout (50 * 1 tick)
@@ -42,15 +42,15 @@ public class ChestLoadedEvent {
                     @Override
                     public void run() {
                         // Ensure we are still on the same screen
-                        if (client.currentScreen != genericContainerScreen) {
+                        if (client.screen != genericContainerScreen) {
                             return;
                         }
 
-                        ScreenHandler handler = genericContainerScreen.getScreenHandler();
-                        if (handler instanceof GenericContainerScreenHandler containerHandler) {
-                            Inventory inv = containerHandler.getInventory();
+                        AbstractContainerMenu handler = genericContainerScreen.getMenu();
+                        if (handler instanceof ChestMenu containerHandler) {
+                            Container inv = containerHandler.getContainer();
                             // Check if inventory is populated and not in a loading state
-                            if (!inv.isEmpty() && !inv.getStack(inv.size() - 1).isEmpty() && !isItemLoading(inv)) {
+                            if (!inv.isEmpty() && !inv.getItem(inv.getContainerSize() - 1).isEmpty() && !isItemLoading(inv)) {
                                 // GUI is loaded, post the event
                                 ChestLoadedEvent event = new ChestLoadedEvent();
                                 event.lowerChestInventory = inv;
@@ -70,10 +70,10 @@ public class ChestLoadedEvent {
         });
     }
 
-    private static List<ItemStack> getChestItemSlots(Inventory inventory) {
+    private static List<ItemStack> getChestItemSlots(Container inventory) {
         List<ItemStack> stacks = new ArrayList<>();
-        for (int i = 0; i < inventory.size(); i++) {
-            ItemStack stack = inventory.getStack(i);
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
             if (!stack.isEmpty()) {
                 stacks.add(stack);
             }
@@ -81,12 +81,12 @@ public class ChestLoadedEvent {
         return stacks;
     }
 
-    private static boolean isItemLoading(Inventory inventory) {
-        for (int i = 0; i < inventory.size(); i++) {
-            ItemStack item = inventory.getStack(i);
+    private static boolean isItemLoading(Container inventory) {
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack item = inventory.getItem(i);
             if (item.isEmpty()) continue;
 
-            Text customName = item.get(DataComponentTypes.CUSTOM_NAME);
+            Component customName = item.get(DataComponents.CUSTOM_NAME);
             if (customName != null) {
                 String displayName = Util.removeFormatting(customName.getString());
                 if (displayName.contains("Loading")) {

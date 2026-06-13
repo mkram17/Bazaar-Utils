@@ -11,17 +11,17 @@ import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.SignEditScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.SignEditScreen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 
 import java.util.function.Consumer;
 
@@ -32,7 +32,7 @@ public class GUIUtils {
     @Getter @Setter
     private static guiTypes guiType;
     @Getter @Setter
-    private static Inventory lowerChestInventory;
+    private static Container lowerChestInventory;
 
     @RunOnInit
     public static void subscribe() {
@@ -50,10 +50,10 @@ public class GUIUtils {
         });
     }
 
-    public static ScreenHandler getHandledScreen() {
-        MinecraftClient client = MinecraftClient.getInstance();
+    public static AbstractContainerMenu getHandledScreen() {
+        Minecraft client = Minecraft.getInstance();
         if (client == null || client.player == null) return null;
-        return client.player.currentScreenHandler;
+        return client.player.containerMenu;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -81,12 +81,12 @@ public class GUIUtils {
     public static void closeHandledScreen() {
         try {
             PlayerActionUtil.notifyAll("Closing gui", Util.notificationTypes.GUI);
-            MinecraftClient client = MinecraftClient.getInstance();
+            Minecraft client = Minecraft.getInstance();
             if (client == null) {
                 Util.notifyError("Client is null", new Throwable());
                 return;
             }
-            if(!(client.currentScreen instanceof HandledScreen<?>))
+            if(!(client.screen instanceof AbstractContainerScreen<?>))
                 return;
 
             client.execute(GUIUtils::customCloseHandledScreen);
@@ -97,15 +97,15 @@ public class GUIUtils {
 
     private static void customCloseHandledScreen() {
         try {
-            MinecraftClient client = MinecraftClient.getInstance();
-            ClientPlayerEntity player = client.player;
+            Minecraft client = Minecraft.getInstance();
+            LocalPlayer player = client.player;
             if (player == null) {
                 Util.notifyError("Player is null, cannot close screen", new Throwable());
                 return;
             }
-            player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(player.currentScreenHandler.syncId));
+            player.connection.send(new ServerboundContainerClosePacket(player.containerMenu.containerId));
             client.setScreen(null);
-            player.currentScreenHandler = player.playerScreenHandler;
+            player.containerMenu = player.inventoryMenu;
 
         } catch (Exception e) {
             Util.notifyError("Error encountered while closing screen with custom method", e);
@@ -129,9 +129,9 @@ public class GUIUtils {
     public static void closeSign(){
         try {
             PlayerActionUtil.notifyAll("Closing sign", Util.notificationTypes.GUI);
-            MinecraftClient mcclient = MinecraftClient.getInstance();
-            if (mcclient != null && mcclient.currentScreen instanceof AbstractSignEditScreen signEditScreen) {
-                mcclient.execute(signEditScreen::close);
+            Minecraft mcclient = Minecraft.getInstance();
+            if (mcclient != null && mcclient.screen instanceof AbstractSignEditScreen signEditScreen) {
+                mcclient.execute(signEditScreen::onClose);
             } else {
                 Util.notifyError("Error closing sign: client was null or not in a sign", new Throwable());
             }
@@ -150,25 +150,25 @@ public class GUIUtils {
             return;
         }
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         if (client == null) {
             Util.notifyError("Failed to set sign text: MinecraftClient is null.", new Throwable());
             return;
         }
 
         client.execute(() -> {
-            if (client.currentScreen instanceof SignEditScreen screen) {
+            if (client.screen instanceof SignEditScreen screen) {
                 try {
                     AccessorSignEditScreen signScreen = (AccessorSignEditScreen) screen;
                     String[] lines = text.split("\n", 4);
-                    int originalRow = signScreen.getCurrentRow();
+                    int originalRow = signScreen.getLine();
 
                     for (int i = 0; i < 4; i++) {
                         String line = i < lines.length ? lines[i] : "";
-                        signScreen.setCurrentRow(i);
-                        signScreen.callSetCurrentRowMessage(line);
+                        signScreen.setLine(i);
+                        signScreen.callSetMessage(line);
                     }
-                    signScreen.setCurrentRow(originalRow);
+                    signScreen.setLine(originalRow);
 
                     if (closeAfter) {
                         closeSign();
@@ -185,20 +185,20 @@ public class GUIUtils {
     }
 
     public static void clickSlot(int slotIndex, int button) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        ClientPlayerInteractionManager interactionManager = client.interactionManager;
-        ClientPlayerEntity player = client.player;
+        Minecraft client = Minecraft.getInstance();
+        MultiPlayerGameMode interactionManager = client.gameMode;
+        LocalPlayer player = client.player;
 
         if (interactionManager == null || player == null) return;
 
-        ScreenHandler screenHandler = player.currentScreenHandler;
-        int syncId = screenHandler.syncId;
+        AbstractContainerMenu screenHandler = player.containerMenu;
+        int syncId = screenHandler.containerId;
         Util.tickExecuteLater(1, () -> {
-            interactionManager.clickSlot(
+            interactionManager.handleInventoryMouseClick(
                     syncId,
                     slotIndex,
                     button,
-                    SlotActionType.PICKUP,
+                    ClickType.PICKUP,
                     player
             );
         });
@@ -206,8 +206,8 @@ public class GUIUtils {
     public static ItemStack getChestItem(int chestSlot) {
         if (guiType != guiTypes.CHEST) return ItemStack.EMPTY;
         if (lowerChestInventory == null) return ItemStack.EMPTY;
-        if (chestSlot < 0 || chestSlot >= lowerChestInventory.size()) return ItemStack.EMPTY;
-        ItemStack stack = lowerChestInventory.getStack(chestSlot);
+        if (chestSlot < 0 || chestSlot >= lowerChestInventory.getContainerSize()) return ItemStack.EMPTY;
+        ItemStack stack = lowerChestInventory.getItem(chestSlot);
         return stack == null ? ItemStack.EMPTY : stack;
     }
 }

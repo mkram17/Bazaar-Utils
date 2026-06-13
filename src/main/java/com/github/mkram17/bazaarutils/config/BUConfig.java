@@ -17,11 +17,11 @@ import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
@@ -94,8 +94,8 @@ public class BUConfig {
 
 
     public static void openGUI() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        client.send(() -> client.setScreen(BUConfigGui.create(null, get())));
+        Minecraft client = Minecraft.getInstance();
+        client.schedule(() -> client.setScreen(BUConfigGui.create(null, get())));
     }
 
     public Screen createGUI(Screen parent) {
@@ -126,8 +126,8 @@ public class BUConfig {
          return events;
      }
 
-     public static List<ClickableWidget> getWidgets(){
-        List<ClickableWidget> widgets = new ArrayList<>();
+     public static List<AbstractWidget> getWidgets(){
+        List<AbstractWidget> widgets = new ArrayList<>();
         //automatically added using @RegisterWidget annotation
         return widgets;
     }
@@ -144,42 +144,42 @@ public class BUConfig {
         public Collection<? extends Option<?>> createOptions() {
             ArrayList<Option<?>> optionList = new ArrayList<>();
             optionList.add(Option.<Boolean>createBuilder()
-                    .name(Text.literal("Error Messages"))
+                    .name(Component.literal("Error Messages"))
                     .binding(errorMessages,
                             () -> errorMessages,
                             newVal -> errorMessages = newVal)
                     .controller(BUConfigGui::createBooleanController)
                     .build());
             optionList.add(Option.<Boolean>createBuilder()
-                    .name(Text.literal("GUI Messages"))
+                    .name(Component.literal("GUI Messages"))
                     .binding(guiMessages,
                             () -> guiMessages,
                             newVal -> guiMessages = newVal)
                     .controller(BUConfigGui::createBooleanController)
                     .build());
             optionList.add(Option.<Boolean>createBuilder()
-                    .name(Text.literal("Feature Messages"))
+                    .name(Component.literal("Feature Messages"))
                     .binding(featureMessages,
                             () -> featureMessages,
                             newVal -> featureMessages = newVal)
                     .controller(BUConfigGui::createBooleanController)
                     .build());
             optionList.add(Option.<Boolean>createBuilder()
-                    .name(Text.literal("Bazaar Data Messages"))
+                    .name(Component.literal("Bazaar Data Messages"))
                     .binding(bazaarDataMessages,
                             () -> bazaarDataMessages,
                             newVal -> bazaarDataMessages = newVal)
                     .controller(BUConfigGui::createBooleanController)
                     .build());
             optionList.add(Option.<Boolean>createBuilder()
-                    .name(Text.literal("Command Messages"))
+                    .name(Component.literal("Command Messages"))
                     .binding(commandMessages,
                             () -> commandMessages,
                             newVal -> commandMessages = newVal)
                     .controller(BUConfigGui::createBooleanController)
                     .build());
             optionList.add(Option.<Boolean>createBuilder()
-                    .name(Text.literal("Item Data Messages"))
+                    .name(Component.literal("Item Data Messages"))
                     .binding(itemDataMessages,
                             () -> itemDataMessages,
                             newVal -> itemDataMessages = newVal)

@@ -4,16 +4,16 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.misc.autoregistration.RegisterWidget;
 import com.github.mkram17.bazaarutils.misc.widgets.ItemSlotButtonWidget;
-import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
+import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,9 +23,9 @@ public class BazaarOpenOrdersButton {
 
     @Getter @Setter
     private boolean enabled;
-    private static final Identifier BASE = Identifier.tryParse(BazaarUtils.MODID, "widget/generic_widget_base");
-    private static final Identifier HOVER = Identifier.tryParse(BazaarUtils.MODID, "widget/generic_widget_hover");
-    public static final ButtonTextures SLOT_BUTTON_TEXTURES = new ButtonTextures(
+    private static final Identifier BASE = Identifier.tryBuild(BazaarUtils.MODID, "widget/generic_widget_base");
+    private static final Identifier HOVER = Identifier.tryBuild(BazaarUtils.MODID, "widget/generic_widget_hover");
+    public static final WidgetSprites SLOT_BUTTON_TEXTURES = new WidgetSprites(
             BASE,
             HOVER);
 
@@ -39,7 +39,7 @@ public class BazaarOpenOrdersButton {
             return Collections.emptyList();
 
         ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
-        if (!(MinecraftClient.getInstance().currentScreen instanceof AccessorHandledScreen screen) || !screenInfo.inBazaar())
+        if (!(Minecraft.getInstance().screen instanceof AccessorAbstractContainerScreen screen) || !screenInfo.inBazaar())
             return Collections.emptyList();
 
 
@@ -65,8 +65,8 @@ public class BazaarOpenOrdersButton {
 //                    GUIUtils.closeHandledScreen();
                     PlayerActionUtil.runCommand("managebazaarorders");
                 },
-                Items.BOOK.getDefaultStack(),
-                Text.literal("Go to Orders (Requires Cookie)")
+                Items.BOOK.getDefaultInstance(),
+                Component.literal("Go to Orders (Requires Cookie)")
         );
     }
 }

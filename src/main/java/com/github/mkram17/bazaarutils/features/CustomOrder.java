@@ -18,12 +18,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 import java.util.HashMap;
 import java.util.List;
@@ -65,8 +65,8 @@ public class CustomOrder extends CustomItemButton implements BUListener {
 
     public static OptionGroup.Builder createOrdersGroup(){
         return OptionGroup.createBuilder()
-                .name(Text.literal("Buy Amount Options"))
-                .description(OptionDescription.of(Text.literal("Add buttons for custom buy order/insta buy amounts. To add more do /bu customorder add {order amount} {slot number} (top left slot is slot #1, to the right is #2, etc etc.")));
+                .name(Component.literal("Buy Amount Options"))
+                .description(OptionDescription.of(Component.literal("Add buttons for custom buy order/insta buy amounts. To add more do /bu customorder add {order amount} {slot number} (top left slot is slot #1, to the right is #2, etc etc.")));
     }
 
     @EventHandler
@@ -81,7 +81,7 @@ public class CustomOrder extends CustomItemButton implements BUListener {
         ItemStack itemStack = new ItemStack(getItem(), 1);
         itemStack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, String.valueOf(getOrderAmount()));
 
-        itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Buy " + getOrderAmount()).formatted(Formatting.DARK_PURPLE));
+        itemStack.set(DataComponents.CUSTOM_NAME, Component.literal("Buy " + getOrderAmount()).withStyle(ChatFormatting.DARK_PURPLE));
         event.setReplacement(itemStack);
     }
 
@@ -91,7 +91,7 @@ public class CustomOrder extends CustomItemButton implements BUListener {
         if (!screenInfo.inMenu(ScreenInfo.BazaarMenuType.BUY_ORDER, ScreenInfo.BazaarMenuType.INSTA_BUY) || !isEnabled())
             return;
 
-        if (event.slot.getIndex() != slotNumber)
+        if (event.slot.getContainerSlot() != slotNumber)
             return;
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
 

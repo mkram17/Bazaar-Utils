@@ -3,8 +3,8 @@ package com.github.mkram17.bazaarutils.utils;
 import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
 import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.item.Items;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.item.Items;
 
 import java.util.function.Predicate;
 

@@ -15,11 +15,11 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.component.ComponentType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class BazaarUtils implements ClientModInitializer {
     public static IEventBus EVENT_BUS = new EventBus();
-    public static ArrayList<KeyBinding> keybinds = new ArrayList<>();
+    public static ArrayList<KeyMapping> keybinds = new ArrayList<>();
     public static final String MODID = "bazaarutils";
     public static final String MOD_NAME = "Bazaar Utils";
     public static boolean updatedMajorVersion = false;
@@ -36,8 +36,8 @@ public class BazaarUtils implements ClientModInitializer {
     private static String updateNotes;
     public static ScheduledExecutorService BUExecutorService = Executors.newSingleThreadScheduledExecutor();
 
-    public static ComponentType<String> CUSTOM_SIZE_COMPONENT;
-    public static ComponentType<Boolean> CUSTOM_SHOWPRICECHART_COMPONENT;
+    public static DataComponentType<String> CUSTOM_SIZE_COMPONENT;
+    public static DataComponentType<Boolean> CUSTOM_SHOWPRICECHART_COMPONENT;
 
 
     @Override
@@ -57,14 +57,14 @@ public class BazaarUtils implements ClientModInitializer {
 
     private static void registerDataComponents() {
         CUSTOM_SIZE_COMPONENT = Registry.register(
-                Registries.DATA_COMPONENT_TYPE,
-                Identifier.of(BazaarUtils.MODID, "custom_size"),
-                ComponentType.<String>builder().codec(Codec.STRING).build()
+                BuiltInRegistries.DATA_COMPONENT_TYPE,
+                Identifier.fromNamespaceAndPath(BazaarUtils.MODID, "custom_size"),
+                DataComponentType.<String>builder().persistent(Codec.STRING).build()
         );
         CUSTOM_SHOWPRICECHART_COMPONENT = Registry.register(
-                Registries.DATA_COMPONENT_TYPE,
-                Identifier.of(BazaarUtils.MODID, "has_price_chart"),
-                ComponentType.<Boolean>builder().codec(Codec.BOOL).build()
+                BuiltInRegistries.DATA_COMPONENT_TYPE,
+                Identifier.fromNamespaceAndPath(BazaarUtils.MODID, "has_price_chart"),
+                DataComponentType.<Boolean>builder().persistent(Codec.BOOL).build()
         );
     }
 

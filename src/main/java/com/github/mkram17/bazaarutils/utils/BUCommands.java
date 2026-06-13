@@ -16,9 +16,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.CommandNode;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConfirmLinkScreen;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.network.chat.Component;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -96,17 +96,17 @@ public class BUCommands {
         );
         bazaarutils.then(ClientCommandManager.literal("discord")
                 .executes((context) -> {
-                    MinecraftClient client = MinecraftClient.getInstance();
-                    client.send(() -> {
+                    Minecraft client = Minecraft.getInstance();
+                    client.schedule(() -> {
                         context.getSource().getClient().setScreen(new ConfirmLinkScreen((confirmed) -> {
                             if (confirmed) {
                                     try {
-                                        net.minecraft.util.Util.getOperatingSystem().open(new URI(Util.DISCORD_LINK));
+                                        net.minecraft.util.Util.getPlatform().openUri(new URI(Util.DISCORD_LINK));
                                     } catch (URISyntaxException e) {
                                         throw new RuntimeException(e);
                                     }
                             }
-                            MinecraftClient.getInstance().setScreen(null);
+                            Minecraft.getInstance().setScreen(null);
                         }, Util.DISCORD_LINK, true));
                     });
                     return 1;
@@ -135,12 +135,12 @@ public class BUCommands {
                                             int slotNumber = IntegerArgumentType.getInteger(context, "slot number");
 
                                             if (orderAmount < 1 || orderAmount > 71680) {
-                                                context.getSource().sendError(Text.literal("Order amount must be 1-71,680"));
+                                                context.getSource().sendError(Component.literal("Order amount must be 1-71,680"));
                                                 return 0;
                                             }
 
                                             if (slotNumber < 1 || slotNumber > 36) {
-                                                context.getSource().sendError(Text.literal("Slot number must be 1-36"));
+                                                context.getSource().sendError(Component.literal("Slot number must be 1-36"));
                                                 return 0;
                                             }
                                             CustomOrder orderToAdd = new CustomOrder(
@@ -229,7 +229,7 @@ public class BUCommands {
                                     int restrictNum = IntegerArgumentType.getInteger(context, "rule number") - 1;
                                     RestrictSellControl rule = BUConfig.get().restrictSell.getControls().get(restrictNum);
                                     if (rule == null)
-                                        context.getSource().sendError(Text.literal("Invalid rule number. Check the order in /bu"));
+                                        context.getSource().sendError(Component.literal("Invalid rule number. Check the order in /bu"));
                                     if (rule.getRule() != null) {
                                         PlayerActionUtil.notifyAll(rule.getRule() == RestrictSell.restrictBy.NAME ? "Removed rule: NAME: " + rule.getName() : "Removed rule: " + rule.getRule() + ": " + rule.getAmount());
                                     }

@@ -7,13 +7,14 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import dev.isxander.yacl3.api.Option;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.scoreboard.*;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.scores.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class MaxBuyOrder extends CustomOrder {
             if(itemStack == null)
                 return;
 
-            MinecraftClient client = MinecraftClient.getInstance();
+            Minecraft client = Minecraft.getInstance();
             updatePurse(client);
 
             String name = itemStack.getCustomName().getString();
@@ -65,15 +66,15 @@ public class MaxBuyOrder extends CustomOrder {
 
     private static boolean inCorrectScreen(ScreenChangeEvent event){
         return (event.getNewScreen().getTitle().getString().contains("How many do you want?") || event.getNewScreen().getTitle().getString().contains("➜ Insta"))
-                && event.getNewScreen() instanceof GenericContainerScreen;
+                && event.getNewScreen() instanceof ContainerScreen;
     }
 
     private static ItemStack getItemStack(Screen previousScreen) {
 
-        if(!(previousScreen instanceof GenericContainerScreen containerScreen))
+        if(!(previousScreen instanceof ContainerScreen containerScreen))
             return null;
 
-        ItemStack itemStack = containerScreen.getScreenHandler().getInventory().getStack(13);
+        ItemStack itemStack = containerScreen.getMenu().getContainer().getItem(13);
         if (itemStack.isEmpty()) {
             Util.notifyError("Could not find item in previous container.", new Throwable());
             return null;
@@ -81,23 +82,23 @@ public class MaxBuyOrder extends CustomOrder {
         return itemStack;
     }
 
-    private static void updatePurse(MinecraftClient client) {
-        ClientWorld world = client.world;
+    private static void updatePurse(Minecraft client) {
+        ClientLevel world = client.level;
         if (world == null) return;
 
         Scoreboard scoreboard = world.getScoreboard();
-        ScoreboardObjective objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
+        Objective objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
 
         if (objective == null) return;
 
         ObjectArrayList<String> stringLines = new ObjectArrayList<>();
-        for (ScoreHolder scoreHolder : scoreboard.getKnownScoreHolders()) {
-            if (scoreboard.getScoreHolderObjectives(scoreHolder).containsKey(objective)) {
-                Team team = scoreboard.getScoreHolderTeam(scoreHolder.getNameForScoreboard());
+        for (ScoreHolder scoreHolder : scoreboard.getTrackedPlayers()) {
+            if (scoreboard.listPlayerScores(scoreHolder).containsKey(objective)) {
+                PlayerTeam team = scoreboard.getPlayersTeam(scoreHolder.getScoreboardName());
                 if (team != null) {
-                    String line = team.getPrefix().getString() + team.getSuffix().getString();
+                    String line = team.getPlayerPrefix().getString() + team.getPlayerSuffix().getString();
                     if (!line.trim().isEmpty()) {
-                        stringLines.add(Formatting.strip(line));
+                        stringLines.add(ChatFormatting.stripFormatting(line));
                     }
                 }
             }

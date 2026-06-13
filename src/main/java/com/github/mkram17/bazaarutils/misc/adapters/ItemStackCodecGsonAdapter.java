@@ -4,7 +4,7 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.*;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import java.lang.reflect.Type;
 

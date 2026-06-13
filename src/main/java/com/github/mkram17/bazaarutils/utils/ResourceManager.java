@@ -8,9 +8,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.Resource;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +29,7 @@ public class ResourceManager {
 
     private static final Path MOD_CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve(BazaarUtils.MODID);
     private static final Path LOCAL_RESOURCES_PATH = MOD_CONFIG_DIR.resolve("bazaar-resources.json");
-    private static final Identifier BUNDLED_RESOURCES_ID = Identifier.of(BazaarUtils.MODID, "bazaar-resources.json");
+    private static final Identifier BUNDLED_RESOURCES_ID = Identifier.fromNamespaceAndPath(BazaarUtils.MODID, "bazaar-resources.json");
     private static final String GITHUB_API_URL = "https://api.github.com/repos/mkram17/Skyblock-Bazaar-Conversions/contents/conversionupdating/bazaar-conversions.json?ref=main";
 
 
@@ -53,9 +53,9 @@ public class ResourceManager {
         }
 
         Util.logMessage("Local resources file not found. Copying from bundled resources.");
-        Optional<Resource> resourceOptional = MinecraftClient.getInstance().getResourceManager().getResource(BUNDLED_RESOURCES_ID);
+        Optional<Resource> resourceOptional = Minecraft.getInstance().getResourceManager().getResource(BUNDLED_RESOURCES_ID);
         if (resourceOptional.isPresent()) {
-            try (InputStream inputStream = resourceOptional.get().getInputStream()) {
+            try (InputStream inputStream = resourceOptional.get().open()) {
                 Files.copy(inputStream, LOCAL_RESOURCES_PATH);
                 // don't know the SHA of the bundled file, so stays null to force an update check.
                 BUConfig.get().resourcesSha = "";
@@ -132,9 +132,9 @@ public class ResourceManager {
             Util.notifyError("Could not read local bazaar-resources.json", e);
             // Fallback to bundled resources if local read fails
             try {
-                Optional<Resource> resourceOptional = MinecraftClient.getInstance().getResourceManager().getResource(BUNDLED_RESOURCES_ID);
+                Optional<Resource> resourceOptional = Minecraft.getInstance().getResourceManager().getResource(BUNDLED_RESOURCES_ID);
                 if (resourceOptional.isPresent()) {
-                    try (InputStream inputStream = resourceOptional.get().getInputStream()) {
+                    try (InputStream inputStream = resourceOptional.get().open()) {
                         String content = new String(inputStream.readAllBytes());
                         return JsonParser.parseString(content).getAsJsonObject();
                     }

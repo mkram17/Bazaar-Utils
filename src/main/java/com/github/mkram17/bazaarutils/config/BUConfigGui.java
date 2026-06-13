@@ -9,10 +9,10 @@ import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConfirmLinkScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,7 +20,7 @@ import java.net.URISyntaxException;
 public class BUConfigGui {
     public static Screen create(Screen parent, BUConfig config) {
         return YetAnotherConfigLib.create(BUConfig.HANDLER, (defaults, cfg, builder) -> {
-            builder.title(Text.literal(BazaarUtils.MOD_NAME));
+            builder.title(Component.literal(BazaarUtils.MOD_NAME));
 
             buildGeneralCategory(builder, config);
             buildCustomHelpersCategory(builder);
@@ -35,7 +35,7 @@ public class BUConfigGui {
 
     private static void buildGeneralCategory(YetAnotherConfigLib.Builder builder, BUConfig config) {
         ConfigCategory.Builder generalBuilder = ConfigCategory.createBuilder()
-                .name(Text.literal("General"));
+                .name(Component.literal("General"));
 
         generalBuilder.option(config.flipHelper.createOption());
         generalBuilder.options(config.outbidOrderHandler.createOptions());
@@ -53,8 +53,8 @@ public class BUConfigGui {
 
     private static OptionGroup buildRestrictSellGroup(RestrictSell restrictSell) {
         OptionGroup.Builder restrictSellGroupBuilder = OptionGroup.createBuilder()
-                .name(Text.literal("Sell rules"))
-                .description(OptionDescription.of(Text.literal("Blocks insta selling based on rules. You can add a new rule with /bu rule add {based on volume or price} {amount over which will be restricted} or you can remove it with /bu rule remove {rule number}")));
+                .name(Component.literal("Sell rules"))
+                .description(OptionDescription.of(Component.literal("Blocks insta selling based on rules. You can add a new rule with /bu rule add {based on volume or price} {amount over which will be restricted} or you can remove it with /bu rule remove {rule number}")));
 
         if (restrictSell.getControls().isEmpty()) {
             restrictSell.addRule(RestrictSell.restrictBy.PRICE, 1000000);
@@ -66,8 +66,8 @@ public class BUConfigGui {
 
     private static void buildCustomHelpersCategory(YetAnotherConfigLib.Builder builder) {
       ConfigCategory.Builder customHelpersBuilder = ConfigCategory.createBuilder()
-                .name(Text.literal("Custom Helpers"))
-                .tooltip(Text.literal("Add or manage the functionality among the enabled helpers."));
+                .name(Component.literal("Custom Helpers"))
+                .tooltip(Component.literal("Add or manage the functionality among the enabled helpers."));
 
       OptionGroup.Builder CustomOrderGroup = CustomOrder.createOrdersGroup();
       OptionGroup.Builder FlipHelperGroup = FlipHelper.createFlipsGroup();
@@ -83,10 +83,10 @@ public class BUConfigGui {
 
     private static void buildDeveloperCategory(YetAnotherConfigLib.Builder builder, BUConfig.Developer developer) {
         ConfigCategory.Builder developerBuilder = ConfigCategory.createBuilder()
-                .name(Text.literal("Developer"));
+                .name(Component.literal("Developer"));
 
         developerBuilder.option(Option.<Boolean>createBuilder()
-                .name(Text.literal("All Messages"))
+                .name(Component.literal("All Messages"))
                 .binding(developer.allMessages,
                         () -> developer.allMessages,
                         newVal -> developer.allMessages = newVal)
@@ -95,8 +95,8 @@ public class BUConfigGui {
 
         developerBuilder.group(
                 OptionGroup.createBuilder()
-                        .name(Text.literal("Message Options"))
-                        .description(OptionDescription.of(Text.literal("DEVELOPER ONLY")))
+                        .name(Component.literal("Message Options"))
+                        .description(OptionDescription.of(Component.literal("DEVELOPER ONLY")))
                         .options(developer.createOptions())
                         .build());
 
@@ -105,8 +105,8 @@ public class BUConfigGui {
 
     private static Option<Boolean> createDisableErrorNotifsOption(BUConfig config) {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal("Disable Error Notifications"))
-                .description(OptionDescription.of(Text.literal("Not recommended to enable this unless you are experiencing error spam. This will disable all error notifications, but not the errors themselves.")))
+                .name(Component.literal("Disable Error Notifications"))
+                .description(OptionDescription.of(Component.literal("Not recommended to enable this unless you are experiencing error spam. This will disable all error notifications, but not the errors themselves.")))
                 .binding(
                         config.disableErrorNotifications,
                         () -> config.disableErrorNotifications,
