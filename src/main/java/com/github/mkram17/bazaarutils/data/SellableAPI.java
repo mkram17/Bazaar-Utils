@@ -137,7 +137,7 @@ public class SellableAPI extends BUListener {
             for (Slot slot : event.getPlayerSlots()) {
                 var item = slot.getItem();
 
-                if (event.getContainer() != client.player.getInventory()) continue;
+                if (slot.container != client.player.getInventory()) continue;
 
                 String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
 
@@ -157,7 +157,7 @@ public class SellableAPI extends BUListener {
                 var item = slot.getItem();
 
                 if (remaining <= 0) break;
-                if (event.getContainer() != client.player.getInventory()) continue;
+                if (slot.container != client.player.getInventory()) continue;
                 if (Targets.containsKey(item)) continue;
 
                 String name = DataTypeItemStackKt.getData(item, DataTypes.INSTANCE.getCLEAN_NAME());
