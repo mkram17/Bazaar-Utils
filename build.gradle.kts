@@ -1,9 +1,9 @@
 plugins {
-    id("fabric-loom") version "1.15-SNAPSHOT"
+    id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT"
     id("maven-publish")
+    id("me.modmuss50.mod-publish-plugin") version "2.0.0"
     `maven-publish`
     java
-    id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
 
 base {
@@ -73,19 +73,17 @@ version = if (preReleaseNumber == 0) {
 }
 
 dependencies {
-    mappings(loom.officialMojangMappings())
-
     minecraft("com.mojang:minecraft:${mcVersion}")
-    modImplementation("net.fabricmc:fabric-loader:${deps["fabricLoaderVersion"]}")
+    implementation("net.fabricmc:fabric-loader:${deps["fabricLoaderVersion"]}")
 
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
 
-    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
+    runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
 
     implementation("meteordevelopment:orbit:0.2.4")
     include("meteordevelopment:orbit:0.2.4")
 
-    modImplementation("net.hypixel:hypixel-api-transport-apache:4.4")
+    implementation("net.hypixel:hypixel-api-transport-apache:4.4")
     include("net.hypixel:hypixel-api-transport-apache:4.4")
     include("net.hypixel:hypixel-api-core:4.4")
 
@@ -96,13 +94,13 @@ dependencies {
     include("commons-codec:commons-codec:1.16.0")
 
     // Config lib and settings screen
-    modImplementation("dev.isxander:yet-another-config-lib:${deps["yacl_version"]}-fabric")
+    implementation("dev.isxander:yet-another-config-lib:${deps["yacl_version"]}-fabric")
 
-    modCompileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
+    compileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
 
     // Project Lombok
-    compileOnly("org.projectlombok:lombok:1.18.40")
-    annotationProcessor("org.projectlombok:lombok:1.18.40")
+    compileOnly("org.projectlombok:lombok:1.18.46")
+    annotationProcessor("org.projectlombok:lombok:1.18.46")
     // Mixin Constraints
     include(implementation("com.moulberry:mixinconstraints:1.0.8")!!)
 
@@ -110,7 +108,7 @@ dependencies {
     implementation("org.danilopianini:gson-extras:3.3.0")
     include("org.danilopianini:gson-extras:3.3.0")
     // Skyblocker for compatibility
-    modCompileOnly("maven.modrinth:skyblocker-liap:v${deps["skyblocker_version"]}")
+    compileOnly("maven.modrinth:skyblocker-liap:v${deps["skyblocker_version"]}")
 }
 
 val buildtimeInjectionTask = tasks.register<com.github.mkram17.bazaarutils.build.BuildtimeInjectionTask>("processInitAnnotations") {
@@ -161,13 +159,12 @@ java {
 }
 
 publishMods {
-    file = tasks.remapJar.get().archiveFile
-    additionalFiles.from(tasks.remapSourcesJar.get().archiveFile)
-    version = project.version.toString()
-
-    type = if(releaseChannel == "alpha") ALPHA else STABLE
+    version.set(project.version.toString())
+    file.set(tasks.jar.get().archiveFile)
+    version.set(project.version.toString())
+    type.set(if(releaseChannel == "alpha") ALPHA else STABLE)
     modLoaders.add("fabric")
-    changelog = rootProject.file("UPDATES.MD").readText()
+    changelog.set(rootProject.file("UPDATES.MD").readText())
     displayName = if (preReleaseNumber == 0) {
         "Bazaar Utils v$versionNumber-$releaseChannel for $mcVersion"
     } else {
