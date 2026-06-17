@@ -3,15 +3,21 @@ package com.github.mkram17.bazaarutils.utils;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.minecraft.sound.AudioSource;
+import com.github.mkram17.bazaarutils.utils.minecraft.sound.SoundHolder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.sounds.SoundEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 /**
  * All player-facing communication goes through this class.
@@ -125,6 +131,59 @@ public final class PlayerLogger {
 
     public static void debug(Component message, NotificationType type) {
         debug(message, type, BazaarUtils.LOG);
+    }
+
+    /** Sends a component to the player's action bar (above the hotbar). */
+    public static void sendActionBar(Component message) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.isSameThread()) {
+            doSendActionBar(client, message);
+        } else {
+            client.execute(() -> doSendActionBar(client, message));
+        }
+    }
+
+    private static void doSendActionBar(Minecraft minecraft, Component message) {
+        if (minecraft.player != null) {
+            minecraft.player.displayClientMessage(message, true);
+        }
+    }
+
+    public static void sendTitle(@Nullable Component title, @Nullable Component subtitle) {
+        sendTitle(title, subtitle, 10, 40, 20);
+    }
+
+    /**
+     * Shows a title and optional subtitle overlay to the player.
+     * Pass {@code null} for subtitle to show only a title.
+     */
+    public static void sendTitle(@Nullable Component title, @Nullable Component subtitle, int fadeInTime, int stayTime, int fadeOutTime) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.isSameThread()) {
+            doSendTitle(client, title, subtitle, fadeInTime, stayTime, fadeOutTime);
+        } else {
+            client.execute(() -> doSendTitle(client, title, subtitle, fadeInTime, stayTime, fadeOutTime));
+        }
+    }
+
+    private static void doSendTitle(Minecraft client, @Nullable Component title, @Nullable Component subtitle, int fadeInTime, int stayTime, int fadeOutTime) {
+        if (client.player != null) {
+            client.gui.setTimes(fadeInTime, stayTime, fadeOutTime);
+            client.gui.setTitle(Objects.requireNonNullElseGet(title, Component::empty));
+            client.gui.setSubtitle(Objects.requireNonNullElseGet(subtitle, Component::empty));
+        }
+    }
+
+    public static void playSound(SoundEvent event, float volume, float pitch, AudioSource source) {
+        SoundUtil.playSound(event, volume, pitch, source);
+    }
+
+    public static void playSound(SoundHolder holder) {
+        SoundUtil.playSound(holder);
+    }
+
+    public static void playSound(Holder<SoundEvent> holder, float volume, float pitch, AudioSource source) {
+        SoundUtil.playSound(holder, volume, pitch, source);
     }
 
     /** Sends a client-side command (without the leading slash). */
