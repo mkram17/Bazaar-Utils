@@ -519,11 +519,35 @@
         }
       },
 
+      "channel.{}": {
+        "chat.{}": {
+          "label": "Chat",
+          "hint": "Posts a formatted message to chat."
       "notification.{}": {
         "enabled.{}": {
           "label": "Enabled",
           "hint": "Whether the notification will be produced."
         },
+        "screen_title.{}": {
+          "label": "Screen Title",
+          "hint": "Displays a message in the screen."
+        },
+        "sound.{}": {
+          "label": "Sound",
+          "hint": "Plays a UI click sound."
+        },
+        "os.{}": {
+          "label": "OS Notification",
+          "hint": "Sends a native desktop notification (libnotify on Linux, Notification Center on macOS, system tray on Windows)."
+        },
+        "command.{}": {
+          "label": "Auto Command",
+          "hint": "Automatically runs the configured command."
+        },
+        "remote.{}": {
+          "label": "Remote",
+          "hint": "HTTP POST to the notification's webhook URL (e.g. a Discord webhook)."
+        }
         "auto_open_bazaar.label": "Auto Open Bazaar",
         "emit_chat_message.label": "Emit Chat Message",
         "emit_client_sound.label": "Emit Client Sound"
