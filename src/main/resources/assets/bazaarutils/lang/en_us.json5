@@ -503,19 +503,117 @@
 
     "notifications.{}": {
       "category.label": "Notifications",
-      "category.hint": "Configurations for the notifications pushed by the mod",
+      "category.hint": "Configurations for the notifications features of the mod",
 
-      "separator.order_notifications.label": "Order Notifications",
+      "separator.introductory.label": "Notifications",
+
+      "enabled.{}": {
+        "label": "Enabled",
+        "hint": "Produces notifications to various configurable channels in response to market & order events."
+      },
+
+      "deduplication_window_ticks.{}": {
+        "label": "Deduplication Window",
+        "hint": "Within this many ticks, events sharing the same kind and subject are coalesced into one notification. Set to 0 to disable. (20 ticks = 1 second)"
+      },
+
+      "separator.order_bus_informational.{}": {
+        "label": "Order Notifications",
+        "hint": "Create & manage configurations of notifications related to orders."
+      },
+
+      "coop_orders.{}": {
+        "label": "Co-op Orders",
+        "hint": "Include notifications for co-op members' orders."
+      },
+
+      "batch_orders.{}": {
+        "label": "Batching",
+        "hint": "When multiple notifications of the same kind and product fire within the configured deduplication window, collapse them into one summary message. Example: \"12 buy orders for 71,680 Nether Wart have been outbid.\""
+      },
+
+      "self_outbid.{}": {
+        "label": "Self Outbid",
+        "hint": "By default, your own volume at a price level doesn't count against you — so a spot you hold alone still reports as COMPETITIVE. Enable this if you'd rather any shared price level fire MATCHED notifications regardless of who owns the volume."
+      },
+
+      "notify_position_on_placement.{}": {
+        "label": "Notify on Placement",
+        "hint": "Whether COMPETITIVE/MATCHED/OUTBID notifications fire for an order's very first position check, right after it's placed. Disable this to only be notified when your position changes later due to market activity, not on the initial placement."
+      },
+
       "order_notifications.{}": {
         "label": "Order Notifications",
-        "hint": "Enables notifications related to the status of your Bazaar orders.",
-        "outbid.{}": {
-          "label": "Order Outbidded",
-          "hint": "Configures the notification shown when your order is outbid."
+        "hint": "Each configured notification specifies which order events it triggers by and which channels deliver it. Multiple notification may trigger by the same event."
+      },
+
+      "notification.{}": {
+        "separator.{}": {
+          "chat_channel.{}": {
+            "label": "Chat Channel \uD83D\uDCAC",
+            "hint": "Settings relevant to the Chat channel."
+          },
+          "screen_channel.{}": {
+            "label": "Screen Channel \uD83D\uDD24",
+            "hint": "Settings relevant to the Screen channel."
+          },
+          "sound_channel.{}": {
+            "label": "Sound Channel \uD83D\uDD09",
+            "hint": "Settings relevant to the Sound channel."
+          },
+          "command_channel.{}": {
+            "label": "Auto Command \uD83D\uDD27",
+            "hint": "Settings relevant to the Auto Command channel."
+          },
+          "remote_channel.{}": {
+            "label": "Remote Channel \uD83D\uDD0C",
+            "hint": "Settings relevant to the Remote channel."
+          }
         },
-        "filled.{}": {
-          "label": "Order Filled",
-          "hint": "Configures the notification shown when your order is filled."
+
+        "kinds.{}": {
+          "label": "Kinds",
+          "hint": "The order events this notification triggers by."
+        },
+        "channels.{}": {
+          "label": "Channels",
+          "hint": "Output channels for this notification."
+        },
+        "click_command.{}": {
+          "label": "Clickable Command",
+          "hint": "Command attached as a clickable event to the chat message."
+        },
+        "fade_in_time.{}": {
+          "label": "Fade In Time",
+          "hint": "The duration in milliseconds it takes for the screen title to fade in entirely."
+        },
+        "stay_time.{}": {
+          "label": "Stay Time",
+          "hint": "The duration in milliseconds it takes for the screen title to start to fade out."
+        },
+        "fade_out_time.{}": {
+          "label": "Fade Out Time",
+          "hint": "The duration in milliseconds it takes for screen title to fade out entirely."
+        },
+        "sound_id.{}": {
+          "label": "Sound",
+          "hint": "The sound which is played."
+        },
+        "sound_volume.{}": {
+          "label": "Sound Volume",
+          "hint": "The volume with which the sound is played."
+        },
+        "sound_source.{}": {
+          "label": "Sound Source",
+          "hint": "Configurable channel this sound plays through (Master, Ambient, Block, Player, UI, etc.)."
+        },
+        "auto_command.{}": {
+          "label": "Executed Command",
+          "hint": "Command run automatically when this notification triggers."
+        },
+        "webhook_url.{}": {
+          "label": "Webhook URL",
+          "hint": "HTTP endpoint to POST this notification to (e.g. a Discord webhook URL)."
         }
       },
 
@@ -523,12 +621,8 @@
         "chat.{}": {
           "label": "Chat",
           "hint": "Posts a formatted message to chat."
-      "notification.{}": {
-        "enabled.{}": {
-          "label": "Enabled",
-          "hint": "Whether the notification will be produced."
         },
-        "screen_title.{}": {
+        "screen.{}": {
           "label": "Screen Title",
           "hint": "Displays a message in the screen."
         },
@@ -548,9 +642,47 @@
           "label": "Remote",
           "hint": "HTTP POST to the notification's webhook URL (e.g. a Discord webhook)."
         }
-        "auto_open_bazaar.label": "Auto Open Bazaar",
-        "emit_chat_message.label": "Emit Chat Message",
-        "emit_client_sound.label": "Emit Client Sound"
+      },
+
+      "order.{}": {
+        "kind.{}": {
+          "competitive.{}": {
+            "label": "Competitive",
+            "hint": "Your order is the best offer on the book with no external orders ahead or at the same price."
+          },
+          "matched.{}": {
+            "label": "Matched",
+            "hint": "Your order is at the top of the book but matched by other orders at the same price."
+          },
+          "outbid.{}": {
+            "label": "Outbid",
+            "hint": "Your order has been outbid by another."
+          },
+          "placed.{}": {
+            "label": "Placed",
+            "hint": "A new order has been placed."
+          },
+          "partially_filled.{}": {
+            "label": "Partially Filled",
+            "hint": "An order has been partially filled."
+          },
+          "filled.{}": {
+            "label": "Filled",
+            "hint": "An order has been completely filled and is ready to claim."
+          },
+          "claimed.{}": {
+            "label": "Claimed",
+            "hint": "A filled order has been claimed."
+          },
+          "cancelled.{}": {
+            "label": "Cancelled",
+            "hint": "An order has been cancelled."
+          },
+          "flipped.{}": {
+            "label": "Flipped",
+            "hint": "A buy order has been cancelled and replaced with a sell offer."
+          }
+        }
       }
     },
 
