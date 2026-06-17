@@ -7,16 +7,17 @@
     "defaultRequire": 1
   },
   "client": [
-    "MinecraftMixin",
     "AccessorAbstractContainerScreen",
     "AccessorScreen",
     "AccessorSignEditScreen",
+    "AccessorSkyBlockBazaarReply",
     "DrawContentMixin",
-    "MixinSignEditScreen",
-    "AccessorSkyBlockBazaarReply"
+    "MinecraftMixin",
+    "MixinSignEditScreen"
   ],
   "mixins": [
     "AdvancedOptionsMixin",
+    "JavaConfigParserMixin",
     "ObservableConfigRefreshMixin"
   ]
 }
