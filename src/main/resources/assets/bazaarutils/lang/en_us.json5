@@ -78,7 +78,8 @@
   "bazaarutils.rconfig.ui.{}": {
     "constant.{}": {
       "search": "Search...",
-      "select": "Select"
+      "select": "Select",
+      "no_results": "No results"
     }
   },
 
