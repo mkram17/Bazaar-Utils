@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
 import com.github.mkram17.bazaarutils.config.util.client.ItemRendererProvider;
 import com.github.mkram17.bazaarutils.config.util.client.SlotRendererProvider;
+import com.github.mkram17.bazaarutils.config.util.client.SoundRendererProvider;
 import com.github.mkram17.bazaarutils.utils.BazaarLogger;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.JsonObject;
@@ -69,6 +70,7 @@ public class ConfigUtil {
         
         ItemRendererProvider.register();
         SlotRendererProvider.register();
+        SoundRendererProvider.register();
 
         configurator.register(BUConfig.class, event ->
                 PATCHES.forEach((version, patch) ->
