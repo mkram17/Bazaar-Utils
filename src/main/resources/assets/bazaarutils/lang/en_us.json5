@@ -139,6 +139,53 @@
       }
     },
 
+    "audio_source.{}": {
+      "ui.{}": {
+        "label": "UI",
+        "hint": "UI Volume"
+      },
+      "master.{}": {
+        "label": "Master",
+        "hint": "Master Volume"
+      },
+      "players.{}": {
+        "label": "Players",
+        "hint": "Players Volume"
+      },
+      "ambient.{}": {
+        "label": "Ambient",
+        "hint": "Ambient/Environment Volume"
+      },
+      "voice.{}": {
+        "label": "Voice",
+        "hint": "Narrator/Voice Volume"
+      },
+      "blocks.{}": {
+        "label": "Blocks",
+        "hint": "Blocks Volume"
+      },
+      "hostile.{}": {
+        "label": "Hostile",
+        "hint": "Hostile Mobs Volume"
+      },
+      "neutral.{}": {
+        "label": "Friendly Mobs",
+        "hint": "Friendly Mobs Volume"
+      },
+      "weather.{}": {
+        "label": "Weather",
+        "hint": "Weather Volume"
+      },
+      "records.{}": {
+        "label": "Jukebox/Note Blocks",
+        "hint": "Jukebox/Note Blocks Volume"
+      },
+      "music.{}": {
+        "label": "Music",
+        "hint": "Music Volume"
+      }
+    },
+
     "chat.{}": {
       "category.label": "Chat",
       "category.hint": "Configurations for the chat features of the mod",
