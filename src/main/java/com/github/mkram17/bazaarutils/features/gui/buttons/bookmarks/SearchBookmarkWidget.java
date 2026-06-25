@@ -16,6 +16,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
+import com.github.mkram17.bazaarutils.utils.minecraft.sound.AudioSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.resources.Identifier;
@@ -96,7 +97,7 @@ public class SearchBookmarkWidget {
     }
 
     public static void onWidgetLeftClick(Bookmark bookmark) {
-        SoundUtil.playSound(ItemButton.BUTTON_SOUND, ItemButton.BUTTON_VOLUME);
+        SoundUtil.playSound(ItemButton.BUTTON_SOUND, 0.25f, 1.0f, AudioSource.UI);
 
         Optional<Integer> inventorySlot = SlotLookup.findScreenSlotByProductId(bookmark.productId());
 

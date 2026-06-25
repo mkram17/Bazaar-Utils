@@ -84,7 +84,7 @@ public abstract class InputHelper<T> implements ItemButton {
             return Result.CANCELLED;
         }
 
-        SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
+        SoundUtil.playSound(this);
 
         handleAction(state.get(), this::resetState);
 
