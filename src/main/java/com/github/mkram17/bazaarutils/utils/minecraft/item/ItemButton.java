@@ -7,6 +7,9 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.StateItemGroup;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.AbstractItemModifier;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.ModifyIndicator;
+import com.github.mkram17.bazaarutils.utils.minecraft.sound.AudioSource;
+import com.github.mkram17.bazaarutils.utils.minecraft.sound.SoundHolder;
+import com.github.mkram17.bazaarutils.utils.minecraft.sound.SoundRef;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -20,11 +23,20 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public interface ItemButton extends AbstractItemModifier {
+public interface ItemButton extends AbstractItemModifier, SoundHolder {
     Item DEFAULT_ITEM = Items.BARRIER;
 
-    float BUTTON_VOLUME = 0.2f;
     Holder<SoundEvent> BUTTON_SOUND = SoundEvents.UI_BUTTON_CLICK;
+
+    @Override
+    default SoundRef getSoundRef() {
+        return SoundRef.of(BUTTON_SOUND);
+    }
+
+    @Override
+    default AudioSource getAudioSource() {
+        return AudioSource.UI;
+    }
 
     int getSlotIndex();
     ItemRef getItemRef();

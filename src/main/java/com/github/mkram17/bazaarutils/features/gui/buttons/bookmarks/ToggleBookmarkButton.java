@@ -69,7 +69,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
 
     @Override
     public Result onButtonClicked(int button) {
-        SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
+        SoundUtil.playSound(this);
 
         BookmarkUtil.currentPage().ifPresent(this::toggleBookmark);
 
