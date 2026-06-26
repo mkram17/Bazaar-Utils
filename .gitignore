@@ -1,7 +1,8 @@
 # gradle
 #**/DevOnly/
 .gradle/
-build/
+/build/
+/buildSrc/build/
 out/
 classes/
 

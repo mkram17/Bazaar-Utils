@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "package": "com.github.mkram17.bazaarutils.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "bazaarutils.refmap.json",
+  "plugin": "com.moulberry.mixinconstraints.ConstraintsMixinPlugin",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "MinecraftMixin",
+    "AccessorAbstractContainerScreen",
+    "AccessorScreen",
+    "AccessorSignEditScreen",
+    "DrawContentMixin",
+    "MixinAbstractContainerScreen",
+    "MixinSignEditScreen",
+    "MixinSimpleContainer",
+    "AccessorSkyBlockBazaarReply"
+  ]
+}

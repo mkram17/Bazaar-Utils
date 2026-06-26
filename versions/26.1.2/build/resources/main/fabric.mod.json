@@ -1,0 +1,50 @@
+{
+	"schemaVersion": 1,
+	"id": "bazaarutils",
+	"version": "0.7",
+	"name": "Bazaar Utils",
+	"description": "Bazaar Utils is a QOL mod for the Bazaar. It has useful features like outdated order notifications, item bookmarks, custom order amounts, and more!",
+	"authors": [
+		"mkram17"
+	],
+	"contact": {
+		"sources": "https://github.com/mkram17/Bazaar-Utils/tree/modern",
+		"issues": "https://github.com/mkram17/Bazaar-Utils/issues",
+		"homepage": "https://modrinth.com/project/bazaar-utils",
+		"Modrinth": "https://modrinth.com/project/bazaar-utils",
+		"Discord": "https://discord.gg/xDKjvm5hQd"
+	},
+	"license": "CC-BY-NC-4.0",
+	"icon": "assets/bazaarutils/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.github.mkram17.bazaarutils.BazaarUtils"
+		]
+	},
+	"mixins": [
+		"bazaarutils.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.9",
+		"minecraft": ">=26.1.2 <=26.1.2",
+		"java": ">=21",
+		"fabric-api": "*",
+		"yet_another_config_lib_v3": "*"
+	},
+	"suggests": {
+		"amecsreborn": ">=2.02",
+		"modmenu": ">=13.0.1"
+	},
+	"custom": {
+		"latestMajorUpdateNotes": "v0.6 Update: Too many changes to note here, but user experience is greatly improved. Check the changelog on the Modrinth page/GitHub for more details!",
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/xDKjvm5hQd"
+			},
+			"entrypoints": {
+				"bazaarutils_widgets": "com.github.mkram17.bazaarutils.init.WidgetRegistrar"
+			}
+		}
+	}
+}
