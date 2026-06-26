@@ -3,59 +3,84 @@
 [![Discord](https://img.shields.io/discord/1337164726802579597?style=flat&label=discord&color=red)](https://discord.gg/xDKjvm5hQd)
 [![Modrinth Downloads](https://img.shields.io/modrinth/dt/c4u7nzUZ?label=modrinth%20downloads&color=red)](https://modrinth.com/mod/bazaar-utils)
 [![GitHub Release](https://img.shields.io/github/v/release/mkram17/Bazaar-Utils?style=flat&logoColor=green&color=red)](https://github.com/mkram17/Bazaar-Utils/releases)
-![GitHub License](https://img.shields.io/badge/license-CC--BY--NC--4.0-red?style=flat)
+![GitHub License](https://img.shields.io/github/license/mkram17/Bazaar-Utils?color=red)
 
+## 🔍Features
 
-A Fabric client-side QoL mod for the Hypixel Bazaar.
+-   **Custom Orders**: Create buttons in the buy order and insta buy menu for options of different buy amountss.
+-   **Insta Sell Rules**: Prevent accidental insta selling by requiring multiple clicks based on price, volume, or item name restrictions you choose.
+-   **Flip Helper**: Adds a button in the flip GUI to easily flip order at market price.
+-   **Outdated Item Notifications**: Receive chat alerts when an order is undercut, click the message to open the bazaar.
+-   **Stash Helper**: Keybind (default ALT + V) to close GUIs and pick up your stash.
+-   **Disable Stash Messages**: Option to turn off chat reminders to pick up your stash.
+-   **Bookmarks**: Easily search for bookmarked items from the main Bazaar menu.
+-   **Price Charts**: CTRL+SHIFT + click an item in the Bazaar to open its skyblock.finance page.
 
-## Features
+<details>
+<summary><strong>🖼️ Gallery</strong></summary>
 
-- **Custom Orders**: Create quick-buy buttons in Buy Order and Insta Buy menus for your preferred amounts.
-- **Insta Sell Rules**: Prevent accidental insta-sells with multi-click confirmation rules based on item name, volume, or price.
-- **Flip Helper**: Adds a one-click helper button in the flip GUI to quickly flip at market-adjusted pricing.
-- **Outdated Order Notifications**: Get chat alerts when an order is undercut, with clickable navigation back to the Bazaar.
-- **Stash Helper**: Use a keybind (default `Alt + V`) to close GUIs and collect your stash.
-- **Disable Stash Messages**: Optionally suppress stash reminder chat messages.
-- **Bookmarks**: Save and quickly search favorite Bazaar items from the main Bazaar screen.
-- **Price Charts**: Use `Ctrl + Shift + Click` on Bazaar items to open the item chart page.
-- **Recent Fixes**: Includes fixes for order-data chat parsing issues (see `UPDATES.MD`).
+**Custom Orders**
+![Custom Orders Screenshot](images/custom_orders_example.png)
+_Create custom order buttons (the glass panes on the right) which are shortcuts to buying a set amount of an item in buy orders or insta buy._
 
-## Compatibility
+**Bookmarks**
+![Bookmarks Screenshot](images/updated_bookmarks_ui.png)
+_Bookmarks for items in the bazaar. When you open the main page of the bazaar, you will see your bookmarks on the right. Clicking one will search for that item. To create a bookmark, you can click the button in the top left when you are in an item's page._
 
-- **Minecraft**: `1.21.11` (current target)
-- **Java**: `21`
-- **Fabric Loader**: `0.17.2+`
-- **Current mod version**: `0.6.2-beta.1`
+**Settings General Page**
+![Settings General Page Screenshot](images/updated_general_page.png)
 
-## Using Bazaar Utils
+**Flip Helper**
+![Flip Helper Screenshot](images/Flip_Helper_Example.png)
+_Makes button (the cherry sign) that you can click to flip your order, undercutting the market price by .1 coin._
 
-- Open config with `/bazaarutils` or `/bu`.
-- If your Bazaar Flipper account upgrade is not level 1, set your tax in the config or the mod won't work properly.
+**Price Charts**
+![Price Charts Screenshot](images/Price_Charts.png)
+_Ctrl+Shift click an item in the bazaar to open that item's skyblock.finance page. There is a confirmation screen before you are redirected._
 
-### Other Commands
+**Sell Rules**
+![Sell Rules Screenshot](images/sell_rules_example.png)
+_Create rules which stop you from insta selling items in your inventory. Ex: I can make a rule for "diamond" and a rule for price <100,000, and it would require three clicks to sell your inventory if you have diamonds or the items cost > 100,000._
+</details>
 
-- `/bu help`
-- `/bu discord` opens a link to join the Discord server
+## ❓Using Bazaar Utils
 
-## Dependencies
+REMEMBER -- if your bazaar flipper account upgrade is not level one, change your bazaar tax with `/bazaarutils tax {tax percentage}` or the mod wont work right
+##### To open the mod config use `/bazaarutils` or `/bu`.
+<details>
+<summary><strong>🧾Other Commands</strong></summary>
 
-### Required in your mods folder
+- `/bu customorder add {order amount} {slot number}` \(top left slot is slot #1, to the right is #2, etc etc)\
+- `/bu customorder remove {order number}` \(the order it is shown in config)\
+- `/bu rule add {based on volume, price or item name} {amount over which will be restricted}\`
+- `/bu rule remove {rule number}`
+- `/bu developer` \(to enable developer settings, you probably wont use this)\
 
-- [Fabric API](https://modrinth.com/mod/fabric-api)
-- [Resourceful Config](https://modrinth.com/mod/resourceful-config)
-- [owo-lib](https://modrinth.com/mod/owo-lib)
-- [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
+</details>
 
-### Optional
+## 🧩Dependencies
 
-- [Mod Menu](https://modrinth.com/mod/modmenu)
+<details>
+<summary><strong>🔗Must Have in Mods Folder</strong></summary>
 
-### Bundled with Bazaar Utils
+- Fabric API (you probably already have this https://modrinth.com/mod/fabric-api)
+- Yet Another Config Library (https://modrinth.com/mod/yacl)
 
-- Orbit Event System
-- Mixin Constraints
-- Hypixel API Transport/Core
-- Gson Extras
-- owo Sentinel
-- SkyBlock API
-- Hypixel Mod API
+</details>
+
+<details>
+<summary><strong>✨Optional (But Recommended)</strong></summary>
+
+- Amecs Reborn (https://modrinth.com/mod/amecs-reborn)
+- Mod Menu (https://modrinth.com/mod/modmenu)
+
+</details>
+
+<details>
+<summary><strong>📦Included in Mod Already</strong></summary>
+
+- Orbit Event System (helps in mod development)
+- Mixin Constructs (helps in mod development)
+- Hypixel API Transport (for getting bazaar data)
+- Hypixel API Core (for getting bazaar data)
+</details>
