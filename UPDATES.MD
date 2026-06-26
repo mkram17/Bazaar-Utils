@@ -1,0 +1,1 @@
+- Fixed StackOverflowError crash when loaded with Skyblock-API/SkyOcean caused by recursive ReplaceItemEvent loops
