@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.features.gui.inventory;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
+import com.github.mkram17.bazaarutils.data.SellableAPI;
 import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
@@ -89,13 +90,11 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
     @EventHandler
     private void onContainerLoaded(ContainerLoadedEvent event) {
         colorCache.clear();
-
         if (!isEnabled() || !inCorrectScreen(event)) return;
-
         Minecraft client = Minecraft.getInstance();
         if (client.player == null) return;
 
-        List<OrderInfo> orders = resolveOrders(event.asContext());
+        List<OrderInfo> orders = SellableAPI.InstantSell.orders();
         if (orders.isEmpty()) return;
 
         Set<String> names = orders.stream().map(OrderInfo::getName).collect(Collectors.toSet());
@@ -104,18 +103,5 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
 
     private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {
         colorCache.clear();
-    }
-
-    private static List<OrderInfo> resolveOrders(ScreenContext context) {
-        var instantSellItem = SellablePageLayout.getInstantSellItem(context).map(ItemInfo::itemStack);
-
-        if (context.is(BazaarScreenType.PRODUCT_PAGE))
-            return instantSellItem.flatMap(InstantSellParser::parseProductPageOrder)
-                    .map(InstantSellParser.InstantSellResult::items)
-                    .orElse(List.of());
-
-        return instantSellItem.map(InstantSellParser::parseInstantSellOrders)
-                .map(InstantSellParser.InstantSellResult::items)
-                .orElse(List.of());
     }
 }

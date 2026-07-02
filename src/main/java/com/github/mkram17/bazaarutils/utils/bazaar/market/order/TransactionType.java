@@ -7,6 +7,15 @@ import lombok.Getter;
  *
  * <p>The resolved {@link PriceType} depends on both values: instant transactions use the same
  * market side, while order transactions target the opposite side of the book.</p>
+ *
+ * <p>Two helper comparison methods are provided:
+ * <ul>
+ *   <li>{@link #is(TransactionType)} compares market-bucket equivalence by comparing the
+ *       resolved {@link PriceType} (i.e. whether two TransactionType instances map to the
+ *       same market bucket).</li>
+ *   <li>{@link #isStrictly(TransactionType)} compares the concrete intent by requiring both the
+ *       same {@link Method} and the same {@link Side} (exact side+method equality).</li>
+ * </ul></p>
  */
 public class TransactionType {
 
@@ -103,8 +112,24 @@ public class TransactionType {
      *
      * <p>This compares market bucket equivalence, not exact side/method identity.</p>
      */
-    public boolean is(TransactionType targetTransactionType) {
-        return this.priceType == targetTransactionType.getPriceType();
+     public boolean is(TransactionType targetTransactionType) {
+         return this.priceType == targetTransactionType.getPriceType();
+     }
+
+    /**
+     * Checks whether this transaction is strictly the same as the target.
+     *
+     * <p>Unlike {@link #is(TransactionType)}, which considers two transactions equivalent when
+     * they resolve to the same market {@link PriceType}, this method requires exact equality
+     * of both the {@link Method} (INSTANT/ORDER) and the {@link Side} (BUY/SELL). Use this
+     * when you need to distinguish, for example, an ORDER-buy from an INSTANT-buy even though
+     * they map to the same price bucket.</p>
+     *
+     * @param targetTransactionType transaction to compare against
+     * @return {@code true} when method and side are identical
+     */
+    public boolean isStrictly(TransactionType targetTransactionType) {
+        return this.method == targetTransactionType.getMethod() && this.side == targetTransactionType.getSide();
     }
 
     public String getString() {

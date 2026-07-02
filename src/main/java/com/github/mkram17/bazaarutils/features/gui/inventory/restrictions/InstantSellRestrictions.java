@@ -2,6 +2,8 @@ package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.data.SellableAPI;
+import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
@@ -61,23 +63,32 @@ public class InstantSellRestrictions extends RestrictionHelper<InstantSellRestri
 
     @Override
     protected Optional<InstantSellState> makeState(ContainerLoadedEvent event) {
+        if (!SellableAPI.InstantSell.hasResult()) return Optional.empty();
+
         ScreenContext context = event.asContext();
 
         Optional<ItemInfo> instantSellItem = SellablePageLayout.getInstantSellItem(context);
 
         if (instantSellItem.isEmpty()) return Optional.empty();
 
-        List<OrderInfo> orders = context.is(BazaarScreenType.PRODUCT_PAGE)
-                ? InstantSellParser.parseProductPageOrder(instantSellItem.get().itemStack())
-                        .map(InstantSellParser.InstantSellResult::items)
-                        .orElse(List.of())
-                : InstantSellParser.parseInstantSellOrders(instantSellItem.get().itemStack())
-                        .items();
+        List<OrderInfo> items = SellableAPI.InstantSell.orders();
+        Optional<InstantSellParser.InstantSellResult.OtherItems> otherItems = SellableAPI.InstantSell.otherItems();
 
-        List<RestrictionControl<?>> triggered = getRestrictors().stream()
-                .filter(control -> control.anyMatch(orders))
+        Set<RestrictionControl<?>> triggered = new LinkedHashSet<>(getRestrictors().stream()
+                .filter(control -> control.anyMatch(items))
+                .toList());
+
+        otherItems.ifPresent(other -> triggered.addAll(collectOtherItemsTriggered(other)));
+
+        return Optional.of(new InstantSellState(instantSellItem.get(), List.copyOf(triggered)));
+    }
+
+    private List<RestrictionControl<?>> collectOtherItemsTriggered(InstantSellParser.InstantSellResult.OtherItems otherItems) {
+        return getRestrictors().stream()
+                .filter(control -> control instanceof DoubleRestrictionControl doubleControl && switch (doubleControl.getRule()) {
+                    case PRICE -> otherItems.totalValue() > doubleControl.getAmount();
+                    case VOLUME -> otherItems.volume() > doubleControl.getAmount();
+                })
                 .toList();
-
-        return Optional.of(new InstantSellState(instantSellItem.get(), triggered));
     }
 }
