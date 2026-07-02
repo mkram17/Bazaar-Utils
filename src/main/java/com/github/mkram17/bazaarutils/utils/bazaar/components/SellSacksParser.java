@@ -18,7 +18,7 @@ public final class SellSacksParser {
 
     private SellSacksParser() {}
 
-    public static SellSacksResult parseOrders(ItemStack sellSacksStack) {
+    public static SellSacksResult parseSackOrders(ItemStack sellSacksStack) {
         List<OrderInfo> items = new ArrayList<>();
         Optional<SellSacksResult.OtherItems> otherItems = Optional.empty();
 

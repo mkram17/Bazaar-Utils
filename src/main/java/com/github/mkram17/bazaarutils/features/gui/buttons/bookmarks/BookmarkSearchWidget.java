@@ -2,17 +2,16 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
+import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RegisterWidget;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
-import com.github.mkram17.bazaarutils.utils.minecraft.PlayerSlots;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
 import net.minecraft.client.Minecraft;
@@ -31,7 +30,7 @@ import java.util.Optional;
 public class BookmarkSearchWidget {
     @RegisterWidget
     public static List<ItemSlotButtonWidget> getWidgets() {
-        var dimensions = WidgetManager.getScreenDimensions(BazaarScreens.ALL.toArray(ScreenType[]::new));
+        var dimensions = WidgetManager.getScreenDimensions(BazaarScreenType.values());
         if (dimensions.isEmpty()) return Collections.emptyList();
 
         int buttonSize = ButtonsConfig.BookmarksConfig.OPEN_BOOKMARK_BUTTON.size;
@@ -85,7 +84,7 @@ public class BookmarkSearchWidget {
     public static void onWidgetLeftClick(Bookmark bookmark) {
         SoundUtil.playSound(ItemButton.BUTTON_SOUND, ItemButton.BUTTON_VOLUME);
 
-        Optional<Integer> inventorySlot = PlayerSlots.findScreenSlotByProductId(bookmark.productID());
+        Optional<Integer> inventorySlot = SlotLookup.findScreenSlotByProductId(bookmark.productID());
 
         if (inventorySlot.isPresent()) {
             ContainerManager.clickSlot(inventorySlot.get(), 0);

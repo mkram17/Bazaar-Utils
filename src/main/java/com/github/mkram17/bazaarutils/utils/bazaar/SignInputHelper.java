@@ -1,11 +1,12 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
@@ -22,7 +23,7 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.Container;
@@ -38,7 +39,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,9 +78,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     }
 
     protected Optional<ItemInfo> getInputSign(Container inventory) {
-        int slot = inputSignRef.resolve(inventory);
-
-        return inputSignRef.query(inventory).first(inventory).map(stack -> new ItemInfo(slot, stack));
+        return inputSignRef.query(inventory).first(inventory);
     }
 
     @Override
@@ -114,7 +112,10 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 Inventory playerInventory,
 
                 @NotNull
-                ContainerScreen containerScreen
+                Container container,
+
+                @NotNull
+                AbstractContainerScreen<ChestMenu> containerScreen
         ) implements SignInputState {
         }
 
@@ -129,36 +130,27 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         protected abstract AmountStrategy getAmountStrategy();
 
         @Override
-        protected Optional<TransactionState> makeState(ChestLoadedEvent event) {
-            Optional<ContainerScreen> container = ScreenManager.getInstance()
-                    .current()
-                    .flatMap(context -> context.as(ContainerScreen.class));
+        protected Optional<TransactionState> makeState(ContainerLoadedEvent event) {
+            Container container = event.getContainer();
 
-            Optional<Container> inventory = container
-                    .map(ContainerScreen::getMenu)
-                    .map(ChestMenu::getContainer);
-
-            if (container.isEmpty() || inventory.isEmpty()) return Optional.empty();
-
-            Optional<ItemInfo> inputSign = inventory.flatMap(this::getInputSign);
-
+            Optional<ItemInfo> inputSign = getInputSign(container);
             if (inputSign.isEmpty()) return Optional.empty();
 
             Optional<ItemInfo> productItem = ScreenManager.getInstance()
-                    .findBack(BazaarScreens.ITEM_PAGE)
-                    .flatMap(BazaarScreenHandler::getDisplayItem);
+                    .findBack(BazaarScreenType.PRODUCT_PAGE)
+                    .flatMap(ProductPageLayout::getDisplayItem);
 
             if (productItem.isEmpty()) return Optional.empty();
 
             Optional<String> productId = ScreenManager.getInstance()
-                    .findBack(BazaarScreens.ITEM_PAGE)
-                    .flatMap(BazaarScreenHandler::getDisplayProductId);
+                    .findBack(BazaarScreenType.PRODUCT_PAGE)
+                    .flatMap(ProductPageLayout::getDisplayProductInfo);
 
             if (productId.isEmpty()) return Optional.empty();
 
-            Optional<Double> purse = Optional.ofNullable(Minecraft.getInstance())
+            Optional<Double> purse = Optional.of(Minecraft.getInstance())
                     .flatMap(client -> Optional.ofNullable(client.level))
-                    .flatMap(world -> Optional.ofNullable(world.getScoreboard()))
+                    .flatMap(world -> Optional.of(world.getScoreboard()))
                     .flatMap(scoreboard -> {
                         Objective objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
 
@@ -204,13 +196,13 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (purse.isEmpty()) return Optional.empty();
 
-            Optional<Inventory> playerInventory = Optional.ofNullable(Minecraft.getInstance())
+            Optional<Inventory> playerInventory = Optional.of(Minecraft.getInstance())
                     .flatMap(client -> Optional.ofNullable(client.player))
                     .map(LocalPlayer::getInventory);
 
             if (playerInventory.isEmpty()) return Optional.empty();
 
-            return Optional.of(new TransactionState(purse.get(), productId.get(), productItem.get(), inputSign.get(), playerInventory.get(), container.get()));
+            return Optional.of(new TransactionState(purse.get(), productId.get(), productItem.get(), inputSign.get(), playerInventory.get(), container, event.getScreen()));
         }
 
         public TransactionAmount(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
@@ -226,14 +218,6 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            OptionalDouble price = BazaarDataUtil.findItemPriceOptional(state.productId(), getTransactionType());
-
-            if (price.isEmpty()) {
-                Util.logMessage("Could not retrieve relevant item pricing for " + name + "'s resolved value.");
-
-                return new ResolvedInput.Value(0);
-            }
-
             int amount = switch (getAmountStrategy()) {
                 case MAX -> computeMaxValue(state);
                 case FIXED -> computeFixedValue(state);
@@ -248,12 +232,9 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             return switch (getTransactionType().getMethod()) {
                 case INSTANT -> {
                     if (getTransactionType().isBuy()) {
-                        yield Optional.of(state.containerScreen())
-                            .map(ContainerScreen::getMenu)
-                            .map(ChestMenu::getContainer)
-                            .map(inventory -> SlotLookup.getInventoryItem(inventory, BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot))
+                        yield SlotLookup.getInventoryItem(state.container(), BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot)
                             .map(ItemInfo::itemStack)
-                            .flatMap(BazaarScreens::findOptionAmount)
+                            .flatMap(TransactionPageLayout::findOptionAmount)
                             .map(value -> (int) Math.floor(value))
                             .orElse((int) state.playerInventory()
                                     .getNonEquipmentItems()
@@ -270,7 +251,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                     if (getTransactionType().isBuy()) {
                         int amountCanAfford = (int) (state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()));
 
-                        yield BazaarScreens.findBuyOrderAmountLimit(state.inputSign().itemStack())
+                        yield TransactionPageLayout.findBuyOrderAmountLimit(state.inputSign().itemStack())
                                 .map(limit -> Math.min(amountCanAfford, limit))
                                 .orElse(amountCanAfford);
                     }
@@ -297,7 +278,10 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                 ItemInfo inputSign,
 
                 @NotNull
-                ContainerScreen containerScreen
+                Container container,
+
+                @NotNull
+                AbstractContainerScreen<ChestMenu> screen
         ) implements SignInputState {
         }
 
@@ -308,23 +292,15 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         protected Optional<String> getItemProductId(ItemInfo inputSign) {
             return ScreenManager.getInstance()
-                    .findBack(BazaarScreens.ITEM_PAGE)
-                    .flatMap(BazaarScreenHandler::getDisplayProductId);
+                    .findBack(BazaarScreenType.PRODUCT_PAGE)
+                    .flatMap(ProductPageLayout::getDisplayProductInfo);
         }
 
         @Override
-        protected Optional<TransactionState> makeState(ChestLoadedEvent event) {
-            Optional<ContainerScreen> container = ScreenManager.getInstance()
-                    .current()
-                    .flatMap(context -> context.as(ContainerScreen.class));
+        protected Optional<TransactionState> makeState(ContainerLoadedEvent event) {
+            Container container = event.getContainer();
 
-            Optional<Container> inventory = container
-                    .map(ContainerScreen::getMenu)
-                    .map(ChestMenu::getContainer);
-
-            if (container.isEmpty() || inventory.isEmpty()) return Optional.empty();
-
-            Optional<ItemInfo> inputSign = inventory.flatMap(this::getInputSign);
+            Optional<ItemInfo> inputSign = getInputSign(container);
 
             if (inputSign.isEmpty()) return Optional.empty();
 
@@ -332,7 +308,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (productId.isEmpty()) return Optional.empty();
 
-            return Optional.of(new TransactionState(productId.get(), inputSign.get(), container.get()));
+            return Optional.of(new TransactionState(productId.get(), inputSign.get(), container, event.getScreen()));
         }
 
         public TransactionCost(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
@@ -348,14 +324,6 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected ResolvedInput resolveInput(TransactionState state) {
-            OptionalDouble price = BazaarDataUtil.findItemPriceOptional(state.productId(), getTransactionType());
-
-            if (price.isEmpty()) {
-                Util.logMessage("Could not retrieve relevant item pricing for " + name + "'s resolved value.");
-
-                return new ResolvedInput.Value(0);
-            }
-
             return new ResolvedInput.Value(OrderUtil.getPriceForPosition(state.productId(), getPricingPosition(), getTransactionType()));
         }
     }

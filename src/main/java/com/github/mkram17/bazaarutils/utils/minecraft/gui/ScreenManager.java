@@ -1,14 +1,12 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
-import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
@@ -16,15 +14,12 @@ import meteordevelopment.orbit.EventPriority;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +32,7 @@ public class ScreenManager {
 
     @RunOnInit
     public static void initialize() {
-        BazaarScreens.initialize();
+        BazaarScreenType.registerAll();
 
         EVENT_BUS.subscribe(ScreenManager.class);
 
@@ -53,25 +48,23 @@ public class ScreenManager {
     }
 
     public static Optional<ScreenType> matchType(Screen screen) {
+        ScreenType fallback = null;
+
         for (ScreenType type : types) {
             try {
-                if (type.test(screen)) return Optional.of(type);
-            } catch (Exception ignored) {
-            }
+                if (!type.test(screen)) continue;
+                if (type instanceof BazaarScreenType bst && bst.isEager()) {
+                    if (fallback == null) fallback = type;
+                } else {
+                    return Optional.of(type);
+                }
+            } catch (Exception ignored) {}
         }
-        return Optional.empty();
+
+        return Optional.ofNullable(fallback);
     }
 
-    public record ScreenSnapshot(Screen screen, ScreenType type) {
-        @Override
-        public @NotNull String toString() {
-            return typeLabel(type) + " " + (screen != null ? screen.getClass().getSimpleName() : "null");
-        }
-    }
-
-    private static final int MAX_HISTORY = 8;
-
-    private final ArrayDeque<ScreenSnapshot> history = new ArrayDeque<>(MAX_HISTORY);
+    private final ScreenHistory history = new ScreenHistory();
 
     /**
      * True immediately after a screen closes that is known to cause the server to
@@ -95,8 +88,11 @@ public class ScreenManager {
 
             // A screen closed. We check whether it is a known overlay which double nulls currentScreen
             instance.expectingServerFollowUp = isFollowUpScreen(prev);
-//            instance.logHistory("CLOSE  " + typeLabel(instance.history.isEmpty() ? null : instance.history.peekFirst().type()));
-            instance.logHistoryCompact("CLOSE");
+            if (!instance.expectingServerFollowUp) {
+                instance.history.clear(); // context is gone, currentOrNull() now returns null
+            }
+            instance.logHistory("CLOSE");
+
             return;
         }
 
@@ -104,8 +100,7 @@ public class ScreenManager {
         // we're starting fresh from the game world, or a server follow-up just arrived.
         if (prev == null && !instance.expectingServerFollowUp && !instance.history.isEmpty()) {
             instance.history.clear();
-//            instance.logHistory("CLEAR  (new session)");
-            instance.logHistoryCompact("CLEAR");
+            instance.logHistory("CLEAR");
         }
         instance.expectingServerFollowUp = false;
 
@@ -121,21 +116,20 @@ public class ScreenManager {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private static void onChestLoaded(ChestLoadedEvent event) {
-        ContainerManager.onChestLoaded(event);
+    private static void onContainerLoaded(ContainerLoadedEvent event) {
+        ContainerManager.onContainerLoaded(event);
 
-        ContainerScreen screen = event.getGenericContainerScreen();
-        ScreenType resolved = matchType(screen).orElse(null);
+        AbstractContainerScreen<ChestMenu> screen = event.getScreen();
+        ScreenType resolved = event.getType().orElse(null);
 
-        List<ScreenSnapshot> list = new ArrayList<>(instance.history);
+        if (resolved instanceof BazaarScreenType bst && bst.isEager()) resolved = null;
 
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).screen() == screen) {
-                list.set(i, new ScreenSnapshot(screen, resolved));
-                instance.history.clear();
-                instance.history.addAll(list);
-//                instance.logHistory("LOADED " + typeLabel(resolved));
-                instance.logHistoryCompact("LOADED");
+        for (int i = 0; i < instance.history.size(); i++) {
+            ScreenContext ctx = instance.history.get(i);
+
+            if (ctx != null && ctx.screen() == screen) {
+                instance.history.set(i, new ScreenContext(screen, resolved));
+                instance.logHistory("LOADED");
                 return;
             }
         }
@@ -144,125 +138,67 @@ public class ScreenManager {
     public void setCurrentScreen(Screen screen) {
         if (screen == null) return;
 
-        ScreenSnapshot snapshot = new ScreenSnapshot(screen, matchType(screen).orElse(null));
+        ScreenContext context = new ScreenContext(screen, matchType(screen).orElse(null));
 
-        ScreenSnapshot head = history.peekFirst();
-        if (head != null && head.screen() == screen) {
-            if (head.type() == null && snapshot.type() != null) {
-                history.removeFirst();
-                history.addFirst(snapshot);
-//                logHistory("RETYPE " + typeLabel(snapshot.type()));
-                logHistoryCompact("RETYPE");
-            }
+        // ScreenEvents.AFTER_INIT fires after setScreen — same screen instance arriving twice is a no-op
+        // we no longer check for a RETYPE op as the cases were we fall to that are generally ones where
+        // we depend on off ContainerQuery, and that solely is handled by #onContainerLoaded
+        if (history.peek() != null && history.peek().screen() == screen) return;
 
-            return;
-        }
-
-        if (history.size() >= MAX_HISTORY) history.removeLast();
-        history.addFirst(snapshot);
-//        logHistory("PUSH   " + typeLabel(snapshot.type()));
-        logHistoryCompact("PUSH");
+        history.push(context);
+        logHistory("PUSH");
     }
 
-//    Useful for debugging, too large as to stream it to the chat.
-//    public void logHistory(String trigger) {
-//        StringBuilder builder = new StringBuilder();
-//        String header = "── " + trigger + " ";
-//        builder.append(header).append("─".repeat(Math.max(0, 72 - header.length()))).append("\n");
-//
-//        if (history.isEmpty()) {
-//            builder.append("  (empty)\n");
-//        } else {
-//            int depth = 0;
-//            for (ScreenSnapshot snapshot : history) {
-//                String pointer = depth == 0 ? "▶" : " ";
-//                String typeStr = typeLabel(snapshot.type());
-//                String screenStr = snapshot.screen() != null
-//                        ? snapshot.screen().getClass().getSimpleName() + "@"
-//                        + Integer.toHexString(System.identityHashCode(snapshot.screen()))
-//                        : "null";
-//
-//                builder.append(String.format("  [%d] %s %-55s %s%n", depth, pointer, typeStr, screenStr));
-//                depth++;
-//            }
-//        }
-//
-//        builder.append("─".repeat(72));
-//        Util.logMessage(builder.toString());
-//    }
-
-    private void logHistoryCompact(String trigger) {
+    private void logHistory(String trigger) {
         if (!NotificationType.GUI.isEnabled()) return;
 
-        StringJoiner breadcrumb = new StringJoiner(" › ");
-
-        for (ScreenSnapshot snap : history) {
-            breadcrumb.add(snap.type() != null ? snap.type().shortName() : "???");
-        }
-
-        PlayerActionUtil.notifyAll("[" + trigger.strip() + "] " + breadcrumb, NotificationType.GUI);
-    }
-
-    private static String typeLabel(ScreenType type) {
-        return type == null ? "???" : type.asString();
+        PlayerActionUtil.notifyAll("[" + trigger.strip() + "] " + history.toBreadcrumb(), NotificationType.GUI);
     }
 
     public Optional<ScreenContext> current() {
-        return Optional.ofNullable(history.peekFirst()).map(ScreenContext::new);
+        return Optional.ofNullable(history.peek());
+    }
+
+    public @Nullable ScreenContext currentOrNull() {
+        return current().orElse(null);
     }
 
     public Optional<ScreenContext> getAtDepth(int depth) {
         if (depth < 0 || depth >= history.size()) return Optional.empty();
 
-        Iterator<ScreenSnapshot> it = history.iterator();
-        ScreenSnapshot target = null;
-
-        for (int i = 0; i <= depth; i++) {
-            if (!it.hasNext()) return Optional.empty();
-            target = it.next();
-        }
-
-        return Optional.ofNullable(target).map(ScreenContext::new);
+        return Optional.ofNullable(history.get(depth));
     }
 
     public Optional<ScreenContext> previous() {
         return getAtDepth(1);
     }
-    
+
     public Optional<ScreenContext> findBack(ScreenType... wanted) {
-        Iterator<ScreenSnapshot> it = history.iterator();
+        for (int i = 1; i < history.size(); i++) {
+            ScreenContext ctx = history.get(i);
+            if (ctx == null) continue;
 
-        if (it.hasNext()) it.next();
-
-        while (it.hasNext()) {
-            ScreenSnapshot snap = it.next();
-            if (snap.type() != null) {
-                for (ScreenType w : wanted) {
-                    if (snap.type() == w) return Optional.of(new ScreenContext(snap));
-                }
+            for (ScreenType w : wanted) {
+                if (ctx.is(w)) return Optional.of(ctx);
             }
         }
 
         return Optional.empty();
     }
 
-    public List<ScreenSnapshot> getHistorySnapshot() {
-        return new ArrayList<>(history);
+    public List<ScreenContext> getHistorySnapshot() {
+        List<ScreenContext> list = new ArrayList<>(history.size());
+
+        for (int i = 0; i < history.size(); i++) list.add(history.get(i));
+
+        return list;
     }
 
     public boolean isCurrent(ScreenType... wanted) {
         return current().map(ctx -> ctx.isAnyOf(wanted)).orElse(false);
     }
 
-    public boolean inRegisteredScreenType() {
-        return isCurrent(types.toArray(ScreenType[]::new));
-    }
-
-    public Optional<ContainerScreen> inGenericContainerScreen() {
-        return current().flatMap(ctx -> ctx.as(ContainerScreen.class));
-    }
-
-    public static <T extends AbstractContainerMenu> Optional<T> getCurrentScreenHandler(Class<T> type) {
+    public static <T extends AbstractContainerMenu> Optional<T> getMenu(Class<T> type) {
         Minecraft client = Minecraft.getInstance();
 
         if (client == null || client.player == null) {
@@ -274,42 +210,18 @@ public class ScreenManager {
                 : Optional.empty();
     }
 
-    public static <T extends AbstractContainerScreen<?>> Optional<T> getCurrentlyHandledScreen(Class<T> type) {
+    public static <T extends Screen> Optional<T> getScreen(Class<T> type) {
         Minecraft client = Minecraft.getInstance();
-
-        if (client == null || client.player == null) {
-            return Optional.empty();
-        }
 
         return type.isInstance(client.screen)
                 ? Optional.of(type.cast(client.screen))
                 : Optional.empty();
     }
 
-    public static Optional<Container> getScreenContainer() {
-        return getCurrentScreenHandler(ChestMenu.class)
-                .map(ChestMenu::getContainer);
-    }
-
-    public static Optional<Integer> getScreenContainerSize() {
-        return getScreenContainer().map(Container::getContainerSize);
-    }
-
-    public static ItemInfo getScreenItem(int chestSlot) {
-        return getScreenContainer()
-                .map(inv -> SlotLookup.getInventoryItem(inv, chestSlot))
-                .orElse(ItemInfo.empty(chestSlot));
-    }
-
-    public static Optional<Integer> getInventorySlotFromItemStack(ItemStack wanted) {
-        return getScreenContainer()
-                .flatMap(inv -> SlotLookup.getInventorySlotFromItemStack(inv, wanted));
-    }
-
-    public static void closeHandledScreen() {
+    public static void closeScreen() {
         PlayerActionUtil.notifyAll("Closing GUI", NotificationType.GUI);
 
-        if (getCurrentlyHandledScreen(AbstractContainerScreen.class).isEmpty()) {
+        if (getScreen(AbstractContainerScreen.class).isEmpty()) {
             Util.notifyError("Current screen does not implement HandledScreen", new Throwable());
 
             return;
@@ -318,19 +230,13 @@ public class ScreenManager {
         try {
             Minecraft client = Minecraft.getInstance();
 
-            if (client == null) {
-                Util.notifyError("Client is null", new Throwable());
-
-                return;
-            }
-
-            client.execute(ScreenManager::customCloseHandledScreen);
+            client.execute(ScreenManager::doCloseScreen);
         } catch (Exception exception) {
             Util.notifyError("Error closing GUI", exception);
         }
     }
 
-    private static void customCloseHandledScreen() {
+    private static void doCloseScreen() {
         try {
             Minecraft client = Minecraft.getInstance();
 

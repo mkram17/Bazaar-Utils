@@ -2,7 +2,6 @@ package com.github.mkram17.bazaarutils.features.keybinds;
 
 import com.github.mkram17.bazaarutils.features.util.BUKeybinding;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import net.minecraft.resources.Identifier;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -25,7 +24,7 @@ public class StashHelper extends BUKeybinding {
             }
             if(ticksBetweenPresses > 10) {
                 ticksBetweenPresses = 0;
-                ScreenManager.closeHandledScreen();
+                ScreenManager.closeScreen();
                 PlayerActionUtil.runCommand("pickupstash");
             }
         });

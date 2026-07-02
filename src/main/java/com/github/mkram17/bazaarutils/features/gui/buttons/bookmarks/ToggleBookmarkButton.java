@@ -3,10 +3,13 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenHandler;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
@@ -19,11 +22,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
 @Module
-public class ToggleBookmarkButton extends BUListener implements ItemButton {
+public class ToggleBookmarkButton extends BUListener implements ItemButton, ScreenConstrained {
     @Override
     public int getSlotIndex() {
         return 0;
@@ -34,8 +38,11 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
         return ItemRef.of(BookmarkUtil.currentBookmarkOpt::isEmpty, ItemGroups.BOOKMARKED_STATE_GROUP);
     }
 
-    private boolean inCorrectScreen() {
-        return ScreenManager.getInstance().isCurrent(BazaarScreens.ITEM_PAGE);
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.PRODUCT_PAGE);
+
+    @Override
+    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+        return SCREENS;
     }
 
     public ToggleBookmarkButton() {}
@@ -43,7 +50,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
     private Optional<String> resolveCurrentItemName() {
         return ScreenManager.getInstance()
                 .current()
-                .flatMap(BazaarScreenHandler::getDisplayItemName);
+                .flatMap(ProductPageLayout::getDisplayItemName);
     }
 
     @Override
@@ -89,12 +96,12 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton {
             BookmarkUtil.currentBookmarkOpt = Optional.empty();
         } else {
             ItemStack itemStack = ScreenManager.getInstance().current()
-                    .flatMap(BazaarScreenHandler::getDisplayItem)
+                    .flatMap(ProductPageLayout::getDisplayItem)
                     .map(ItemInfo::itemStack)
                     .orElse(Items.DIAMOND.getDefaultInstance());
 
             String productId = ScreenManager.getInstance().current()
-                    .flatMap(BazaarScreenHandler::getDisplayProductId)
+                    .flatMap(ProductPageLayout::getDisplayProductInfo)
                     .orElse(null);
 
             Bookmark newBookmark = new Bookmark(name, itemStack, productId);

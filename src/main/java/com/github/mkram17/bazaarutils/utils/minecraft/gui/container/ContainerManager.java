@@ -1,80 +1,104 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.container;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 // Utility class for current screen info
 public class ContainerManager {
-    public static void onChestLoaded(ChestLoadedEvent event) {
-        lowerChestInventory = event.getLowerChestInventory();
-    }
+    @Nullable
+    private static AbstractContainerScreen<ChestMenu> screen = null;
 
-    public static String getContainerName() {
-        Optional<ScreenContext> context = ScreenManager.getInstance().current();
+    @Nullable
+    private static Container container = null;
 
-        if (context.isEmpty() || context.get().screen().getTitle() == null) {
-            return null;
-        }
+    @Nullable
+    private static String title = null;
 
-        return Util.removeFormatting(context.get().screen().getTitle().getString());
-    }
+    @Nullable
+    private static Component titleComponent = null;
 
     @Getter
-    private static Container lowerChestInventory = null;
+    @NotNull
+    private static List<Slot> containerSlots = List.of();
 
-    public static int getLowerChestInventorySize() {
-        Container inventory = getLowerChestInventory();
+    @Getter
+    @NotNull
+    private static List<Slot> playerSlots = List.of();
 
-        if (inventory == null) {
-            return -1;
-        }
+    public static void onContainerLoaded(ContainerLoadedEvent event) {
+        screen = event.getScreen();
+        container = event.getContainer();
+        title = event.getTitle();
+        titleComponent = event.getTitleComponent();
+        containerSlots = event.getContainerSlots();
+        playerSlots = event.getPlayerSlots();
+    }
 
-        return inventory.getContainerSize();
+    public static Optional<Container> getContainer() {
+        return Optional.ofNullable(container);
+    }
+
+    public static Optional<String> getTitle() {
+        return Optional.ofNullable(title);
+    }
+
+    public static Optional<Component> getTitleComponent() {
+        return Optional.ofNullable(titleComponent);
+    }
+
+    public static Optional<AbstractContainerScreen<ChestMenu>> getScreen() {
+        return Optional.ofNullable(screen);
+    }
+
+    public static int getContainerSize() {
+        return container != null ? container.getContainerSize() : -1;
+    }
+
+    public static ItemInfo getContainerItem(int chestSlot) {
+        return getContainer()
+                .map(container -> SlotLookup.getInventoryItem(container, chestSlot))
+                .orElse(ItemInfo.empty(chestSlot));
+    }
+
+    public static Optional<Integer> getContainerSlotOf(ItemStack wanted) {
+        return getContainer()
+                .flatMap(container -> SlotLookup.getInventorySlotFromItemStack(container, wanted));
     }
 
     public static void clickSlot(int slotIndex, int button) {
-        Optional<AbstractContainerMenu> handlerOpt = ScreenManager.getCurrentScreenHandler(AbstractContainerMenu.class);
+        Optional<AbstractContainerMenu> menu = ScreenManager.getMenu(AbstractContainerMenu.class);
 
         Minecraft client = Minecraft.getInstance();
-
         MultiPlayerGameMode interactionManager = client.gameMode;
+
         LocalPlayer player = client.player;
 
-        if (interactionManager == null || player == null || handlerOpt.isEmpty()) {
-            return;
-        }
+        if (interactionManager == null || player == null || menu.isEmpty()) return;
 
-        int syncId = handlerOpt.get().containerId;
+        int syncId = menu.get().containerId;
 
-        Util.tickExecuteLater(1, () -> interactionManager
-                .handleInventoryMouseClick(syncId,
-                        slotIndex,
-                        button,
-                        ClickType.PICKUP,
-                        player
-                )
+        Util.tickExecuteLater(1, () ->
+                interactionManager.handleInventoryMouseClick(syncId, slotIndex, button, ClickType.PICKUP, player)
         );
-    }
-
-    public static ItemInfo getChestItem(int chestSlot) {
-        return SlotLookup.getInventoryItem(lowerChestInventory, chestSlot);
-    }
-
-    public static int getInventorySlotFromItemStack(Container lowerChestInventory, ItemStack itemStack) {
-        return SlotLookup.getInventorySlotFromItemStack(lowerChestInventory, itemStack).orElse(-1);
     }
 }

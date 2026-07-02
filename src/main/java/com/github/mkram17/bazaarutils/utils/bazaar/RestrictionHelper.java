@@ -1,11 +1,12 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.SlotClickEvent;
 import com.github.mkram17.bazaarutils.events.listener.BUListener;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
-import com.github.mkram17.bazaarutils.utils.config.ToggleableFeature;
+import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
+import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import lombok.Getter;
 import meteordevelopment.orbit.EventHandler;
@@ -15,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionState> extends BUListener implements ToggleableFeature {
+public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionState> extends BUListener implements ToggleableFeature, ScreenConstrained {
     public interface RestrictionState {
         @NotNull
         ItemInfo targetItem();
@@ -35,7 +36,7 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     private transient boolean isRestricted = true;
     private transient Optional<T> state = Optional.empty();
 
-    protected abstract Optional<T> makeState(ChestLoadedEvent event);
+    protected abstract Optional<T> makeState(ContainerLoadedEvent event);
 
     protected void resetState() {
         state = Optional.empty();
@@ -56,8 +57,8 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     }
 
     @EventHandler
-    public void onChestLoaded(ChestLoadedEvent event) {
-        if (!(isEnabled() && inCorrectScreen())) {
+    public void onContainerLoaded(ContainerLoadedEvent event) {
+        if (!(isEnabled() && inCorrectScreen(event))) {
             resetState();
             return;
         }
@@ -83,8 +84,6 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
             event.cancel();
         }
     }
-
-    public abstract boolean inCorrectScreen();
 
     protected String getMessage(T state) {
         StringBuilder message = new StringBuilder(getMessagePrefix());

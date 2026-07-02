@@ -30,108 +30,71 @@ public class SignManager {
         });
     }
 
-    public static void closeSign() {
-        try {
-            PlayerActionUtil.notifyAll("Closing sign", NotificationType.GUI);
+    public static void setSignText(String text, boolean closeAfter) {
+        setSignTextInternal(text, closeAfter, 5);
+    }
 
-            Minecraft client = Minecraft.getInstance();
-            ScreenManager screenManager = ScreenManager.getInstance();
 
-            Optional<ScreenContext> context = screenManager.current();
+    private static void setSignTextInternal(String text, boolean closeAfter, int attemptsLeft) {
+        if (attemptsLeft <= 0) {
+            Util.notifyError("Failed to set sign text: max attempts reached.", new Throwable());
+            return;
+        }
 
-            if (context.isEmpty()) {
-                Util.notifyError("Error closing sign: client and manager was null or not in a sign", new Throwable());
+        Minecraft.getInstance().execute(() -> {
+            syncSignScreen();
+
+            Optional<ScreenContext> context = ScreenManager.getInstance().current();
+
+            if (context.isEmpty() || !(context.get().screen() instanceof SignEditScreen)) {
+                Util.tickExecuteLater(4, () -> setSignTextInternal(text, closeAfter, attemptsLeft - 1));
 
                 return;
             }
 
-            if (client.screen instanceof SignEditScreen signEditScreen && signEditScreen != context.get().screen()) {
-                screenManager.setCurrentScreen(signEditScreen);
-            }
+            try {
+                AccessorSignEditScreen signScreen = (AccessorSignEditScreen) context.get().screen();
+                String[] lines = text.split("\n", 4);
+                int originalRow = signScreen.getLine();
 
-            client.execute(context.get().screen()::onClose);
+                for (int i = 0; i < 4; i++) {
+                    signScreen.setLine(i);
+                    signScreen.callSetMessage(i < lines.length ? lines[i] : "");
+                }
+
+                signScreen.setLine(originalRow);
+
+                if (closeAfter) closeSign();
+            } catch (Exception exception) {
+                Util.notifyError("Error executing sign text update", exception);
+            }
+        });
+    }
+
+    public static void closeSign() {
+        try {
+            PlayerActionUtil.notifyAll("Closing sign", NotificationType.GUI);
+
+            syncSignScreen();
+
+            ScreenManager.getInstance().current()
+                    .map(ScreenContext::screen)
+                    .ifPresentOrElse(
+                            screen -> Minecraft.getInstance().execute(screen::onClose),
+                            () -> Util.notifyError("Error closing sign: not in a sign screen", new Throwable())
+                    );
         } catch (Exception e) {
             Util.notifyError("Unknown error while closing sign", e);
         }
     }
 
-    public static void setSignText(String text, boolean closeAfter) {
-        setSignTextInternal(text, closeAfter, 5);
-    }
+    private static void syncSignScreen() {
+        ScreenManager.getScreen(SignEditScreen.class).ifPresent(live -> {
+            boolean outOfSync = ScreenManager.getInstance().current()
+                    .map(context -> context.screen() != live)
+                    .orElse(true);
 
-    private static void setSignTextInternal(String text, boolean closeAfter, int attemptsLeft) {
-        if (attemptsLeft <= 0) {
-            Util.notifyError("Failed to set Sign text: max amount of attempts reached.", new Throwable());
-
-            return;
-        }
-
-        Minecraft client = Minecraft.getInstance();
-
-        if (client == null) {
-            Util.notifyError("Failed to set sign text: MinecraftClient is null.", new Throwable());
-
-            return;
-        }
-
-        client.execute(() -> {
-            ScreenManager screenManager = ScreenManager.getInstance();
-
-            Screen currentScreen = client.screen;
-            if (currentScreen instanceof SignEditScreen) {
-                Optional<ScreenContext> context = screenManager.current();
-
-                if (context.isEmpty() || context.get().screen() != currentScreen) {
-                    screenManager.setCurrentScreen(currentScreen);
-                }
-            }
-
-            Optional<ScreenContext> context = screenManager.current();
-
-            if (context.isEmpty()) {
-                Util.tickExecuteLater(4, () -> setSignTextInternal(text, closeAfter, attemptsLeft - 1));
-
-                return;
-            }
-
-            Screen screen = context.get().screen();
-
-            if (!(screen instanceof SignEditScreen)) {
-                Util.tickExecuteLater(4, () -> setSignTextInternal(text, closeAfter, attemptsLeft - 1));
-
-                return;
-            }
-
-
-
-            if (client.screen instanceof SignEditScreen signEditScreen && signEditScreen != context.get().screen()) {
-                screenManager.setCurrentScreen(signEditScreen);
-            }
-
-            try {
-                AccessorSignEditScreen signScreen = (AccessorSignEditScreen) context.get().screen();
-
-                String[] lines = text.split("\n", 4);
-                int originalRow = signScreen.getLine();
-
-                for (int i = 0; i < 4; i++) {
-                    String line = i < lines.length ? lines[i] : "";
-
-                    signScreen.setLine(i);
-                    signScreen.callSetMessage(line);
-                }
-
-                signScreen.setLine(originalRow);
-
-                if (closeAfter) {
-                    closeSign();
-                }
-            } catch (Exception exception) {
-                Util.notifyError("Error executing sign text update", exception);
-
-                exception.printStackTrace();
-            }
+            if (outOfSync) ScreenManager.getInstance().setCurrentScreen(live);
         });
     }
-
 }

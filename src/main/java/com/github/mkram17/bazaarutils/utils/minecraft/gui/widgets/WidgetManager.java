@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
@@ -35,7 +35,7 @@ public class WidgetManager {
     private static void onScreenChange(ScreenChangeEvent event) {
         if (event.getOldScreen() != null) removeWidgetsFrom(event.getOldScreen());
 
-        // causes a flash when onChestLoaded removes and re-adds immediately after.
+        // causes a flash when onContainerLoaded removes and re-adds immediately after.
         Screen next = event.getNewScreen();
         if (next == null || next instanceof ContainerScreen) return;
 
@@ -43,8 +43,8 @@ public class WidgetManager {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    private static void onChestLoaded(ChestLoadedEvent event) {
-        Screen screen = event.getGenericContainerScreen();
+    private static void onContainerLoaded(ContainerLoadedEvent event) {
+        Screen screen = event.getScreen();
         removeWidgetsFrom(screen);
         addWidgetsTo(screen);
     }
@@ -81,7 +81,7 @@ public class WidgetManager {
         int backgroundWidth = screen.getImageWidth();
 
         if (backgroundWidth <= 0) {
-            PlayerActionUtil.notifyAll("BackgroundWidth not yet initialized for " + ContainerManager.getContainerName(), NotificationType.GUI);
+            PlayerActionUtil.notifyAll("BackgroundWidth not yet initialized for " + ContainerManager.getTitle(), NotificationType.GUI);
         }
 
         return Optional.of(new ScreenWidgetDimensions(x, y, backgroundWidth));

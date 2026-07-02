@@ -1,9 +1,9 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
+import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.ChestLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreens;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -11,6 +11,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnIn
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -40,14 +41,14 @@ public class OrderUpdater {
     private static final double FILL_TOLERANCE_RATIO = 0.05; //5%
 
     @EventHandler(priority = EventPriority.HIGH)
-    public static void onGUI(ChestLoadedEvent event) {
-        if (!ScreenManager.getInstance().isCurrent(BazaarScreens.ORDERS_PAGE)) {
+    public static void onGUI(ContainerLoadedEvent event) {
+        if (!ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
             return;
         }
 
-        lowerChestInventory = event.getLowerChestInventory();
+        lowerChestInventory = event.getContainer();
 
-        List<ItemStack> allInventoryStacks = event.getItemStacks();
+        List<ItemStack> allInventoryStacks = event.getContainerSlots().stream().map(Slot::getItem).toList();
         List<ItemStack> orderStacks = extractOrderStacks(allInventoryStacks);
 
         updateWatchedOrders(orderStacks);
