@@ -88,6 +88,21 @@
       "not_upgraded.label": "Not Upgraded",
       "first_tier.label": "Bazaar Flipper I",
       "second_tier.label": "Bazaar Flipper II"
+    },
+
+    "commands.bazaar.{}": {
+      "open_bazaar.{}": {
+        "label": "Open Bazaar",
+        "hint": "Open the Bazaar"
+      },
+      "open_orders.{}": {
+        "label": "Open Orders",
+        "hint": "Open the Manage Orders page",
+      },
+      "search_item.{}": {
+        "label": "Search Item",
+        "hint": "Search the item on the Bazaar"
+      },
     }
   },
 
