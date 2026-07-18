@@ -42,7 +42,7 @@ public class PriceCharts implements ItemTooltipCallback, BUListener {
     @Override
     public void getTooltip(ItemStack stack, Item.TooltipContext ctx, TooltipFlag type, List<Component> lines) {
         if (stack == null || stack.isEmpty() || !shouldShow()) return;
-        if (stack.getItem().getName().getString().contains("GLASS_PANE")) return;
+        if (stack.getItem().getName(stack).getString().contains("GLASS_PANE")) return;
 
         String key = sanitizeName(stack.getHoverName().getString());
 

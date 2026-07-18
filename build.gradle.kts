@@ -96,7 +96,7 @@ dependencies {
     // Config lib and settings screen
     implementation("dev.isxander:yet-another-config-lib:${deps["yacl_version"]}-fabric")
 
-    compileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
+    compileOnly("maven.modrinth:modmenu:${property("modmenu_version")}")
 
     // Project Lombok
     compileOnly("org.projectlombok:lombok:1.18.46")

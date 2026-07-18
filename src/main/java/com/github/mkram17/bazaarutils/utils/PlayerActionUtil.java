@@ -19,7 +19,7 @@ public class PlayerActionUtil {
 
     static void sendPlayerMessage(Component message){
         if (Minecraft.getInstance().player != null) {
-            Minecraft.getInstance().player.displayClientMessage(message, false);
+            Minecraft.getInstance().player.sendSystemMessage(message);
         } else {
             Util.logMessage("Could not send notification because player is null. Message: " + message);
             Util.tickExecuteLater(100, () -> sendPlayerMessage(message));

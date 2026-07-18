@@ -63,8 +63,9 @@ public class Bookmark extends CustomItemButton implements BUListener {
     public Bookmark(String name) {
         this.name = name;
         this.slotNumber = 0;
-        changeVisuals(isItemBookmarked(this.name));
-        this.replacementItem.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, "★");
+        // replacementItem stays null here and is created lazily in replaceItemEvent —
+        // since 26.1, ItemStacks cannot be constructed until a world is loaded
+        // ("Components not bound yet"), and Bookmarks are also created during client init.
         this.bookmarkedItemStack = findItemStack(name);
         this.orderInfo = new OrderInfoContainer(name, null, null, PriceInfoContainer.PriceType.INSTABUY, null);
 

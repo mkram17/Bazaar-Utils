@@ -9,7 +9,7 @@ import com.github.mkram17.bazaarutils.utils.GUIUtils;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
@@ -32,7 +32,7 @@ public class StashHelper {
 
     @RunOnInit
     public static void initializeKeybind(){
-        KeyBindingHelper.registerKeyBinding(keyBinding);
+        KeyMappingHelper.registerKeyMapping(keyBinding);
     }
 
     @RunOnInit

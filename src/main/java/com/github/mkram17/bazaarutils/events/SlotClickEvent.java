@@ -5,7 +5,7 @@ import lombok.Setter;
 import meteordevelopment.orbit.ICancellable;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import org.jetbrains.annotations.NotNull;
 
 public class SlotClickEvent implements ICancellable {
@@ -15,13 +15,13 @@ public class SlotClickEvent implements ICancellable {
     public final Slot slot;
     public final int slotId;
     public int clickedButton;
-    public ClickType clickType;
+    public ContainerInput clickType;
     public boolean usePickblockInstead = false;
     @Setter
     @Getter
     public boolean cancelled = false;
 
-    public SlotClickEvent(AbstractContainerScreen<?> handledScreen, Slot slot, int slotId, int clickedButton, ClickType actionType) {
+    public SlotClickEvent(AbstractContainerScreen<?> handledScreen, Slot slot, int slotId, int clickedButton, ContainerInput actionType) {
         this.handledScreen = handledScreen;
         this.slot = slot;
         this.slotId = slotId;

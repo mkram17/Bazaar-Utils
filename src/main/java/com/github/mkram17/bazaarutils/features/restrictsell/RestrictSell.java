@@ -59,13 +59,13 @@ public class RestrictSell implements BUListener {
         try {
             if (e.getSlotId() != SELL_ITEM_SLOT_ID || !screenInfo.inBazaar())
                 return;
-            if (e.getOriginal() == null || e.getOriginal().getComponentsPatch().get(DataComponents.LORE) == null)
+            if (e.getOriginal() == null || e.getOriginal().get(DataComponents.LORE) == null)
                 return;
-            if (e.getOriginal().getComponentsPatch().get(DataComponents.LORE).get().styledLines().size() < 6 || e.getOriginal().getComponentsPatch().get(DataComponents.LORE).get().styledLines().get(4).getString().contains("Loading"))
+            if (e.getOriginal().get(DataComponents.LORE).styledLines().size() < 6 || e.getOriginal().get(DataComponents.LORE).styledLines().get(4).getString().contains("Loading"))
                 return;
 
             ItemStack sellButton = e.getOriginal().copy();
-            List<Component> changedComponents = sellButton.getComponentsPatch().get(DataComponents.LORE).get().styledLines();
+            List<Component> changedComponents = sellButton.get(DataComponents.LORE).styledLines();
 
             int numItems = findNumItems(changedComponents);
             ArrayList<SellItem> items = getItems(changedComponents, numItems);

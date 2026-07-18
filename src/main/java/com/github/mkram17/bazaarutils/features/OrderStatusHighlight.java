@@ -72,7 +72,7 @@ public class OrderStatusHighlight implements BUListener {
         ItemTooltipCallback.EVENT.register((ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, TooltipFlag type, List<Component> lines) -> {
             if (!enabled) return;
             ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
-            if (stack == null || stack.isEmpty() || stack.getItem().getName().getString().contains("GLASS_PANE") || !screenInfo.inMenu(ScreenInfo.BazaarMenuType.ORDER_SCREEN)) {
+            if (stack == null || stack.isEmpty() || stack.getItem().getName(stack).getString().contains("GLASS_PANE") || !screenInfo.inMenu(ScreenInfo.BazaarMenuType.ORDER_SCREEN)) {
                 return;
             }
 

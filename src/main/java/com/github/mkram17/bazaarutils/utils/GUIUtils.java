@@ -21,7 +21,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 
 import java.util.function.Consumer;
 
@@ -194,11 +194,11 @@ public class GUIUtils {
         AbstractContainerMenu screenHandler = player.containerMenu;
         int syncId = screenHandler.containerId;
         Util.tickExecuteLater(1, () -> {
-            interactionManager.handleInventoryMouseClick(
+            interactionManager.handleContainerInput(
                     syncId,
                     slotIndex,
                     button,
-                    ClickType.PICKUP,
+                    ContainerInput.PICKUP,
                     player
             );
         });

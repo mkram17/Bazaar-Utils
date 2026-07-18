@@ -90,12 +90,12 @@ public class OrderUpdater {
         }
         order.setItemInfo(parsedItemInfo);
 
-        Optional<? extends ItemLore> loreComponent = order.getItemInfo().itemStack().getComponentsPatch().get(DataComponents.LORE);
-        if (loreComponent == null || loreComponent.isEmpty()) {
+        ItemLore loreComponent = order.getItemInfo().itemStack().get(DataComponents.LORE);
+        if (loreComponent == null) {
             return;
         }
 
-        List<Component> loreLines = loreComponent.get().styledLines();
+        List<Component> loreLines = loreComponent.styledLines();
 
 
         int amountFilled = parseAmountFilled(loreLines);
@@ -120,11 +120,11 @@ public class OrderUpdater {
         String title = stack.getHoverName().getString();
         ItemInfo itemInfo = new ItemInfo(mapScreenIndexToInventoryIndex(stack), stack);
 
-        Optional<? extends ItemLore> loreComponent = stack.getComponentsPatch().get(DataComponents.LORE);
-        if (loreComponent == null || loreComponent.isEmpty()) {
+        ItemLore loreComponent = stack.get(DataComponents.LORE);
+        if (loreComponent == null) {
             return null;
         }
-        List<Component> loreLines = loreComponent.get().styledLines();
+        List<Component> loreLines = loreComponent.styledLines();
 
         OrderType orderType = detectOrderType(title);
         if (orderType == null) {

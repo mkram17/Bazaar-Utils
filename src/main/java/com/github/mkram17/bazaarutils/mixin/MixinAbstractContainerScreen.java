@@ -12,12 +12,12 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.data.AtlasIds;
 import net.minecraft.util.ARGB;
@@ -35,8 +35,8 @@ public abstract class MixinAbstractContainerScreen extends Screen {
 		super(title);
 	}
 
-	@Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V", at = @At("HEAD"), cancellable = true)
-	private void onHandleMouseClick(Slot slot, int slotId, int button, ClickType actionType, CallbackInfo ci) {
+	@Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ContainerInput;)V", at = @At("HEAD"), cancellable = true)
+	private void onHandleMouseClick(Slot slot, int slotId, int button, ContainerInput actionType, CallbackInfo ci) {
 		if (slot == null){
             return;
         }
@@ -58,11 +58,11 @@ public abstract class MixinAbstractContainerScreen extends Screen {
 
 		if (event.usePickblockInstead) {
 			assert client != null && client.player != null && client.gameMode != null;
-            client.gameMode.handleInventoryMouseClick(
+            client.gameMode.handleContainerInput(
 					screen.getMenu().containerId,
 					slotId,
 					2,
-					ClickType.PICKUP,
+					ContainerInput.PICKUP,
 					client.player
 			);
 			ci.cancel();
@@ -92,12 +92,8 @@ public abstract class MixinAbstractContainerScreen extends Screen {
 		}
 	}
 
-	@Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItem(Lnet/minecraft/world/item/ItemStack;III)V"))
-    //? if > 1.21.10 {
-    private void bazaarutils$drawOnItem(GuiGraphics context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
-    //? } else {
-	/*private void drawOnItem(DrawContext context, Slot slot, CallbackInfo ci) {
-    *///? }
+	@Inject(method = "extractSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;item(Lnet/minecraft/world/item/ItemStack;III)V"))
+    private void bazaarutils$drawOnItem(GuiGraphicsExtractor context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
 		ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
 		if (slot == null || !BUConfig.get().orderStatusHighlight.isEnabled() || !screenInfo.inMenu(ScreenInfo.BazaarMenuType.ORDER_SCREEN) || !slot.hasItem())
 			return;
@@ -113,7 +109,7 @@ public abstract class MixinAbstractContainerScreen extends Screen {
 	}
 
 	@Unique
-	protected void draw(GuiGraphics context, int x, int y, OrderInfoContainer.Statuses orderStatus) {
+	protected void draw(GuiGraphicsExtractor context, int x, int y, OrderInfoContainer.Statuses orderStatus) {
 		final float r, g, b;
 		if (orderStatus == OrderInfoContainer.Statuses.COMPETITIVE) {
 			r = 0.0f; g = 1.0f; b = 0.0f; // Green

@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.misc.widgets;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button.OnPress;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.Tooltip;
@@ -21,19 +21,14 @@ public class ItemSlotButtonWidget extends ImageButton {
         this.setTooltip(Tooltip.create(tooltip));
     }
     @Override
-    //? if > 1.21.10 {
-    public void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderContents(context, mouseX, mouseY, delta);
-    //? } else {
-    /*public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.renderWidget(context, mouseX, mouseY, delta);
-    *///? }
+    public void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractContents(context, mouseX, mouseY, delta);
 
         if (this.itemStack != null && !this.itemStack.isEmpty()) {
             int itemX = this.getX() + (this.width - 16) / 2;
             int itemY = this.getY() + (this.height - 16) / 2;
 
-            context.renderItem(this.itemStack, itemX, itemY);
+            context.item(this.itemStack, itemX, itemY);
         }
     }
     public static ScreenWidgetDimensions getSafeScreenDimensions(AccessorAbstractContainerScreen screen, String screenTitle) {
