@@ -70,7 +70,6 @@ val mcVersion = stonecutter.current.version
 val maxMcVersion = deps["core.maxMcVersion"]
 val fabricKotlinVersion = property("fabric_kotlin_version").toString().trim()
 val modMenuVersion = deps["modmenu_version"]
-val orbitVersion = deps["orbit_version"]
 val devAuthVersion = deps["devauth_version"]
 val hypixelApiVersion = deps["hypixel_api_version"]
 val apacheHttpClientVersion = deps["apache_httpclient_version"]
@@ -113,9 +112,6 @@ dependencies {
 
     modLocalRuntime("maven.modrinth:hypixel-mod-api:$hypixelModApiVersion")
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:$devAuthVersion")
-
-    implementation("meteordevelopment:orbit:$orbitVersion")
-    include("meteordevelopment:orbit:$orbitVersion")
 
     modImplementation("tech.thatgravyboat:skyblock-api:${deps["skyblock_api_version"]}") {
         capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${deps["skyblock_api_platform"]}") }

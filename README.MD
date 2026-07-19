@@ -52,7 +52,6 @@ A Fabric client-side QoL mod for the Hypixel Bazaar.
 
 ### Bundled with Bazaar Utils
 
-- Orbit Event System
 - Mixin Constraints
 - Hypixel API Transport/Core
 - Gson Extras
