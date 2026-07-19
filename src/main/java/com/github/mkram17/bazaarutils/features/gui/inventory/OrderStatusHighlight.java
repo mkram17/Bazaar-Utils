@@ -83,8 +83,9 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
         super();
     }
 
+    // Clear doesnt need to be gated to @OnlyBazaarScreen(any = true) because it's cheap and also
+    // avoids the predicate's screen-resolution ordering hazard for ContainerInitializedEvent.
     @Subscription
-    @OnlyBazaarScreen(any = true)
     private void onScreenInitialized(ContainerInitializedEvent event) {
         colorCache.clear();
         tooltipCache.clear();
