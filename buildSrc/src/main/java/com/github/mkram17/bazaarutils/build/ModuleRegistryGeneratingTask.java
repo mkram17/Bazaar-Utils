@@ -273,7 +273,13 @@ public abstract class ModuleRegistryGeneratingTask extends DefaultTask {
 
         sb.append("    public static final List<Object> collected = new ArrayList<>();\n\n");
 
+        // Idempotence guard: a registry must only construct its entries once. Without this a
+        // second init() call would build (and, for BUListeners, re-subscribe) every entry again.
+        sb.append("    private static boolean initialized;\n\n");
+
         sb.append("    public static void init() {\n");
+        sb.append("        if (initialized) return;\n");
+        sb.append("        initialized = true;\n");
         for (Entry entry : entries) {
             String field = entry.toFieldName();
             sb.append("        ").append(field).append(" = ").append(entry.initializer()).append(";\n");
@@ -282,6 +288,8 @@ public abstract class ModuleRegistryGeneratingTask extends DefaultTask {
         sb.append("    }\n\n");
 
         sb.append("    public static void init(Consumer<Object> applicator) {\n");
+        sb.append("        if (initialized) return;\n");
+        sb.append("        initialized = true;\n");
         for (Entry entry : entries) {
             String field = entry.toFieldName();
             sb.append("        ").append(field).append(" = ").append(entry.initializer()).append(";\n");

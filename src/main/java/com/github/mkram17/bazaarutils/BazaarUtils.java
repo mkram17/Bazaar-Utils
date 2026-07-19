@@ -54,8 +54,6 @@ public class BazaarUtils implements ClientModInitializer {
 
         BazaarUtilsCommands.init();
 
-        BazaarUtilsLateInitModules.init();
-
         if (RepoAPI.isInitialized()) {
             onRepoReady();
         }
