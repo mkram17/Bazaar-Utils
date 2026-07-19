@@ -78,7 +78,7 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     @OnlyOnSkyBlock
     @OnlyBazaarScreen(useConstrainsInterface = true)
     public void onSlotClicked(SlotClickEvent event) {
-        boolean isRestrictedSlot = state.map(RestrictionState::targetItem)
+        boolean isRestrictedSlot = !event.isInPlayerInventory() && state.map(RestrictionState::targetItem)
                 .map(info -> info.slotIndex() == event.getSlot().getContainerSlot())
                 .orElse(false);
 

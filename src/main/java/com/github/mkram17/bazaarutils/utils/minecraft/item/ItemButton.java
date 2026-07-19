@@ -41,7 +41,7 @@ public interface ItemButton {
     }
 
     default boolean wasButtonClicked(SlotClickEvent event) {
-        return event.getSlot().getContainerSlot() == getSlotIndex();
+        return !event.isInPlayerInventory() && event.getSlot().getContainerSlot() == getSlotIndex();
     }
 
     private static Item resolveId(String rawId) {
