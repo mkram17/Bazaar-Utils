@@ -1,6 +1,8 @@
 // MixinHandledScreen.java
 package com.github.mkram17.bazaarutils.mixin;
 
+import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.events.minecraft.SlotInteractionEvent;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -9,6 +11,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Component;
 import net.minecraft.data.AtlasIds;
@@ -24,6 +27,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinAbstractContainerScreen extends Screen {
 	protected MixinAbstractContainerScreen(Component title) {
 		super(title);
+	}
+
+	// SkyblockAPI's SlotClickEvent is mouse-only (posted from ScreenMouseClickEvent against the
+	// hovered slot). slotClicked is the single vanilla chokepoint every interaction path routes
+	// through — mouse clicks, number-key hotbar swaps, the drop key, double-click — so posting the
+	// cancellable SlotInteractionEvent here keeps the insta-sell / sell-sacks safety gate covering
+	// keyboard-driven sells, which the mouse-only event silently missed.
+	@Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V", at = @At("HEAD"), cancellable = true)
+	private void onSlotClicked_RestrictionGate(Slot slot, int slotId, int button, ClickType clickType, CallbackInfo ci) {
+		if (slot == null) return;
+
+		AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
+		if (new SlotInteractionEvent(screen, slot, slotId, button, clickType).post(BazaarUtils.EVENT_BUS)) {
+			ci.cancel();
+		}
 	}
 
 	@Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItem(Lnet/minecraft/world/item/ItemStack;III)V"))

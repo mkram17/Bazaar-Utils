@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.SlotInteractionEvent;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
@@ -14,7 +15,6 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import org.jetbrains.annotations.NotNull;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
-import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -73,11 +73,17 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
         clicks = 0;
     }
 
+    // Subscribes to the local SlotInteractionEvent rather than SkyblockAPI's mouse-only
+    // SlotClickEvent so keyboard-driven interactions (hotbar number keys, drop key, ...) are also
+    // gated — the whole point of the restriction is to prevent accidental irreversible sells.
     @Subscription(inherited = true)
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
     @OnlyBazaarScreen(useConstrainsInterface = true)
-    public void onSlotClicked(SlotClickEvent event) {
+    public void onSlotClicked(SlotInteractionEvent event) {
+        // ItemInfo.slotIndex() is a container index (see SellablePageLayout#getSlot), so it is
+        // correct to compare against getContainerSlot(); but player-inventory slots share that
+        // index space (0-35) and would trip the restriction on unrelated clicks. Exclude them.
         boolean isRestrictedSlot = !event.isInPlayerInventory() && state.map(RestrictionState::targetItem)
                 .map(info -> info.slotIndex() == event.getSlot().getContainerSlot())
                 .orElse(false);
