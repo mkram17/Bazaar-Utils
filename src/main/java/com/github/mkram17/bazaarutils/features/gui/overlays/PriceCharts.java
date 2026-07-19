@@ -16,7 +16,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
-import tech.thatgravyboat.skyblockapi.api.events.base.predicates.IgnoreFiller;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ItemTooltipEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
@@ -68,7 +67,6 @@ public class PriceCharts extends BUListener implements ToggleableFeature {
     @Subscription
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
-    @IgnoreFiller
     private void onClick(SlotClickEvent event) {
         if (!shouldShow() || event.isCancelled()) {
             return;
@@ -103,7 +101,8 @@ public class PriceCharts extends BUListener implements ToggleableFeature {
     }
 
     private boolean shouldShow() {
-        return OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR || ScreenManager.getInstance().isCurrent(BazaarScreenType.values());
+        return (OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR || ScreenManager.getInstance().isCurrent(BazaarScreenType.values()))
+                && !ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE);
     }
 
     private static String sanitizeName(String raw){
