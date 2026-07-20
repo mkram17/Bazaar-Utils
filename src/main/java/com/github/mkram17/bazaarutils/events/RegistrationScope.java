@@ -24,17 +24,29 @@ public final class RegistrationScope {
     }
 
     /**
-     * Seeds the context with the given instance, executes the registration action,
-     * then guarantees cleanup via finally — preventing context pollution on the thread
-     * if registration throws mid-way.
+     * Seeds the context with the given instance, executes the registration action, then restores
+     * whatever scope was previously in effect — guaranteed via finally, so a registration that
+     * throws mid-way cannot leave a stale instance on the thread.
+     *
+     * <p>This saves and restores rather than simply clearing, so that nested calls behave. If
+     * registering one listener causes another to be constructed — a static initializer reached
+     * while {@code EventBus.register} resolves method parameter types, or a module built lazily
+     * from a registration path — the inner {@code wrap} would otherwise clear the context on exit,
+     * leaving the outer listener's remaining predicates to be built with no scope at all. That
+     * outer listener would then register partially and throw
+     * {@code "predicate built outside of registration context"}.</p>
      */
     public static void wrap(Object instance, Runnable action) {
+        RegistrationScope previous = CURRENT.get();
         CURRENT.set(new RegistrationScope(instance));
 
         try {
             action.run();
         } finally {
-            CURRENT.remove();
+            // At the outermost level remove() rather than set(null), so no stale entry is left
+            // behind in the thread's ThreadLocalMap.
+            if (previous == null) CURRENT.remove();
+            else CURRENT.set(previous);
         }
     }
 
