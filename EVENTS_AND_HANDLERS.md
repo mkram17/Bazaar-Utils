@@ -62,7 +62,7 @@ At build time, [`buildSrc/.../ModuleRegistryGeneratingTask`](buildSrc/src/main/j
 Instead of opening every handler with `if (!isEnabled() || !inCorrectScreen(event)) return;`, guards are expressed as annotations and evaluated by the bus before the method runs:
 
 - [`@OnlyWhenEnabled`](src/main/java/com/github/mkram17/bazaarutils/events/predicates/OnlyWhenEnabled.java) — runs only when the listener's `ToggleableFeature.isEnabled()` is true.
-- [`@OnlyBazaarScreen(...)`](src/main/java/com/github/mkram17/bazaarutils/events/predicates/OnlyBazaarScreen.java) — runs only on matching bazaar screens: an explicit `value` whitelist, `any = true`, or `useConstraintsInterface = true` to delegate to the instance's `ScreenConstrained`.
+- [`@OnlyBazaarScreen(...)`](src/main/java/com/github/mkram17/bazaarutils/events/predicates/OnlyBazaarScreen.java) — runs only on matching bazaar screens: an explicit `value` whitelist, `any = true`, or `useConstraintsInterface = true` to delegate to the instance's `ScreenConstrained`. Omitting all three — a bare `@OnlyBazaarScreen`, or one supplying only `except` — matches any bazaar screen.
 
 The mod also leans on SkyblockAPI's own predicate annotations, including `@OnlyOnSkyBlock`, `@OnRepoStatus(repoStatus = ...)`, `@TimePassed(duration = "5s")`, and `@IgnoreFiller`. Note one caveat: `@IgnoreFiller` only filters `InventoryChangeEvent` — on any other event type it is a no-op, so it does not do anything on, say, a `SlotClickEvent`.
 

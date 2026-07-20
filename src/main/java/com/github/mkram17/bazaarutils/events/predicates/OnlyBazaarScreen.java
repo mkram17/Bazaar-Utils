@@ -19,6 +19,11 @@ import java.lang.annotation.Target;
  * </ul>
  * {@link #except()} additionally removes screens from the match in every mode.
  *
+ * <p>Every attribute has a default, so a bare {@code @OnlyBazaarScreen} — or one that supplies
+ * only {@link #except()} — names no screens. That form behaves as {@code any = true}, i.e. "any
+ * bazaar screen", so {@code @OnlyBazaarScreen(except = MAIN_PAGE)} means "any bazaar screen but
+ * the main page".</p>
+ *
  * <p><strong>Note:</strong> the modes are meant to be used one at a time, but this is not
  * validated. If more than one is set, {@code BazaarScreenEventPredicateProvider} resolves them in
  * the order {@code useConstraintsInterface} &gt; {@code any} &gt; {@code value}, silently ignoring
@@ -31,6 +36,7 @@ public @interface OnlyBazaarScreen {
     /**
      * Explicit screen whitelist.
      * Mutually exclusive with {@code any = true} and {@code useConstraintsInterface = true}.
+     * Leaving this empty with no other mode set matches any bazaar screen.
      */
     BazaarScreenType[] value() default {};
 

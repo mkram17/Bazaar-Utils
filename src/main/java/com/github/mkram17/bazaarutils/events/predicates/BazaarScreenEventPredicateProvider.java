@@ -35,7 +35,11 @@ public class BazaarScreenEventPredicateProvider implements EventPredicateProvide
             };
         }
 
-        ScreenMatcher<BazaarScreenType> matcher = annotation.any()
+        // Every attribute has a default, so a bare @OnlyBazaarScreen — or one that supplies only
+        // except() — names no screens at all. That reads as "any bazaar screen", which is a mode
+        // that already exists, so fall back to it rather than building an empty whitelist that
+        // would silently match nothing.
+        ScreenMatcher<BazaarScreenType> matcher = annotation.any() || annotation.value().length == 0
                 ? BazaarScreenMatcher.any()
                 : BazaarScreenMatcher.of(annotation.value());
 
