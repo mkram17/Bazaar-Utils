@@ -74,7 +74,7 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip implem
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.COMPLETED_BUY_ORDER_OPTIONS);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 

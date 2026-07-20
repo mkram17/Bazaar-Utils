@@ -82,7 +82,7 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.SELL_OFFER_AMOUNT);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 

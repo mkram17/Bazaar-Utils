@@ -74,7 +74,7 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost impleme
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.BUY_ORDER_PRICE);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 

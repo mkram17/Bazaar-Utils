@@ -23,7 +23,7 @@ public class BazaarScreenEventPredicateProvider implements EventPredicateProvide
 
         OnlyBazaarScreen annotation = method.getAnnotation(OnlyBazaarScreen.class);
 
-        if (annotation.useConstrainsInterface()) {
+        if (annotation.useConstraintsInterface()) {
             ScreenConstrained constrained = resolveConstrained(method);
             ScreenMatcher<BazaarScreenType> exclusions = annotation.except().length > 0
                     ? BazaarScreenMatcher.any().except(annotation.except())
@@ -58,13 +58,13 @@ public class BazaarScreenEventPredicateProvider implements EventPredicateProvide
         Object instance = RegistrationScope.current()
                 .map(RegistrationScope::getInstance)
                 .orElseThrow(() -> new IllegalStateException(
-                        "@OnlyBazaarScreen(useConstrainsInterface) built outside registration context on "
+                        "@OnlyBazaarScreen(useConstraintsInterface) built outside registration context on "
                                 + qualifiedName(method)));
 
         if (!(instance instanceof ScreenConstrained sc)) {
             throw new IllegalStateException(
                     "@OnlyBazaarScreen on " + qualifiedName(method)
-                            + ": useConstrainsInterface=true but instance does not implement ScreenConstrained.");
+                            + ": useConstraintsInterface=true but instance does not implement ScreenConstrained.");
         }
 
         return sc;

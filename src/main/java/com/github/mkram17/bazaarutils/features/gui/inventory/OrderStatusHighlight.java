@@ -75,7 +75,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.ORDERS_PAGE);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 
@@ -94,7 +94,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     @Subscription
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
-    @OnlyBazaarScreen(useConstrainsInterface = true)
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
         event.getContainerSlots().stream()
                 .map(Slot::getItem)
@@ -104,7 +104,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     @Subscription
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
-    @OnlyBazaarScreen(useConstrainsInterface = true)
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onTooltip(ItemTooltipEvent event) {
         var stack = event.getItem();
         var lines = event.getTooltip();

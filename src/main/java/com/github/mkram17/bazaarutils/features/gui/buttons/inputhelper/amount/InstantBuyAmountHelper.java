@@ -82,7 +82,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.INSTANT_BUY);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 

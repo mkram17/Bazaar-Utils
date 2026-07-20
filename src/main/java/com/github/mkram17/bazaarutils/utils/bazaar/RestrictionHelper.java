@@ -79,7 +79,7 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
     @Subscription(inherited = true)
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
-    @OnlyBazaarScreen(useConstrainsInterface = true)
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     public void onSlotClicked(SlotInteractionEvent event) {
         // ItemInfo.slotIndex() is a container index (see SellablePageLayout#getSlot), so it is
         // correct to compare against getContainerSlot(); but player-inventory slots share that

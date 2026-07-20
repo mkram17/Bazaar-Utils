@@ -187,13 +187,13 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 
     @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
-    @OnlyBazaarScreen(useConstrainsInterface = true)
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
         var context = event.asContext();
 
@@ -213,7 +213,7 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
 
     @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
-    @OnlyBazaarScreen(useConstrainsInterface = true)
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onInventoryChange(PlayerInventoryChangeEvent event) {
         if (InstantSell.orders().isEmpty() && SellSacks.orders().isEmpty()) return;
 

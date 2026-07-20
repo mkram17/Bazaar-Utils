@@ -42,7 +42,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.PRODUCT_PAGE);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 
@@ -73,7 +73,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
 
     @Subscription
     @OnlyOnSkyBlock
-    @OnlyBazaarScreen(useConstrainsInterface = true)
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onReplaceItemEvent(ReplaceItemEvent event) {
         if (!shouldReplaceItem(event)) return;
 
@@ -84,7 +84,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
 
     @Subscription
     @OnlyOnSkyBlock
-    @OnlyBazaarScreen(useConstrainsInterface = true)
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onClick(SlotClickEvent event) {
         if (!wasButtonClicked(event)) return;
 
