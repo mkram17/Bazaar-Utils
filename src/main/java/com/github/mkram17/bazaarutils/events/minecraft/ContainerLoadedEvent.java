@@ -7,7 +7,6 @@ import lombok.Getter;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -27,11 +26,13 @@ import java.util.Optional;
  * before firing this event. This ensures that listeners can safely access all container contents.
  * </p>
  *
- * <p>The event includes:</p>
+ * <p>The event exposes:</p>
  * <ul>
- *   <li>The container's inventory</li>
- *   <li>A list of all non-empty item stacks</li>
- *   <li>The container's display name</li>
+ *   <li>the backing container inventory ({@code getContainer()})</li>
+ *   <li>the container slots and the player-inventory slots as separate {@code List<Slot>}
+ *       ({@code getContainerSlots()} / {@code getPlayerSlots()})</li>
+ *   <li>the display name, both formatted and stripped ({@code getTitleComponent()} / {@code getTitle()})</li>
+ *   <li>the resolved {@link ScreenType}, if the screen was recognised ({@code getType()})</li>
  * </ul>
  *
  * <p><strong>Usage Example:</strong></p>
@@ -39,18 +40,19 @@ import java.util.Optional;
  * {@code
  * @Subscription
  * public void onContainerLoaded(ContainerLoadedEvent event) {
- *    List<ItemStack> items = event.getItemStacks();
- *    processBazaarItems(items);
+ *    List<Slot> slots = event.getContainerSlots();
+ *    processBazaarItems(slots);
  * }
  * }
  * </pre>
  *
  * <p><strong>Implementation Note:</strong></p>
- * The event uses a polling mechanism that checks every 40ms (up to 50 attempts / 2 seconds)
- * to determine when the GUI is fully loaded.
+ * This event is posted by {@link ContainerLoadedHandler}, which polls once per tick (up to
+ * 50 attempts, roughly 2.5 seconds) until the GUI has finished loading before firing.
  *
  * @see Container
- * @see ItemStack
+ * @see Slot
+ * @see ContainerLoadedHandler
  */
 @Getter
 public final class ContainerLoadedEvent extends SkyBlockEvent {

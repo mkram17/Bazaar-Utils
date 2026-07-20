@@ -3,6 +3,8 @@
 In the pull request description, label what you did in the pr with feature, change, bug fix, etc. Proposed changes should be made in their own branch.
 All new classes should be written in Java if possible; there are no plans to use Kotlin in the near future. Follow coding conventions described [here](https://github.com/hannibal002/SkyHanni/blob/beta/CONTRIBUTING.md#coding-styles-and-conventions). Make sure to describe your changes in the UPDATES.md file if they are relevant to the user.
 
+If you are working with the event system — subscribing to events, adding a module, or defining a new event — read [EVENTS_AND_HANDLERS.md](EVENTS_AND_HANDLERS.md) first for an overview of the SkyblockAPI event bus, the module annotation pipeline, and event predicates.
+
 ### Getting Started & Building
 1. Fork and clone the repository.
 2. Open the project in your IDE of choice (IntelliJ IDEA is recommended).

@@ -7,7 +7,6 @@ import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
 import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -19,9 +18,12 @@ import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import java.util.Optional;
 
 /**
- * Handler for all BazaarChatEvent occurrences.
+ * Consumer of {@link BazaarChatEvent}: this handler <em>reacts to</em> the bazaar chat events that
+ * {@code BazaarChatHandler} parses and posts — it does not read chat itself. (The names are
+ * confusingly close: {@code BazaarChatHandler} is the producer, {@code BazaarChatEventHandler} is
+ * the consumer.)
  * <p>
- * This class processes bazaar-related chat events and performs various actions such as:
+ * It performs various actions in response, such as:
  * </p>
  * <ul>
  *   <li>Tracking order creation and adding orders to watch lists</li>
@@ -29,10 +31,11 @@ import java.util.Optional;
  *   <li>Updating the order limit tracker for instant buys and sells</li>
  *   <li>Marking orders as filled in the internal order tracking system</li>
  * </ul>
- * 
- * <p>The handler automatically registers itself during mod initialization via the
- * {@link RunOnInit} annotation.</p>
- * 
+ *
+ * <p>The handler registers automatically: it is annotated {@code @Module}, so the module
+ * annotation pipeline collects it into the generated {@code BazaarUtilsModules} registry and
+ * constructs it during initialization, at which point {@link BUListener} subscribes it.</p>
+ *
  * @see BazaarChatEvent
  * @see Order
  * @see OrderInfo

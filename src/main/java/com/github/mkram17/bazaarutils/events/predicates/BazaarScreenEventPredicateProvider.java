@@ -58,13 +58,13 @@ public class BazaarScreenEventPredicateProvider implements EventPredicateProvide
         Object instance = RegistrationScope.current()
                 .map(RegistrationScope::getInstance)
                 .orElseThrow(() -> new IllegalStateException(
-                        "@OnlyBazaarScreen(useTargetScreens) built outside registration context on "
+                        "@OnlyBazaarScreen(useConstrainsInterface) built outside registration context on "
                                 + qualifiedName(method)));
 
         if (!(instance instanceof ScreenConstrained sc)) {
             throw new IllegalStateException(
                     "@OnlyBazaarScreen on " + qualifiedName(method)
-                            + ": useTargetScreens=true but instance does not implement ScreenConstrained.");
+                            + ": useConstrainsInterface=true but instance does not implement ScreenConstrained.");
         }
 
         return sc;

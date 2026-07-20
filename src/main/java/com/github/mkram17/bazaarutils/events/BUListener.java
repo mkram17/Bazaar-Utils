@@ -1,24 +1,29 @@
 package com.github.mkram17.bazaarutils.events;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.config.BUConfig;
 import lombok.Getter;
 
 import java.util.Optional;
 
 /**
- * Interface for event listeners.
+ * Base class for event listeners.
  * <p>
- * This interface defines the contract for classes that need to subscribe to the event bus
- * and handle mod events. Implementing classes should register their event handlers in the
- * {@link #subscribe()} method.
+ * Subclasses subscribe to the event bus simply by extending this class and annotating
+ * themselves {@code @Module} (or {@code @PreInitModule} / {@code @LateInitModule}). The module
+ * annotation pipeline constructs the class during initialization, and this constructor calls
+ * {@link #subscribe()} — which is {@code final} — so registration happens automatically; you
+ * never call {@code EVENT_BUS.register} yourself. Registration is wrapped in a
+ * {@link RegistrationScope} so that event predicate providers can resolve the instance being
+ * registered while they build their predicates.
  * </p>
- * 
- * <p><strong>Important:</strong> Implementations must be added to the serialized events list
- * to be persisted with the config, unless there is a singleton object as instance data in
- * {@link BUConfig}, which gets automatically subscribed.</p>
+ *
+ * <p>Handler methods on a listener are annotated {@code @Subscription}. See
+ * {@code EVENTS_AND_HANDLERS.md} for the full picture of the event bus, the module pipeline,
+ * and predicates.</p>
+ *
+ * <p>A subclass that additionally needs a raw Fabric callback registered at subscribe time can
+ * override the no-op {@link #registerFabricEvents()} hook. No listener currently overrides it.</p>
  */
-//TODO switch to using fabric event system with annotation processor
 public abstract class BUListener implements AbstractListener {
     @Getter
     private transient boolean isSubscribed = false;
