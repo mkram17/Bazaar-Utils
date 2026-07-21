@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.misc.orderinfo.OrderInfoContainer;
 import com.github.mkram17.bazaarutils.misc.orderinfo.PriceInfoContainer;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import lombok.Getter;
@@ -77,7 +78,7 @@ public class OrderStatusHighlight implements BUListener {
             }
 
             Minecraft client = Minecraft.getInstance();
-            if (client.player == null || !(client.screen instanceof AbstractContainerScreen<?> handledScreen)) {
+            if (client.player == null || !(VersionCompat.getScreen(client) instanceof AbstractContainerScreen<?> handledScreen)) {
                 return;
             }
 

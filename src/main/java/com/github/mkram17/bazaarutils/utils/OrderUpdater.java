@@ -12,6 +12,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.Container;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
@@ -229,7 +230,7 @@ public class OrderUpdater {
     private static List<ItemStack> extractOrderStacks(List<ItemStack> screenStacks) {
         List<ItemStack> result = new ArrayList<>();
         for (ItemStack stack : screenStacks) {
-            if (stack.is(Items.BLACK_STAINED_GLASS_PANE)) continue;
+            if (stack.is(VersionCompat.stainedGlassPane(DyeColor.BLACK))) continue;
             if (stack.is(Items.ARROW)) break; // stop at navigation arrow
             result.add(stack);
         }

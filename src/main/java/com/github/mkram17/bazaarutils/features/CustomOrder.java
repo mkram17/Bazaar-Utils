@@ -10,6 +10,7 @@ import com.github.mkram17.bazaarutils.utils.GUIUtils;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -35,7 +37,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 //TODO find new name for this
 @NoArgsConstructor
 public class CustomOrder extends CustomItemButton implements BUListener {
-    public static final Map<Integer, Item> COLORMAP = new HashMap<>(Map.of(0, Items.PURPLE_STAINED_GLASS_PANE, 1, Items.BLUE_STAINED_GLASS_PANE, 2, Items.ORANGE_STAINED_GLASS_PANE, 3, Items.BLACK_STAINED_GLASS_PANE, 4, Items.BLACK_STAINED_GLASS_PANE));
+    public static final Map<Integer, Item> COLORMAP = new HashMap<>(Map.of(0, VersionCompat.stainedGlassPane(DyeColor.PURPLE), 1, VersionCompat.stainedGlassPane(DyeColor.BLUE), 2, VersionCompat.stainedGlassPane(DyeColor.ORANGE), 3, VersionCompat.stainedGlassPane(DyeColor.BLACK), 4, VersionCompat.stainedGlassPane(DyeColor.BLACK)));
     private boolean buySignClicked = false;
 
     @Getter @Setter
@@ -56,7 +58,7 @@ public class CustomOrder extends CustomItemButton implements BUListener {
         this.enabled = enabled;
         this.orderAmount = 71680;
         this.slotNumber = 17;
-        this.item = Items.PURPLE_STAINED_GLASS_PANE;
+        this.item = VersionCompat.stainedGlassPane(DyeColor.PURPLE);
     }
     public static Item getNextColoredPane(){
         int size = BUConfig.get().customOrders.size();

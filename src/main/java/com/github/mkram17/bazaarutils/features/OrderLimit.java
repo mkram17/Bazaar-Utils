@@ -19,6 +19,7 @@ import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.TimeUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
@@ -90,10 +91,10 @@ public class OrderLimit implements BUListener {
         OrderLimit orderLimit = BUConfig.get().orderLimit;
         ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
         boolean isTargetScreen = screenInfo.inBazaar();
-        if (!orderLimit.isEnabled() || !isTargetScreen || !(Minecraft.getInstance().screen instanceof AccessorAbstractContainerScreen screen))
+        if (!orderLimit.isEnabled() || !isTargetScreen || !(VersionCompat.getScreen(Minecraft.getInstance()) instanceof AccessorAbstractContainerScreen screen))
             return Collections.emptyList();
 
-        String screenTitle = Minecraft.getInstance().screen.getTitle().getString();
+        String screenTitle = VersionCompat.getScreen(Minecraft.getInstance()).getTitle().getString();
         String orderedCoinsFormatted = formatNumberWithPrefix(orderLimit.getTotalOrderedCoins());
 
         Component orderedCoinsText = orderLimit.getTotalOrderedCoins() >= orderLimit.getCoinLimit() ? Component.literal(orderedCoinsFormatted).withStyle(ChatFormatting.RED) : Component.literal(orderedCoinsFormatted).withStyle(ChatFormatting.GREEN);

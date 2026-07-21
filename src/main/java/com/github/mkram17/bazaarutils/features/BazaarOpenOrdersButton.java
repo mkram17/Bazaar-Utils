@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.misc.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -39,7 +40,7 @@ public class BazaarOpenOrdersButton {
             return Collections.emptyList();
 
         ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
-        if (!(Minecraft.getInstance().screen instanceof AccessorAbstractContainerScreen screen) || !screenInfo.inBazaar())
+        if (!(VersionCompat.getScreen(Minecraft.getInstance()) instanceof AccessorAbstractContainerScreen screen) || !screenInfo.inBazaar())
             return Collections.emptyList();
 
 

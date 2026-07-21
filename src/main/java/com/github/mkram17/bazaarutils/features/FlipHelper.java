@@ -13,6 +13,7 @@ import com.github.mkram17.bazaarutils.utils.GUIUtils;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 
 import dev.isxander.yacl3.api.NameableEnum;
 import dev.isxander.yacl3.api.Option;
@@ -246,7 +247,7 @@ public class FlipHelper extends CustomItemButton implements BUListener {
     }
 
     private static boolean inCancelOrderScreen() {
-        if (!(Minecraft.getInstance().screen instanceof ContainerScreen inventory)) {
+        if (!(VersionCompat.getScreen(Minecraft.getInstance()) instanceof ContainerScreen inventory)) {
             return false;
         }
 

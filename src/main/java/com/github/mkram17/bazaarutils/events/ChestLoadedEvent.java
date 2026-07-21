@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.misc.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import lombok.Getter;
 import meteordevelopment.orbit.ICancellable;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -42,7 +43,7 @@ public class ChestLoadedEvent {
                     @Override
                     public void run() {
                         // Ensure we are still on the same screen
-                        if (client.screen != genericContainerScreen) {
+                        if (VersionCompat.getScreen(client) != genericContainerScreen) {
                             return;
                         }
 

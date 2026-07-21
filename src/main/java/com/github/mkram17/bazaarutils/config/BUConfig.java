@@ -9,6 +9,7 @@ import com.github.mkram17.bazaarutils.misc.adapters.ItemStackCodecGsonAdapter;
 import com.github.mkram17.bazaarutils.misc.adapters.ZonedDateTimeAdapter;
 import com.github.mkram17.bazaarutils.misc.orderinfo.BazaarOrder;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
@@ -95,7 +96,7 @@ public class BUConfig {
 
     public static void openGUI() {
         Minecraft client = Minecraft.getInstance();
-        client.schedule(() -> client.setScreen(BUConfigGui.create(null, get())));
+        client.schedule(() -> VersionCompat.setScreen(client, BUConfigGui.create(null, get())));
     }
 
     public Screen createGUI(Screen parent) {

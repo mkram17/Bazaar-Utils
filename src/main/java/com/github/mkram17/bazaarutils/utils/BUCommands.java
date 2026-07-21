@@ -98,7 +98,7 @@ public class BUCommands {
                 .executes((context) -> {
                     Minecraft client = Minecraft.getInstance();
                     client.schedule(() -> {
-                        context.getSource().getClient().setScreen(new ConfirmLinkScreen((confirmed) -> {
+                        VersionCompat.setScreen(context.getSource().getClient(), new ConfirmLinkScreen((confirmed) -> {
                             if (confirmed) {
                                     try {
                                         net.minecraft.util.Util.getPlatform().openUri(new URI(Util.DISCORD_LINK));
@@ -106,7 +106,7 @@ public class BUCommands {
                                         throw new RuntimeException(e);
                                     }
                             }
-                            Minecraft.getInstance().setScreen(null);
+                            VersionCompat.setScreen(Minecraft.getInstance(), null);
                         }, Util.DISCORD_LINK, true));
                     });
                     return 1;

@@ -6,6 +6,7 @@ import com.github.mkram17.bazaarutils.misc.autoregistration.RegisterWidget;
 import com.github.mkram17.bazaarutils.misc.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.Component;
@@ -24,10 +25,10 @@ public class BazaarSettingsButton {
     @RegisterWidget
     public static List<ItemSlotButtonWidget> getWidget() {
         ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
-        if (!(Minecraft.getInstance().screen instanceof AccessorAbstractContainerScreen screen) || !screenInfo.inBazaar())
+        if (!(VersionCompat.getScreen(Minecraft.getInstance()) instanceof AccessorAbstractContainerScreen screen) || !screenInfo.inBazaar())
             return Collections.emptyList();
 
-        String screenTitle = Minecraft.getInstance().screen.getTitle().getString();
+        String screenTitle = VersionCompat.getScreen(Minecraft.getInstance()).getTitle().getString();
 
         ItemSlotButtonWidget.ScreenWidgetDimensions dimensions = ItemSlotButtonWidget.getSafeScreenDimensions(screen, screenTitle);
 
@@ -43,7 +44,7 @@ public class BazaarSettingsButton {
                 buttonSize, buttonSize,
                 SLOT_BUTTON_TEXTURES,
                 (btn) -> {
-                    Minecraft.getInstance().setScreen(BUConfig.get().createGUI(Minecraft.getInstance().screen));
+                    VersionCompat.setScreen(Minecraft.getInstance(), BUConfig.get().createGUI(VersionCompat.getScreen(Minecraft.getInstance())));
                 },
                 null,
                 Component.literal("Bazaar Utils Settings")

@@ -14,8 +14,8 @@ stonecutter {
     kotlinController = true
     centralScript = "build.gradle.kts"
     create(rootProject){
-        versions("26.1")
-        vcsVersion = "26.1"
+        versions("26.1.2", "26.2")
+        vcsVersion = "26.2"
     }
 }
 

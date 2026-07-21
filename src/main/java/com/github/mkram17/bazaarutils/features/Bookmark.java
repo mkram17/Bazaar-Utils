@@ -24,6 +24,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 /*import net.minecraft.client.gui.screen.Screen;
 *///?}
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -132,12 +133,12 @@ public class Bookmark extends CustomItemButton implements BUListener {
 
     private void changeVisuals(boolean bookmarked){
         if(bookmarked) {
-            replacementItem = new ItemStack(Items.GREEN_STAINED_GLASS_PANE, 1);
+            replacementItem = new ItemStack(VersionCompat.stainedGlassPane(DyeColor.GREEN), 1);
             replacementItem.set(DataComponents.CUSTOM_NAME, Component.literal("Remove " + name + " Bookmark"));
             replacementItem.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, "⃠ ");
         }
         else {
-            replacementItem = new ItemStack(Items.RED_STAINED_GLASS_PANE, 1);
+            replacementItem = new ItemStack(VersionCompat.stainedGlassPane(DyeColor.RED), 1);
             replacementItem.set(DataComponents.CUSTOM_NAME, Component.literal("Bookmark " + name));
             replacementItem.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, "★");
         }
@@ -208,7 +209,7 @@ public class Bookmark extends CustomItemButton implements BUListener {
         ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
         boolean isTargetScreen = screenInfo.inMenu(ScreenInfo.BazaarMenuType.BAZAAR_MAIN_PAGE);
 
-        if (!(Minecraft.getInstance().screen instanceof AccessorAbstractContainerScreen screen) || !isTargetScreen)
+        if (!(VersionCompat.getScreen(Minecraft.getInstance()) instanceof AccessorAbstractContainerScreen screen) || !isTargetScreen)
             return Collections.emptyList();
 
 

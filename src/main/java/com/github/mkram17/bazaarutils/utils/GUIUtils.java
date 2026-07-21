@@ -86,7 +86,7 @@ public class GUIUtils {
                 Util.notifyError("Client is null", new Throwable());
                 return;
             }
-            if(!(client.screen instanceof AbstractContainerScreen<?>))
+            if(!(VersionCompat.getScreen(client) instanceof AbstractContainerScreen<?>))
                 return;
 
             client.execute(GUIUtils::customCloseHandledScreen);
@@ -104,7 +104,7 @@ public class GUIUtils {
                 return;
             }
             player.connection.send(new ServerboundContainerClosePacket(player.containerMenu.containerId));
-            client.setScreen(null);
+            VersionCompat.setScreen(client, null);
             player.containerMenu = player.inventoryMenu;
 
         } catch (Exception e) {
@@ -130,7 +130,7 @@ public class GUIUtils {
         try {
             PlayerActionUtil.notifyAll("Closing sign", Util.notificationTypes.GUI);
             Minecraft mcclient = Minecraft.getInstance();
-            if (mcclient != null && mcclient.screen instanceof AbstractSignEditScreen signEditScreen) {
+            if (mcclient != null && VersionCompat.getScreen(mcclient) instanceof AbstractSignEditScreen signEditScreen) {
                 mcclient.execute(signEditScreen::onClose);
             } else {
                 Util.notifyError("Error closing sign: client was null or not in a sign", new Throwable());
@@ -157,7 +157,7 @@ public class GUIUtils {
         }
 
         client.execute(() -> {
-            if (client.screen instanceof SignEditScreen screen) {
+            if (VersionCompat.getScreen(client) instanceof SignEditScreen screen) {
                 try {
                     AccessorSignEditScreen signScreen = (AccessorSignEditScreen) screen;
                     String[] lines = text.split("\n", 4);
