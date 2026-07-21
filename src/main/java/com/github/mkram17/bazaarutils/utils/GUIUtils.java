@@ -14,7 +14,6 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.Container;
@@ -157,7 +156,7 @@ public class GUIUtils {
         }
 
         client.execute(() -> {
-            if (VersionCompat.getScreen(client) instanceof SignEditScreen screen) {
+            if (VersionCompat.getScreen(client) instanceof AbstractSignEditScreen screen) {
                 try {
                     AccessorSignEditScreen signScreen = (AccessorSignEditScreen) screen;
                     String[] lines = text.split("\n", 4);
