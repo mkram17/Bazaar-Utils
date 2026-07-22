@@ -12,27 +12,28 @@ import com.github.mkram17.bazaarutils.misc.autoregistration.RegisterWidget;
 import com.github.mkram17.bazaarutils.misc.orderinfo.OrderInfoContainer;
 import com.github.mkram17.bazaarutils.misc.orderinfo.PriceInfoContainer;
 import com.github.mkram17.bazaarutils.misc.widgets.ItemSlotButtonWidget;
-import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
+import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.utils.*;
 import lombok.Getter;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ButtonTextures;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.WidgetSprites;
 //? if < 1.21.10 {
 /*import net.minecraft.client.gui.screen.Screen;
 *///?}
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,9 +51,9 @@ public class Bookmark extends CustomItemButton implements BUListener {
     private final OrderInfoContainer orderInfo;
     private static final int SIGN_SLOT_NUMBER = 45;
 
-    private static final Identifier BASE = Identifier.tryParse(BazaarUtils.MODID, "widget/bookmark_widget_base");
-    private static final Identifier HOVER = Identifier.tryParse(BazaarUtils.MODID, "widget/bookmark_widget_hover");
-    public static final ButtonTextures SLOT_BUTTON_TEXTURES = new ButtonTextures(
+    private static final Identifier BASE = Identifier.tryBuild(BazaarUtils.MODID, "widget/bookmark_widget_base");
+    private static final Identifier HOVER = Identifier.tryBuild(BazaarUtils.MODID, "widget/bookmark_widget_hover");
+    public static final WidgetSprites SLOT_BUTTON_TEXTURES = new WidgetSprites(
             BASE,
             HOVER);
 
@@ -63,8 +64,9 @@ public class Bookmark extends CustomItemButton implements BUListener {
     public Bookmark(String name) {
         this.name = name;
         this.slotNumber = 0;
-        changeVisuals(isItemBookmarked(this.name));
-        this.replacementItem.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, "★");
+        // replacementItem stays null here and is created lazily in replaceItemEvent —
+        // since 26.1, ItemStacks cannot be constructed until a world is loaded
+        // ("Components not bound yet"), and Bookmarks are also created during client init.
         this.bookmarkedItemStack = findItemStack(name);
         this.orderInfo = new OrderInfoContainer(name, null, null, PriceInfoContainer.PriceType.INSTABUY, null);
 
@@ -131,13 +133,13 @@ public class Bookmark extends CustomItemButton implements BUListener {
 
     private void changeVisuals(boolean bookmarked){
         if(bookmarked) {
-            replacementItem = new ItemStack(Items.GREEN_STAINED_GLASS_PANE, 1);
-            replacementItem.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Remove " + name + " Bookmark"));
+            replacementItem = new ItemStack(VersionCompat.stainedGlassPane(DyeColor.GREEN), 1);
+            replacementItem.set(DataComponents.CUSTOM_NAME, Component.literal("Remove " + name + " Bookmark"));
             replacementItem.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, "⃠ ");
         }
         else {
-            replacementItem = new ItemStack(Items.RED_STAINED_GLASS_PANE, 1);
-            replacementItem.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Bookmark " + name));
+            replacementItem = new ItemStack(VersionCompat.stainedGlassPane(DyeColor.RED), 1);
+            replacementItem.set(DataComponents.CUSTOM_NAME, Component.literal("Bookmark " + name));
             replacementItem.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, "★");
         }
     }
@@ -153,7 +155,7 @@ public class Bookmark extends CustomItemButton implements BUListener {
     private static String findNameFromItemStacks(List<ItemStack> itemStacks, String nameFromContainer){
         for(ItemStack stack : itemStacks){
             if(stack == null) continue;
-            if (!stack.isEmpty() && stack.getName().getString().startsWith(nameFromContainer)) {
+            if (!stack.isEmpty() && stack.getHoverName().getString().startsWith(nameFromContainer)) {
                 return stack.getCustomName().getString();
             }
         }
@@ -172,25 +174,25 @@ public class Bookmark extends CustomItemButton implements BUListener {
 
 
     private static ItemStack findItemStack(String name){
-        ScreenHandler handler = GUIUtils.getHandledScreen();
+        AbstractContainerMenu handler = GUIUtils.getHandledScreen();
 
         if(handler == null) return null;
         for(Slot slot : handler.slots){
-            ItemStack itemStack = slot.getStack();
+            ItemStack itemStack = slot.getItem();
             if(itemStack == null) continue;
 
-            if (!itemStack.isEmpty() && itemStack.getName().getString().startsWith(name)) {
+            if (!itemStack.isEmpty() && itemStack.getHoverName().getString().startsWith(name)) {
                 return itemStack;
             }
         }
         for(Slot slot : handler.slots){
-            ItemStack itemStack = slot.getStack();
+            ItemStack itemStack = slot.getItem();
 
-            if (!itemStack.isEmpty() && itemStack.getName().getString().contains(name)) {
+            if (!itemStack.isEmpty() && itemStack.getHoverName().getString().contains(name)) {
                 return itemStack;
             }
         }
-        return Items.DIAMOND.getDefaultStack();
+        return Items.DIAMOND.getDefaultInstance();
     }
 
     public static boolean isItemBookmarked(String itemName){
@@ -207,7 +209,7 @@ public class Bookmark extends CustomItemButton implements BUListener {
         ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
         boolean isTargetScreen = screenInfo.inMenu(ScreenInfo.BazaarMenuType.BAZAAR_MAIN_PAGE);
 
-        if (!(MinecraftClient.getInstance().currentScreen instanceof AccessorHandledScreen screen) || !isTargetScreen)
+        if (!(VersionCompat.getScreen(Minecraft.getInstance()) instanceof AccessorAbstractContainerScreen screen) || !isTargetScreen)
             return Collections.emptyList();
 
 
@@ -223,16 +225,16 @@ public class Bookmark extends CustomItemButton implements BUListener {
         for (Bookmark value : bookmarks) {
             ItemStack configuredItem = value.getBookmarkedItemStack();
 
-            final ItemStack itemForButton = (configuredItem == null) ? Items.BARRIER.getDefaultStack() : configuredItem;
+            final ItemStack itemForButton = (configuredItem == null) ? Items.BARRIER.getDefaultInstance() : configuredItem;
             final Bookmark bookmark = value;
-            MutableText text = Text.literal(bookmark.getName()).formatted(Formatting.BOLD);
+            MutableComponent text = Component.literal(bookmark.getName()).withStyle(ChatFormatting.BOLD);
 
             OrderInfoContainer orderInfo = bookmark.getOrderInfo();
             orderInfo.updateMarketPrice();
 
-            Style style = Style.EMPTY.withColor(Formatting.GRAY).withBold(false);
-            text.append(Text.literal("\nBuy: " + Util.getPrettyString(orderInfo.getMarketPrice(PriceInfoContainer.PriceType.INSTASELL)) + " coins").setStyle(style));
-            text.append(Text.literal("\nSell: " + Util.getPrettyString(orderInfo.getMarketPrice(PriceInfoContainer.PriceType.INSTABUY)) + " coins").setStyle(style));
+            Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withBold(false);
+            text.append(Component.literal("\nBuy: " + Util.getPrettyString(orderInfo.getMarketPrice(PriceInfoContainer.PriceType.INSTASELL)) + " coins").setStyle(style));
+            text.append(Component.literal("\nSell: " + Util.getPrettyString(orderInfo.getMarketPrice(PriceInfoContainer.PriceType.INSTABUY)) + " coins").setStyle(style));
 
             ItemSlotButtonWidget button = new ItemSlotButtonWidget(
                     buttonX,
@@ -241,7 +243,7 @@ public class Bookmark extends CustomItemButton implements BUListener {
                     SLOT_BUTTON_TEXTURES,
                     (btn) -> {
                         //? if > 1.21.8 {
-                        if (MinecraftClient.getInstance().isShiftPressed()) {
+                        if (Minecraft.getInstance().hasShiftDown()) {
                             //?} else {
                             /*if (Screen.hasShiftDown()) {
                              *///?}

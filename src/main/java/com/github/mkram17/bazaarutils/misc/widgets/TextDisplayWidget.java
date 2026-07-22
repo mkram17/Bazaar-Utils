@@ -1,31 +1,31 @@
 package com.github.mkram17.bazaarutils.misc.widgets;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.network.chat.Component;
 
-public class TextDisplayWidget extends ClickableWidget {
-    private final Text text;
+public class TextDisplayWidget extends AbstractWidget {
+    private final Component text;
 
-    public TextDisplayWidget(int x, int y, int width, int height, Text text) {
+    public TextDisplayWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, text);
         this.text = text;
     }
 
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-        int textWidth = textRenderer.getWidth(text);
+    protected void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        Font textRenderer = Minecraft.getInstance().font;
+        int textWidth = textRenderer.width(text);
         int textX = this.getX() + (this.width - textWidth) / 2;
-        int textY = this.getY() + (this.height - textRenderer.fontHeight) / 2;
-        context.drawText(textRenderer, text, textX, textY, 0xFFFFFF, false);
+        int textY = this.getY() + (this.height - textRenderer.lineHeight) / 2;
+        context.text(textRenderer, text, textX, textY, 0xFFFFFFFF, false);
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
 
     }
 }

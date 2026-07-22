@@ -14,11 +14,12 @@ import com.github.mkram17.bazaarutils.misc.autoregistration.RegisterWidget;
 import com.github.mkram17.bazaarutils.misc.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.misc.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.misc.widgets.TextDisplayWidget;
-import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
+import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.TimeUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
@@ -26,10 +27,10 @@ import dev.isxander.yacl3.api.controller.DoubleFieldControllerBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 public class OrderLimit implements BUListener {
     @Getter @Setter
@@ -86,19 +87,19 @@ public class OrderLimit implements BUListener {
     }
 
     @RegisterWidget
-    public static List<ClickableWidget> getWidget() {
+    public static List<AbstractWidget> getWidget() {
         OrderLimit orderLimit = BUConfig.get().orderLimit;
         ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
         boolean isTargetScreen = screenInfo.inBazaar();
-        if (!orderLimit.isEnabled() || !isTargetScreen || !(MinecraftClient.getInstance().currentScreen instanceof AccessorHandledScreen screen))
+        if (!orderLimit.isEnabled() || !isTargetScreen || !(VersionCompat.getScreen(Minecraft.getInstance()) instanceof AccessorAbstractContainerScreen screen))
             return Collections.emptyList();
 
-        String screenTitle = MinecraftClient.getInstance().currentScreen.getTitle().getString();
+        String screenTitle = VersionCompat.getScreen(Minecraft.getInstance()).getTitle().getString();
         String orderedCoinsFormatted = formatNumberWithPrefix(orderLimit.getTotalOrderedCoins());
 
-        Text orderedCoinsText = orderLimit.getTotalOrderedCoins() >= orderLimit.getCoinLimit() ? Text.literal(orderedCoinsFormatted).formatted(Formatting.RED) : Text.literal(orderedCoinsFormatted).formatted(Formatting.GREEN);
-        Text limitText = Text.literal("/" + formatNumberWithPrefix(orderLimit.getCoinLimit())).formatted(Formatting.GOLD);
-        Text message = Text.literal("Bazaar Order Limit: ").formatted(Formatting.GOLD)
+        Component orderedCoinsText = orderLimit.getTotalOrderedCoins() >= orderLimit.getCoinLimit() ? Component.literal(orderedCoinsFormatted).withStyle(ChatFormatting.RED) : Component.literal(orderedCoinsFormatted).withStyle(ChatFormatting.GREEN);
+        Component limitText = Component.literal("/" + formatNumberWithPrefix(orderLimit.getCoinLimit())).withStyle(ChatFormatting.GOLD);
+        Component message = Component.literal("Bazaar Order Limit: ").withStyle(ChatFormatting.GOLD)
                 .append(orderedCoinsText)
                 .append(limitText);
 
@@ -131,8 +132,8 @@ public class OrderLimit implements BUListener {
 
     public OptionGroup buildOrderLimitGroup() {
         OptionGroup.Builder restrictSellGroupBuilder = OptionGroup.createBuilder()
-                .name(Text.literal("Order Limit"))
-                .description(OptionDescription.of(Text.literal("Shows you how close you are to the coin order limit for the bazaar. Resets at 12am GMT.")));
+                .name(Component.literal("Order Limit"))
+                .description(OptionDescription.of(Component.literal("Shows you how close you are to the coin order limit for the bazaar. Resets at 12am GMT.")));
 
         buildOptions(restrictSellGroupBuilder);
 
@@ -146,8 +147,8 @@ public class OrderLimit implements BUListener {
 
     private Option<Boolean> createEnabledOption() {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal("Show Bazaar Order Limit"))
-                .description(OptionDescription.of(Text.literal("Shows you how close you are to the coin order limit for the bazaar at the top of the bazaar. Resets at 12am GMT.")))
+                .name(Component.literal("Show Bazaar Order Limit"))
+                .description(OptionDescription.of(Component.literal("Shows you how close you are to the coin order limit for the bazaar at the top of the bazaar. Resets at 12am GMT.")))
                 .binding(false,
                         this::isEnabled,
                         this::setEnabled)
@@ -157,8 +158,8 @@ public class OrderLimit implements BUListener {
 
     private Option<Double> createLimitOption() {
         return Option.<Double>createBuilder()
-                .name(Text.literal("Order Limit"))
-                .description(OptionDescription.of(Text.literal("The order limit you want to display.")))
+                .name(Component.literal("Order Limit"))
+                .description(OptionDescription.of(Component.literal("The order limit you want to display.")))
                 .binding(coinLimit,
                         this::getCoinLimit,
                         this::setCoinLimit)

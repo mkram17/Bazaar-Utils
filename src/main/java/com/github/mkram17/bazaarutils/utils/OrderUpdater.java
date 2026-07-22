@@ -9,12 +9,13 @@ import com.github.mkram17.bazaarutils.misc.orderinfo.OrderInfoContainer;
 import com.github.mkram17.bazaarutils.misc.orderinfo.PriceInfoContainer;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.Optional;
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public class OrderUpdater {
-    private static Inventory lowerChestInventory;
+    private static Container lowerChestInventory;
 
     private static final String PREFIX_BUY = "BUY";
     private static final String PREFIX_SELL = "SELL";
@@ -90,12 +91,12 @@ public class OrderUpdater {
         }
         order.setItemInfo(parsedItemInfo);
 
-        Optional<? extends LoreComponent> loreComponent = order.getItemInfo().itemStack().getComponentChanges().get(DataComponentTypes.LORE);
-        if (loreComponent == null || loreComponent.isEmpty()) {
+        ItemLore loreComponent = order.getItemInfo().itemStack().get(DataComponents.LORE);
+        if (loreComponent == null) {
             return;
         }
 
-        List<Text> loreLines = loreComponent.get().styledLines();
+        List<Component> loreLines = loreComponent.styledLines();
 
 
         int amountFilled = parseAmountFilled(loreLines);
@@ -117,14 +118,14 @@ public class OrderUpdater {
     }
 
     private static OrderInfoContainer parseOrderFromItemStack(ItemStack stack) {
-        String title = stack.getName().getString();
+        String title = stack.getHoverName().getString();
         ItemInfo itemInfo = new ItemInfo(mapScreenIndexToInventoryIndex(stack), stack);
 
-        Optional<? extends LoreComponent> loreComponent = stack.getComponentChanges().get(DataComponentTypes.LORE);
-        if (loreComponent == null || loreComponent.isEmpty()) {
+        ItemLore loreComponent = stack.get(DataComponents.LORE);
+        if (loreComponent == null) {
             return null;
         }
-        List<Text> loreLines = loreComponent.get().styledLines();
+        List<Component> loreLines = loreComponent.styledLines();
 
         OrderType orderType = detectOrderType(title);
         if (orderType == null) {
@@ -164,8 +165,8 @@ public class OrderUpdater {
         return title.startsWith(prefix) ? title.substring(prefix.length()) : title;
     }
 
-    private static double parseUnitPrice(List<Text> lore) {
-        Text line = Util.findComponentWith(lore, LORE_PER_UNIT);
+    private static double parseUnitPrice(List<Component> lore) {
+        Component line = Util.findComponentWith(lore, LORE_PER_UNIT);
         if (line == null) return Double.NaN;
         String raw = line.getString();
         try {
@@ -175,8 +176,8 @@ public class OrderUpdater {
         }
     }
 
-    private static int parseVolume(List<Text> lore) {
-        Text line = Util.findComponentWith(lore, LORE_ORDER_AMOUNT);
+    private static int parseVolume(List<Component> lore) {
+        Component line = Util.findComponentWith(lore, LORE_ORDER_AMOUNT);
         if (line == null) {
             line = Util.findComponentWith(lore, LORE_OFFER_AMOUNT);
         }
@@ -189,8 +190,8 @@ public class OrderUpdater {
         }
     }
 
-    private static int parseAmountFilled(List<Text> lore) {
-        Text filledLine = Util.findComponentWith(lore, LORE_FILLED);
+    private static int parseAmountFilled(List<Component> lore) {
+        Component filledLine = Util.findComponentWith(lore, LORE_FILLED);
         if (filledLine == null) return -1;
         String s = filledLine.getString();
         int slash = s.indexOf('/');
@@ -203,9 +204,9 @@ public class OrderUpdater {
         }
     }
 
-    private static int parseAmountClaimed(List<Text> lore, int amountFilled) {
+    private static int parseAmountClaimed(List<Component> lore, int amountFilled) {
         if (amountFilled < 0) return -1;
-        Text unclaimedLine = Util.findComponentWith(lore, LORE_TO_CLAIM);
+        Component unclaimedLine = Util.findComponentWith(lore, LORE_TO_CLAIM);
         if (unclaimedLine == null) {
             return amountFilled; // fully claimed
         }
@@ -229,8 +230,8 @@ public class OrderUpdater {
     private static List<ItemStack> extractOrderStacks(List<ItemStack> screenStacks) {
         List<ItemStack> result = new ArrayList<>();
         for (ItemStack stack : screenStacks) {
-            if (stack.isOf(Items.BLACK_STAINED_GLASS_PANE)) continue;
-            if (stack.isOf(Items.ARROW)) break; // stop at navigation arrow
+            if (stack.is(VersionCompat.stainedGlassPane(DyeColor.BLACK))) continue;
+            if (stack.is(Items.ARROW)) break; // stop at navigation arrow
             result.add(stack);
         }
         return result;
@@ -238,8 +239,8 @@ public class OrderUpdater {
 
     private static int mapScreenIndexToInventoryIndex(ItemStack target) {
         if (lowerChestInventory == null) return -1;
-        for (int i = 0; i < lowerChestInventory.size(); i++) {
-            ItemStack current = lowerChestInventory.getStack(i);
+        for (int i = 0; i < lowerChestInventory.getContainerSize(); i++) {
+            ItemStack current = lowerChestInventory.getItem(i);
             if (!current.isEmpty() && current.equals(target)) {
                 return i;
             }

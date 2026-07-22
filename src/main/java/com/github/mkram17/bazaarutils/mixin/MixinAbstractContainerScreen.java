@@ -10,17 +10,17 @@ import com.github.mkram17.bazaarutils.misc.orderinfo.BazaarOrder;
 import com.github.mkram17.bazaarutils.misc.orderinfo.OrderInfoContainer;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Atlases;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.data.AtlasIds;
+import net.minecraft.util.ARGB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,15 +28,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 //used for SlotClickEvent, register keybinds in chests, block slot clicks
-@Mixin(value = HandledScreen.class, priority = 999)
-public abstract class MixinHandledScreen extends Screen {
+@Mixin(value = AbstractContainerScreen.class, priority = 999)
+public abstract class MixinAbstractContainerScreen extends Screen {
 
-	protected MixinHandledScreen(Text title) {
+	protected MixinAbstractContainerScreen(Component title) {
 		super(title);
 	}
 
-	@Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
-	private void onHandleMouseClick(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
+	@Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ContainerInput;)V", at = @At("HEAD"), cancellable = true)
+	private void onHandleMouseClick(Slot slot, int slotId, int button, ContainerInput actionType, CallbackInfo ci) {
 		if (slot == null){
             return;
         }
@@ -45,11 +45,11 @@ public abstract class MixinHandledScreen extends Screen {
             ci.cancel();
         }
 
-		HandledScreen<?> screen = (HandledScreen<?>) (Object) this;
+		AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
 		SlotClickEvent event = new SlotClickEvent(screen, slot, slotId, button, actionType);
 		BazaarUtils.EVENT_BUS.post(event);
 		// Use the accessor to safely get the client instance
-		MinecraftClient client = ((AccessorScreen) screen).getClient();
+		Minecraft client = ((AccessorScreen) screen).getMinecraft();
 
 		if (event.isCancelled()) {
 			ci.cancel();
@@ -57,12 +57,12 @@ public abstract class MixinHandledScreen extends Screen {
 		}
 
 		if (event.usePickblockInstead) {
-			assert client != null && client.player != null && client.interactionManager != null;
-            client.interactionManager.clickSlot(
-					screen.getScreenHandler().syncId,
+			assert client != null && client.player != null && client.gameMode != null;
+            client.gameMode.handleContainerInput(
+					screen.getMenu().containerId,
 					slotId,
 					2,
-					SlotActionType.PICKUP,
+					ContainerInput.PICKUP,
 					client.player
 			);
 			ci.cancel();
@@ -87,24 +87,20 @@ public abstract class MixinHandledScreen extends Screen {
 
 	@Inject(method = "init", at = @At("TAIL"))
 	private void addConfiguredButtons(CallbackInfo ci) {
-		for (ClickableWidget button : BUConfig.getWidgets()) {
-			this.addDrawableChild(button);
+		for (AbstractWidget button : BUConfig.getWidgets()) {
+			this.addRenderableWidget(button);
 		}
 	}
 
-	@Inject(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawItem(Lnet/minecraft/item/ItemStack;III)V"))
-    //? if > 1.21.10 {
-    private void bazaarutils$drawOnItem(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
-    //? } else {
-	/*private void drawOnItem(DrawContext context, Slot slot, CallbackInfo ci) {
-    *///? }
+	@Inject(method = "extractSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;item(Lnet/minecraft/world/item/ItemStack;III)V"))
+    private void bazaarutils$drawOnItem(GuiGraphicsExtractor context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
 		ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
-		if (slot == null || !BUConfig.get().orderStatusHighlight.isEnabled() || !screenInfo.inMenu(ScreenInfo.BazaarMenuType.ORDER_SCREEN) || !slot.hasStack())
+		if (slot == null || !BUConfig.get().orderStatusHighlight.isEnabled() || !screenInfo.inMenu(ScreenInfo.BazaarMenuType.ORDER_SCREEN) || !slot.hasItem())
 			return;
-		if (MinecraftClient.getInstance().player != null && slot.inventory == MinecraftClient.getInstance().player.getInventory())
+		if (Minecraft.getInstance().player != null && slot.container == Minecraft.getInstance().player.getInventory())
 			return;
 
-		BazaarOrder order = OrderStatusHighlight.getHighlightedOrder(slot.getIndex());
+		BazaarOrder order = OrderStatusHighlight.getHighlightedOrder(slot.getContainerSlot());
 		if(order == null || order.getFillStatus() == OrderInfoContainer.Statuses.FILLED)
 			return;
 
@@ -113,7 +109,7 @@ public abstract class MixinHandledScreen extends Screen {
 	}
 
 	@Unique
-	protected void draw(DrawContext context, int x, int y, OrderInfoContainer.Statuses orderStatus) {
+	protected void draw(GuiGraphicsExtractor context, int x, int y, OrderInfoContainer.Statuses orderStatus) {
 		final float r, g, b;
 		if (orderStatus == OrderInfoContainer.Statuses.COMPETITIVE) {
 			r = 0.0f; g = 1.0f; b = 0.0f; // Green
@@ -123,12 +119,12 @@ public abstract class MixinHandledScreen extends Screen {
 			r = 1.0f; g = 1.0f; b = 0.0f; // Yellow
 		}
 
-		final int color = ColorHelper.fromFloats(OrderStatusHighlight.BACKGROUND_TRANSPARENCY, r, g, b);
+		final int color = ARGB.colorFromFloat(OrderStatusHighlight.BACKGROUND_TRANSPARENCY, r, g, b);
 
-        final var sprite = MinecraftClient.getInstance().getAtlasManager().getAtlasTexture(Atlases.GUI)
+        final var sprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI)
                 .getSprite(OrderStatusHighlight.IDENTIFIER);
 
-		context.drawSpriteStretched(RenderPipelines.GUI_TEXTURED,
+		context.blitSprite(RenderPipelines.GUI_TEXTURED,
 				sprite, x, y, 16, 16, color
 		);
 	}

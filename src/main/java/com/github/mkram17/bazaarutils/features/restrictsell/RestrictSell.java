@@ -13,9 +13,9 @@ import lombok.Getter;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,13 +59,13 @@ public class RestrictSell implements BUListener {
         try {
             if (e.getSlotId() != SELL_ITEM_SLOT_ID || !screenInfo.inBazaar())
                 return;
-            if (e.getOriginal() == null || e.getOriginal().getComponentChanges().get(DataComponentTypes.LORE) == null)
+            if (e.getOriginal() == null || e.getOriginal().get(DataComponents.LORE) == null)
                 return;
-            if (e.getOriginal().getComponentChanges().get(DataComponentTypes.LORE).get().styledLines().size() < 6 || e.getOriginal().getComponentChanges().get(DataComponentTypes.LORE).get().styledLines().get(4).getString().contains("Loading"))
+            if (e.getOriginal().get(DataComponents.LORE).styledLines().size() < 6 || e.getOriginal().get(DataComponents.LORE).styledLines().get(4).getString().contains("Loading"))
                 return;
 
             ItemStack sellButton = e.getOriginal().copy();
-            List<Text> changedComponents = sellButton.getComponentChanges().get(DataComponentTypes.LORE).get().styledLines();
+            List<Component> changedComponents = sellButton.get(DataComponents.LORE).styledLines();
 
             int numItems = findNumItems(changedComponents);
             ArrayList<SellItem> items = getItems(changedComponents, numItems);
@@ -87,7 +87,7 @@ public class RestrictSell implements BUListener {
         }
     }
 
-    private int findNumItems(List<Text> changedComponents) {
+    private int findNumItems(List<Component> changedComponents) {
         //if there are items with no buy orders in inv, you get "Some items can't be sold" and there are 2 extra components
         if(Util.findComponentWith(changedComponents, "Some items can't be sold") == null){
             return changedComponents.size()-8;
@@ -95,7 +95,7 @@ public class RestrictSell implements BUListener {
             return changedComponents.size()-10;
         }
     }
-    public ArrayList<SellItem> getItems(List<Text> changedComponents, int numItems){
+    public ArrayList<SellItem> getItems(List<Component> changedComponents, int numItems){
         ArrayList<SellItem> items = new ArrayList<>();
 
         try {
@@ -197,21 +197,21 @@ public class RestrictSell implements BUListener {
 
     public Option<Boolean> createRuleOption(RestrictSellControl control) {
         // Determine display text based on rule type
-        Text nameText;
-        Text descriptionText;
+        Component nameText;
+        Component descriptionText;
 
         if (control.getRule() == restrictBy.NAME) {
             String itemName = control.getName(); // Assuming getName() exists for NAME rules
-            nameText = Text.literal("Item: " + itemName);
-            descriptionText = Text.literal("Block insta-sell for item: " + itemName);
+            nameText = Component.literal("Item: " + itemName);
+            descriptionText = Component.literal("Block insta-sell for item: " + itemName);
         } else {
             double amount = control.getAmount();
             String typeText = control.getRule() == restrictBy.VOLUME ? "Volume < " : "Price < ";
-            nameText = Text.literal(typeText + amount);
+            nameText = Component.literal(typeText + amount);
             String desc = control.getRule() == restrictBy.PRICE ?
                     "Block insta-sell if price exceeds " + amount :
                     "Block insta-sell if volume exceeds " + amount;
-            descriptionText = Text.literal(desc);
+            descriptionText = Component.literal(desc);
         }
 
         return Option.<Boolean>createBuilder()

@@ -12,7 +12,7 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +24,8 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 public class ChatHandler {
     public static Option<Boolean> createOrderFilledSoundOption() {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal("Sound on Order Filled"))
-                .description(OptionDescription.of(Text.literal("Plays two short notification sounds when your order is filled.")))
+                .name(Component.literal("Sound on Order Filled"))
+                .description(OptionDescription.of(Component.literal("Plays two short notification sounds when your order is filled.")))
                 .binding(true,
                         BUConfig.get()::isOrderFilledSound,
                         BUConfig.get()::setOrderFilledSound)
@@ -38,7 +38,7 @@ public class ChatHandler {
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if(message.getString().contains("Error")) return;
 
-            ArrayList<Text> siblings = new ArrayList<>(message.getSiblings());
+            ArrayList<Component> siblings = new ArrayList<>(message.getSiblings());
             getMessageType(message, siblings).ifPresent(messageType -> {
                 switch (messageType) {
                     case ORDER_CREATED -> handleOrderCreated(siblings);
@@ -53,7 +53,7 @@ public class ChatHandler {
         });
     }
 
-    private static Optional<BazaarChatEvent.BazaarEventTypes> getMessageType(Text message, ArrayList<Text> siblings) {
+    private static Optional<BazaarChatEvent.BazaarEventTypes> getMessageType(Component message, ArrayList<Component> siblings) {
         if (siblings.isEmpty() && message.getString().contains("was filled!")) {
             return Optional.of(BazaarChatEvent.BazaarEventTypes.ORDER_FILLED);
         }
@@ -75,7 +75,7 @@ public class ChatHandler {
         return Optional.empty();
     }
 
-    private static Optional<OrderInfoContainer> parseOrderData(ArrayList<Text> siblings, int volumeIndex, int nameIndex, int priceIndex) {
+    private static Optional<OrderInfoContainer> parseOrderData(ArrayList<Component> siblings, int volumeIndex, int nameIndex, int priceIndex) {
         try {
             String volumeString = siblings.get(volumeIndex).getString().replace(",", "");
             int volume = Integer.parseInt(volumeString);
@@ -93,13 +93,13 @@ public class ChatHandler {
 
             return Optional.of(new OrderInfoContainer(name, volume, pricePerUnit, null, null));
         } catch (Exception e) {
-            Util.notifyError("Failed to parse order data from chat: " + siblings.stream().map(Text::getString), e);
+            Util.notifyError("Failed to parse order data from chat: " + siblings.stream().map(Component::getString), e);
             return Optional.empty();
         }
     }
 
     private static void processOrderEvent(
-            ArrayList<Text> siblings,
+            ArrayList<Component> siblings,
             BazaarChatEvent.BazaarEventTypes eventType,
             PriceInfoContainer.PriceType priceType,
             int volumeIndex,
@@ -112,26 +112,26 @@ public class ChatHandler {
         });
     }
 
-    public static void handleFlip(ArrayList<Text> siblings) {
+    public static void handleFlip(ArrayList<Component> siblings) {
         int priceIndex = Util.componentIndexOf(siblings, "for") + 1;
         processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, PriceInfoContainer.PriceType.INSTABUY, 3, 4, priceIndex);
     }
 
-    public static void handleCancelled(ArrayList<Text> siblings) {
+    public static void handleCancelled(ArrayList<Component> siblings) {
         int priceIndex = Util.componentIndexOf(siblings, "for") + 1;
         processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_CANCELLED, PriceInfoContainer.PriceType.INSTASELL, 2, 4, priceIndex);
     }
 
-    public static void handleInstaSell(ArrayList<Text> siblings) {
+    public static void handleInstaSell(ArrayList<Component> siblings) {
         int priceIndex = Util.componentIndexOf(siblings, "for") + 1;
         processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_SELL, PriceInfoContainer.PriceType.INSTASELL, 2, 4, priceIndex);
     }
 
-    public static void handleInstaBuy(ArrayList<Text> siblings) {
+    public static void handleInstaBuy(ArrayList<Component> siblings) {
         processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_BUY, PriceInfoContainer.PriceType.INSTABUY, 2, 4, 6);
     }
 
-    private static void handleFilled(Text message) {
+    private static void handleFilled(Component message) {
         String messageString = Util.removeFormatting(message.getString());
         // Example: "Your Buy Order for 2,304x Mithril was filled!"
         String[] parts = messageString.split(" for |x | was filled!");
@@ -155,7 +155,7 @@ public class ChatHandler {
         }
     }
 
-    private static void handleOrderCreated(ArrayList<Text> siblings) {
+    private static void handleOrderCreated(ArrayList<Component> siblings) {
         String itemName = Util.removeFormatting(getName(siblings));
         int volume = Integer.parseInt(siblings.get(3).getString().replace(",", ""));
 
@@ -174,7 +174,7 @@ public class ChatHandler {
         EVENT_BUS.post(new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_CREATED, orderToAdd));
     }
 
-    private static String getName(List<Text> siblings) {
+    private static String getName(List<Component> siblings) {
         if (siblings.size() == 10) {
             return Util.removeFormatting(siblings.get(6).getString());
         } else {
@@ -182,7 +182,7 @@ public class ChatHandler {
         }
     }
 
-    public static void handleClaimed(ArrayList<Text> siblings) {
+    public static void handleClaimed(ArrayList<Component> siblings) {
         Optional<BazaarOrder> orderOptional;
         try {
             if (siblings.get(6).getString().contains("worth")) {
@@ -203,7 +203,7 @@ public class ChatHandler {
         EVENT_BUS.post(new BazaarChatEvent<>(BazaarChatEvent.BazaarEventTypes.ORDER_CLAIMED, order));
     }
 
-    private static Optional<BazaarOrder> getClaimedBuyOrder(ArrayList<Text> siblings) {
+    private static Optional<BazaarOrder> getClaimedBuyOrder(ArrayList<Component> siblings) {
         // Parse volume with validation
         String volumeStr = siblings.get(3).getString().replace(",", "").trim();
         if (volumeStr.isEmpty()) {
@@ -252,17 +252,17 @@ public class ChatHandler {
         return getOrderInfo(item);
     }
 
-    private static Optional<BazaarOrder> getClaimedSellOrder(ArrayList<Text> siblings) {
+    private static Optional<BazaarOrder> getClaimedSellOrder(ArrayList<Component> siblings) {
         // Sell order claimed messages sometimes include volume and sometimes don't
 
-        Text volumeComponent = siblings.get(Util.componentIndexOf(siblings, "x") - 1);
+        Component volumeComponent = siblings.get(Util.componentIndexOf(siblings, "x") - 1);
         String volumeString = volumeComponent.getString();
         int volume = Integer.parseInt(volumeString.replace(",", "").trim());
 
-        Text nameComponent = siblings.get(Util.componentIndexOf(siblings, "x") + 1);
+        Component nameComponent = siblings.get(Util.componentIndexOf(siblings, "x") + 1);
         String name = nameComponent.getString().trim();
 
-        Text priceComponent = siblings.get(Util.componentLastIndexOf(siblings, "at") + 1);
+        Component priceComponent = siblings.get(Util.componentLastIndexOf(siblings, "at") + 1);
         String priceString = priceComponent.getString().replace(",", "").trim();
         double price = Double.parseDouble(priceString);
 

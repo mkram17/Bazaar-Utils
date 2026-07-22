@@ -9,10 +9,10 @@ import com.github.mkram17.bazaarutils.misc.orderinfo.BazaarOrder;
 import lombok.AllArgsConstructor;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import org.apache.logging.log4j.LogManager;
 
 import java.math.BigDecimal;
@@ -43,25 +43,25 @@ public class Util {
     public static final String HELP_MESSAGE = "Commands: /bu or /bazaarutils to open settings gui. \n---------------------------\n " +
             "/bu tax {amount} to set bazaar tax. This is important for the mod to function correctly. /bu customorders to see current Custom Orders. /bu customorder {order amount} {slot number} to make new Custom Order /bu customorder remove {customorder number} to remove Custom Order (find number by using /bu customorders) \n---------------------------\n  ";
     public static final String DISCORD_LINK = "https://discord.gg/xDKjvm5hQd";
-    public static final Text DISCORD_TEXT = Text.literal("Discord server")
-            .styled(style -> {
+    public static final Component DISCORD_TEXT = Component.literal("Discord server")
+            .withStyle(style -> {
                 try {
                     return style
                             .withBold(true)
                             .withClickEvent(new ClickEvent.OpenUrl(new URI(DISCORD_LINK)))
-                            .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to join the Discord!")));
+                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to join the Discord!")));
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
             });
-    public static final Text CHANGELOG = Text.literal("Click To See Changelog")
-            .styled(style -> {
+    public static final Component CHANGELOG = Component.literal("Click To See Changelog")
+            .withStyle(style -> {
                 try {
                     return style
                             .withBold(true)
                             .withClickEvent(new ClickEvent.OpenUrl(new URI("https://modrinth.com/mod/bazaar-utils/changelog")))
-                            .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to see the changelog")))
-                            .withFormatting(Formatting.GREEN);
+                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to see the changelog")))
+                            .applyFormat(ChatFormatting.GREEN);
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
@@ -87,12 +87,12 @@ public class Util {
     public static void notifyError(String message, Throwable e) {
         String callingName = getCallingClassName();
         String simpleCallingName = callingName.substring(callingName.lastIndexOf(".") + 1);
-        Text messageText = Text.literal("[" + BazaarUtils.MOD_NAME + " Error]: " + message + ". Click here for support.")
-                .styled(style -> {
+        Component messageText = Component.literal("[" + BazaarUtils.MOD_NAME + " Error]: " + message + ". Click here for support.")
+                .withStyle(style -> {
                     try {
-                        return style.withColor(Formatting.RED)
+                        return style.withColor(ChatFormatting.RED)
                                 .withClickEvent(new ClickEvent.OpenUrl(new URI("https://discord.gg/xDKjvm5hQd")))
-                                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to join the Discord for support")));
+                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to join the Discord for support")));
                     } catch (URISyntaxException uriSyntaxException) {
                         throw new RuntimeException(uriSyntaxException);
                     }
@@ -180,16 +180,16 @@ public class Util {
         return Math.abs(value1 - value2) <= tolerance;
     }
     //finds the first index that contains lookingFor, so there could be another later which would cause problems
-    public static int componentIndexOf(List<Text> components, String lookingFor){
+    public static int componentIndexOf(List<Component> components, String lookingFor){
         int num = 0;
-        for(Text component : components){
+        for(Component component : components){
             if(component.getString().contains(lookingFor))
                 return num;
             num++;
         }
             return -1;
     }
-    public static int componentLastIndexOf(List<Text> components, String lookingFor){
+    public static int componentLastIndexOf(List<Component> components, String lookingFor){
         for (int i = components.size() - 1; i >= 0; i--) {
             if (components.get(i).getString().contains(lookingFor)) {
                 return i;
@@ -197,8 +197,8 @@ public class Util {
         }
         return -1;
     }
-    public static Text findComponentWith(List<Text> components, String lookingFor){
-        for(Text component : components){
+    public static Component findComponentWith(List<Component> components, String lookingFor){
+        for(Component component : components){
             if(component.getString().contains(lookingFor))
                 return component;
         }

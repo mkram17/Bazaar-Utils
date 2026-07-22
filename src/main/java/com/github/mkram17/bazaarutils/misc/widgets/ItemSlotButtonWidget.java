@@ -1,44 +1,40 @@
 package com.github.mkram17.bazaarutils.misc.widgets;
 
-import com.github.mkram17.bazaarutils.mixin.AccessorHandledScreen;
+import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.MutableText;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button.OnPress;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.MutableComponent;
 
-public class ItemSlotButtonWidget extends TexturedButtonWidget {
+public class ItemSlotButtonWidget extends ImageButton {
     private final ItemStack itemStack;
     public record ScreenWidgetDimensions(int x, int y, int backgroundWidth) {}
 
-    public ItemSlotButtonWidget(int x, int y, int width, int height, ButtonTextures textures, PressAction onPress, ItemStack itemStack, MutableText tooltip) {
-        super(x, y, width, height, textures, onPress, net.minecraft.text.Text.empty());
+    public ItemSlotButtonWidget(int x, int y, int width, int height, WidgetSprites textures, OnPress onPress, ItemStack itemStack, MutableComponent tooltip) {
+        super(x, y, width, height, textures, onPress, net.minecraft.network.chat.Component.empty());
         this.itemStack = itemStack;
-        this.setTooltip(Tooltip.of(tooltip));
+        this.setTooltip(Tooltip.create(tooltip));
     }
     @Override
-    //? if > 1.21.10 {
-    public void drawIcon(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.drawIcon(context, mouseX, mouseY, delta);
-    //? } else {
-    /*public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.renderWidget(context, mouseX, mouseY, delta);
-    *///? }
+    public void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractContents(context, mouseX, mouseY, delta);
 
         if (this.itemStack != null && !this.itemStack.isEmpty()) {
             int itemX = this.getX() + (this.width - 16) / 2;
             int itemY = this.getY() + (this.height - 16) / 2;
 
-            context.drawItem(this.itemStack, itemX, itemY);
+            context.item(this.itemStack, itemX, itemY);
         }
     }
-    public static ScreenWidgetDimensions getSafeScreenDimensions(AccessorHandledScreen screen, String screenTitle) {
-        int currentX = screen.getX();
-        int currentY = screen.getY();
-        int currentBgWidth = screen.getBackgroundWidth();
+    public static ScreenWidgetDimensions getSafeScreenDimensions(AccessorAbstractContainerScreen screen, String screenTitle) {
+        int currentX = screen.getLeftPos();
+        int currentY = screen.getTopPos();
+        int currentBgWidth = screen.getImageWidth();
 
         if (currentBgWidth <= 0) {
             PlayerActionUtil.notifyAll("BackgroundWidth is not yet initialized correctly in init TAIL for " + screenTitle, Util.notificationTypes.GUI);

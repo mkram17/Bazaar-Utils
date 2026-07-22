@@ -12,7 +12,7 @@ import dev.isxander.yacl3.api.OptionDescription;
 import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,8 +96,8 @@ public class StashMessages implements BUListener {
 
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal("Disable Stash Messages"))
-                .description(OptionDescription.of(Text.literal("When this option is ON, messages reminding you to pick up your stash will no longer appear in chat.")))
+                .name(Component.literal("Disable Stash Messages"))
+                .description(OptionDescription.of(Component.literal("When this option is ON, messages reminding you to pick up your stash will no longer appear in chat.")))
                 .binding(false,
                         this::shouldRemoveMessages,
                         this::setRemoveMessages)

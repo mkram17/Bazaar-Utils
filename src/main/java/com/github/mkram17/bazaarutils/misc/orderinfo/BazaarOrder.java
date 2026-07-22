@@ -12,9 +12,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -98,16 +98,16 @@ public class BazaarOrder extends OrderInfoContainer {
         if(!shouldNotifyUser || !BUConfig.get().userOrders.contains(this)) return;
         if(this.getFillStatus() == OrderInfoContainer.Statuses.FILLED) return;
 
-        MutableText message;
+        MutableComponent message;
         if (isOutbid) {
             message = OutbidOrderHandler.getOutbidMessage(this);
             if (BUConfig.get().developerMode) {
-                message.append(Text.literal(". Market Price: " + this.getMarketPrice(this.getPriceType()) + " Order Price: " + this.getPricePerItem()));
+                message.append(Component.literal(". Market Price: " + this.getMarketPrice(this.getPriceType()) + " Order Price: " + this.getPricePerItem()));
             }
             if(shouldAutoOpenBazaar){
                 openBazaar();
             }
-            MinecraftClient client = MinecraftClient.getInstance();
+            Minecraft client = Minecraft.getInstance();
             var player = client.player;
             if (shouldPlayNotificationSound && player != null) {
                 SoundUtil.notifyMultipleTimes(OUTBID_ORDER_NOTIFICATIONS);

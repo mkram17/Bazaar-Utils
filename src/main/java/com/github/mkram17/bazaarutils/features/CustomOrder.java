@@ -10,6 +10,7 @@ import com.github.mkram17.bazaarutils.utils.GUIUtils;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
@@ -18,12 +19,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +37,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 //TODO find new name for this
 @NoArgsConstructor
 public class CustomOrder extends CustomItemButton implements BUListener {
-    public static final Map<Integer, Item> COLORMAP = new HashMap<>(Map.of(0, Items.PURPLE_STAINED_GLASS_PANE, 1, Items.BLUE_STAINED_GLASS_PANE, 2, Items.ORANGE_STAINED_GLASS_PANE, 3, Items.BLACK_STAINED_GLASS_PANE, 4, Items.BLACK_STAINED_GLASS_PANE));
+    public static final Map<Integer, Item> COLORMAP = new HashMap<>(Map.of(0, VersionCompat.stainedGlassPane(DyeColor.PURPLE), 1, VersionCompat.stainedGlassPane(DyeColor.BLUE), 2, VersionCompat.stainedGlassPane(DyeColor.ORANGE), 3, VersionCompat.stainedGlassPane(DyeColor.BLACK), 4, VersionCompat.stainedGlassPane(DyeColor.BLACK)));
     private boolean buySignClicked = false;
 
     @Getter @Setter
@@ -56,7 +58,7 @@ public class CustomOrder extends CustomItemButton implements BUListener {
         this.enabled = enabled;
         this.orderAmount = 71680;
         this.slotNumber = 17;
-        this.item = Items.PURPLE_STAINED_GLASS_PANE;
+        this.item = VersionCompat.stainedGlassPane(DyeColor.PURPLE);
     }
     public static Item getNextColoredPane(){
         int size = BUConfig.get().customOrders.size();
@@ -65,8 +67,8 @@ public class CustomOrder extends CustomItemButton implements BUListener {
 
     public static OptionGroup.Builder createOrdersGroup(){
         return OptionGroup.createBuilder()
-                .name(Text.literal("Buy Amount Options"))
-                .description(OptionDescription.of(Text.literal("Add buttons for custom buy order/insta buy amounts. To add more do /bu customorder add {order amount} {slot number} (top left slot is slot #1, to the right is #2, etc etc.")));
+                .name(Component.literal("Buy Amount Options"))
+                .description(OptionDescription.of(Component.literal("Add buttons for custom buy order/insta buy amounts. To add more do /bu customorder add {order amount} {slot number} (top left slot is slot #1, to the right is #2, etc etc.")));
     }
 
     @EventHandler
@@ -81,7 +83,7 @@ public class CustomOrder extends CustomItemButton implements BUListener {
         ItemStack itemStack = new ItemStack(getItem(), 1);
         itemStack.set(BazaarUtils.CUSTOM_SIZE_COMPONENT, String.valueOf(getOrderAmount()));
 
-        itemStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Buy " + getOrderAmount()).formatted(Formatting.DARK_PURPLE));
+        itemStack.set(DataComponents.CUSTOM_NAME, Component.literal("Buy " + getOrderAmount()).withStyle(ChatFormatting.DARK_PURPLE));
         event.setReplacement(itemStack);
     }
 
@@ -91,7 +93,7 @@ public class CustomOrder extends CustomItemButton implements BUListener {
         if (!screenInfo.inMenu(ScreenInfo.BazaarMenuType.BUY_ORDER, ScreenInfo.BazaarMenuType.INSTA_BUY) || !isEnabled())
             return;
 
-        if (event.slot.getIndex() != slotNumber)
+        if (event.slot.getContainerSlot() != slotNumber)
             return;
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
 

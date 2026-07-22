@@ -6,26 +6,26 @@ import com.github.mkram17.bazaarutils.misc.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 public class JoinMessages {
 
-    private static Text welcomeMessage;
-    private static Text discordMessage;
-    private static Text updateMessage;
+    private static Component welcomeMessage;
+    private static Component discordMessage;
+    private static Component updateMessage;
 
     @RunOnInit(priority = RunOnInit.EVENT_PRIORITIES.HIGH)
     public static void initializeFields(){
-        welcomeMessage = Text.literal("Thanks for installing! Use /bu or /bazaarutils to configure the mod.")
-                .formatted(Formatting.GREEN);
-        discordMessage = Text.literal("For more help or to report a bug, join the ")
-                .formatted(Formatting.GREEN)
+        welcomeMessage = Component.literal("Thanks for installing! Use /bu or /bazaarutils to configure the mod.")
+                .withStyle(ChatFormatting.GREEN);
+        discordMessage = Component.literal("For more help or to report a bug, join the ")
+                .withStyle(ChatFormatting.GREEN)
                 .append(Util.DISCORD_TEXT)
-                .append(Text.literal("!")
-                        .formatted(Formatting.GREEN));
-        updateMessage = (Text.literal(BazaarUtils.getUpdateNotes())
-                .formatted(Formatting.DARK_GREEN));
+                .append(Component.literal("!")
+                        .withStyle(ChatFormatting.GREEN));
+        updateMessage = (Component.literal(BazaarUtils.getUpdateNotes())
+                .withStyle(ChatFormatting.DARK_GREEN));
 
     }
 

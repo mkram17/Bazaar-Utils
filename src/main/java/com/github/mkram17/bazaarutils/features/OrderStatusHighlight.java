@@ -8,19 +8,20 @@ import com.github.mkram17.bazaarutils.misc.orderinfo.OrderInfoContainer;
 import com.github.mkram17.bazaarutils.misc.orderinfo.PriceInfoContainer;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ import java.util.List;
 public class OrderStatusHighlight implements BUListener {
     @Getter @Setter
     private boolean enabled;
-    public static final Identifier IDENTIFIER = Identifier.tryParse("bazaarutils", "orderstatushighlight/background");
+    public static final Identifier IDENTIFIER = Identifier.tryBuild("bazaarutils", "orderstatushighlight/background");
     public static final float BACKGROUND_TRANSPARENCY = 0.9f;
 
     public OrderStatusHighlight(boolean enabled){
@@ -58,8 +59,8 @@ public class OrderStatusHighlight implements BUListener {
 
     public Option<Boolean> createOption() {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal("Order Status Highlight"))
-                .description(OptionDescription.of(Text.literal("Adds a colored background and tooltip for orders that are competitive, matched or outbid in the orders gui inside the bazaar. For outdated orders, also adds the market price in the tooltip.")))
+                .name(Component.literal("Order Status Highlight"))
+                .description(OptionDescription.of(Component.literal("Adds a colored background and tooltip for orders that are competitive, matched or outbid in the orders gui inside the bazaar. For outdated orders, also adds the market price in the tooltip.")))
                 .binding(false,
                         this::isEnabled,
                         this::setEnabled)
@@ -69,19 +70,19 @@ public class OrderStatusHighlight implements BUListener {
 
     //maybe could be split into separate methods, but this is fine for now
     private void registerTooltipListener() {
-        ItemTooltipCallback.EVENT.register((ItemStack stack, net.minecraft.item.Item.TooltipContext context, TooltipType type, List<Text> lines) -> {
+        ItemTooltipCallback.EVENT.register((ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, TooltipFlag type, List<Component> lines) -> {
             if (!enabled) return;
             ScreenInfo screenInfo = ScreenInfo.getCurrentScreenInfo();
-            if (stack == null || stack.isEmpty() || stack.getItem().getName().getString().contains("GLASS_PANE") || !screenInfo.inMenu(ScreenInfo.BazaarMenuType.ORDER_SCREEN)) {
+            if (stack == null || stack.isEmpty() || stack.getItem().getName(stack).getString().contains("GLASS_PANE") || !screenInfo.inMenu(ScreenInfo.BazaarMenuType.ORDER_SCREEN)) {
                 return;
             }
 
-            MinecraftClient client = MinecraftClient.getInstance();
-            if (client.player == null || !(client.currentScreen instanceof HandledScreen<?> handledScreen)) {
+            Minecraft client = Minecraft.getInstance();
+            if (client.player == null || !(VersionCompat.getScreen(client) instanceof AbstractContainerScreen<?> handledScreen)) {
                 return;
             }
 
-            for (Text line : lines) {
+            for (Component line : lines) {
                 String lineText = line.getString();
                 if (lineText.contains("FILLED") || lineText.contains("OUTBID") ||
                         lineText.contains("COMPETITIVE") || lineText.contains("MATCHED")) {
@@ -91,10 +92,10 @@ public class OrderStatusHighlight implements BUListener {
             }
 
             int index = -1;
-            for (Slot slot : handledScreen.getScreenHandler().slots) {
-                if (!slot.hasStack() || !(slot.getStack() == stack))
+            for (Slot slot : handledScreen.getMenu().slots) {
+                if (!slot.hasItem() || !(slot.getItem() == stack))
                     continue;
-                index = slot.getIndex();
+                index = slot.getContainerSlot();
             }
 
             if(index == -1)
@@ -110,14 +111,14 @@ public class OrderStatusHighlight implements BUListener {
 
             switch (orderStatus) {
                 case OUTBID:
-                    lines.add(1, Text.literal("OUTBID").formatted(Formatting.RED, Formatting.BOLD));
-                    lines.add(2, Text.literal("Market Price: " + Util.getPrettyString(order.getMarketPrice(order.getPriceType()))).formatted(Formatting.RED));
+                    lines.add(1, Component.literal("OUTBID").withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
+                    lines.add(2, Component.literal("Market Price: " + Util.getPrettyString(order.getMarketPrice(order.getPriceType()))).withStyle(ChatFormatting.RED));
                     break;
                 case COMPETITIVE:
-                    lines.add(1, Text.literal("COMPETITIVE").formatted(Formatting.GREEN, Formatting.BOLD));
+                    lines.add(1, Component.literal("COMPETITIVE").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD));
                     break;
                 case MATCHED:
-                    lines.add(1, Text.literal("MATCHED").formatted(Formatting.YELLOW, Formatting.BOLD));
+                    lines.add(1, Component.literal("MATCHED").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD));
                     break;
             }
             if(BUConfig.get().developerMode) {
@@ -126,8 +127,8 @@ public class OrderStatusHighlight implements BUListener {
                 if(sellPrice == null || buyPrice == null)
                     return;
 
-                lines.add(Text.literal("[BU] Buy: " + Util.getPrettyString(sellPrice) + " coins"));
-                lines.add(Text.literal("[BU] Sell: " + Util.getPrettyString(buyPrice) + " coins"));
+                lines.add(Component.literal("[BU] Buy: " + Util.getPrettyString(sellPrice) + " coins"));
+                lines.add(Component.literal("[BU] Sell: " + Util.getPrettyString(buyPrice) + " coins"));
             }
         });
     }

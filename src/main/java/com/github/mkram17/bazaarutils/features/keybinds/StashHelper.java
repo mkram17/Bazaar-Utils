@@ -2,26 +2,26 @@ package com.github.mkram17.bazaarutils.features.keybinds;
 
 //? if > 1.21.8 {
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 //?}
 import com.github.mkram17.bazaarutils.misc.autoregistration.RunOnInit;
 import com.github.mkram17.bazaarutils.utils.GUIUtils;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
 
 public class StashHelper {
     @Getter
     private static int ticksBetweenPresses;
     //? if > 1.21.8
-    private static final KeyBinding.Category CATEGORY = KeyBinding.Category.create(Identifier.of(BazaarUtils.MODID));
-    private static final KeyBinding keyBinding = new KeyBinding(
+    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.parse(BazaarUtils.MODID));
+    private static final KeyMapping keyBinding = new KeyMapping(
        "Pick Up Stash",
-       InputUtil.Type.KEYSYM,
+       InputConstants.Type.KEYSYM,
        GLFW.GLFW_KEY_V,
        //? if > 1.21.8 {
        CATEGORY
@@ -32,14 +32,14 @@ public class StashHelper {
 
     @RunOnInit
     public static void initializeKeybind(){
-        KeyBindingHelper.registerKeyBinding(keyBinding);
+        KeyMappingHelper.registerKeyMapping(keyBinding);
     }
 
     @RunOnInit
     public static void registerOnPressed(){
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             ticksBetweenPresses++;
-            if(!keyBinding.isPressed()) {
+            if(!keyBinding.isDown()) {
                 return;
             }
             if(ticksBetweenPresses > 10) {
@@ -51,6 +51,6 @@ public class StashHelper {
     }
 
     public static String getUsage(){
-        return keyBinding.getBoundKeyTranslationKey();
+        return keyBinding.saveString();
     }
 }

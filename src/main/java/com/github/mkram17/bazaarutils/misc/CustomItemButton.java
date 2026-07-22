@@ -8,11 +8,11 @@ import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Holder;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -22,7 +22,7 @@ public class CustomItemButton {
     protected int slotNumber;
     @Getter @Setter
     protected transient ItemStack replacementItem;
-    protected static final RegistryEntry<SoundEvent> BUTTON_SOUND = SoundEvents.UI_BUTTON_CLICK;
+    protected static final Holder<SoundEvent> BUTTON_SOUND = SoundEvents.UI_BUTTON_CLICK;
     protected static final float BUTTON_VOLUME = .2f;
 
     protected void onGuiLoad(ChestLoadedEvent event) {
@@ -39,22 +39,22 @@ public class CustomItemButton {
 
     public Option<Boolean> createBooleanOption(String name, String description, Supplier<Boolean> getter, Consumer<Boolean> setter) {
         return Option.<Boolean>createBuilder()
-                .name(Text.literal(name))
+                .name(Component.literal(name))
                 .binding(true,
                         getter,
                         setter)
-                .description(OptionDescription.of(Text.literal(description)))
+                .description(OptionDescription.of(Component.literal(description)))
                 .controller(BUConfigGui::createBooleanController)
                 .build();
     }
 
     public <T extends Enum<T>> Option<T> createEnumOption(String name, String description, Class<T> enumClass, T def, Supplier<T> getter, Consumer<T> setter) {
         return Option.<T>createBuilder()
-                .name(Text.literal(name))
+                .name(Component.literal(name))
                 .binding(def,
                         getter,
                         setter)
-                .description(OptionDescription.of(Text.literal(description)))
+                .description(OptionDescription.of(Component.literal(description)))
                 .controller(opt -> BUConfigGui.createEnumController(opt, enumClass))
                 .build();
     }

@@ -8,9 +8,9 @@ import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,23 +32,23 @@ public class OutbidOrderHandler {
         this.notificationSound = true;
     }
 
-    public static MutableText getOutbidMessage(BazaarOrder order) {
+    public static MutableComponent getOutbidMessage(BazaarOrder order) {
         return createYourOrderForText(order)
-                .append(Text.literal(" is now outdated.").formatted(Formatting.WHITE))
-                .append(Text.literal(" Click to open bazaar orders").formatted(Formatting.GOLD));
+                .append(Component.literal(" is now outdated.").withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(" Click to open bazaar orders").withStyle(ChatFormatting.GOLD));
     }
-    public static MutableText getCompetitiveMessage(BazaarOrder order) {
+    public static MutableComponent getCompetitiveMessage(BazaarOrder order) {
         return createYourOrderForText(order)
-                .append(Text.literal(" is no longer outdated.").formatted(Formatting.DARK_PURPLE));
+                .append(Component.literal(" is no longer outdated.").withStyle(ChatFormatting.DARK_PURPLE));
     }
-    public static MutableText getMatchedMessage(BazaarOrder order) {
+    public static MutableComponent getMatchedMessage(BazaarOrder order) {
         return createYourOrderForText(order)
-                .append(Text.literal(" has been matched.").formatted(Formatting.YELLOW));
+                .append(Component.literal(" has been matched.").withStyle(ChatFormatting.YELLOW));
     }
-    private static MutableText createYourOrderForText(BazaarOrder order){
-        return Text.literal("Your " + order.getPriceType().getString().toLowerCase() + " order for ").formatted(Formatting.WHITE)
-                .append(Text.literal(order.getVolume().toString() + " ").formatted(Formatting.DARK_PURPLE))
-                .append(Text.literal(order.getName()).formatted(Formatting.GOLD));
+    private static MutableComponent createYourOrderForText(BazaarOrder order){
+        return Component.literal("Your " + order.getPriceType().getString().toLowerCase() + " order for ").withStyle(ChatFormatting.WHITE)
+                .append(Component.literal(order.getVolume().toString() + " ").withStyle(ChatFormatting.DARK_PURPLE))
+                .append(Component.literal(order.getName()).withStyle(ChatFormatting.GOLD));
     }
 
     public static List<BazaarOrder> getOutbidOrders() {
@@ -60,24 +60,24 @@ public class OutbidOrderHandler {
     public Collection<Option<Boolean>> createOptions() {
         ArrayList<Option<Boolean>> options = new ArrayList<>();
         options.add(Option.<Boolean>createBuilder()
-                .name(Text.literal("Open Bazaar on Outbid Orders"))
-                .description(OptionDescription.of(Text.literal("Automatically open the bazaar after a delay when an order becomes outdated.")))
+                .name(Component.literal("Open Bazaar on Outbid Orders"))
+                .description(OptionDescription.of(Component.literal("Automatically open the bazaar after a delay when an order becomes outdated.")))
                 .binding(false,
                         this::isAutoOpenEnabled,
                         this::setAutoOpenEnabled)
                 .controller(BUConfigGui::createBooleanController)
                 .build());
         options.add(Option.<Boolean>createBuilder()
-                .name(Text.literal("Chat Notification on Outbid Orders"))
-                .description(OptionDescription.of(Text.literal("Sends a message in chat when someone has undercut your order.")))
+                .name(Component.literal("Chat Notification on Outbid Orders"))
+                .description(OptionDescription.of(Component.literal("Sends a message in chat when someone has undercut your order.")))
                 .binding(true,
                         this::isNotifyOutbid,
                         this::setNotifyOutbid)
                 .controller(BUConfigGui::createBooleanController)
                 .build());
         options.add(Option.<Boolean>createBuilder()
-                .name(Text.literal("Sound on Outbid Order"))
-                .description(OptionDescription.of(Text.literal("Plays three short notification sounds when your order becomes outdated.")))
+                .name(Component.literal("Sound on Outbid Order"))
+                .description(OptionDescription.of(Component.literal("Plays three short notification sounds when your order becomes outdated.")))
                 .binding(true,
                         this::isNotificationSound,
                         this::setNotificationSound)

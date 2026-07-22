@@ -2,14 +2,14 @@ package com.github.mkram17.bazaarutils.events;
 
 import lombok.Getter;
 import meteordevelopment.orbit.ICancellable;
-import net.minecraft.client.gui.screen.ingame.SignEditScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 
 public class SignOpenEvent implements ICancellable {
     @Getter
-    private final SignEditScreen signEditScreen;
+    private final AbstractSignEditScreen signEditScreen;
     private boolean cancelled;
 
-    public SignOpenEvent(SignEditScreen signEditScreen) {
+    public SignOpenEvent(AbstractSignEditScreen signEditScreen) {
         this.signEditScreen = signEditScreen;
     }
 

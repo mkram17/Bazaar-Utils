@@ -7,14 +7,14 @@
     "defaultRequire": 1
   },
   "client": [
-    "MinecraftClientMixin",
-    "AccessorHandledScreen",
+    "MinecraftMixin",
+    "AccessorAbstractContainerScreen",
     "AccessorScreen",
     "AccessorSignEditScreen",
     "DrawContentMixin",
-    "MixinHandledScreen",
+    "MixinAbstractContainerScreen",
     "MixinSignEditScreen",
-    "MixinSimpleInventory",
+    "MixinSimpleContainer",
     "AccessorSkyBlockBazaarReply"
   ]
 }
