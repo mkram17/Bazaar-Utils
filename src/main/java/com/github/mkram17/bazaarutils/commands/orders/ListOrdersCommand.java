@@ -1,7 +1,6 @@
 package com.github.mkram17.bazaarutils.commands.orders;
 
 import com.github.mkram17.bazaarutils.commands.BUCommand;
-import com.github.mkram17.bazaarutils.commands.DeveloperCommands;
 import com.github.mkram17.bazaarutils.commands.OrdersCommands;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
@@ -27,8 +26,6 @@ public final class ListOrdersCommand implements BUCommand {
     }
 
     private int queryAll(CommandContext<FabricClientCommandSource> context) {
-        if (!DeveloperCommands.isEnabled()) return 0;
-
         PlayerActionUtil.notifyAll(Order.getVariables(Order::getName).toString());
 
         return 1;

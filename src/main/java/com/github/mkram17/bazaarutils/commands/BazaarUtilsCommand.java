@@ -1,8 +1,6 @@
 package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -19,15 +17,7 @@ public final class BazaarUtilsCommand implements BUCommand {
     public final String commandName = "bazaarutils";
 
     public List<BUCommand> getSubcommands() {
-        return BazaarUtilsCommands.collected.stream()
-                .filter(it -> it instanceof BUCommand)
-                .map(it -> (BUCommand) it)
-                .filter(it -> {
-                    Command ann = it.getClass().getAnnotation(Command.class);
-
-                    return ann == null || ann.parent() == BUCommand.class;
-                })
-                .toList();
+        return BUCommand.childrenOf(BUCommand.class);
     }
 
     private static final List<String> PREFIXES = List.of("bazaarutils", "bu");

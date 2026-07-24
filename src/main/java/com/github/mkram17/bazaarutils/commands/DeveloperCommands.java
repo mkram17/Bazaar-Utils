@@ -2,7 +2,6 @@ package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -24,15 +23,7 @@ public final class DeveloperCommands implements BUCommand {
 
     @Override
     public List<BUCommand> getSubcommands() {
-        return BazaarUtilsCommands.collected.stream()
-                .filter(it -> it instanceof BUCommand)
-                .map(it -> (BUCommand) it)
-                .filter(it -> {
-                    Command ann = it.getClass().getAnnotation(Command.class);
-
-                    return ann != null && ann.parent() == DeveloperCommands.class;
-                })
-                .toList();
+        return BUCommand.childrenOf(DeveloperCommands.class);
     }
 
 
