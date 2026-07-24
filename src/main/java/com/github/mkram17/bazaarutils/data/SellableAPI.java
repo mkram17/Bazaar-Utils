@@ -213,7 +213,6 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
 
     @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
-    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onInventoryChange(PlayerInventoryChangeEvent event) {
         if (InstantSell.orders().isEmpty() && SellSacks.orders().isEmpty()) return;
 
@@ -234,7 +233,6 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
     }
 
     @Subscription
-    @OnlyOnSkyBlock
     private void onScreenChange(ScreenChangeEvent.Post ignored) {
         clearAll();
     }
