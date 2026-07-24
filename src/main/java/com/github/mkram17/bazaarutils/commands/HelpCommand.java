@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.commands;
 
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -23,7 +23,7 @@ public final class HelpCommand implements BUCommand {
     }
 
     private int execute(CommandContext<FabricClientCommandSource> context) {
-        BazaarUtilsCommand root = BazaarUtilsLateInitModules.BazaarUtilsCommand;
+        BazaarUtilsCommand root = BazaarUtilsModules.BazaarUtilsCommand;
 
         MutableComponent message = Component.literal("BazaarUtils Commands\n").withStyle(ChatFormatting.GOLD);
 

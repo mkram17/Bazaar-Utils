@@ -9,16 +9,18 @@ import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.Minecraft;
 
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.thatgravyboat.repolib.api.RepoAPI;
 import tech.thatgravyboat.repolib.api.RepoStatus;
 import tech.thatgravyboat.skyblockapi.api.SkyBlockAPI;
 import tech.thatgravyboat.skyblockapi.api.events.base.EventBus;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
-import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnRepoStatus;
 import tech.thatgravyboat.skyblockapi.api.events.misc.RepoStatusEvent;
 
 import java.util.concurrent.Executors;
@@ -28,6 +30,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BazaarUtils implements ClientModInitializer {
     public static final String MOD_ID = "bazaarutils";
     public static final String MOD_NAME = "Bazaar Utils";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
     public static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
 
@@ -50,9 +54,9 @@ public class BazaarUtils implements ClientModInitializer {
 
         UpdateUtil.updateModProperties();
 
-        BazaarUtilsModules.init();
-
         BazaarUtilsCommands.init();
+
+        BazaarUtilsModules.init();
 
         if (RepoAPI.isInitialized()) {
             onRepoReady();
@@ -62,15 +66,22 @@ public class BazaarUtils implements ClientModInitializer {
     private static final AtomicBoolean repoReady = new AtomicBoolean(false);
 
     @Subscription(event = RepoStatusEvent.class)
-    @OnRepoStatus(repoStatus = RepoStatus.SUCCESS)
-    public void onRepoReady(RepoStatusEvent event) {
+    public void onRepoStatus(RepoStatusEvent event) {
+        if (event.getStatus() != RepoStatus.SUCCESS) {
+            LOGGER.warn("SkyblockAPI repo did not load successfully (status: {}); continuing with late init anyway.", event.getStatus());
+        }
+
         onRepoReady();
     }
 
     private void onRepoReady() {
         if (!repoReady.compareAndSet(false, true)) return;
 
-        BazaarUtilsLateInitModules.init();
-        UpdateUtil.checkForUpdates();
+        // The repo-status event is posted from repolib's async worker thread; marshal onto the
+        // client thread before touching the (unsynchronized) event bus and command registration.
+        Minecraft.getInstance().execute(() -> {
+            BazaarUtilsLateInitModules.init();
+            UpdateUtil.checkForUpdates();
+        });
     }
 }

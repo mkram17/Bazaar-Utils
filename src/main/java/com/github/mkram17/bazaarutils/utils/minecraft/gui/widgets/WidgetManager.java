@@ -9,7 +9,7 @@ import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.mixin.AccessorScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Priority;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
@@ -23,7 +23,7 @@ import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import java.util.List;
 import java.util.Optional;
 
-@LateInitModule
+@Module
 public class WidgetManager extends BUListener {
     public record ScreenWidgetDimensions(int x, int y, int backgroundWidth) {}
 

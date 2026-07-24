@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.commands;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.List;
 
-@LateInitModule
+@Module
 public final class BazaarUtilsCommand implements BUCommand {
     @Getter
     public final String commandName = "bazaarutils";
@@ -28,7 +28,7 @@ public final class BazaarUtilsCommand implements BUCommand {
                     return ann == null || ann.parent() == BUCommand.class;
                 })
                 .toList();
-    };
+    }
 
     private static final List<String> PREFIXES = List.of("bazaarutils", "bu");
 
