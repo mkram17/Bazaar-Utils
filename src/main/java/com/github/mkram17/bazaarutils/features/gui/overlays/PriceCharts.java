@@ -68,7 +68,7 @@ public class PriceCharts extends BUListener implements ToggleableFeature {
     @OnlyWhenEnabled
     @OnlyOnSkyBlock
     private void onClick(SlotClickEvent event) {
-        if (!shouldShow() || event.isCancelled()) {
+        if (!shouldShow()) {
             return;
         }
 

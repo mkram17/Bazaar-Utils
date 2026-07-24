@@ -109,10 +109,9 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
         var stack = event.getItem();
         var lines = event.getTooltip();
 
-        if (!isEnabled()) return;
-
+        // Enablement and ORDERS_PAGE gating are handled by @OnlyWhenEnabled and
+        // @OnlyBazaarScreen(useConstraintsInterface = true); the chain below only resolves the menu.
         ScreenManager.getInstance().current()
-                .filter(context -> context.is(BazaarScreenType.ORDERS_PAGE))
                 .flatMap(context -> context.as(AbstractContainerScreen.class))
                 .map(AbstractContainerScreen::getMenu)
                 .ifPresent(screen -> {

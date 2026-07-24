@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.utils;
 
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+
 /**
  * Canonical priority constants for any ordered event or computation pipeline.
  *
@@ -19,19 +21,19 @@ public final class Priority {
     public static final int FIRST = Integer.MIN_VALUE;
 
     /** Before all standard tiers; for cross-cutting concerns (e.g. cancellation guards). */
-    public static final int HIGHEST = -2_000_000;
+    public static final int HIGHEST = Subscription.HIGHEST;
 
     /** Before normal; for pre-processing or enrichment. */
-    public static final int HIGH = -100_000;
+    public static final int HIGH = Subscription.HIGH;
 
     /** Default. Use when ordering relative to other handlers does not matter. */
     public static final int NORMAL = 0;
 
     /** After normal; for post-processing or aggregation. */
-    public static final int LOW = 100_000;
+    public static final int LOW = Subscription.LOW;
 
     /** After all standard tiers; for cleanup or final decoration. */
-    public static final int LOWEST = 2_000_000;
+    public static final int LOWEST = Subscription.LOWEST;
 
     /** Runs after everything else. Use for terminal/audit handlers. */
     public static final int LAST = Integer.MAX_VALUE;

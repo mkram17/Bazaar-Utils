@@ -14,20 +14,31 @@ import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class SignManager {
-    public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
-        BazaarUtils.EVENT_BUS.register(new Object() {
-            @Subscription(priority = Priority.FIRST)
-            private void onSignOpen(SignOpenEvent event) {
-                try {
-                    action.accept(event);
-                } finally {
-                    BazaarUtils.EVENT_BUS.unregister(this);
-                }
+    /** One-shot callbacks to run the next time a sign opens; drained by {@link SignOpenDispatcher}. */
+    private static final Queue<Consumer<SignOpenEvent>> PENDING = new ConcurrentLinkedQueue<>();
+
+    static {
+        BazaarUtils.EVENT_BUS.register(new SignOpenDispatcher());
+    }
+
+    private static final class SignOpenDispatcher {
+        @Subscription(priority = Priority.FIRST)
+        private void onSignOpen(SignOpenEvent event) {
+            Consumer<SignOpenEvent> action;
+
+            while ((action = PENDING.poll()) != null) {
+                action.accept(event);
             }
-        });
+        }
+    }
+
+    public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
+        PENDING.add(action);
     }
 
     public static void setSignText(String text, boolean closeAfter) {
