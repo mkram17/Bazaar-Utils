@@ -159,6 +159,13 @@ public abstract class ModuleRegistryGeneratingTask extends DefaultTask {
             if (decl.pos() < fieldPos) start = decl.pos();
         }
 
+        // Cut the window at the previous member's terminator (`;`, `{` or `}`) so annotations
+        // belonging to an earlier field/member in the same class don't bleed into this field's
+        // preceding text and get mis-attributed to it.
+        int boundary = Math.max(source.lastIndexOf(';', fieldPos - 1),
+                Math.max(source.lastIndexOf('{', fieldPos - 1), source.lastIndexOf('}', fieldPos - 1)));
+        if (boundary >= start) start = boundary + 1;
+
         return source.substring(start, fieldPos);
     }
 
@@ -183,15 +190,16 @@ public abstract class ModuleRegistryGeneratingTask extends DefaultTask {
 
     private static String buildFqn(String source, List<ClassDecl> decls, int index, String packagePrefix) {
         ClassDecl decl = decls.get(index);
-        long open  = braceCount(source, decl.pos(), '{');
-        long close = braceCount(source, decl.pos(), '}');
+        long depth = braceCount(source, decl.pos(), '{') - braceCount(source, decl.pos(), '}');
 
-        if (open <= close) return packagePrefix + decl.name(); // top-level
+        if (depth <= 0) return packagePrefix + decl.name(); // top-level
 
+        // The enclosing class is the nearest preceding declaration at a strictly shallower brace
+        // depth; a preceding sibling sits at the same depth (its body has already closed) and must
+        // be skipped. Matches the depth logic in findEnclosingClassFqn.
         for (int j = index - 1; j >= 0; j--) {
-            long o = braceCount(source, decls.get(j).pos(), '{');
-            long c = braceCount(source, decls.get(j).pos(), '}');
-            if (o <= close) return packagePrefix + decls.get(j).name() + "." + decl.name();
+            long enclosingDepth = braceCount(source, decls.get(j).pos(), '{') - braceCount(source, decls.get(j).pos(), '}');
+            if (enclosingDepth < depth) return packagePrefix + decls.get(j).name() + "." + decl.name();
         }
         return packagePrefix + decl.name();
     }
@@ -284,17 +292,6 @@ public abstract class ModuleRegistryGeneratingTask extends DefaultTask {
             String field = entry.toFieldName();
             sb.append("        ").append(field).append(" = ").append(entry.initializer()).append(";\n");
             sb.append("        collected.add(").append(field).append(");\n");
-        }
-        sb.append("    }\n\n");
-
-        sb.append("    public static void init(Consumer<Object> applicator) {\n");
-        sb.append("        if (initialized) return;\n");
-        sb.append("        initialized = true;\n");
-        for (Entry entry : entries) {
-            String field = entry.toFieldName();
-            sb.append("        ").append(field).append(" = ").append(entry.initializer()).append(";\n");
-            sb.append("        collected.add(").append(field).append(");\n");
-            sb.append("        applicator.accept(").append(field).append(");\n");
         }
         sb.append("    }\n\n");
 
