@@ -174,6 +174,10 @@ public class Order extends OrderInfo implements AbstractListener {
 
         new UserOrdersChangeEvent(this, UserOrdersChangeEvent.ChangeTypes.REMOVE).post(EVENT_BUS);
 
+        // Stop tracking: without this the removed order stays subscribed and keeps reacting to
+        // every BazaarDataUpdateEvent for the rest of the session (leak). Safe no-op if never registered.
+        EVENT_BUS.unregister(this);
+
         UserOrdersStorage.INSTANCE.save();
     }
 }

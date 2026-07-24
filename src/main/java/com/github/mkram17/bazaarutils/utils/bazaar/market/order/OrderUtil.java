@@ -22,6 +22,16 @@ public final class OrderUtil {
         return UserOrdersStorage.INSTANCE.get();
     }
 
+    /**
+     * Subscribes every persisted order to the event bus. Orders loaded from disk are deserialized
+     * reflectively by Gson, which bypasses the {@link Order} constructor (and therefore its
+     * {@code subscribe()} call), so without this they would never react to Bazaar data updates.
+     * Runtime-created orders subscribe in their constructor and must not be passed here.
+     */
+    public static void subscribeLoadedOrders() {
+        getUserOrders().forEach(Order::subscribe);
+    }
+
     public static Optional<Order> getUserOrderFromIndex(int slotIndex) {
         return getUserOrders().stream()
                 .filter(order ->

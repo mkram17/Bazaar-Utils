@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import com.github.mkram17.bazaarutils.utils.update.UpdateUtil;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
@@ -57,6 +58,10 @@ public class BazaarUtils implements ClientModInitializer {
         BazaarUtilsCommands.init();
 
         BazaarUtilsModules.init();
+
+        // Persisted orders are deserialized reflectively (bypassing Order's constructor), so they
+        // are not yet subscribed to the event bus — subscribe them explicitly.
+        OrderUtil.subscribeLoadedOrders();
 
         if (RepoAPI.isInitialized()) {
             onRepoReady();
