@@ -2,9 +2,7 @@ package com.github.mkram17.bazaarutils.utils.web;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.JsonParseException;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -89,15 +87,19 @@ public final class JsonHttpClient {
             return status >= 200 && status < 300;
         }
 
-        /** Parses the body, or empty when it is absent or not a JSON object. */
-        public Optional<JsonObject> json() {
+        /**
+         * Deserializes the body into {@code type}, or empty when there is no body or it does not
+         * parse — a proxy or gateway answering with HTML is an ordinary failure, not a crash.
+         *
+         * <p>Fields the server omitted are left null, so a present result does not mean every
+         * field is populated.</p>
+         */
+        public <T> Optional<T> as(Class<T> type) {
             if (body == null || body.isBlank()) return Optional.empty();
 
             try {
-                JsonElement parsed = JsonParser.parseString(body);
-
-                return parsed.isJsonObject() ? Optional.of(parsed.getAsJsonObject()) : Optional.empty();
-            } catch (Exception exception) {
+                return Optional.ofNullable(WebJson.GSON.fromJson(body, type));
+            } catch (JsonParseException exception) {
                 return Optional.empty();
             }
         }
@@ -107,12 +109,10 @@ public final class JsonHttpClient {
          * its text is written to be shown to a player, so prefer it over a message invented here.
          */
         public Optional<String> errorMessage() {
-            return json()
-                    .map(object -> object.get("error"))
-                    .filter(element -> element != null && element.isJsonPrimitive())
-                    .map(JsonElement::getAsString)
-                    .filter(message -> !message.isBlank());
+            return as(ApiError.class).map(ApiError::error).filter(message -> !message.isBlank());
         }
+
+        private record ApiError(String error) {}
     }
 
     /**

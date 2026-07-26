@@ -4,8 +4,6 @@ import com.github.mkram17.bazaarutils.config.features.WebsiteConfig;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.storage.LinkStorage;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -111,8 +109,8 @@ public final class AccountLinker {
             return;
         }
 
-        Optional<JsonObject> body = response.json();
-        String token = string(body, "token").orElse(null);
+        Optional<BazaarUtilsApi.ConfirmedLink> link = response.as(BazaarUtilsApi.ConfirmedLink.class);
+        String token = link.map(BazaarUtilsApi.ConfirmedLink::token).filter(value -> !value.isBlank()).orElse(null);
 
         if (token == null) {
             notifyPlayer(error("The website accepted the link but sent no token. Try again."));
@@ -123,8 +121,13 @@ public final class AccountLinker {
 
         // Both of these are echoed back from Mojang's answer, so prefer them; the local session is
         // only a fallback for a response shape that changed.
-        String uuid = string(body, "uuid").orElseGet(session::dashlessUuid);
-        String username = string(body, "username").orElseGet(session::username);
+        String uuid = link.map(BazaarUtilsApi.ConfirmedLink::uuid)
+                .filter(value -> !value.isBlank())
+                .orElseGet(session::dashlessUuid);
+
+        String username = link.map(BazaarUtilsApi.ConfirmedLink::username)
+                .filter(value -> !value.isBlank())
+                .orElseGet(session::username);
 
         LinkStorage.store(token, uuid, username);
 
@@ -156,13 +159,6 @@ public final class AccountLinker {
             case 429 -> "Too many attempts. Wait a minute and try again.";
             default -> "The website returned an unexpected error (" + status + "). Try again later.";
         };
-    }
-
-    private static Optional<String> string(Optional<JsonObject> body, String field) {
-        return body.map(object -> object.get(field))
-                .filter(element -> element != null && element.isJsonPrimitive())
-                .map(JsonElement::getAsString)
-                .filter(value -> !value.isBlank());
     }
 
     private static Component info(String message) {
