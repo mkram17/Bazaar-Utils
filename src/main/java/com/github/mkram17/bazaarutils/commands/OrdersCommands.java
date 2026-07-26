@@ -41,6 +41,11 @@ public final class OrdersCommands implements BUCommand {
     }
 
     @Override
+    public boolean shouldRegister() {
+        return DeveloperCommands.isEnabled();
+    }
+
+    @Override
     public List<BUCommand> getSubcommands() {
         return BUCommand.childrenOf(OrdersCommands.class);
     }

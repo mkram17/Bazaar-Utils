@@ -16,7 +16,8 @@ public interface BUCommand {
     /**
      * Collects every registered {@link BUCommand} whose {@link Command#parent()} is {@code parent}.
      * A command with no {@code @Command} annotation is treated as a root command, i.e. it only
-     * matches when {@code parent == BUCommand.class}.
+     * matches when {@code parent == BUCommand.class}. Commands that opt out via
+     * {@link #shouldRegister()} are excluded.
      */
     static List<BUCommand> childrenOf(Class<? extends BUCommand> parent) {
         return BazaarUtilsCommands.collected.stream()
@@ -27,7 +28,17 @@ public interface BUCommand {
 
                     return ann == null ? parent == BUCommand.class : ann.parent() == parent;
                 })
+                .filter(BUCommand::shouldRegister)
                 .toList();
+    }
+
+    /**
+     * Whether this command should be attached to the dispatcher at all. Commands gated behind a
+     * toggle return {@code false} to stay absent from both the command tree and {@code /bu help},
+     * along with their whole subtree.
+     */
+    default boolean shouldRegister() {
+        return true;
     }
 
     default Component getDescription() {
