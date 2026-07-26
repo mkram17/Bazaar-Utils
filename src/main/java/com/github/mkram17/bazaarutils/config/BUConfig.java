@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
+import com.github.mkram17.bazaarutils.config.features.WebsiteConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.ModifyIndicator;
@@ -25,6 +26,7 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
                 InventoryConfig.class,
                 OverlaysConfig.class,
                 NotificationsConfig.class,
+                WebsiteConfig.class,
                 AdvancedConfig.class,
                 DeveloperConfig.class
         },
