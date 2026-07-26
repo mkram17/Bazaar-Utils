@@ -31,22 +31,37 @@ public final class BazaarUtilsApi {
     private BazaarUtilsApi() {}
 
     public static String baseUrl() {
-        String url = firstNonBlank(System.getProperty(BASE_URL_PROPERTY), System.getenv(BASE_URL_ENV), DEFAULT_BASE_URL);
-
-        return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+        return resolveBaseUrl().url();
     }
 
-    /** Whether the mod is pointed somewhere other than production. Logged when diagnosing. */
-    public static boolean isOverridden() {
-        return !DEFAULT_BASE_URL.equals(baseUrl());
-    }
+    /**
+     * The resolved endpoint together with where the value came from.
+     *
+     * <p>The source matters as much as the value when something is misconfigured: an override can
+     * arrive from a system property, from the launching shell's environment, or from a {@code .env}
+     * the build loaded, and knowing which one is in play is the difference between a one-line fix
+     * and a hunt.</p>
+     */
+    public record Endpoint(String url, String source) {}
 
-    private static String firstNonBlank(String... values) {
-        for (String value : values) {
-            if (value != null && !value.isBlank()) return value.trim();
+    public static Endpoint resolveBaseUrl() {
+        String property = System.getProperty(BASE_URL_PROPERTY);
+
+        if (property != null && !property.isBlank()) {
+            return new Endpoint(trimTrailingSlash(property.trim()), "system property " + BASE_URL_PROPERTY);
         }
 
-        return DEFAULT_BASE_URL;
+        String environment = System.getenv(BASE_URL_ENV);
+
+        if (environment != null && !environment.isBlank()) {
+            return new Endpoint(trimTrailingSlash(environment.trim()), "environment variable " + BASE_URL_ENV);
+        }
+
+        return new Endpoint(DEFAULT_BASE_URL, "built-in default");
+    }
+
+    private static String trimTrailingSlash(String url) {
+        return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
     }
 
     /**
