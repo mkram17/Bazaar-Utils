@@ -1,8 +1,10 @@
 package com.github.mkram17.bazaarutils.utils.web;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -59,6 +61,37 @@ public final class BazaarUtilsApi {
         body.addProperty("username", username);
 
         return JsonHttpClient.postJson(endpoint("/api/link/confirm"), body.toString(), Map.of());
+    }
+
+    /**
+     * Serializes an order snapshot into the sync request body.
+     *
+     * <p>Kept separate from {@link #syncOrders} so callers can compare the serialized form against
+     * the last one they sent and skip an identical push.</p>
+     */
+    public static String serializeOrderSync(List<OrderSnapshot> orders) {
+        JsonArray array = new JsonArray();
+        orders.forEach(order -> array.add(order.toJson()));
+
+        JsonObject body = new JsonObject();
+        body.add("orders", array);
+
+        return body.toString();
+    }
+
+    /**
+     * Pushes an order snapshot. The account is resolved from the bearer token alone — the payload
+     * deliberately carries no identity of its own.
+     *
+     * <p>Answers 200 with <code>{ ok, opened, updated, closed }</code>, 401 when the token has
+     * been revoked or the account unlinked, or 402 when the owning subscription has lapsed.</p>
+     */
+    public static CompletableFuture<JsonHttpClient.Response> syncOrders(String token, String body) {
+        return JsonHttpClient.postJson(
+                endpoint("/api/orders/sync"),
+                body,
+                Map.of("Authorization", "Bearer " + token)
+        );
     }
 
     private static URI endpoint(String path) {
