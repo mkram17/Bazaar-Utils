@@ -4,10 +4,15 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.JsonParseException;
 
+import javax.net.ssl.SSLException;
+import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -200,12 +205,53 @@ public final class JsonHttpClient {
         return status == 429 || status >= 500;
     }
 
+    /**
+     * Whether another attempt could plausibly succeed.
+     *
+     * <p>Not every {@link IOException} is worth repeating. A TLS handshake against a plaintext
+     * port and an unresolvable hostname are configuration errors: they will fail identically on
+     * every attempt, so retrying only delays the report. A refused connection or a timeout can
+     * genuinely be transient (a dev server still starting up), so those still get their retries.</p>
+     */
     private static boolean isTransport(Throwable throwable) {
+        boolean sawIoFailure = false;
+
         for (Throwable current = throwable; current != null; current = current.getCause()) {
-            if (current instanceof java.io.IOException) return true;
+            if (current instanceof SSLException || current instanceof UnknownHostException) return false;
+            if (current instanceof IOException) sawIoFailure = true;
             if (current.getCause() == current) break;
         }
 
-        return false;
+        return sawIoFailure;
+    }
+
+    /**
+     * A short, specific explanation of a transport failure, when one can be identified.
+     *
+     * <p>"Check your connection" is the wrong advice for most of these — the connection is usually
+     * fine and the URL is wrong.</p>
+     */
+    public static Optional<String> describeTransportFailure(Throwable throwable) {
+        for (Throwable current = throwable; current != null; current = current.getCause()) {
+            if (current instanceof SSLException) {
+                return Optional.of("the URL starts with https but the server answered in plain HTTP — check the scheme");
+            }
+
+            if (current instanceof UnknownHostException) {
+                return Optional.of("that hostname does not resolve");
+            }
+
+            if (current instanceof ConnectException) {
+                return Optional.of("nothing is listening on that host and port");
+            }
+
+            if (current instanceof HttpTimeoutException) {
+                return Optional.of("the request timed out");
+            }
+
+            if (current.getCause() == current) break;
+        }
+
+        return Optional.empty();
     }
 }

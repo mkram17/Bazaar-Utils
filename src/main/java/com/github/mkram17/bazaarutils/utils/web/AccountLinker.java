@@ -57,10 +57,10 @@ public final class AccountLinker {
 
         notifyPlayer(info("Verifying your Minecraft session with Mojang..."));
 
-        // Where the request went is the first thing anyone needs when a link misbehaves, and it is
-        // not otherwise recoverable from the logs.
-        Util.logMessage("Linking against " + BazaarUtilsApi.baseUrl()
-                + (BazaarUtilsApi.isOverridden() ? " (overridden)" : ""));
+        // Where the request went, and which knob decided that. The value alone is not enough --
+        // when it is unexpected, the next question is always "set by what?".
+        BazaarUtilsApi.Endpoint endpoint = BazaarUtilsApi.resolveBaseUrl();
+        Util.logMessage("Linking against %s (from %s)".formatted(endpoint.url(), endpoint.source()));
 
         CompletableFuture
                 .runAsync(() -> joinServer(code), JsonHttpClient.executor())
@@ -165,8 +165,13 @@ public final class AccountLinker {
             return;
         }
 
-        notifyPlayer(error("Could not reach the Bazaar Utils website. Check your connection and try again."));
-        Util.logError("Link confirm request failed", cause);
+        BazaarUtilsApi.Endpoint endpoint = BazaarUtilsApi.resolveBaseUrl();
+        String reason = JsonHttpClient.describeTransportFailure(cause)
+                .map(detail -> " — " + detail)
+                .orElse(". Check your connection and try again.");
+
+        notifyPlayer(error("Could not reach " + endpoint.url() + reason));
+        Util.logError("Link confirm request to %s (from %s) failed".formatted(endpoint.url(), endpoint.source()), cause);
     }
 
     private static String fallbackMessage(int status) {
