@@ -57,6 +57,11 @@ public final class AccountLinker {
 
         notifyPlayer(info("Verifying your Minecraft session with Mojang..."));
 
+        // Where the request went is the first thing anyone needs when a link misbehaves, and it is
+        // not otherwise recoverable from the logs.
+        Util.logMessage("Linking against " + BazaarUtilsApi.baseUrl()
+                + (BazaarUtilsApi.isOverridden() ? " (overridden)" : ""));
+
         CompletableFuture
                 .runAsync(() -> joinServer(code), JsonHttpClient.executor())
                 .thenCompose(ignored -> BazaarUtilsApi.confirmLink(code, session.get().username()))
@@ -110,11 +115,24 @@ public final class AccountLinker {
         }
 
         Optional<BazaarUtilsApi.ConfirmedLink> link = response.as(BazaarUtilsApi.ConfirmedLink.class);
+
+        // A 2xx that is not our API's JSON almost always means the mod is pointed at the wrong
+        // host — a landing page or a proxy will happily answer 200 with HTML. Saying so beats
+        // "no token", which describes the symptom and hides the cause.
+        if (link.isEmpty()) {
+            notifyPlayer(error("Got a reply from " + BazaarUtilsApi.baseUrl()
+                    + " that was not a Bazaar Utils API response. Check that it points at the website."));
+            Util.logError("Link confirm returned %d from %s with a non-API body: %s"
+                    .formatted(response.status(), BazaarUtilsApi.baseUrl(), snippet(response.body())), null);
+
+            return;
+        }
+
         String token = link.map(BazaarUtilsApi.ConfirmedLink::token).filter(value -> !value.isBlank()).orElse(null);
 
         if (token == null) {
             notifyPlayer(error("The website accepted the link but sent no token. Try again."));
-            Util.logError("Link confirm succeeded without a token in the response", null);
+            Util.logError("Link confirm succeeded without a token in the response: " + snippet(response.body()), null);
 
             return;
         }
@@ -159,6 +177,15 @@ public final class AccountLinker {
             case 429 -> "Too many attempts. Wait a minute and try again.";
             default -> "The website returned an unexpected error (" + status + "). Try again later.";
         };
+    }
+
+    /** Enough of a body to recognise what answered, without dumping a whole HTML page into the log. */
+    private static String snippet(String body) {
+        if (body == null || body.isBlank()) return "<empty>";
+
+        String collapsed = body.strip().replaceAll("\\s+", " ");
+
+        return collapsed.length() <= 200 ? collapsed : collapsed.substring(0, 200) + "…";
     }
 
     private static Component info(String message) {

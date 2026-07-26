@@ -5,6 +5,10 @@ build/
 out/
 classes/
 
+# local dev overrides (BAZAARUTILS_API_URL, etc.)
+
+.env
+
 # eclipse
 
 *.launch
