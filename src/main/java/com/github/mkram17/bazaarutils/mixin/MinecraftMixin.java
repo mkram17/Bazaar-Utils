@@ -1,7 +1,9 @@
 package com.github.mkram17.bazaarutils.mixin;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +21,13 @@ public class MinecraftMixin {
     public Screen screen;
 
     @Inject(method = "setScreen", at = @At("HEAD"))
-    public void setScreen(Screen newScreen, CallbackInfo ci) {
-        BazaarUtils.EVENT_BUS.post(new ScreenChangeEvent(screen, newScreen));
+    private void setScreenPre(Screen newScreen, CallbackInfo ci, @Share("oldScreen") LocalRef<Screen> oldScreenRef) {
+        oldScreenRef.set(this.screen);
+        new ScreenChangeEvent.Pre(this.screen, newScreen).post(BazaarUtils.EVENT_BUS);
+    }
+
+    @Inject(method = "setScreen", at = @At("RETURN"))
+    private void setScreenPost(Screen newScreen, CallbackInfo ci, @Share("oldScreen") LocalRef<Screen> oldScreenRef) {
+        new ScreenChangeEvent.Post(oldScreenRef.get(), newScreen).post(BazaarUtils.EVENT_BUS);
     }
 }

@@ -1,8 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
 import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
-import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.events.SlotClickEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.StateItemGroup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -10,6 +9,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 public interface ItemButton {
     Item DEFAULT_ITEM = Items.BARRIER;
@@ -41,7 +41,7 @@ public interface ItemButton {
     }
 
     default boolean wasButtonClicked(SlotClickEvent event) {
-        return event.getSlotId() == getSlotIndex();
+        return !event.isInPlayerInventory() && event.getSlot().getContainerSlot() == getSlotIndex();
     }
 
     private static Item resolveId(String rawId) {

@@ -3,10 +3,12 @@ package com.github.mkram17.bazaarutils.features.gui.inventory;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -16,20 +18,17 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
-import meteordevelopment.orbit.EventHandler;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ItemTooltipEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +75,7 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.ORDERS_PAGE);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 
@@ -84,31 +83,35 @@ public class OrderStatusHighlight extends BUListener implements ToggleableFeatur
         super();
     }
 
-    @Override
-    protected void registerFabricEvents() {
-        ScreenEvents.AFTER_INIT.register(this::onScreenInitialized);
-        ItemTooltipCallback.EVENT.register(this::onTooltip);
+    // Clear doesnt need to be gated to @OnlyBazaarScreen(any = true) because it's cheap and also
+    // avoids the predicate's screen-resolution ordering hazard for ContainerInitializedEvent.
+    @Subscription
+    private void onScreenInitialized(ContainerInitializedEvent event) {
+        colorCache.clear();
+        tooltipCache.clear();
     }
 
-    @EventHandler
+    @Subscription
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
-        if (!isEnabled() || !inCorrectScreen(event)) return;
-
         event.getContainerSlots().stream()
                 .map(Slot::getItem)
                 .forEach(stack -> populateCache(stack, event.getContainerSlots()));
     }
 
-    private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {
-        colorCache.clear();
-        tooltipCache.clear();
-    }
+    @Subscription
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstraintsInterface = true)
+    private void onTooltip(ItemTooltipEvent event) {
+        var stack = event.getItem();
+        var lines = event.getTooltip();
 
-    private void onTooltip(ItemStack stack, Item.TooltipContext tooltip, TooltipFlag type, List<Component> lines) {
-        if (!isEnabled()) return;
-
+        // Enablement and ORDERS_PAGE gating are handled by @OnlyWhenEnabled and
+        // @OnlyBazaarScreen(useConstraintsInterface = true); the chain below only resolves the menu.
         ScreenManager.getInstance().current()
-                .filter(context -> context.is(BazaarScreenType.ORDERS_PAGE))
                 .flatMap(context -> context.as(AbstractContainerScreen.class))
                 .map(AbstractContainerScreen::getMenu)
                 .ifPresent(screen -> {

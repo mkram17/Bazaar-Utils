@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
-import com.github.mkram17.bazaarutils.events.UserOrdersChangeEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -9,7 +9,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenType;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +20,16 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 public final class OrderUtil {
     public static List<Order> getUserOrders() {
         return UserOrdersStorage.INSTANCE.get();
+    }
+
+    /**
+     * Subscribes every persisted order to the event bus. Orders loaded from disk are deserialized
+     * reflectively by Gson, which bypasses the {@link Order} constructor (and therefore its
+     * {@code subscribe()} call), so without this they would never react to Bazaar data updates.
+     * Runtime-created orders subscribe in their constructor and must not be passed here.
+     */
+    public static void subscribeLoadedOrders() {
+        getUserOrders().forEach(Order::subscribe);
     }
 
     public static Optional<Order> getUserOrderFromIndex(int slotIndex) {
@@ -64,7 +73,7 @@ public final class OrderUtil {
         }
         UserOrdersStorage.INSTANCE.get().add(order);
         PlayerActionUtil.notifyAll("Added order: § " + order, NotificationType.ORDERDATA);
-        EVENT_BUS.post(new UserOrdersChangeEvent(UserOrdersChangeEvent.ChangeTypes.ADD, order));
+        new UserOrdersChangeEvent(order, UserOrdersChangeEvent.ChangeTypes.ADD).post(EVENT_BUS);
         UserOrdersStorage.INSTANCE.save();
     }
 

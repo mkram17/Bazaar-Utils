@@ -1,8 +1,8 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
-import com.github.mkram17.bazaarutils.events.ReplaceItemEvent;
-import com.github.mkram17.bazaarutils.events.SlotClickEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -16,13 +16,14 @@ import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataCompo
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.ItemGroups;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.PRODUCT_PAGE);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 
@@ -70,18 +71,22 @@ public class ToggleBookmarkButton extends BUListener implements ItemButton, Scre
         return stack;
     }
 
-    @EventHandler
+    @Subscription
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onReplaceItemEvent(ReplaceItemEvent event) {
-        if (!shouldReplaceItem(event) || !inCorrectScreen()) return;
+        if (!shouldReplaceItem(event)) return;
 
         resolveCurrentItemName().ifPresent(name -> BookmarkUtil.currentBookmarkOpt = BookmarkUtil.findMatchingBookmark(name));
 
         event.setReplacement(getReplacementItem());
     }
 
-    @EventHandler
+    @Subscription
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onClick(SlotClickEvent event) {
-        if (!wasButtonClicked(event) || !inCorrectScreen()) return;
+        if (!wasButtonClicked(event)) return;
 
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
 

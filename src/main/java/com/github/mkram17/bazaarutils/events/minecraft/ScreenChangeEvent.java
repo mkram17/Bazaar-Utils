@@ -1,9 +1,9 @@
-package com.github.mkram17.bazaarutils.events;
+package com.github.mkram17.bazaarutils.events.minecraft;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.gui.screens.Screen;
+import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 
 /**
  * Event fired when the player's current screen changes.
@@ -15,7 +15,7 @@ import net.minecraft.client.gui.screens.Screen;
  * <p><strong>Usage Example:</strong></p>
  * <pre>
  * {@code
- * @EventHandler
+ * @Subscription
  * public void onScreenChange(ScreenChangeEvent event) {
  *     Screen old = event.getOldScreen();
  *     Screen new = event.getNewScreen();
@@ -25,8 +25,7 @@ import net.minecraft.client.gui.screens.Screen;
  * </pre>
  * @see com.github.mkram17.bazaarutils.mixin.MinecraftMixin
  */
-@AllArgsConstructor
-public class ScreenChangeEvent {
+public abstract class ScreenChangeEvent extends SkyBlockEvent {
     /**
      * The screen that was previously displayed.
      * May be null if no screen was open before.
@@ -40,4 +39,21 @@ public class ScreenChangeEvent {
      */
     @Getter @Setter
     private Screen newScreen;
+
+    public ScreenChangeEvent(Screen oldScreen, Screen newScreen) {
+        this.oldScreen = oldScreen;
+        this.newScreen = newScreen;
+    }
+
+    public static final class Pre extends ScreenChangeEvent {
+        public Pre(Screen oldScreen, Screen newScreen) {
+            super(oldScreen, newScreen);
+        }
+    }
+
+    public static final class Post extends ScreenChangeEvent {
+        public Post(Screen oldScreen, Screen newScreen) {
+            super(oldScreen, newScreen);
+        }
+    }
 }

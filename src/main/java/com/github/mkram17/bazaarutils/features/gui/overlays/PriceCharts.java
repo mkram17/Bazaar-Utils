@@ -1,34 +1,32 @@
 package com.github.mkram17.bazaarutils.features.gui.overlays;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.events.SlotClickEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.Util;
-import meteordevelopment.orbit.EventHandler;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ItemTooltipEvent;
+import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Module
-public class PriceCharts extends BUListener implements ItemTooltipCallback, ToggleableFeature {
+public class PriceCharts extends BUListener implements ToggleableFeature {
     // Cache: sanitized item name -> should show tooltip
     private static final Map<String, Boolean> SHOW_CACHE = new ConcurrentHashMap<>();
 
@@ -39,9 +37,14 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, Togg
 
     public PriceCharts() {}
 
-    @Override
-    public void getTooltip(ItemStack stack, Item.TooltipContext ctx, TooltipFlag type, List<Component> lines) {
-        if (!isEnabled() || stack == null || stack.isEmpty() || !shouldShow()) return;
+    @Subscription
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
+    public void onTooltip(ItemTooltipEvent event) {
+        var stack = event.getItem();
+        var lines = event.getTooltip();
+
+        if (stack.isEmpty() || !shouldShow()) return;
         if (stack.getItem().getName().getString().contains("GLASS_PANE")) return;
 
         String key = sanitizeName(stack.getHoverName().getString());
@@ -61,9 +64,11 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, Togg
         lines.add(poweredBy);
     }
 
-    @EventHandler
-    private void onClick(SlotClickEvent e){
-        if (!isEnabled() || !shouldShow() || e.isCancelled()) {
+    @Subscription
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
+    private void onClick(SlotClickEvent event) {
+        if (!shouldShow()) {
             return;
         }
 
@@ -71,7 +76,7 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, Togg
             return;
         }
 
-        String itemName = sanitizeName(e.slot.getItem().getHoverName().getString());
+        String itemName = sanitizeName(event.getSlot().getItem().getHoverName().getString());
 
         if (!SHOW_CACHE.getOrDefault(itemName, false)) {
             return;
@@ -91,18 +96,13 @@ public class PriceCharts extends BUListener implements ItemTooltipCallback, Togg
             Minecraft.getInstance().setScreen(null);
         }, link, true));
 
-        e.cancel();
-    }
 
-    @Override
-    protected void registerFabricEvents() {
-        ItemTooltipCallback.EVENT.register(this);
-        // Clear cache when (re)subscribing to avoid stale bazaar state leakage
-        SHOW_CACHE.clear();
+        event.cancel();
     }
 
     private boolean shouldShow() {
-        return (ScreenManager.getInstance().isCurrent(BazaarScreenType.values()) || OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR) && !ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE);
+        return (OverlaysConfig.PRICE_CHARTS_SHOW_OUTSIDE_BAZAAR || ScreenManager.getInstance().isCurrent(BazaarScreenType.values()))
+                && !ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE);
     }
 
     private static String sanitizeName(String raw){

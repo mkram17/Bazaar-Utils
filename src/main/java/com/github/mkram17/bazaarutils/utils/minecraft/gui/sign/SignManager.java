@@ -1,33 +1,44 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.sign;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.events.SignOpenEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.SignOpenEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class SignManager {
-    public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
-        BazaarUtils.EVENT_BUS.subscribe(new Object() {
-            @EventHandler
-            private void onSignOpen(SignOpenEvent event) {
-                try {
-                    action.accept(event);
-                } finally {
-                    BazaarUtils.EVENT_BUS.unsubscribe(this);
-                }
+    /** One-shot callbacks to run the next time a sign opens; drained by {@link SignOpenDispatcher}. */
+    private static final Queue<Consumer<SignOpenEvent>> PENDING = new ConcurrentLinkedQueue<>();
+
+    static {
+        BazaarUtils.EVENT_BUS.register(new SignOpenDispatcher());
+    }
+
+    private static final class SignOpenDispatcher {
+        @Subscription(priority = Priority.FIRST)
+        private void onSignOpen(SignOpenEvent event) {
+            Consumer<SignOpenEvent> action;
+
+            while ((action = PENDING.poll()) != null) {
+                action.accept(event);
             }
-        });
+        }
+    }
+
+    public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
+        PENDING.add(action);
     }
 
     public static void setSignText(String text, boolean closeAfter) {

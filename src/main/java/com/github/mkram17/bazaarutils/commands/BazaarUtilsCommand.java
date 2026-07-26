@@ -1,8 +1,7 @@
 package com.github.mkram17.bazaarutils.commands;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.LateInitModule;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import lombok.Getter;
@@ -12,24 +11,20 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.List;
 
-@LateInitModule
-public final class BazaarUtilsCommands implements BUCommand {
-    private static final List<String> PREFIXES = List.of("bazaarutils", "bu");
-
+@Module
+public final class BazaarUtilsCommand implements BUCommand {
     @Getter
     public final String commandName = "bazaarutils";
 
-    @Getter
-    private final List<BUCommand> subcommands;
+    public List<BUCommand> getSubcommands() {
+        return BUCommand.childrenOf(BUCommand.class);
+    }
 
-    public BazaarUtilsCommands() {
-        this.subcommands = BazaarUtilsModules.collected.stream()
-                .filter(it -> it instanceof BUCommand)
-                .map(it -> (BUCommand) it)
-                .toList();
+    private static final List<String> PREFIXES = List.of("bazaarutils", "bu");
 
+    public BazaarUtilsCommand() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-                registerWithCommands(dispatcher, subcommands)
+                registerWithCommands(dispatcher, getSubcommands())
         );
     }
 

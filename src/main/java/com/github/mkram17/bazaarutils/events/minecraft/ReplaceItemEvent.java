@@ -1,10 +1,10 @@
-package com.github.mkram17.bazaarutils.events;
+package com.github.mkram17.bazaarutils.events.minecraft;
 
 import lombok.Getter;
 import lombok.Setter;
-import meteordevelopment.orbit.ICancellable;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
+import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 
 /**
  * Event fired when an item in an inventory is about to be replaced.
@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
  * <p><strong>Usage Example:</strong></p>
  * <pre>
  * {@code
- * @EventHandler
+ * @Subscription
  * public void onItemReplace(ReplaceItemEvent event) {
  *     ItemStack original = event.getOriginal();
  *     ItemStack modified = addCustomLore(original);
@@ -29,7 +29,7 @@ import net.minecraft.world.item.ItemStack;
  * @see ItemStack
  * @see SimpleContainer
  */
-public class ReplaceItemEvent implements ICancellable {
+public class ReplaceItemEvent extends SkyBlockEvent {
     /**
      * The original item stack before replacement.
      */
@@ -67,15 +67,5 @@ public class ReplaceItemEvent implements ICancellable {
         this.inventory = inventory;
         this.slotId = slotId;
         this.replacement = original;
-    }
-
-    @Override
-    public void setCancelled(boolean b) {
-
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return false;
     }
 }

@@ -1,15 +1,17 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
 import com.github.mkram17.bazaarutils.BazaarUtils;
-import com.github.mkram17.bazaarutils.events.util.EventPriorities;
-import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.codecs.CodecGsonAdapter;
 import com.github.mkram17.bazaarutils.utils.codecs.ZonedDateTimeCodec;
 import com.google.gson.*;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.item.ItemStack;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.TimePassed;
+import tech.thatgravyboat.skyblockapi.api.events.time.TickEvent;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -32,22 +34,20 @@ public class DataStorage<T> {
             .registerTypeAdapter(ZonedDateTime.class, new CodecGsonAdapter<>(ZonedDateTimeCodec.CODEC))
             .create();
 
-    private static int tickCounter = 0;
     private static final Set<DataStorage<?>> REQUIRES_SAVE = ConcurrentHashMap.newKeySet();
 
-    @RunOnInit(priority = EventPriorities.HIGH)
-    public static void registerTickListener() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (++tickCounter >= 100) {
-                tickCounter = 0;
-                if (REQUIRES_SAVE.isEmpty()) return;
-                DataStorage<?>[] toSave = REQUIRES_SAVE.toArray(new DataStorage<?>[0]);
-                REQUIRES_SAVE.clear();
-                CompletableFuture.runAsync(() -> {
-                    for (DataStorage<?> s : toSave) s.saveToSystem();
-                });
-            }
-        });
+    @Module
+    public static final class Listener extends BUListener {
+        @Subscription
+        @TimePassed(duration = "5s")
+        public void onTick(TickEvent event) {
+            if (REQUIRES_SAVE.isEmpty()) return;
+            DataStorage<?>[] toSave = REQUIRES_SAVE.toArray(new DataStorage<?>[0]);
+            REQUIRES_SAVE.clear();
+            CompletableFuture.runAsync(() -> {
+                for (DataStorage<?> s : toSave) s.saveToSystem();
+            });
+        }
     }
 
     public static void flushAll() {

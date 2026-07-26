@@ -1,17 +1,22 @@
 package com.github.mkram17.bazaarutils.data;
 
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
-import com.github.mkram17.bazaarutils.events.ScreenChangeEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.Priority;
+import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.google.common.collect.MapMaker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.Slot;
@@ -21,7 +26,6 @@ import tech.thatgravyboat.skyblockapi.api.datatype.DataTypeItemStackKt;
 import tech.thatgravyboat.skyblockapi.api.datatype.DataTypes;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
-import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
 import tech.thatgravyboat.skyblockapi.api.events.screen.PlayerInventoryChangeEvent;
 import tech.thatgravyboat.skyblockapi.api.profile.items.sacks.SacksAPI;
 
@@ -48,7 +52,7 @@ import java.util.stream.Collectors;
  * to simply index via {@link SacksAPI}, because Hypixel doesn't offer a proper endpoint of the Bazaar Catalogs/Products.
  */
 @Module
-public class SellableAPI extends BUListener {
+public class SellableAPI extends BUListener implements ScreenConstrained {
     private record SellDataState(
             @Nullable InstantSellParser.InstantSellResult instantSell,
             @Nullable SellSacksParser.SellSacksResult sellSacks,
@@ -180,19 +184,18 @@ public class SellableAPI extends BUListener {
         }
     }
 
+    private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
 
-    @Subscription
-    @OnlyOnSkyBlock
-    private void onScreenChange(ScreenChangeEvent ignored) {
-        clearAll();
+    @Override
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
+        return SCREENS;
     }
 
-    @Subscription
+    @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
         var context = event.asContext();
-
-        if (!context.isAnyOf(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE)) return;
 
         SellablePageLayout.getInstantSellItem(context).ifPresent(info -> {
             InstantSell.parse(info.itemStack(), context);
@@ -208,7 +211,7 @@ public class SellableAPI extends BUListener {
         });
     }
 
-    @Subscription
+    @Subscription(priority = Priority.HIGH)
     @OnlyOnSkyBlock
     private void onInventoryChange(PlayerInventoryChangeEvent event) {
         if (InstantSell.orders().isEmpty() && SellSacks.orders().isEmpty()) return;
@@ -230,7 +233,7 @@ public class SellableAPI extends BUListener {
     }
 
     @Subscription
-    private void onContainerClose(ContainerCloseEvent ignored) {
+    private void onScreenChange(ScreenChangeEvent.Post ignored) {
         clearAll();
     }
 

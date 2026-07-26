@@ -3,30 +3,28 @@ package com.github.mkram17.bazaarutils.features.gui.inventory;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.data.SellableAPI;
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
-import com.github.mkram17.bazaarutils.events.listener.BUListener;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
-import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
-import meteordevelopment.orbit.EventHandler;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.screen.ScreenInitializedEvent;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,7 +67,7 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
 
     @Override
-    public ScreenMatcher<BazaarScreenType> screenConstrains() {
+    public ScreenMatcher<BazaarScreenType> screenConstraints() {
         return SCREENS;
     }
 
@@ -82,15 +80,11 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
         super();
     }
 
-    @Override
-    protected void registerFabricEvents() {
-        ScreenEvents.AFTER_INIT.register(this::onScreenInitialized);
-    }
-
-    @EventHandler
+    @Subscription
+    @OnlyWhenEnabled
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
-        colorCache.clear();
-        if (!isEnabled() || !inCorrectScreen(event)) return;
         Minecraft client = Minecraft.getInstance();
         if (client.player == null) return;
 
@@ -101,7 +95,8 @@ public class InstantSellHighlight extends BUListener implements SlotHighlight, T
         populateCache(names, event.getScreen(), client.player.getInventory());
     }
 
-    private void onScreenInitialized(Minecraft client, Screen screen, int width, int height) {
+    @Subscription
+    private void onScreenInitialized(ScreenInitializedEvent event) {
         colorCache.clear();
     }
 }

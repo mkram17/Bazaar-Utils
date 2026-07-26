@@ -1,4 +1,4 @@
-package com.github.mkram17.bazaarutils.events.listener;
+package com.github.mkram17.bazaarutils.events;
 
 public interface AbstractListener {
     /**

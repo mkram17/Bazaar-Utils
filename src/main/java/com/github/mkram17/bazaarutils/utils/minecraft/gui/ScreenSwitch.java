@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui;
 
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

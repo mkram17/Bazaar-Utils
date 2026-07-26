@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils;
 
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface ScreenConstrained {
 
-    ScreenMatcher<BazaarScreenType> screenConstrains();
+    ScreenMatcher<BazaarScreenType> screenConstraints();
 
     default BazaarScreenType[] getTargetScreens() {
         return new BazaarScreenType[0];
@@ -28,7 +28,7 @@ public interface ScreenConstrained {
             return false;
         }
 
-        return screenConstrains().matches(context);
+        return screenConstraints().matches(context);
     }
 
     default boolean inCorrectScreen(ContainerLoadedEvent event) {

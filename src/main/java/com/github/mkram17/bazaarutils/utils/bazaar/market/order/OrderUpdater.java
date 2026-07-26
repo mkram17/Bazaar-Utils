@@ -1,15 +1,15 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.events.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.Priority;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.TextSearch;
-import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
-import com.github.mkram17.bazaarutils.utils.annotations.autoregistration.RunOnInit;
-import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.component.ItemLore;
@@ -17,14 +17,14 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
-
-public class OrderUpdater {
+@Module
+public final class OrderUpdater extends BUListener {
     private static Container lowerChestInventory;
 
     private static final String PREFIX_BUY = "BUY";
@@ -40,12 +40,9 @@ public class OrderUpdater {
     private static final String WORD_UNIT = "unit:";
     private static final double FILL_TOLERANCE_RATIO = 0.05; //5%
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public static void onGUI(ContainerLoadedEvent event) {
-        if (!ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
-            return;
-        }
-
+    @Subscription(priority = Priority.HIGH)
+    @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
+    private void onGUI(ContainerLoadedEvent event) {
         lowerChestInventory = event.getContainer();
 
         List<ItemStack> allInventoryStacks = event.getContainerSlots().stream().map(Slot::getItem).toList();
@@ -296,10 +293,5 @@ public class OrderUpdater {
             }
         }
         return -1;
-    }
-
-    @RunOnInit
-    public static void subscribe() {
-        EVENT_BUS.subscribe(OrderUpdater.class);
     }
 }

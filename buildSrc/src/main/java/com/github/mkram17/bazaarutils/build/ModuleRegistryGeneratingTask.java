@@ -8,15 +8,9 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.regex.*;
+import java.util.stream.Collectors;
 
 public abstract class ModuleRegistryGeneratingTask extends DefaultTask {
-
-    private static final Map<String, String> ANNOTATION_TO_METHOD = Map.of(
-            "PreInitModule",  "loadPreInit",
-            "Module",         "loadAll",
-            "LateInitModule", "loadLateInit"
-    );
-
     @InputDirectory
     public abstract DirectoryProperty getSourcesDir();
 
@@ -25,96 +19,336 @@ public abstract class ModuleRegistryGeneratingTask extends DefaultTask {
 
     @TaskAction
     public void generate() throws IOException {
-        Map<String, List<String>> grouped = new LinkedHashMap<>();
-        ANNOTATION_TO_METHOD.values().forEach(m -> grouped.put(m, new ArrayList<>()));
+        Path sourcesDir = getSourcesDir().get().getAsFile().toPath();
 
-        Files.walk(getSourcesDir().get().getAsFile().toPath())
-                .filter(p -> p.toString().endsWith(".java"))
-                .forEach(p -> scanSourceFile(p, grouped));
+        Map<String, String> annotationToList = discoverAutoCollectAnnotations(sourcesDir);
+        getLogger().lifecycle("Discovered @AutoCollect annotations: {}", annotationToList);
 
-        grouped.forEach((method, classes) ->
-                getLogger().lifecycle("ModuleRegistry.{}() → {} modules: {}", method, classes.size(), classes));
+        Map<String, List<Entry>> grouped = collectAnnotated(sourcesDir, annotationToList);
+        grouped.forEach((name, entries) -> getLogger().lifecycle("BazaarUtils{} → {} entries: {}", name, entries.size(), entries));
 
         writeRegistry(grouped);
     }
 
-    private void scanSourceFile(Path path, Map<String, List<String>> grouped) {
+    private Map<String, String> discoverAutoCollectAnnotations(Path sourcesDir) throws IOException {
+        Map<String, String> result = new LinkedHashMap<>();
+
+        try (var paths = Files.walk(sourcesDir)) {
+            paths.filter(p -> p.toString().endsWith(".java")).forEach(p -> scanForAutoCollect(p, result));
+        }
+
+        return result;
+    }
+
+    private void scanForAutoCollect(Path path, Map<String, String> result) {
         try {
-            String source = Files.readString(path);
+            String source = stripComments(Files.readString(path));
+            if (!source.contains("@AutoCollect")) return;
 
-            String pkg = "";
-            Matcher pkgMatcher = Pattern.compile("^\\s*package\\s+([\\w.]+)\\s*;", Pattern.MULTILINE).matcher(source);
-            if (pkgMatcher.find()) pkg = pkgMatcher.group(1);
+            Matcher autoCollect = Pattern.compile("@AutoCollect\\(\"([^\"]+)\"\\)").matcher(source);
+            if (!autoCollect.find()) return;
 
-            Matcher classMatcher = Pattern.compile("(?:public\\s+)?(?:final\\s+)?class\\s+(\\w+)").matcher(source);
-            if (!classMatcher.find()) return;
-            String className = (pkg.isEmpty() ? "" : pkg + ".") + classMatcher.group(1);
+            Matcher annotation = Pattern.compile("@interface\\s+(\\w+)").matcher(source);
+            if (!annotation.find()) return;
 
-            for (Map.Entry<String, String> entry : ANNOTATION_TO_METHOD.entrySet()) {
-                if (source.contains("@" + entry.getKey())) {
-                    grouped.get(entry.getValue()).add(className);
-                    break;
-                }
-            }
+            result.put(annotation.group(1), autoCollect.group(1));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private void writeRegistry(Map<String, List<String>> grouped) throws IOException {
+    private Map<String, List<Entry>> collectAnnotated(Path sourcesDir, Map<String, String> annotationToList) throws IOException {
+        Map<String, List<Entry>> grouped = new LinkedHashMap<>();
+        annotationToList.values().forEach(name -> grouped.put(name, new ArrayList<>()));
+
+        try (var paths = Files.walk(sourcesDir)) {
+            paths.filter(p -> p.toString().endsWith(".java")).forEach(p -> scanSourceFile(p, annotationToList, grouped));
+        }
+
+        return grouped;
+    }
+
+    private void scanSourceFile(Path path, Map<String, String> annotationToList, Map<String, List<Entry>> grouped) {
+        try {
+            String source = stripComments(Files.readString(path));
+            String packagePrefix = parsePackagePrefix(source);
+            Map<String, String> imports = parseImports(source);
+            List<ClassDecl> decls = parseClassDeclarations(source);
+
+            scanClasses(source, decls, packagePrefix, annotationToList, grouped);
+            scanFields(source, decls, packagePrefix, imports, annotationToList, grouped);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void scanClasses(String source, List<ClassDecl> decls, String packagePrefix, Map<String, String> annotationToList, Map<String, List<Entry>> grouped) {
+        for (int i = 0; i < decls.size(); i++) {
+            ClassDecl decl = decls.get(i);
+            String preceding = source.substring(i == 0 ? 0 : decls.get(i - 1).pos(), decl.pos());
+            String fqn = buildFqn(source, decls, i, packagePrefix);
+
+            for (Map.Entry<String, String> entry : annotationToList.entrySet()) {
+                if (preceding.contains("@" + entry.getKey())) {
+                    grouped.get(entry.getValue()).add(new Entry.ClassEntry(fqn));
+                    break;
+                }
+            }
+        }
+    }
+
+    private void scanFields(String source, List<ClassDecl> decls, String packagePrefix, Map<String, String> imports, Map<String, String> annotationToList, Map<String, List<Entry>> grouped) {
+        Matcher fieldMatcher = Pattern.compile("public\\s+static\\s+(?:final\\s+)?(\\w[\\w.<>]*)\\s+(\\w+)\\s*=").matcher(source);
+
+        while (fieldMatcher.find()) {
+            int fieldPos = fieldMatcher.start();
+            String simpleType = fieldMatcher.group(1);
+            String fieldName = fieldMatcher.group(2);
+
+            String outerFqn = findEnclosingClassFqn(source, decls, fieldPos, packagePrefix);
+            if (outerFqn == null) continue;
+
+            String preceding = precedingText(source, decls, fieldPos);
+
+            for (Map.Entry<String, String> entry : annotationToList.entrySet()) {
+                if (preceding.contains("@" + entry.getKey())) {
+                    String resolvedType = resolveType(simpleType, imports);
+                    grouped.get(entry.getValue()).add(new Entry.FieldEntry(outerFqn, fieldName, resolvedType));
+
+                    break;
+                }
+            }
+        }
+    }
+
+    private static String parsePackagePrefix(String source) {
+        Matcher matcher = Pattern.compile("^\\s*package\\s+([\\w.]+)\\s*;", Pattern.MULTILINE).matcher(source);
+
+        return matcher.find() ? matcher.group(1) + "." : "";
+    }
+
+    private static Map<String, String> parseImports(String source) {
+        Map<String, String> imports = new LinkedHashMap<>();
+        Matcher matcher = Pattern.compile("^import\\s+([\\w.]+);", Pattern.MULTILINE).matcher(source);
+
+        while (matcher.find()) {
+            String fqn = matcher.group(1);
+            String simple = fqn.substring(fqn.lastIndexOf('.') + 1);
+            imports.put(simple, fqn);
+        }
+
+        return imports;
+    }
+
+    private static List<ClassDecl> parseClassDeclarations(String source) {
+        Matcher matcher = Pattern.compile("(?:public\\s+)?(?:protected\\s+)?(?:private\\s+)?" + "(?:static\\s+)?(?:final\\s+)?(?:abstract\\s+)?class\\s+(\\w+)").matcher(source);
+
+        List<ClassDecl> decls = new ArrayList<>();
+
+        while (matcher.find()) {
+            decls.add(new ClassDecl(matcher.start(), matcher.group(1)));
+        }
+
+        return decls;
+    }
+
+    private static String precedingText(String source, List<ClassDecl> decls, int fieldPos) {
+        int start = 0;
+
+        for (ClassDecl decl : decls) {
+            if (decl.pos() < fieldPos) start = decl.pos();
+        }
+
+        // Cut the window at the previous member's terminator (`;`, `{` or `}`) so annotations
+        // belonging to an earlier field/member in the same class don't bleed into this field's
+        // preceding text and get mis-attributed to it.
+        int boundary = Math.max(source.lastIndexOf(';', fieldPos - 1),
+                Math.max(source.lastIndexOf('{', fieldPos - 1), source.lastIndexOf('}', fieldPos - 1)));
+        if (boundary >= start) start = boundary + 1;
+
+        return source.substring(start, fieldPos);
+    }
+
+    private static String resolveType(String simpleType, Map<String, String> imports) {
+        String baseName = simpleType.replaceAll("<.*>", "").trim();
+        String resolved = imports.getOrDefault(baseName, baseName);
+        String withBase = simpleType.replace(baseName, resolved);
+
+        StringBuffer sb = new StringBuffer();
+
+        Matcher matcher = Pattern.compile("<(\\w+)>").matcher(withBase);
+
+        while (matcher.find()) {
+            String inner = imports.getOrDefault(matcher.group(1), matcher.group(1));
+            matcher.appendReplacement(sb, "<" + inner + ">");
+        }
+
+        matcher.appendTail(sb);
+
+        return sb.toString();
+    }
+
+    private static String buildFqn(String source, List<ClassDecl> decls, int index, String packagePrefix) {
+        ClassDecl decl = decls.get(index);
+        long depth = braceCount(source, decl.pos(), '{') - braceCount(source, decl.pos(), '}');
+
+        if (depth <= 0) return packagePrefix + decl.name(); // top-level
+
+        // The enclosing class is the nearest preceding declaration at a strictly shallower brace
+        // depth; a preceding sibling sits at the same depth (its body has already closed) and must
+        // be skipped. Matches the depth logic in findEnclosingClassFqn.
+        for (int j = index - 1; j >= 0; j--) {
+            long enclosingDepth = braceCount(source, decls.get(j).pos(), '{') - braceCount(source, decls.get(j).pos(), '}');
+            if (enclosingDepth < depth) return packagePrefix + decls.get(j).name() + "." + decl.name();
+        }
+        return packagePrefix + decl.name();
+    }
+
+    private static String findEnclosingClassFqn(String source, List<ClassDecl> decls, int fieldPos, String packagePrefix) {
+        long fieldDepth = braceCount(source, fieldPos, '{') - braceCount(source, fieldPos, '}');
+
+        for (int i = decls.size() - 1; i >= 0; i--) {
+            ClassDecl decl = decls.get(i);
+            if (decl.pos() >= fieldPos) continue;
+            long depth = braceCount(source, decl.pos(), '{') - braceCount(source, decl.pos(), '}');
+            if (depth < fieldDepth) return buildFqn(source, decls, i, packagePrefix);
+        }
+        return null;
+    }
+
+    private static long braceCount(String source, int upTo, char brace) {
+        return source.substring(0, upTo).chars().filter(c -> c == brace).count();
+    }
+
+    private record ClassDecl(int pos, String name) {}
+
+    private sealed interface Entry {
+        record ClassEntry(String fqn) implements Entry {}
+        record FieldEntry(String outerFqn, String fieldName, String declaredType) implements Entry {}
+
+        default String toFieldName() {
+            return switch (this) {
+                case ClassEntry e -> Arrays.stream(e.fqn().split("\\."))
+                        .filter(s -> Character.isUpperCase(s.charAt(0)))
+                        .collect(Collectors.joining("_"));
+                case FieldEntry e -> Arrays.stream(e.outerFqn().split("\\."))
+                        .filter(s -> Character.isUpperCase(s.charAt(0)))
+                        .collect(Collectors.joining("_")) + "_" + e.fieldName();
+            };
+        }
+
+        default String declaredType() {
+            return switch (this) {
+                case ClassEntry e -> e.fqn();
+                case FieldEntry e -> e.declaredType();
+            };
+        }
+
+        default String initializer() {
+            return switch (this) {
+                case ClassEntry e -> "new " + e.fqn() + "()";
+                case FieldEntry e -> e.outerFqn() + "." + e.fieldName();
+            };
+        }
+    }
+
+    private void writeRegistry(Map<String, List<Entry>> grouped) throws IOException {
         String pkg = "com.github.mkram17.bazaarutils.generated";
         Path outDir = getOutputDir().get().getAsFile().toPath().resolve(pkg.replace('.', '/'));
         Files.createDirectories(outDir);
 
-        Map<String, String> methodToClassName = Map.of(
-                "loadPreInit",  "BazaarUtilsPreInitModules",
-                "loadAll",      "BazaarUtilsModules",
-                "loadLateInit", "BazaarUtilsLateInitModules"
-        );
-
-        methodToClassName.forEach((method, className) -> {
-            List<String> classes = grouped.getOrDefault(method, List.of());
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("package ").append(pkg).append(";\n\n");
-            sb.append("import java.util.List;\n");
-            sb.append("import java.util.ArrayList;\n");
-            sb.append("import java.util.function.Consumer;\n\n");
-            sb.append("// Generated by ModuleRegistryGeneratingTask — do not edit\n");
-            sb.append("public final class ").append(className).append(" {\n\n");
-
-            for (String fqn : classes) {
-                sb.append("    public static ").append(fqn).append(" ")
-                        .append(toFieldName(fqn)).append(";\n");
-            }
-            if (!classes.isEmpty()) sb.append("\n");
-
-            sb.append("    public static final List<Object> collected = new ArrayList<>();\n\n");
-
-            sb.append("    public static void init() {\n");
-            for (String fqn : classes) {
-                String field = toFieldName(fqn);
-                sb.append("        ").append(field).append(" = new ").append(fqn).append("();\n");
-                sb.append("        collected.add(").append(field).append(");\n");
-            }
-            sb.append("    }\n\n");
-
-            sb.append("    public static void forEach(Consumer<Object> applicator) {\n");
-            sb.append("        collected.forEach(applicator);\n");
-            sb.append("    }\n");
-
-            sb.append("}\n");
-
-            try {
-                Files.writeString(outDir.resolve(className + ".java"), sb.toString());
-                getLogger().lifecycle("Generated {}.java with {} module(s)", className, classes.size());
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
+        for (Map.Entry<String, List<Entry>> entry : grouped.entrySet()) {
+            String className = "BazaarUtils" + entry.getKey();
+            Files.writeString(outDir.resolve(className + ".java"), buildRegistrySource(pkg, className, entry.getValue()));
+            getLogger().lifecycle("Generated {}.java with {} entries", className, entry.getValue().size());
+        }
     }
 
-    private static String toFieldName(String fqn) {
-        return fqn.substring(fqn.lastIndexOf('.') + 1);
+    private static String buildRegistrySource(String pkg, String className, List<Entry> entries) {
+        var sb = new StringBuilder();
+        sb.append("package ").append(pkg).append(";\n\n");
+        sb.append("import java.util.List;\n");
+        sb.append("import java.util.ArrayList;\n");
+        sb.append("import java.util.function.Consumer;\n\n");
+        sb.append("// Generated by ModuleRegistryGeneratingTask — do not edit\n");
+        sb.append("public final class ").append(className).append(" {\n\n");
+
+        for (Entry entry : entries) {
+            sb.append("    public static ").append(entry.declaredType()).append(" ").append(entry.toFieldName()).append(";\n");
+        }
+
+        if (!entries.isEmpty()) sb.append("\n");
+
+        sb.append("    public static final List<Object> collected = new ArrayList<>();\n\n");
+
+        // Idempotence guard: a registry must only construct its entries once. Without this a
+        // second init() call would build (and, for BUListeners, re-subscribe) every entry again.
+        sb.append("    private static boolean initialized;\n\n");
+
+        sb.append("    public static void init() {\n");
+        sb.append("        if (initialized) return;\n");
+        sb.append("        initialized = true;\n");
+        for (Entry entry : entries) {
+            String field = entry.toFieldName();
+            sb.append("        ").append(field).append(" = ").append(entry.initializer()).append(";\n");
+            sb.append("        collected.add(").append(field).append(");\n");
+        }
+        sb.append("    }\n\n");
+
+        sb.append("    public static void forEach(Consumer<Object> applicator) {\n");
+        sb.append("        collected.forEach(applicator);\n");
+        sb.append("    }\n");
+
+        sb.append("}\n");
+
+        return sb.toString();
+    }
+
+    private static String stripComments(String source) {
+        StringBuilder sb = new StringBuilder();
+        int i = 0, len = source.length();
+
+        while (i < len) {
+            char c = source.charAt(i);
+
+            if (c == '"' || c == '\'') {
+                // String or char literal — copy verbatim, respecting escapes
+                sb.append(c);
+                i++;
+                while (i < len) {
+                    char sc = source.charAt(i);
+                    sb.append(sc);
+                    if (sc == '\\') {
+                        i++;
+                        if (i < len) { sb.append(source.charAt(i)); i++; }
+                    } else if (sc == c) { // matching closing quote
+                        i++;
+                        break;
+                    } else {
+                        i++;
+                    }
+                }
+            } else if (c == '/' && i + 1 < len) {
+                char next = source.charAt(i + 1);
+
+                if (next == '/') {
+                    // Single-line comment: skip through to end of line
+                    while (i < len && source.charAt(i) != '\n') i++;
+                } else if (next == '*') {
+                    // Block/Javadoc comment: skip through to closing */
+                    i += 2;
+                    while (i + 1 < len && !(source.charAt(i) == '*' && source.charAt(i + 1) == '/')) i++;
+                    i += 2; // consume the closing */
+                } else {
+                    sb.append(c);
+                    i++;
+                }
+            } else {
+                sb.append(c);
+                i++;
+            }
+        }
+
+        return sb.toString();
     }
 }
