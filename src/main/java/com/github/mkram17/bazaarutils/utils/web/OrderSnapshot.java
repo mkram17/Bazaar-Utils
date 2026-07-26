@@ -4,7 +4,6 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
-import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -18,8 +17,11 @@ import java.util.Optional;
  * the storage Gson has an {@code ItemStack} codec registered, so serializing one directly would
  * quietly push full item NBT to the server.</p>
  *
- * <p>Field names and value domains mirror {@code orderSnapshotSchema} on the website; a mismatch
- * is rejected there with a 400, not silently coerced.</p>
+ * <p>Serialized by {@link WebJson}, so this declaration <em>is</em> the wire format: component
+ * names become the JSON keys, enums their {@code name()}, and a null {@code pricingPosition} is
+ * omitted rather than sent. Names and value domains mirror {@code orderSnapshotSchema} on the
+ * website, where a mismatch is rejected with a 400 rather than silently coerced — so renaming a
+ * component here is a protocol change.</p>
  */
 public record OrderSnapshot(
         String productId,
@@ -30,7 +32,8 @@ public record OrderSnapshot(
         double pricePerItem,
         int amountFilled,
         int amountClaimed,
-        @Nullable PricingPosition pricingPosition
+        @Nullable PricingPosition pricingPosition,
+        String profileId
 ) {
     private static final int MAX_STRING_LENGTH = 128;
 
@@ -93,32 +96,12 @@ public record OrderSnapshot(
                 pricePerItem,
                 amountFilled,
                 amountClaimed,
-                order.getPricingPosition()
+                // Derived from live market data, so it is stale the moment it lands. The dashboard
+                // renders it as "as of last sync" rather than as a live signal. Null when the
+                // market data needed to compute it was unavailable, and omitted from the payload.
+                order.getPricingPosition(),
+                UNKNOWN_PROFILE_ID
         ));
-    }
-
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-
-        json.addProperty("productId", productId);
-        json.addProperty("itemName", itemName);
-        // name(), not toString() — Side renders itself as "Buy"/"Sell" for chat, but the wire
-        // contract is the uppercase enum.
-        json.addProperty("side", side.name());
-        json.addProperty("status", status.name());
-        json.addProperty("volume", volume);
-        json.addProperty("pricePerItem", pricePerItem);
-        json.addProperty("amountFilled", amountFilled);
-        json.addProperty("amountClaimed", amountClaimed);
-        json.addProperty("profileId", UNKNOWN_PROFILE_ID);
-
-        // Derived from live market data, so it is stale the moment it lands. The dashboard renders
-        // it as "as of last sync" rather than as a live signal.
-        if (pricingPosition != null) {
-            json.addProperty("pricingPosition", pricingPosition.name());
-        }
-
-        return json;
     }
 
     private static boolean isUnusable(String value) {

@@ -1,8 +1,5 @@
 package com.github.mkram17.bazaarutils.utils.web;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
@@ -12,11 +9,10 @@ import java.util.concurrent.CompletableFuture;
 /**
  * The Bazaar Utils website endpoints the mod talks to.
  *
- * <p>Request bodies are assembled field by field rather than reflected off a model class. The
- * order model is not safe to serialize — {@code Order} is subscribed to the event bus and holds a
- * live {@code ItemStack}, and {@code DataStorage}'s Gson has an {@code ItemStack} codec, so
- * handing it to a serializer emits full item NBT onto the wire. Building the JSON explicitly also
- * keeps this file readable next to the Zod schemas on the other end.</p>
+ * <p>Every body is a record serialized by {@link WebJson}, so the record declarations are the
+ * protocol: they line up one-for-one with the Zod schemas on the other end. What is deliberately
+ * absent is any model object — {@code Order} is subscribed to the event bus and holds a live
+ * {@code ItemStack}, so it is converted to {@link OrderSnapshot} first rather than serialized.</p>
  */
 public final class BazaarUtilsApi {
     private static final String DEFAULT_BASE_URL = "https://bazaarutils.dev";
@@ -56,12 +52,21 @@ public final class BazaarUtilsApi {
      * 429 (rate limited), each with a player-readable {@code error} field.</p>
      */
     public static CompletableFuture<JsonHttpClient.Response> confirmLink(String normalizedCode, String username) {
-        JsonObject body = new JsonObject();
-        body.addProperty("code", normalizedCode);
-        body.addProperty("username", username);
+        String body = WebJson.GSON.toJson(new LinkConfirmRequest(normalizedCode, username));
 
-        return JsonHttpClient.postJson(endpoint("/api/link/confirm"), body.toString(), Map.of());
+        return JsonHttpClient.postJson(endpoint("/api/link/confirm"), body, Map.of());
     }
+
+    private record LinkConfirmRequest(String code, String username) {}
+
+    /**
+     * A completed link, as the website reports it.
+     *
+     * <p>The UUID and username here are the ones Mojang returned from {@code hasJoined}, not
+     * anything the mod sent. Every component can be null if the response shape ever changes, so
+     * callers must check rather than trust.</p>
+     */
+    public record ConfirmedLink(String token, String username, String uuid) {}
 
     /**
      * Serializes an order snapshot into the sync request body.
@@ -70,14 +75,10 @@ public final class BazaarUtilsApi {
      * the last one they sent and skip an identical push.</p>
      */
     public static String serializeOrderSync(List<OrderSnapshot> orders) {
-        JsonArray array = new JsonArray();
-        orders.forEach(order -> array.add(order.toJson()));
-
-        JsonObject body = new JsonObject();
-        body.add("orders", array);
-
-        return body.toString();
+        return WebJson.GSON.toJson(new OrderSyncRequest(orders));
     }
+
+    private record OrderSyncRequest(List<OrderSnapshot> orders) {}
 
     /**
      * Pushes an order snapshot. The account is resolved from the bearer token alone — the payload
