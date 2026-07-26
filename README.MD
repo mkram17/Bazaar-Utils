@@ -91,9 +91,24 @@ A Fabric client-side QoL mod for the Hypixel SkyBlock Bazaar.
 - Open the config with `/bazaarutils` or `/bu`.
 - If your Bazaar Flipper account upgrade is not level 1, set your tier in the config or tax calculations and order limits won't be accurate.
 
+### Website Account Linking
+
+Link the mod to a [Bazaar Utils website](https://bazaarutils.dev) account to see your orders on the
+dashboard.
+
+1. Generate a link code on the website under **Dashboard → Minecraft**. Codes last 5 minutes and
+   work once.
+2. Run `/bu link <code>` in game.
+
+Linking verifies your session with Mojang the same way joining a server does, so it only works on a
+genuine (non-offline) login. Once linked, your orders upload whenever you open the **Manage Orders**
+menu — toggle this off under **Website Sync** in the config, or unlink from the website to stop it
+entirely. `/bu link` on its own reports whether this install is linked.
+
 ### Other Commands
 
 - `/bu help` lists all available commands
+- `/bu link <code>` links this install to your Bazaar Utils website account
 - `/bu discord` opens a link to join the Discord server
 - `/bu updateresources` checks for and applies resource updates
 

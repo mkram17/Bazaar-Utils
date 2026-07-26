@@ -1,1 +1,3 @@
+ - Added website account linking. Generate a code on the Bazaar Utils website, run `/bu link <code>` in game, and your bazaar orders show up on the dashboard. Run `/bu link` on its own to check whether this install is linked.
+ - Added a Website Sync config category for turning order uploads off without unlinking.
  - Internal code changes
