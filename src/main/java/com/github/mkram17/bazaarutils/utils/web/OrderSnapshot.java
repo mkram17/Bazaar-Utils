@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.utils.web;
 
-import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
@@ -48,32 +47,33 @@ public record OrderSnapshot(
      *
      * <p>Orders are parsed out of item lore, so a field can legitimately be missing: an unresolved
      * product ID, a volume the parser returned {@code -1} for. Dropping those one at a time keeps
-     * a single unparseable order from costing the whole sync a 400.</p>
+     * a single unparseable order from costing the whole sync a 400. Callers are expected to report
+     * how many were dropped — see {@code OrderSyncService}.</p>
      */
     public static Optional<OrderSnapshot> of(Order order) {
         String productId = order.getProductID();
         String itemName = order.getName();
 
         if (isUnusable(productId) || isUnusable(itemName)) {
-            return skip(order, "missing product id or name");
+            return Optional.empty();
         }
 
         TransactionType transactionType = order.getTransactionType();
 
         if (transactionType == null || transactionType.getSide() == null) {
-            return skip(order, "missing transaction side");
+            return Optional.empty();
         }
 
         Integer volume = order.getVolume();
 
         if (volume == null || volume <= 0) {
-            return skip(order, "missing or non-positive volume");
+            return Optional.empty();
         }
 
         Double pricePerItem = order.getPricePerItem();
 
         if (pricePerItem == null || !Double.isFinite(pricePerItem) || pricePerItem < 0) {
-            return skip(order, "missing or invalid price");
+            return Optional.empty();
         }
 
         // The lore parsers use -1 for "could not read this", which the server rejects as negative.
@@ -123,11 +123,5 @@ public record OrderSnapshot(
 
     private static boolean isUnusable(String value) {
         return value == null || value.isBlank() || value.length() > MAX_STRING_LENGTH;
-    }
-
-    private static Optional<OrderSnapshot> skip(Order order, String reason) {
-        Util.logMessage("Skipping order in website sync (%s): %s".formatted(reason, order.getName()));
-
-        return Optional.empty();
     }
 }
