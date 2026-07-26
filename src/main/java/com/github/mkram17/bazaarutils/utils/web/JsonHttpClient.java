@@ -140,10 +140,30 @@ public final class JsonHttpClient {
         return send(request, 1);
     }
 
+    /**
+     * One attempt, and exactly one retry decision for it. Success and failure are handled in a
+     * single {@code handle} rather than a {@code thenCompose}/{@code exceptionallyCompose} pair —
+     * with two stages, a retry chain that ends in a transport failure would be seen a second time
+     * by the exception stage and retried again, quietly multiplying the attempt cap.
+     */
     private static CompletableFuture<Response> send(HttpRequest request, int attempt) {
         return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(response -> new Response(response.statusCode(), response.body()))
-                .thenCompose(response -> {
+                .handle((httpResponse, throwable) -> {
+                    if (throwable != null) {
+                        // An IOException here is a connection or timeout failure; both are worth
+                        // another try. Anything else is a bug and should surface immediately.
+                        if (attempt >= MAX_ATTEMPTS || !isTransport(throwable)) {
+                            return CompletableFuture.<Response>failedFuture(throwable);
+                        }
+
+                        Util.logMessage("%s failed (%s), retrying (attempt %d/%d)"
+                                .formatted(request.uri(), throwable.getMessage(), attempt + 1, MAX_ATTEMPTS));
+
+                        return retry(request, attempt);
+                    }
+
+                    Response response = new Response(httpResponse.statusCode(), httpResponse.body());
+
                     if (!isRetryable(response.status()) || attempt >= MAX_ATTEMPTS) {
                         return CompletableFuture.completedFuture(response);
                     }
@@ -153,18 +173,7 @@ public final class JsonHttpClient {
 
                     return retry(request, attempt);
                 })
-                .exceptionallyCompose(throwable -> {
-                    // An IOException here is a connection or timeout failure; both are worth
-                    // another try. Anything else is a bug and should surface immediately.
-                    if (attempt >= MAX_ATTEMPTS || !isTransport(throwable)) {
-                        return CompletableFuture.failedFuture(throwable);
-                    }
-
-                    Util.logMessage("%s failed (%s), retrying (attempt %d/%d)"
-                            .formatted(request.uri(), throwable.getMessage(), attempt + 1, MAX_ATTEMPTS));
-
-                    return retry(request, attempt);
-                });
+                .thenCompose(future -> future);
     }
 
     private static CompletableFuture<Response> retry(HttpRequest request, int attempt) {

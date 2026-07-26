@@ -105,12 +105,20 @@ public final class OrderSyncService extends BUListener {
         // are ordinary states, not errors, so they stay silent.
         if (token.isEmpty()) return;
 
-        String body = BazaarUtilsApi.serializeOrderSync(collectSnapshot());
+        Snapshot snapshot = collectSnapshot();
+        String body = BazaarUtilsApi.serializeOrderSync(snapshot.orders());
         String key = session.get().dashlessUuid() + "|" + body;
 
+        // The floor: sitting on the orders page must not cost a request every window.
         if (key.equals(lastSentKey)) return;
 
         if (!inFlight.compareAndSet(false, true)) return;
+
+        // Logged here rather than per order, so a broken order does not write a line every window.
+        if (snapshot.dropped() > 0) {
+            Util.logMessage("Omitting %d order(s) from the website sync; they could not be fully parsed."
+                    .formatted(snapshot.dropped()));
+        }
 
         BazaarUtilsApi.syncOrders(token.get(), body).whenComplete((response, throwable) -> {
             try {
@@ -160,22 +168,34 @@ public final class OrderSyncService extends BUListener {
         }
     }
 
-    private static List<OrderSnapshot> collectSnapshot() {
+    /** What was collected, and how much of the order list did not survive the trip. */
+    private record Snapshot(List<OrderSnapshot> orders, int dropped) {}
+
+    private static Snapshot collectSnapshot() {
         List<Order> orders = UserOrdersStorage.INSTANCE.get();
-        List<OrderSnapshot> snapshot = new ArrayList<>();
+        List<OrderSnapshot> collected = new ArrayList<>();
+        int dropped = 0;
 
         for (Order order : orders) {
-            if (snapshot.size() >= MAX_ORDERS_PER_SYNC) {
+            if (collected.size() >= MAX_ORDERS_PER_SYNC) {
+                // Never silently truncate: a capped sync would otherwise read as a complete one,
+                // and the server would close every order past the cap as vanished.
                 Util.logMessage("Order sync capped at %d orders; %d were not sent."
                         .formatted(MAX_ORDERS_PER_SYNC, orders.size() - MAX_ORDERS_PER_SYNC));
 
                 break;
             }
 
-            OrderSnapshot.of(order).ifPresent(snapshot::add);
+            Optional<OrderSnapshot> snapshot = OrderSnapshot.of(order);
+
+            if (snapshot.isPresent()) {
+                collected.add(snapshot.get());
+            } else {
+                dropped++;
+            }
         }
 
-        return snapshot;
+        return new Snapshot(collected, dropped);
     }
 
     /** Callbacks land on an HTTP worker; chat has to be written from the client thread. */
