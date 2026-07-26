@@ -13,4 +13,19 @@ If you are working with the event system — subscribing to events, adding a mod
    ./gradlew build
    ```
 
+### Pointing the mod at a local website
+
+Website sync and `/bu link` talk to `https://bazaarutils.dev` by default. To work against a local
+website instead, put a `.env` at the repo root:
+
+```
+BAZAARUTILS_API_URL=http://localhost:3000
+```
+
+The Gradle run configs load it into the dev client's environment. `.env` is gitignored, and if you
+already have IDE run configs you will need to re-sync Gradle so they are regenerated with the
+variable. Note that the file only works because Gradle loads it — `System.getenv` does not read
+`.env` on its own, so this has no effect on a jar launched from the Minecraft Launcher. For that,
+pass `-Dbazaarutils.apiUrl=http://localhost:3000` as a JVM argument instead.
+
 If you are unsure of what to do, please see [SkyHanni's contributing guide](https://github.com/hannibal002/SkyHanni/blob/beta/CONTRIBUTING.md), or if you have a more specific question, you can ask in the [Discord server](https://discord.gg/xDKjvm5hQd).

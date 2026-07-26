@@ -20,13 +20,33 @@ public final class BazaarUtilsApi {
     /** Points the mod at a local website during development. Unset in normal play. */
     private static final String BASE_URL_ENV = "BAZAARUTILS_API_URL";
 
+    /**
+     * The same override as a JVM system property, for launches where setting an environment
+     * variable is awkward. A {@code .env} file is <em>not</em> a third option: {@link System#getenv}
+     * reads the process environment only, so a {@code .env} does nothing unless something loads it
+     * into that environment first (the Gradle run config does this for dev clients).
+     */
+    private static final String BASE_URL_PROPERTY = "bazaarutils.apiUrl";
+
     private BazaarUtilsApi() {}
 
     public static String baseUrl() {
-        String override = System.getenv(BASE_URL_ENV);
-        String url = (override != null && !override.isBlank()) ? override.trim() : DEFAULT_BASE_URL;
+        String url = firstNonBlank(System.getProperty(BASE_URL_PROPERTY), System.getenv(BASE_URL_ENV), DEFAULT_BASE_URL);
 
         return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+    }
+
+    /** Whether the mod is pointed somewhere other than production. Logged when diagnosing. */
+    public static boolean isOverridden() {
+        return !DEFAULT_BASE_URL.equals(baseUrl());
+    }
+
+    private static String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) return value.trim();
+        }
+
+        return DEFAULT_BASE_URL;
     }
 
     /**
