@@ -403,6 +403,17 @@
       }
     },
 
+    "website.{}": {
+      "category.label": "Website Sync",
+      "category.hint": "Link your Minecraft account to the Bazaar Utils website and sync your orders to it",
+      "separator.label": "Account Linking",
+      "separator.hint": "Generate a link code on the website, then run /bu link <code> in game to connect this install.",
+      "sync_orders.{}": {
+        "label": "Sync Orders",
+        "hint": "Upload a snapshot of your bazaar orders to the website whenever you open the Manage Orders menu. Nothing is sent until you link an account."
+      }
+    },
+
     "advanced.{}": {
       "category.label": "Advanced Settings",
       "category.hint": "Advanced configurations for routines & features of the mod",
