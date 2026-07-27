@@ -1,0 +1,429 @@
+{
+  "owo:extended_lang": true,
+
+  "bazaarutils.ref.{}": {
+    "instant_sell": [{
+      "text": "Instant Sell",
+      "color": "green"
+    }],
+
+    "booster_cookie": [{
+      "text": "Booster Cookie",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Booster Cookie\n", "color": "light_purple", "bold": true },
+          { "text": "Donne accès à l'API des ordres du Bazaar\nainsi qu'à d'autres avantages SkyBlock.\n\n", "color": "gray" },
+          { "text": "↗ Cliquez pour ouvrir le wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Booster_Cookie"
+      }
+    }],
+
+    "bazaar_flipper": [{
+      "text": "Bazaar Flipper",
+      "color": "gold",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Bazaar Flipper\n", "color": "gold", "bold": true },
+          { "text": "Une amélioration de compte qui réduit la taxe\net augmente votre limite d'ordres actifs.\n\n", "color": "gray" },
+          { "text": "↗ Cliquez pour ouvrir le wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Bazaar_Flipper"
+      }
+    }],
+
+    "elizabeth": [{
+      "text": "Elizabeth",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Elizabeth\n", "color": "light_purple", "bold": true },
+          { "text": "PNJ au ", "color": "gray" },
+          { "text": "Community Center", "color": "gray" },
+          { "text": " dans le SkyBlock Hub.\n", "color": "gray" },
+          { "text": "Vend des améliorations de compte contre des Gems.\n\n", "color": "gray" },
+          { "text": "↗ Cliquez pour ouvrir le wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Elizabeth"
+      }
+    }],
+
+    "community_center": [{ "text": "Community Center", "color": "aqua" }],
+    "skyblock_hub": [{ "text": "SkyBlock Hub", "color": "aqua" }]
+  },
+
+  "mod.bazaarutils": "Bazaar Utils",
+  "key.category.minecraft.bazaarutils": "Bazaar Utils",
+
+  "bazaarutils.rconfig.ui.{}": {
+    "constant.{}": {
+      "search": "Rechercher...",
+      "select": "Sélectionner"
+    }
+  },
+
+  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
+    "not_upgraded.label": "Non amélioré",
+    "first_tier.label": "Bazaar Flipper I",
+    "second_tier.label": "Bazaar Flipper II"
+  },
+
+  "bazaarutils.config.{}": {
+
+    "separator.introductory.label": "Bienvenue dans Bazaar Utils !",
+    "separator.introductory.hint": "Merci d'avoir installé Bazaar Utils ! Ce mod apporte des améliorations de confort pour le Bazaar d'Hypixel.",
+
+    "bazaar_flipper_account_upgrade.{}": {
+      "label": "Amélioration de compte Bazaar Flipper",
+      "hint": [
+        "Le niveau de votre amélioration de compte ", { "translate": "bazaarutils.ref.bazaar_flipper" },
+        ", qui est pris en compte dans le calcul de la taxe et dans vos limites d'ordres actuelles.",
+        "\nVotre niveau de Bazaar Flipper peut être amélioré en parlant à ",
+        { "translate": "bazaarutils.ref.elizabeth" }, " au ",
+        { "translate": "bazaarutils.ref.community_center" }, " dans le ",
+        { "translate": "bazaarutils.ref.skyblock_hub" }, "."
+      ]
+    },
+
+    "chat.{}": {
+      "category.label": "Chat",
+      "category.hint": "Réglages des fonctionnalités de chat du mod",
+
+      "separator.useless_bazaar_notifications_remover.label": "Notifications inutiles du Bazaar",
+      "useless_bazaar_notifications_remover.{}": {
+        "label": "Notifications inutiles du Bazaar",
+        "hint": "Supprime certains messages temporaires envoyés dans le chat lors des interactions avec le Bazaar afin de réduire l'encombrement.",
+        "excluded_notifications.{}": {
+          "label": "Notifications exclues",
+          "hint": "Une liste de messages et de notifications à bloquer dans le chat."
+        }
+      },
+
+      "separator.stash_messages_remover.label": "Messages de stash",
+      "stash_messages_remover.{}": {
+        "label": "Messages de stash",
+        "hint": "Supprime les messages du chat vous rappelant de récupérer les objets de votre stash."
+      }
+    },
+
+    "buttons.{}": {
+      "category.label": "Boutons",
+      "category.hint": "Réglages des boutons ajoutés et gérés par le mod",
+
+      "separator.mod_buttons.{}": {
+        "label": "Boutons du mod",
+        "hint": "Ajoute des boutons aux écrans d'inventaire pour accéder rapidement aux fonctionnalités du mod."
+      },
+
+      "open_settings.{}": {
+        "label": "Bouton des paramètres du mod",
+        "hint": "Ajoute un bouton dans certains menus pour accéder rapidement aux paramètres du mod."
+      },
+
+      "open_orders.{}": {
+        "label": "Bouton de la page des ordres",
+        "hint": [
+          "Ajoute un bouton dans certains menus pour accéder rapidement à la page de vos ordres.",
+          "\n\nNécessite un ", { "translate": "bazaarutils.ref.booster_cookie" }, " actif."
+        ]
+      },
+
+      "separator.container_buttons.{}": {
+        "label": "Boutons de conteneur",
+        "hint": "Ajoute des boutons d'aide à certaines interfaces de conteneur."
+      },
+
+      "cancel_order_and_search.{}": {
+        "label": "Bouton Annuler et rechercher",
+        "hint": "Ajoute un bouton aux pages d'ordres/d'offres non remplis pour annuler l'ordre et rechercher immédiatement l'objet à nouveau."
+      },
+
+      "button.{}": {
+        "widget.{}": {
+          "enabled.{}": {
+            "label": "Activé",
+            "hint": "Si le bouton sera activé."
+          },
+          "size.label": "Taille du bouton",
+          "spacing.label": "Espacement"
+        },
+        "container.{}": {
+          "enabled.{}": {
+            "label": "Activé",
+            "hint": "Si le bouton sera activé."
+          },
+          "item_id.{}": {
+            "label": "Objet",
+            "hint": "L'objet qui sera placé en tant que bouton."
+          },
+          "slot_index.{}": {
+            "label": "Numéro d'emplacement",
+            "hint": "L'emplacement du conteneur où le bouton sera placé."
+          },
+          "amount_strategy.{}": {
+            "label": "Stratégie de quantité",
+            "hint": "La stratégie utilisée pour calculer la quantité.\n\nMAX : Commandera la quantité maximale possible selon l'action (instantané, ordre).\nFIXED : Commandera la quantité que vous avez configurée ci-dessous."
+          },
+          "pricing_position.{}": {
+            "label": "Position tarifaire",
+            "hint": "La stratégie utilisée pour calculer le prix proposé par objet\n\nCOMPETITIVE : L'offre sera à +0,1 par rapport à la meilleure offre actuelle du marché\nMATCHED : L'offre sera égale à la meilleure offre actuelle du marché\nOUTBID : L'offre sera à -0,1 par rapport à la meilleure offre actuelle du marché"
+          },
+          "fixed_amount.{}": {
+            "label": "Quantité fixe",
+            "hint": "La quantité utilisée si FIXED est défini comme stratégie de quantité."
+          }
+        }
+      },
+
+      "bookmarks.{}": {
+        "category.label": "Favoris",
+
+        "separator.introductory.{}": {
+          "label": "Objets favoris",
+          "hint": "Les objets favoris vous permettent de rechercher rapidement des objets précis sur le Bazaar."
+        },
+
+        "open_bookmark.{}": {
+          "label": "Ouvrir le favori",
+          "hint": "Configure le bouton, dans certains menus, qui recherche rapidement l'objet mis en favori."
+        },
+
+        "toggle_bookmark.{}": {
+          "label": "Mettre l'objet en favori",
+          "hint": "Ajoute un bouton aux pages d'objets pour ajouter ou retirer l'objet de vos favoris."
+        },
+
+        "reset_bookmarks.label": "Favoris enregistrés",
+        "reset_bookmarks.runnable": "Réinitialiser"
+      },
+
+      "helpers.{}": {
+        "category.label": "Aides à la saisie",
+
+        "separator.buy_related.{}": {
+          "label": "Aides à l'achat",
+          "hint": "Aides qui apparaissent lors des achats sur le Bazaar. Configurez des boutons pour remplir automatiquement les quantités ou les prix lors d'un achat instantané ou d'un ordre d'achat."
+        },
+
+        "instant_buy_amount.label": "Quantité d'achat instantané",
+        "buy_order_amount.label": "Quantité de l'ordre d'achat",
+        "buy_order_price.label": "Prix de l'ordre d'achat",
+
+        "separator.sell_related.{}": {
+          "label": "Aides à la vente",
+          "hint": "Aides qui apparaissent lors des ventes sur le Bazaar. Configurez des boutons pour remplir automatiquement les quantités ou les prix lors d'une offre de vente ou d'un flip d'ordre."
+        },
+
+        "flip_order_price.label": "Prix du flip d'ordre",
+        "sell_offer_amount.label": "Quantité de l'offre de vente",
+        "sell_offer_price.label": "Prix de l'offre de vente"
+      }
+    },
+
+    "inventory.{}": {
+      "category.label": "Inventaire",
+      "category.hint": "Réglages des fonctionnalités d'inventaire du mod",
+
+      "separator.instant_sell_highlight.label": "Surbrillance Instant Sell",
+      "instant_sell_highlight.{}": {
+        "label": "Surbrillance Instant Sell",
+        "hint": [
+          "Met en surbrillance les objets de votre inventaire qui seraient vendus par le bouton Instant Sell."
+        ],
+        "color.label": "Couleur de surbrillance"
+      },
+
+      "separator.order_status_highlight.label": "Surbrillance du statut des ordres",
+      "order_status_highlight.{}": {
+        "label": "Surbrillance du statut des ordres",
+        "hint": "Met en évidence le statut de vos ordres du Bazaar en colorant les objets avec des couleurs représentatives.",
+
+        "competitive_color.{}": {
+          "label": "Couleur « meilleure offre »",
+          "hint": "La couleur de surbrillance des ordres qui sont actuellement la meilleure offre du marché."
+        },
+
+        "matched_color.{}": {
+          "label": "Couleur « prix égalé »",
+          "hint": "La couleur de surbrillance des ordres qui correspondent au prix actuel du marché."
+        },
+
+        "outbid_color.{}": {
+          "label": "Couleur « surenchéri »",
+          "hint": "La couleur de surbrillance des ordres qui ont été surenchéris."
+        }
+      },
+
+      "restrictions.{}": {
+        "separator.introductory.{}": {
+          "label": "Restrictions d'inventaire"
+        },
+
+        "category.label": "Restrictions d'inventaire",
+
+        "enabled.{}": {
+          "label": "Restrictions d'inventaire",
+          "hint": "Verrouille certains boutons du Bazaar selon des critères d'inventaire ou d'action afin d'éviter les opérations de marché accidentelles."
+        },
+
+        "features.{}": {
+          "label": "Boutons restreints",
+          "hint": "Les boutons d'inventaire pour lesquels les restrictions sont activées.",
+
+          "target.{}": {
+            "instant_sell.label": "Instant Sell",
+            "sell_sacks.label": "Sell Sacks"
+          }
+        },
+
+        "clicks_required.{}": {
+          "label": "Clics requis",
+          "hint": "Le nombre de clics requis sur le bouton de la fonctionnalité pour confirmer l'action."
+        },
+
+        "separator.rules_informational.{}": {
+          "label": "Règles de restriction",
+          "hint": "Gérez les règles vérifiées par la fonctionnalité de restrictions"
+        },
+
+        "numeric_restrictions.{}": {
+          "label": "Prédicats numériques",
+          "hint": "Règles vérifiant des conditions numériques (par ex. le total d'objets ou de coins) pour restreindre les actions ciblées."
+        },
+
+        "string_restrictions.{}": {
+          "label": "Prédicats de nom",
+          "hint": "Règles vérifiant des noms ou types d'objets précis pour restreindre les actions ciblées."
+        },
+
+        "control.{}": {
+          "targets.{}": {
+            "label": "Fonctionnalités",
+            "hint": "Les fonctionnalités pour lesquelles cette règle est active."
+          },
+
+          "numeric.{}": {
+            "type.{}": {
+              "label": "Type de restriction",
+              "hint": "Si la restriction se déclenche sur la valeur totale en coins ou sur la quantité d'objets."
+            },
+            "threshold.{}": {
+              "label": "Seuil",
+              "hint": "La valeur au-delà de laquelle la restriction se déclenchera."
+            }
+          },
+
+          "name.{}": {
+            "value.{}": {
+              "label": "Nom de l'objet",
+              "hint": "Le nom d'objet qui déclenchera la restriction s'il est présent dans l'action de vente."
+            }
+          }
+        }
+      }
+    },
+
+    "overlays.{}": {
+      "category.label": "Superpositions",
+      "category.hint": "Réglages des superpositions créées par le mod",
+
+      "separator.price_charts.label": "Graphiques de prix",
+      "price_charts.{}": {
+        "label": "Graphiques de prix",
+        "hint": "Ajoute un lien dans les infobulles des objets du Bazaar pour accéder rapidement aux graphiques de prix du marché.",
+        "show_outside_bazaar.{}": {
+          "label": "Afficher en dehors du Bazaar",
+          "hint": "Si les graphiques de prix doivent apparaître dans les infobulles en dehors d'un menu du Bazaar."
+        }
+      },
+
+      "separator.bazaar_limits_visualizer.label": "Limites du Bazaar",
+      "bazaar_limits_visualizer.{}": {
+        "label": "Limites du Bazaar",
+        "hint": [
+          "Affiche l'état de votre limite quotidienne du Bazaar sur les écrans du Bazaar.\n\nLes profils sont limités à ",
+          {
+            "text": "15 000 000 000,00 coins",
+            "color": "gold",
+            "hover_event": {
+              "action": "show_text",
+              "value": [
+                { "text": "Limite quotidienne du Bazaar\n", "color": "gold", "bold": true },
+                { "text": "Réinitialisée à minuit UTC.\n", "color": "gray" },
+                { "text": "S'applique par profil, et non par compte.", "color": "dark_gray", "italic": true }
+              ]
+            }
+          },
+          " d'ordres/offres échangeables par jour."
+        ],
+        "reset_limits.label": "Limites d'ordres quotidiennes",
+        "reset_limits.runnable": "Réinitialiser"
+      }
+    },
+
+    "notifications.{}": {
+      "category.label": "Notifications",
+      "category.hint": "Réglages des notifications envoyées par le mod",
+
+      "separator.order_notifications.label": "Notifications d'ordres",
+      "order_notifications.{}": {
+        "label": "Notifications d'ordres",
+        "hint": "Active les notifications liées au statut de vos ordres du Bazaar.",
+        "outbid.{}": {
+          "label": "Ordre surenchéri",
+          "hint": "Configure la notification affichée lorsque votre ordre est surenchéri."
+        },
+        "filled.{}": {
+          "label": "Ordre rempli",
+          "hint": "Configure la notification affichée lorsque votre ordre est rempli."
+        }
+      },
+
+      "notification.{}": {
+        "enabled.{}": {
+          "label": "Activé",
+          "hint": "Si la notification sera produite."
+        },
+        "auto_open_bazaar.label": "Ouvrir le Bazaar automatiquement",
+        "emit_chat_message.label": "Envoyer un message dans le chat",
+        "emit_client_sound.label": "Jouer un son côté client"
+      }
+    },
+
+    "advanced.{}": {
+      "category.label": "Paramètres avancés",
+      "category.hint": "Réglages avancés des routines et fonctionnalités du mod",
+      "auto_update.{}": {
+        "label": "Mise à jour automatique",
+        "hint": "Met automatiquement le mod à jour lorsqu'une mise à jour est trouvée."
+      }
+    },
+
+    "developer.{}": {
+      "category.label": "Configuration développeur",
+      "category.hint": "Réglages développeur et outils activables du mod",
+      "enabled.{}": {
+        "label": "Activé",
+        "hint": "Interrupteur global pour toutes les fonctionnalités et utilitaires de développement."
+      },
+      "disable_error_notifications.label": "Désactiver les notifications d'erreur",
+      "debug_messages.{}": {
+        "label": "Messages de débogage",
+        "hint": "Configure les messages de débogage envoyés dans le chat concernant les routines et l'état du mod"
+      }
+    }
+  }
+}
