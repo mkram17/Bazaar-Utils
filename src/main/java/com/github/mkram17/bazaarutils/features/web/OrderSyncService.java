@@ -58,6 +58,16 @@ public final class OrderSyncService extends BUListener {
     /** How long to stop trying after a 402. The subscription will not come back within seconds. */
     private static final long ENTITLEMENT_BACKOFF_MILLIS = Duration.ofHours(1).toMillis();
 
+    /**
+     * Said when a link is good but nothing will sync under it.
+     *
+     * <p>Shared with {@link com.github.mkram17.bazaarutils.utils.web.AccountLinker} so linking
+     * without a subscription and syncing without one describe the same state the same way. It
+     * deliberately does not mention re-linking: the link is not the problem.</p>
+     */
+    public static final String ENTITLEMENT_MESSAGE = "Order syncing is paused: an active Bazaar Utils "
+            + "subscription is required to sync new orders. Your existing history stays available.";
+
     private final AtomicBoolean pending = new AtomicBoolean(false);
     private final AtomicBoolean inFlight = new AtomicBoolean(false);
 
@@ -66,6 +76,9 @@ public final class OrderSyncService extends BUListener {
 
     private volatile long blockedUntilMillis;
 
+    /** Whether the player has already been told syncing is paused for want of a subscription. */
+    private volatile boolean entitlementAnnounced;
+
     /**
      * Lifts the {@link #ENTITLEMENT_BACKOFF_MILLIS} pause and forgets the deduplication state.
      *
@@ -73,10 +86,16 @@ public final class OrderSyncService extends BUListener {
      * applies: without clearing them, subscribing and re-linking would still sit out the rest of
      * the hour, and the first snapshot under the new link could be skipped as a duplicate of one
      * pushed under the old one.</p>
+     *
+     * @param entitled what the website reported about the freshly linked account, or empty from a
+     *                 server that does not say. A known-unentitled link has already been explained
+     *                 in the link message itself, so the 402 the next push is certain to get must
+     *                 not repeat it — the player would see the same thing twice, seconds apart.
      */
-    public void onLinked() {
+    public void onLinked(Optional<Boolean> entitled) {
         blockedUntilMillis = 0;
         lastSentKey = null;
+        entitlementAnnounced = entitled.filter(value -> !value).isPresent();
         pending.set(true);
     }
 
@@ -147,7 +166,7 @@ public final class OrderSyncService extends BUListener {
                     // a dropped sync fixes itself the next time the orders page opens.
                     Util.logError("Order sync request failed", throwable);
                 } else {
-                    handleResponse(response, key);
+                    handleResponse(response, key, token.get());
                 }
             } finally {
                 inFlight.set(false);
@@ -155,7 +174,10 @@ public final class OrderSyncService extends BUListener {
         });
     }
 
-    private void handleResponse(JsonHttpClient.Response response, String key) {
+    /**
+     * @param token the token this response answers, which is not necessarily the one stored now
+     */
+    private void handleResponse(JsonHttpClient.Response response, String key, String token) {
         if (response.isSuccess()) {
             lastSentKey = key;
             Util.logMessage("Synced orders to the website: " + response.body());
@@ -164,21 +186,40 @@ public final class OrderSyncService extends BUListener {
         }
 
         switch (response.status()) {
-            // The token was revoked, or the account was unlinked from the website. Dropping it
-            // locally is what stops this from retrying forever against a dead credential.
+            // The token is no longer usable: unknown, superseded by a newer install, or the
+            // account was unlinked. Dropping it locally is what stops this from retrying forever
+            // against a dead credential.
             case 401 -> {
+                // A rejection can outlive the link it was sent under — re-linking while a sync is
+                // in flight is exactly how, and the window is wide because onLinked() queues a
+                // push immediately. Clearing on a stale rejection would delete the link the player
+                // just made and tell them it had gone bad, while the website still shows it as
+                // connected.
+                if (!LinkStorage.isStoredToken(token)) {
+                    Util.logMessage("Ignoring a rejected sync for a token this install no longer "
+                            + "holds; the link was replaced or removed while the request was in flight.");
+
+                    return;
+                }
+
                 LinkStorage.clear();
                 lastSentKey = null;
-                notifyPlayer(Component.literal("Your Bazaar Utils website link is no longer valid. Run /bu link <code> to reconnect.")
-                        .withStyle(ChatFormatting.RED));
+                notifyPlayer(Component.literal(reconnectMessage(response)).withStyle(ChatFormatting.RED));
             }
 
-            // 402 is specifically "subscription lapsed", separated from 401 so it can say so.
+            // 402 is specifically "the link is fine, the subscription is not", separated from 401
+            // so it can say so — and so it does not throw away a working link.
             case 402 -> {
                 blockedUntilMillis = System.currentTimeMillis() + ENTITLEMENT_BACKOFF_MILLIS;
-                notifyPlayer(Component.literal(response.errorMessage()
-                                .orElse("An active Bazaar Utils subscription is required to sync orders."))
-                        .withStyle(ChatFormatting.RED));
+
+                // Said once per link rather than once per backoff window: the state does not
+                // change on its own, so repeating it only adds noise to a player who cannot act
+                // on it from in game.
+                if (!entitlementAnnounced) {
+                    entitlementAnnounced = true;
+                    notifyPlayer(Component.literal(response.errorMessage().orElse(ENTITLEMENT_MESSAGE))
+                            .withStyle(ChatFormatting.RED));
+                }
             }
 
             default -> Util.logError(
@@ -186,6 +227,26 @@ public final class OrderSyncService extends BUListener {
                     null
             );
         }
+    }
+
+    /**
+     * What to tell a player whose token was refused.
+     *
+     * <p>Keyed off the server's {@code reason} rather than its prose, so the text can name the
+     * actual cause. The old single message asserted the link had gone invalid, which was a guess:
+     * a 401 covers an unlinked account and a token superseded by another install just as much.</p>
+     */
+    private static String reconnectMessage(JsonHttpClient.Response response) {
+        String cause = switch (response.errorReason().orElse("")) {
+            case "unlinked" -> "This Minecraft account was unlinked from your Bazaar Utils account.";
+            case "revoked" -> "This install was disconnected because the account was linked somewhere else.";
+            case "unknown_token" -> "This install is no longer linked to a Bazaar Utils account.";
+            // Older server, or a reason this build does not know. Describe the symptom and stop
+            // short of naming a cause, rather than inventing one.
+            default -> "The website would not accept your Bazaar Utils link.";
+        };
+
+        return cause + " Run /bu link <code> to reconnect.";
     }
 
     /**

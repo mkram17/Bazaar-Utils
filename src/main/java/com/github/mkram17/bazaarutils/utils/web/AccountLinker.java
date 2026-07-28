@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.web;
 
 import com.github.mkram17.bazaarutils.config.features.WebsiteConfig;
+import com.github.mkram17.bazaarutils.features.web.OrderSyncService;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -150,18 +151,39 @@ public final class AccountLinker {
 
         LinkStorage.store(token, uuid, username);
 
+        // Empty from a server that does not report it, which is not the same as "not entitled" —
+        // an unknown answer keeps the ordinary message rather than warning about a subscription
+        // the account may well have.
+        Optional<Boolean> entitled = link.map(BazaarUtilsApi.ConfirmedLink::entitled);
+
         // Clears the entitlement backoff and the last-sent payload, both of which describe a link
         // that no longer applies. Without it, buying a subscription and re-linking would still sit
         // out the rest of the hour a previous 402 imposed.
         if (BazaarUtilsModules.OrderSyncService != null) {
-            BazaarUtilsModules.OrderSyncService.onLinked();
+            BazaarUtilsModules.OrderSyncService.onLinked(entitled);
         }
 
         notifyPlayer(Component.literal("Linked as " + username + "! ").withStyle(ChatFormatting.GREEN)
-                .append(Component.literal(WebsiteConfig.SYNC_ORDERS_TOGGLE
-                                ? "Your orders will sync whenever you open the Manage Orders menu."
-                                : "Turn on Website Sync in the settings to start syncing your orders.")
-                        .withStyle(ChatFormatting.GRAY)));
+                .append(Component.literal(followUp(entitled)).withStyle(ChatFormatting.GRAY)));
+    }
+
+    /**
+     * What happens next, now that the account is linked.
+     *
+     * <p>A link with no active subscription succeeds and then syncs nothing. Saying so here is the
+     * whole point: the alternative is promising orders will sync and letting the player discover
+     * otherwise from a refused push seconds later, which reads as the link itself having broken.</p>
+     */
+    private static String followUp(Optional<Boolean> entitled) {
+        if (!WebsiteConfig.SYNC_ORDERS_TOGGLE) {
+            return "Turn on Website Sync in the settings to start syncing your orders.";
+        }
+
+        if (entitled.filter(value -> !value).isPresent()) {
+            return OrderSyncService.ENTITLEMENT_MESSAGE;
+        }
+
+        return "Your orders will sync whenever you open the Manage Orders menu.";
     }
 
     private static void handleFailure(Throwable throwable) {

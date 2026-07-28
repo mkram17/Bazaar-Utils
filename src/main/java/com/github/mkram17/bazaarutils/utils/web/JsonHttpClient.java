@@ -117,7 +117,20 @@ public final class JsonHttpClient {
             return as(ApiError.class).map(ApiError::error).filter(message -> !message.isBlank());
         }
 
-        private record ApiError(String error) {}
+        /**
+         * The API's machine-readable {@code reason} for a failure, where it sends one.
+         *
+         * <p>Separate from {@link #errorMessage()} because the two answer different questions.
+         * The message is what to show; the reason is what to <em>do</em> — a lapsed subscription
+         * and a revoked token both arrive as a failed sync, but only one of them means the stored
+         * token should be thrown away. Absent from older server versions, so every caller needs a
+         * path for empty.</p>
+         */
+        public Optional<String> errorReason() {
+            return as(ApiError.class).map(ApiError::reason).filter(reason -> !reason.isBlank());
+        }
+
+        private record ApiError(String error, String reason) {}
     }
 
     /**
