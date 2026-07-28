@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
-import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
 import com.github.mkram17.bazaarutils.events.minecraft.ReplaceItemEvent;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.StateItemGroup;
 import net.minecraft.world.item.Item;
@@ -20,16 +19,20 @@ public interface ItemButton {
     int getSlotIndex();
     ItemRef getItemRef();
 
-    default Item resolveItem() {
+    default ItemStack resolveStack() {
         return switch (getItemRef()) {
-            case ItemRef.Direct(Item item) -> item;
+            case ItemRef.Direct(Item item) -> new ItemStack(item);
             case ItemRef.ById(var id) -> resolveId(id.get());
-            case ItemRef.Stateful<?> stateful -> resolveStateful(stateful);
+            case ItemRef.Stateful<?> stateful -> resolveStatefulStack(stateful);
         };
     }
 
     default ItemStack getReplacementItem(int size) {
-        return new ItemStack(resolveItem(), size);
+        var stack = resolveStack();
+
+        stack.setCount(size);
+
+        return stack;
     }
 
     default ItemStack getReplacementItem() {
@@ -44,25 +47,25 @@ public interface ItemButton {
         return !event.isInPlayerInventory() && event.getSlot().getContainerSlot() == getSlotIndex();
     }
 
-    private static Item resolveId(String rawId) {
-        Item resolved = ResourcefulConfigItems.resolve(rawId);
+    private static ItemStack resolveId(String rawId) {
+        ItemStack resolved = ItemsRepo.resolve(rawId);
 
-        return resolved != null ? resolved : DEFAULT_ITEM;
+        return resolved != null ? resolved : DEFAULT_ITEM.getDefaultInstance();
     }
 
-    private static <S> Item resolveStateful(ItemRef.Stateful<S> stateful) {
-        Item resolved = stateful.source()
+    private static <S> ItemStack resolveStatefulStack(ItemRef.Stateful<S> stateful) {
+        ItemStack resolved = stateful.source()
                 .map(source -> switch (source) {
-                    case ItemRef.Direct(Item item) -> item;
+                    case ItemRef.Direct(Item item) -> new ItemStack(item);
                     case ItemRef.ById(var id) -> resolveId(id.get());
                     case ItemRef.Stateful<?> ignored -> throw new IllegalStateException("Stateful ItemRef cannot nest another Stateful as its source");
                 })
-                .orElse(DEFAULT_ITEM);
+                .orElse(new ItemStack(DEFAULT_ITEM));
 
         S state = stateful.state().get();
 
         for (StateItemGroup<S> group : stateful.groups()) {
-            if (group.contains(resolved)) return group.forState(state, resolved);
+            if (group.contains(resolved.getItem())) return new ItemStack(group.forState(state, resolved.getItem()));
         }
 
         return resolved;

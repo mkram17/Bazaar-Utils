@@ -1,10 +1,10 @@
 package com.github.mkram17.bazaarutils.config.util.client.components.options.types;
 
-import com.github.mkram17.bazaarutils.config.util.api.ResourcefulConfigItems;
 import com.github.mkram17.bazaarutils.config.util.client.components.options.AbstractSelectorOverlay;
 import com.github.mkram17.bazaarutils.config.util.client.components.options.SelectorOptionWidget;
 import com.github.mkram17.bazaarutils.config.util.client.components.options.types.selector.ContainerCell;
 import com.github.mkram17.bazaarutils.config.util.client.components.options.types.selector.ItemCell;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsRepo;
 import com.teamresourceful.resourcefulconfig.client.components.ModSprites;
 import com.teamresourceful.resourcefulconfig.client.components.options.text.TextBox;
 import com.teamresourceful.resourcefulconfig.client.utils.ListenableState;
@@ -14,14 +14,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +27,11 @@ import java.util.function.Supplier;
 public class ItemOptionWidget extends SelectorOptionWidget {
     protected static final Component SEARCH = Component.translatable("bazaarutils.rconfig.ui.constant.search");
 
-    private final List<Item> items;
+    private final List<ItemStack> items;
     private final Supplier<String> getter;
     private final Consumer<String> setter;
 
-    public ItemOptionWidget(List<Item> items, Supplier<String> getter, Consumer<String> setter) {
+    public ItemOptionWidget(List<ItemStack> items, Supplier<String> getter, Consumer<String> setter) {
         super(ModSprites.BUTTON, SELECT);
         this.items = items;
         this.getter = getter;
@@ -46,10 +42,10 @@ public class ItemOptionWidget extends SelectorOptionWidget {
     protected void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.renderContents(context, mouseX, mouseY, delta);
 
-        Item item = ResourcefulConfigItems.resolve(getter.get());
+        ItemStack stack = ItemsRepo.resolve(getter.get());
 
-        if (item != null) {
-            context.renderItem(new ItemStack(item), getX(), getY());
+        if (stack != null) {
+            context.renderItem(stack, getX(), getY());
         }
     }
 
@@ -72,8 +68,8 @@ public class ItemOptionWidget extends SelectorOptionWidget {
 
         private final Consumer<String> setter;
 
-        private final List<Item> allItems;
-        private List<Item> filteredItems;
+        private final List<ItemStack> allItems;
+        private List<ItemStack> filteredItems;
 
         private int scrollOffset = 0;
 
@@ -119,16 +115,16 @@ public class ItemOptionWidget extends SelectorOptionWidget {
                 int itemIndex = startIndex + i;
                 if (itemIndex >= filteredItems.size()) break;
 
-                Item item = filteredItems.get(itemIndex);
+                ItemStack stack = filteredItems.get(itemIndex);
                 int col = i % GRID_COLS;
                 int row = i / GRID_COLS;
 
                 ItemCell cell = new ItemCell(
                         startX + col * ContainerCell.CELL_SIZE,
                         startY + row * ContainerCell.CELL_SIZE,
-                        item,
+                        stack,
                         selected -> {
-                            this.setter.accept(BuiltInRegistries.ITEM.getKey(selected).toString());
+                            this.setter.accept(ItemsRepo.identify(selected));
                             onClose();
                         }
                 );
@@ -141,11 +137,11 @@ public class ItemOptionWidget extends SelectorOptionWidget {
             String q = query.toLowerCase().trim();
             scrollOffset = 0;
 
-            filteredItems = allItems.stream().filter(item -> {
+            filteredItems = allItems.stream().filter(stack -> {
                 if (q.isEmpty()) return true;
 
-                String name = item.getName(new ItemStack(item)).getString().toLowerCase();
-                String key = BuiltInRegistries.ITEM.getKey(item).toString().toLowerCase();
+                String name = stack.getHoverName().getString().toLowerCase();
+                String key = ItemsRepo.identify(stack).toLowerCase();
 
                 return name.contains(q) || key.contains(q);
             }).toList();

@@ -4,6 +4,7 @@ import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsRepo;
 import com.github.mkram17.bazaarutils.utils.update.UpdateUtil;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
@@ -85,6 +86,8 @@ public class BazaarUtils implements ClientModInitializer {
         // The repo-status event is posted from repolib's async worker thread; marshal onto the
         // client thread before touching the (unsynchronized) event bus and command registration.
         Minecraft.getInstance().execute(() -> {
+            ItemsRepo.buildSkyBlockItemsCache();
+
             BazaarUtilsLateInitModules.init();
             UpdateUtil.checkForUpdates();
         });
