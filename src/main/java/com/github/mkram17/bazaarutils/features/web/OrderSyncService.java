@@ -44,6 +44,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *   <li>an identical payload is never re-sent, so idling on the orders page costs nothing;</li>
  *   <li>only one request is ever in flight.</li>
  * </ul>
+ *
+ * <p>A snapshot that could not describe every order is flagged {@code partial}, which tells the
+ * server not to read the gaps as orders that left the Bazaar. Absence is the only close signal
+ * there is, so an unflagged partial snapshot closes live orders and the next sync re-opens them
+ * as new ones.</p>
  */
 @Module
 public final class OrderSyncService extends BUListener {
@@ -60,6 +65,20 @@ public final class OrderSyncService extends BUListener {
     private volatile String lastSentKey;
 
     private volatile long blockedUntilMillis;
+
+    /**
+     * Lifts the {@link #ENTITLEMENT_BACKOFF_MILLIS} pause and forgets the deduplication state.
+     *
+     * <p>Called after a successful link. Both pieces of state describe a link that no longer
+     * applies: without clearing them, subscribing and re-linking would still sit out the rest of
+     * the hour, and the first snapshot under the new link could be skipped as a duplicate of one
+     * pushed under the old one.</p>
+     */
+    public void onLinked() {
+        blockedUntilMillis = 0;
+        lastSentKey = null;
+        pending.set(true);
+    }
 
     /**
      * Runs at {@link Priority#LOW} — numerically after {@code OrderUpdater}'s {@code HIGH} — so the
@@ -106,7 +125,7 @@ public final class OrderSyncService extends BUListener {
         if (token.isEmpty()) return;
 
         Snapshot snapshot = collectSnapshot();
-        String body = BazaarUtilsApi.serializeOrderSync(snapshot.orders());
+        String body = BazaarUtilsApi.serializeOrderSync(snapshot.orders(), snapshot.partial());
         String key = session.get().dashlessUuid() + "|" + body;
 
         // The floor: sitting on the orders page must not cost a request every window.
@@ -116,7 +135,8 @@ public final class OrderSyncService extends BUListener {
 
         // Logged here rather than per order, so a broken order does not write a line every window.
         if (snapshot.dropped() > 0) {
-            Util.logMessage("Omitting %d order(s) from the website sync; they could not be fully parsed."
+            Util.logMessage(("Omitting %d order(s) from the website sync; they could not be fully "
+                    + "parsed. Marking the snapshot partial so the website does not treat them as closed.")
                     .formatted(snapshot.dropped()));
         }
 
@@ -168,20 +188,38 @@ public final class OrderSyncService extends BUListener {
         }
     }
 
-    /** What was collected, and how much of the order list did not survive the trip. */
-    private record Snapshot(List<OrderSnapshot> orders, int dropped) {}
+    /**
+     * What was collected, and whether it is the whole picture.
+     *
+     * @param dropped   orders that could not be described well enough to send
+     * @param truncated whether the list was cut short at {@link #MAX_ORDERS_PER_SYNC}
+     */
+    private record Snapshot(List<OrderSnapshot> orders, int dropped, boolean truncated) {
+        /**
+         * Whether the server must not read absence as "this order is gone".
+         *
+         * <p>Orders are parsed off item lore, so failing to describe one is a normal, transient
+         * outcome — but on the wire it is indistinguishable from an order that left the Bazaar.
+         * Saying so explicitly is what stops a parse failure from closing a live order and the
+         * sync after it re-opening the same order as a new row.</p>
+         */
+        boolean partial() {
+            return dropped > 0 || truncated;
+        }
+    }
 
     private static Snapshot collectSnapshot() {
         List<Order> orders = UserOrdersStorage.INSTANCE.get();
         List<OrderSnapshot> collected = new ArrayList<>();
         int dropped = 0;
+        boolean truncated = false;
 
         for (Order order : orders) {
             if (collected.size() >= MAX_ORDERS_PER_SYNC) {
-                // Never silently truncate: a capped sync would otherwise read as a complete one,
-                // and the server would close every order past the cap as vanished.
                 Util.logMessage("Order sync capped at %d orders; %d were not sent."
                         .formatted(MAX_ORDERS_PER_SYNC, orders.size() - MAX_ORDERS_PER_SYNC));
+
+                truncated = true;
 
                 break;
             }
@@ -195,7 +233,7 @@ public final class OrderSyncService extends BUListener {
             }
         }
 
-        return new Snapshot(collected, dropped);
+        return new Snapshot(collected, dropped, truncated);
     }
 
     /** Callbacks land on an HTTP worker; chat has to be written from the client thread. */
