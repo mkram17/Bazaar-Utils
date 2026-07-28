@@ -108,12 +108,27 @@ public final class BazaarUtilsApi {
      *
      * <p>Kept separate from {@link #syncOrders} so callers can compare the serialized form against
      * the last one they sent and skip an identical push.</p>
+     *
+     * @param partial whether this snapshot is known not to describe every live order. The server
+     *                closes anything missing from a <em>complete</em> snapshot, so an order the
+     *                mod merely failed to parse must not be sent as one that left the Bazaar.
      */
-    public static String serializeOrderSync(List<OrderSnapshot> orders) {
-        return WebJson.GSON.toJson(new OrderSyncRequest(orders));
+    public static String serializeOrderSync(List<OrderSnapshot> orders, boolean partial) {
+        return WebJson.GSON.toJson(new OrderSyncRequest(orders, partial));
     }
 
-    private record OrderSyncRequest(List<OrderSnapshot> orders) {}
+    /**
+     * @param partial set when this snapshot is known not to describe every live order — an order
+     *                that could not be parsed, or a list longer than the server accepts.
+     *
+     *                <p>It matters because absence is the server's only evidence that an order is
+     *                gone: anything missing from a complete snapshot gets closed. Without this
+     *                flag, an order the mod merely failed to <em>describe</em> looked exactly like
+     *                one that had left the Bazaar, so a transient parse failure closed a live
+     *                order and the next sync re-opened it as a new one. A partial snapshot updates
+     *                what it does mention and closes nothing.</p>
+     */
+    private record OrderSyncRequest(List<OrderSnapshot> orders, boolean partial) {}
 
     /**
      * Pushes an order snapshot. The account is resolved from the bearer token alone — the payload

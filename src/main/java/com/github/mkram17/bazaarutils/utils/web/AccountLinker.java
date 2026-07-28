@@ -1,6 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.web;
 
 import com.github.mkram17.bazaarutils.config.features.WebsiteConfig;
+import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.storage.LinkStorage;
@@ -148,6 +149,13 @@ public final class AccountLinker {
                 .orElseGet(session::username);
 
         LinkStorage.store(token, uuid, username);
+
+        // Clears the entitlement backoff and the last-sent payload, both of which describe a link
+        // that no longer applies. Without it, buying a subscription and re-linking would still sit
+        // out the rest of the hour a previous 402 imposed.
+        if (BazaarUtilsModules.OrderSyncService != null) {
+            BazaarUtilsModules.OrderSyncService.onLinked();
+        }
 
         notifyPlayer(Component.literal("Linked as " + username + "! ").withStyle(ChatFormatting.GREEN)
                 .append(Component.literal(WebsiteConfig.SYNC_ORDERS_TOGGLE
