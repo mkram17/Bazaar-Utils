@@ -82,9 +82,9 @@ public final class BazaarUtilsApi {
      * <p>The body carries no UUID. The username is sent only as the {@code hasJoined} lookup key;
      * the authoritative identity comes back from Mojang, via the website's response.</p>
      *
-     * <p>On success the response is <code>{ token, username, uuid }</code>. Failures answer 400
-     * (bad or expired code), 401 (Mojang could not verify the session), 409 (already linked), or
-     * 429 (rate limited), each with a player-readable {@code error} field.</p>
+     * <p>On success the response is <code>{ token, username, uuid, entitled }</code>. Failures
+     * answer 400 (bad or expired code), 401 (Mojang could not verify the session), 409 (already
+     * linked), or 429 (rate limited), each with a player-readable {@code error} field.</p>
      */
     public static CompletableFuture<JsonHttpClient.Response> confirmLink(String normalizedCode, String username) {
         String body = WebJson.GSON.toJson(new LinkConfirmRequest(normalizedCode, username));
@@ -100,8 +100,15 @@ public final class BazaarUtilsApi {
      * <p>The UUID and username here are the ones Mojang returned from {@code hasJoined}, not
      * anything the mod sent. Every component can be null if the response shape ever changes, so
      * callers must check rather than trust.</p>
+     *
+     * @param entitled whether the linked website account can actually receive orders. A link
+     *                 succeeds without a subscription — nothing about it is wrong, it just will
+     *                 not sync — so this is what lets the mod say that up front instead of
+     *                 leaving the player to infer it from a refused push. {@code Boolean} rather
+     *                 than {@code boolean} because a server that predates the field sends nothing,
+     *                 and "not sent" must not read as "not entitled".
      */
-    public record ConfirmedLink(String token, String username, String uuid) {}
+    public record ConfirmedLink(String token, String username, String uuid, Boolean entitled) {}
 
     /**
      * Serializes an order snapshot into the sync request body.
@@ -134,8 +141,13 @@ public final class BazaarUtilsApi {
      * Pushes an order snapshot. The account is resolved from the bearer token alone — the payload
      * deliberately carries no identity of its own.
      *
-     * <p>Answers 200 with <code>{ ok, opened, updated, closed }</code>, 401 when the token has
-     * been revoked or the account unlinked, or 402 when the owning subscription has lapsed.</p>
+     * <p>Answers 200 with <code>{ ok, opened, updated, closed }</code>, 401 when the token is no
+     * longer usable, or 402 when the link is fine but the owning subscription is not active.</p>
+     *
+     * <p>Both failures carry <code>{ error, reason }</code>. The {@code reason} is the one to
+     * branch on: {@code unknown_token}, {@code unlinked} and {@code revoked} all mean the stored
+     * token is dead, while {@code not_entitled} means it is perfectly good and re-linking would
+     * change nothing.</p>
      */
     public static CompletableFuture<JsonHttpClient.Response> syncOrders(String token, String body) {
         return JsonHttpClient.postJson(

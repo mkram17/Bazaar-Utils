@@ -60,6 +60,20 @@ public final class LinkStorage {
                 : Optional.empty();
     }
 
+    /**
+     * Whether {@code token} is still the one this install holds.
+     *
+     * <p>The guard for responses that outlive the link they were sent under. A request carries its
+     * token, not a reference to storage, so a rejection can land after the player has already
+     * re-linked — and acting on it would clear a link that is perfectly good, with a chat message
+     * saying the opposite.</p>
+     */
+    public static boolean isStoredToken(String token) {
+        LinkData data = INSTANCE.get();
+
+        return isLinked() && data.token.equals(token);
+    }
+
     public static Optional<String> linkedUsername() {
         LinkData data = INSTANCE.get();
 
