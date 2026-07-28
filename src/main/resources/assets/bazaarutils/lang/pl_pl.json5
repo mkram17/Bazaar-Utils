@@ -1,0 +1,429 @@
+{
+  "owo:extended_lang": true,
+
+  "bazaarutils.ref.{}": {
+    "instant_sell": [{
+      "text": "Instant Sell",
+      "color": "green"
+    }],
+
+    "booster_cookie": [{
+      "text": "Booster Cookie",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Booster Cookie\n", "color": "light_purple", "bold": true },
+          { "text": "Daje dostęp do API zleceń Bazaaru\noraz innych bonusów SkyBlocka.\n\n", "color": "gray" },
+          { "text": "↗ Kliknij, aby otworzyć wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Booster_Cookie"
+      }
+    }],
+
+    "bazaar_flipper": [{
+      "text": "Bazaar Flipper",
+      "color": "gold",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Bazaar Flipper\n", "color": "gold", "bold": true },
+          { "text": "Ulepszenie konta, które zmniejsza podatek\ni zwiększa limit aktywnych zleceń.\n\n", "color": "gray" },
+          { "text": "↗ Kliknij, aby otworzyć wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Bazaar_Flipper"
+      }
+    }],
+
+    "elizabeth": [{
+      "text": "Elizabeth",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Elizabeth\n", "color": "light_purple", "bold": true },
+          { "text": "NPC w ", "color": "gray" },
+          { "text": "Community Center", "color": "gray" },
+          { "text": " na SkyBlock Hubie.\n", "color": "gray" },
+          { "text": "Sprzedaje ulepszenia konta za Gemy.\n\n", "color": "gray" },
+          { "text": "↗ Kliknij, aby otworzyć wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Elizabeth"
+      }
+    }],
+
+    "community_center": [{ "text": "Community Center", "color": "aqua" }],
+    "skyblock_hub": [{ "text": "SkyBlock Hub", "color": "aqua" }]
+  },
+
+  "mod.bazaarutils": "Bazaar Utils",
+  "key.category.minecraft.bazaarutils": "Bazaar Utils",
+
+  "bazaarutils.rconfig.ui.{}": {
+    "constant.{}": {
+      "search": "Szukaj...",
+      "select": "Wybierz"
+    }
+  },
+
+  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
+    "not_upgraded.label": "Brak ulepszenia",
+    "first_tier.label": "Bazaar Flipper I",
+    "second_tier.label": "Bazaar Flipper II"
+  },
+
+  "bazaarutils.config.{}": {
+
+    "separator.introductory.label": "Witaj w Bazaar Utils!",
+    "separator.introductory.hint": "Dziękujemy za zainstalowanie Bazaar Utils! Ten mod dodaje udogodnienia dla Bazaaru na Hypixelu.",
+
+    "bazaar_flipper_account_upgrade.{}": {
+      "label": "Ulepszenie konta Bazaar Flipper",
+      "hint": [
+        "Poziom twojego ulepszenia konta ", { "translate": "bazaarutils.ref.bazaar_flipper" },
+        ", który jest uwzględniany przy obliczaniu podatku i aktualnych limitów zleceń.",
+        "\nPoziom Bazaar Flippera możesz podnieść, rozmawiając z ",
+        { "translate": "bazaarutils.ref.elizabeth" }, " w ",
+        { "translate": "bazaarutils.ref.community_center" }, " na ",
+        { "translate": "bazaarutils.ref.skyblock_hub" }, "."
+      ]
+    },
+
+    "chat.{}": {
+      "category.label": "Czat",
+      "category.hint": "Ustawienia funkcji czatu w tym modzie",
+
+      "separator.useless_bazaar_notifications_remover.label": "Zbędne powiadomienia Bazaaru",
+      "useless_bazaar_notifications_remover.{}": {
+        "label": "Zbędne powiadomienia Bazaaru",
+        "hint": "Usuwa wybrane tymczasowe wiadomości wysyłane na czat podczas korzystania z Bazaaru, aby ograniczyć bałagan.",
+        "excluded_notifications.{}": {
+          "label": "Wykluczone powiadomienia",
+          "hint": "Lista wiadomości i powiadomień blokowanych na czacie."
+        }
+      },
+
+      "separator.stash_messages_remover.label": "Wiadomości o schowku",
+      "stash_messages_remover.{}": {
+        "label": "Wiadomości o schowku",
+        "hint": "Usuwa wiadomości z czatu przypominające o odebraniu przedmiotów ze schowka (stash)."
+      }
+    },
+
+    "buttons.{}": {
+      "category.label": "Przyciski",
+      "category.hint": "Ustawienia przycisków dodawanych i obsługiwanych przez mod",
+
+      "separator.mod_buttons.{}": {
+        "label": "Przyciski moda",
+        "hint": "Dodaje przyciski do ekranów ekwipunku dla szybkiego dostępu do funkcji moda."
+      },
+
+      "open_settings.{}": {
+        "label": "Przycisk ustawień moda",
+        "hint": "Dodaje do wybranych menu przycisk szybkiego dostępu do ustawień moda."
+      },
+
+      "open_orders.{}": {
+        "label": "Przycisk strony zleceń",
+        "hint": [
+          "Dodaje do wybranych menu przycisk szybkiego dostępu do strony twoich zleceń.",
+          "\n\nWymaga aktywnego ", { "translate": "bazaarutils.ref.booster_cookie" }, "."
+        ]
+      },
+
+      "separator.container_buttons.{}": {
+        "label": "Przyciski w kontenerach",
+        "hint": "Dodaje pomocnicze przyciski do wybranych interfejsów kontenerów."
+      },
+
+      "cancel_order_and_search.{}": {
+        "label": "Przycisk Anuluj i szukaj",
+        "hint": "Dodaje na stronach niezrealizowanych zleceń/ofert przycisk, który anuluje zlecenie i od razu wyszukuje ten przedmiot ponownie."
+      },
+
+      "button.{}": {
+        "widget.{}": {
+          "enabled.{}": {
+            "label": "Włączony",
+            "hint": "Czy przycisk będzie włączony."
+          },
+          "size.label": "Rozmiar przycisku",
+          "spacing.label": "Odstęp"
+        },
+        "container.{}": {
+          "enabled.{}": {
+            "label": "Włączony",
+            "hint": "Czy przycisk będzie włączony."
+          },
+          "item_id.{}": {
+            "label": "Przedmiot",
+            "hint": "Przedmiot, który zostanie umieszczony jako przycisk."
+          },
+          "slot_index.{}": {
+            "label": "Numer slotu",
+            "hint": "Slot kontenera, w którym zostanie umieszczony przycisk."
+          },
+          "amount_strategy.{}": {
+            "label": "Strategia ilości",
+            "hint": "Strategia obliczania wartości ilości.\n\nMAX: Zleci maksymalną ilość, jaką możesz zlecić przy danej akcji (instant, zlecenie).\nFIXED: Zleci ilość ustawioną poniżej."
+          },
+          "pricing_position.{}": {
+            "label": "Pozycja cenowa",
+            "hint": "Strategia obliczania ceny oferowanej za przedmiot\n\nCOMPETITIVE: Oferta będzie o +0,1 wyższa od najlepszej obecnej oferty na rynku\nMATCHED: Oferta będzie równa najlepszej obecnej ofercie na rynku\nOUTBID: Oferta będzie o -0,1 niższa od najlepszej obecnej oferty na rynku"
+          },
+          "fixed_amount.{}": {
+            "label": "Stała ilość",
+            "hint": "Ilość, która zostanie użyta, jeśli jako strategię ilości ustawiono FIXED."
+          }
+        }
+      },
+
+      "bookmarks.{}": {
+        "category.label": "Zakładki",
+
+        "separator.introductory.{}": {
+          "label": "Zakładki przedmiotów",
+          "hint": "Zakładki przedmiotów pozwalają szybko wyszukiwać wybrane przedmioty na Bazaarze."
+        },
+
+        "open_bookmark.{}": {
+          "label": "Otwórz zakładkę",
+          "hint": "Konfiguruje przycisk w wybranych menu, który szybko wyszukuje przedmiot z zakładki."
+        },
+
+        "toggle_bookmark.{}": {
+          "label": "Dodaj do zakładek",
+          "hint": "Dodaje na stronach przedmiotów przycisk przełączający, czy przedmiot jest w zakładkach dla szybkiego dostępu."
+        },
+
+        "reset_bookmarks.label": "Zapisane zakładki",
+        "reset_bookmarks.runnable": "Zresetuj"
+      },
+
+      "helpers.{}": {
+        "category.label": "Pomocniki wpisywania",
+
+        "separator.buy_related.{}": {
+          "label": "Pomocniki kupna",
+          "hint": "Pomocniki pojawiające się podczas kupowania na Bazaarze. Skonfiguruj przyciski automatycznie uzupełniające ilości lub ceny przy natychmiastowym kupnie i składaniu zleceń kupna."
+        },
+
+        "instant_buy_amount.label": "Ilość natychmiastowego kupna",
+        "buy_order_amount.label": "Ilość zlecenia kupna",
+        "buy_order_price.label": "Cena zlecenia kupna",
+
+        "separator.sell_related.{}": {
+          "label": "Pomocniki sprzedaży",
+          "hint": "Pomocniki pojawiające się podczas sprzedawania na Bazaarze. Skonfiguruj przyciski automatycznie uzupełniające ilości lub ceny przy składaniu ofert sprzedaży i flipowaniu zleceń."
+        },
+
+        "flip_order_price.label": "Cena flipowania zlecenia",
+        "sell_offer_amount.label": "Ilość oferty sprzedaży",
+        "sell_offer_price.label": "Cena oferty sprzedaży"
+      }
+    },
+
+    "inventory.{}": {
+      "category.label": "Ekwipunek",
+      "category.hint": "Ustawienia funkcji ekwipunku w tym modzie",
+
+      "separator.instant_sell_highlight.label": "Podświetlenie Instant Sell",
+      "instant_sell_highlight.{}": {
+        "label": "Podświetlenie Instant Sell",
+        "hint": [
+          "Podświetla w ekwipunku przedmioty, które zostałyby sprzedane przyciskiem Instant Sell."
+        ],
+        "color.label": "Kolor podświetlenia"
+      },
+
+      "separator.order_status_highlight.label": "Podświetlenie statusu zleceń",
+      "order_status_highlight.{}": {
+        "label": "Podświetlenie statusu zleceń",
+        "hint": "Pokazuje status twoich zleceń na Bazaarze, kolorując przedmioty odpowiednimi barwami.",
+
+        "competitive_color.{}": {
+          "label": "Kolor najlepszej oferty",
+          "hint": "Kolor podświetlenia zleceń, które są obecnie najlepszą ofertą na rynku."
+        },
+
+        "matched_color.{}": {
+          "label": "Kolor oferty równej rynkowi",
+          "hint": "Kolor podświetlenia zleceń zgodnych z obecną ceną rynkową."
+        },
+
+        "outbid_color.{}": {
+          "label": "Kolor przebitej oferty",
+          "hint": "Kolor podświetlenia zleceń, które zostały przebite."
+        }
+      },
+
+      "restrictions.{}": {
+        "separator.introductory.{}": {
+          "label": "Ograniczenia ekwipunku"
+        },
+
+        "category.label": "Ograniczenia ekwipunku",
+
+        "enabled.{}": {
+          "label": "Ograniczenia ekwipunku",
+          "hint": "Blokuje wybrane przyciski Bazaaru na podstawie kryteriów ekwipunku lub akcji, aby zapobiec przypadkowym operacjom rynkowym."
+        },
+
+        "features.{}": {
+          "label": "Ograniczone przyciski",
+          "hint": "Przyciski ekwipunku, dla których ograniczenia są włączone.",
+
+          "target.{}": {
+            "instant_sell.label": "Instant Sell",
+            "sell_sacks.label": "Sell Sacks"
+          }
+        },
+
+        "clicks_required.{}": {
+          "label": "Wymagane kliknięcia",
+          "hint": "Liczba kliknięć przycisku funkcji wymagana do potwierdzenia akcji."
+        },
+
+        "separator.rules_informational.{}": {
+          "label": "Reguły ograniczeń",
+          "hint": "Zarządzaj regułami sprawdzanymi przez funkcję ograniczeń"
+        },
+
+        "numeric_restrictions.{}": {
+          "label": "Warunki liczbowe",
+          "hint": "Reguły sprawdzające warunki liczbowe (np. łączną liczbę przedmiotów lub monet), aby ograniczyć wybrane akcje."
+        },
+
+        "string_restrictions.{}": {
+          "label": "Warunki nazw",
+          "hint": "Reguły sprawdzające konkretne nazwy lub typy przedmiotów, aby ograniczyć wybrane akcje."
+        },
+
+        "control.{}": {
+          "targets.{}": {
+            "label": "Funkcje",
+            "hint": "Funkcje, dla których ta reguła jest aktywna."
+          },
+
+          "numeric.{}": {
+            "type.{}": {
+              "label": "Typ ograniczenia",
+              "hint": "Czy ograniczenie reaguje na łączną wartość w monetach, czy na liczbę przedmiotów."
+            },
+            "threshold.{}": {
+              "label": "Próg",
+              "hint": "Wartość, powyżej której ograniczenie zostanie uruchomione."
+            }
+          },
+
+          "name.{}": {
+            "value.{}": {
+              "label": "Nazwa przedmiotu",
+              "hint": "Nazwa przedmiotu, która uruchomi ograniczenie, jeśli wystąpi w akcji sprzedaży."
+            }
+          }
+        }
+      }
+    },
+
+    "overlays.{}": {
+      "category.label": "Nakładki",
+      "category.hint": "Ustawienia nakładek tworzonych przez mod",
+
+      "separator.price_charts.label": "Wykresy cen",
+      "price_charts.{}": {
+        "label": "Wykresy cen",
+        "hint": "Dodaje do podpowiedzi przedmiotów Bazaaru odnośnik do szybkiego podglądu wykresów cen rynkowych.",
+        "show_outside_bazaar.{}": {
+          "label": "Pokazuj poza Bazaarem",
+          "hint": "Czy wykresy cen mają być pokazywane w podpowiedziach poza menu Bazaaru."
+        }
+      },
+
+      "separator.bazaar_limits_visualizer.label": "Limity Bazaaru",
+      "bazaar_limits_visualizer.{}": {
+        "label": "Limity Bazaaru",
+        "hint": [
+          "Wyświetla status twojego dziennego limitu Bazaaru na ekranach Bazaaru.\n\nProfile są ograniczone do ",
+          {
+            "text": "15 000 000 000,00 monet",
+            "color": "gold",
+            "hover_event": {
+              "action": "show_text",
+              "value": [
+                { "text": "Dzienny limit Bazaaru\n", "color": "gold", "bold": true },
+                { "text": "Resetuje się o północy UTC.\n", "color": "gray" },
+                { "text": "Obowiązuje na profil, a nie na konto.", "color": "dark_gray", "italic": true }
+              ]
+            }
+          },
+          " w zleceniach/ofertach handlowych dziennie."
+        ],
+        "reset_limits.label": "Dzienne limity zleceń",
+        "reset_limits.runnable": "Zresetuj"
+      }
+    },
+
+    "notifications.{}": {
+      "category.label": "Powiadomienia",
+      "category.hint": "Ustawienia powiadomień wysyłanych przez mod",
+
+      "separator.order_notifications.label": "Powiadomienia o zleceniach",
+      "order_notifications.{}": {
+        "label": "Powiadomienia o zleceniach",
+        "hint": "Włącza powiadomienia dotyczące statusu twoich zleceń na Bazaarze.",
+        "outbid.{}": {
+          "label": "Zlecenie przebite",
+          "hint": "Konfiguruje powiadomienie pokazywane, gdy twoje zlecenie zostanie przebite."
+        },
+        "filled.{}": {
+          "label": "Zlecenie zrealizowane",
+          "hint": "Konfiguruje powiadomienie pokazywane, gdy twoje zlecenie zostanie zrealizowane."
+        }
+      },
+
+      "notification.{}": {
+        "enabled.{}": {
+          "label": "Włączone",
+          "hint": "Czy powiadomienie będzie wysyłane."
+        },
+        "auto_open_bazaar.label": "Automatycznie otwórz Bazaar",
+        "emit_chat_message.label": "Wyślij wiadomość na czat",
+        "emit_client_sound.label": "Odtwórz dźwięk"
+      }
+    },
+
+    "advanced.{}": {
+      "category.label": "Ustawienia zaawansowane",
+      "category.hint": "Zaawansowane ustawienia procedur i funkcji moda",
+      "auto_update.{}": {
+        "label": "Automatyczna aktualizacja",
+        "hint": "Automatycznie aktualizuje mod, gdy zostanie znaleziona nowa wersja."
+      }
+    },
+
+    "developer.{}": {
+      "category.label": "Ustawienia dewelopera",
+      "category.hint": "Ustawienia deweloperskie i przełączalne narzędzia moda",
+      "enabled.{}": {
+        "label": "Włączone",
+        "hint": "Główny przełącznik wszystkich funkcji i narzędzi deweloperskich."
+      },
+      "disable_error_notifications.label": "Wyłącz powiadomienia o błędach",
+      "debug_messages.{}": {
+        "label": "Wiadomości debugowania",
+        "hint": "Konfiguruje wiadomości debugowania wysyłane na czat, dotyczące procedur i stanu moda"
+      }
+    }
+  }
+}

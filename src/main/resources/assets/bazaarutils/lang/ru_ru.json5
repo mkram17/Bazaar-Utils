@@ -1,0 +1,429 @@
+{
+  "owo:extended_lang": true,
+
+  "bazaarutils.ref.{}": {
+    "instant_sell": [{
+      "text": "Instant Sell",
+      "color": "green"
+    }],
+
+    "booster_cookie": [{
+      "text": "Booster Cookie",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Booster Cookie\n", "color": "light_purple", "bold": true },
+          { "text": "Даёт доступ к API ордеров Bazaar\nи другим привилегиям SkyBlock.\n\n", "color": "gray" },
+          { "text": "↗ Нажмите, чтобы открыть вики", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Booster_Cookie"
+      }
+    }],
+
+    "bazaar_flipper": [{
+      "text": "Bazaar Flipper",
+      "color": "gold",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Bazaar Flipper\n", "color": "gold", "bold": true },
+          { "text": "Улучшение аккаунта, которое снижает налог\nи повышает лимит активных ордеров.\n\n", "color": "gray" },
+          { "text": "↗ Нажмите, чтобы открыть вики", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Bazaar_Flipper"
+      }
+    }],
+
+    "elizabeth": [{
+      "text": "Elizabeth",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Elizabeth\n", "color": "light_purple", "bold": true },
+          { "text": "NPC в ", "color": "gray" },
+          { "text": "Community Center", "color": "gray" },
+          { "text": " в SkyBlock Hub.\n", "color": "gray" },
+          { "text": "Продаёт улучшения аккаунта за Gems.\n\n", "color": "gray" },
+          { "text": "↗ Нажмите, чтобы открыть вики", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Elizabeth"
+      }
+    }],
+
+    "community_center": [{ "text": "Community Center", "color": "aqua" }],
+    "skyblock_hub": [{ "text": "SkyBlock Hub", "color": "aqua" }]
+  },
+
+  "mod.bazaarutils": "Bazaar Utils",
+  "key.category.minecraft.bazaarutils": "Bazaar Utils",
+
+  "bazaarutils.rconfig.ui.{}": {
+    "constant.{}": {
+      "search": "Поиск...",
+      "select": "Выбрать"
+    }
+  },
+
+  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
+    "not_upgraded.label": "Не улучшено",
+    "first_tier.label": "Bazaar Flipper I",
+    "second_tier.label": "Bazaar Flipper II"
+  },
+
+  "bazaarutils.config.{}": {
+
+    "separator.introductory.label": "Добро пожаловать в Bazaar Utils!",
+    "separator.introductory.hint": "Спасибо за установку Bazaar Utils! Этот мод добавляет удобные функции для Bazaar на Hypixel.",
+
+    "bazaar_flipper_account_upgrade.{}": {
+      "label": "Улучшение аккаунта Bazaar Flipper",
+      "hint": [
+        "Уровень вашего улучшения аккаунта ", { "translate": "bazaarutils.ref.bazaar_flipper" },
+        ", который учитывается при расчёте налога и текущих лимитов ордеров.",
+        "\nПовысить уровень Bazaar Flipper можно, поговорив с ",
+        { "translate": "bazaarutils.ref.elizabeth" }, " в ",
+        { "translate": "bazaarutils.ref.community_center" }, " в ",
+        { "translate": "bazaarutils.ref.skyblock_hub" }, "."
+      ]
+    },
+
+    "chat.{}": {
+      "category.label": "Чат",
+      "category.hint": "Настройки чат-функций мода",
+
+      "separator.useless_bazaar_notifications_remover.label": "Бесполезные уведомления Bazaar",
+      "useless_bazaar_notifications_remover.{}": {
+        "label": "Бесполезные уведомления Bazaar",
+        "hint": "Удаляет отдельные временные сообщения, отправляемые в чат при взаимодействии с Bazaar, чтобы уменьшить захламление.",
+        "excluded_notifications.{}": {
+          "label": "Исключённые уведомления",
+          "hint": "Список сообщений и уведомлений, которые будут блокироваться в чате."
+        }
+      },
+
+      "separator.stash_messages_remover.label": "Сообщения о стеше",
+      "stash_messages_remover.{}": {
+        "label": "Сообщения о стеше",
+        "hint": "Удаляет сообщения в чате, напоминающие забрать предметы из стеша."
+      }
+    },
+
+    "buttons.{}": {
+      "category.label": "Кнопки",
+      "category.hint": "Настройки кнопок, добавляемых и обрабатываемых модом",
+
+      "separator.mod_buttons.{}": {
+        "label": "Кнопки мода",
+        "hint": "Добавляет кнопки на экраны инвентаря для быстрого доступа к функциям мода."
+      },
+
+      "open_settings.{}": {
+        "label": "Кнопка настроек мода",
+        "hint": "Добавляет в выбранные меню кнопку для быстрого доступа к настройкам мода."
+      },
+
+      "open_orders.{}": {
+        "label": "Кнопка страницы ордеров",
+        "hint": [
+          "Добавляет в выбранные меню кнопку для быстрого доступа к странице ваших ордеров.",
+          "\n\nТребуется активный ", { "translate": "bazaarutils.ref.booster_cookie" }, "."
+        ]
+      },
+
+      "separator.container_buttons.{}": {
+        "label": "Кнопки в контейнерах",
+        "hint": "Добавляет вспомогательные кнопки в отдельные интерфейсы контейнеров."
+      },
+
+      "cancel_order_and_search.{}": {
+        "label": "Кнопка «Отменить и найти»",
+        "hint": "Добавляет на страницы незавершённых ордеров/предложений кнопку, которая отменяет ордер и сразу же снова ищет этот предмет."
+      },
+
+      "button.{}": {
+        "widget.{}": {
+          "enabled.{}": {
+            "label": "Включено",
+            "hint": "Будет ли кнопка включена."
+          },
+          "size.label": "Размер кнопки",
+          "spacing.label": "Отступ"
+        },
+        "container.{}": {
+          "enabled.{}": {
+            "label": "Включено",
+            "hint": "Будет ли кнопка включена."
+          },
+          "item_id.{}": {
+            "label": "Предмет",
+            "hint": "Предмет, который будет размещён в качестве кнопки."
+          },
+          "slot_index.{}": {
+            "label": "Номер слота",
+            "hint": "Слот контейнера, в котором будет размещена кнопка."
+          },
+          "amount_strategy.{}": {
+            "label": "Стратегия количества",
+            "hint": "Стратегия расчёта количества.\n\nMAX: Закажет максимальное количество, доступное для данного действия (мгновенное, ордер).\nFIXED: Закажет количество, настроенное ниже."
+          },
+          "pricing_position.{}": {
+            "label": "Позиция цены",
+            "hint": "Стратегия расчёта цены ставки за предмет\n\nCOMPETITIVE: Ставка будет на +0,1 выше текущего лучшего предложения на рынке\nMATCHED: Ставка будет равна текущему лучшему предложению на рынке\nOUTBID: Ставка будет на -0,1 ниже текущего лучшего предложения на рынке"
+          },
+          "fixed_amount.{}": {
+            "label": "Фиксированное количество",
+            "hint": "Количество, которое будет использовано, если в качестве стратегии выбрано FIXED."
+          }
+        }
+      },
+
+      "bookmarks.{}": {
+        "category.label": "Закладки",
+
+        "separator.introductory.{}": {
+          "label": "Закладки предметов",
+          "hint": "Закладки предметов позволяют быстро искать нужные предметы на Bazaar."
+        },
+
+        "open_bookmark.{}": {
+          "label": "Открыть закладку",
+          "hint": "Настраивает кнопку в выбранных меню, которая быстро ищет предмет из закладок."
+        },
+
+        "toggle_bookmark.{}": {
+          "label": "Добавить в закладки",
+          "hint": "Добавляет на страницы предметов кнопку, переключающую нахождение предмета в закладках для быстрого доступа."
+        },
+
+        "reset_bookmarks.label": "Сохранённые закладки",
+        "reset_bookmarks.runnable": "Сбросить"
+      },
+
+      "helpers.{}": {
+        "category.label": "Помощники ввода",
+
+        "separator.buy_related.{}": {
+          "label": "Помощники покупки",
+          "hint": "Помощники, появляющиеся при покупке на Bazaar. Настройте кнопки для автозаполнения количества или цены при мгновенной покупке и создании ордеров на покупку."
+        },
+
+        "instant_buy_amount.label": "Количество мгновенной покупки",
+        "buy_order_amount.label": "Количество ордера на покупку",
+        "buy_order_price.label": "Цена ордера на покупку",
+
+        "separator.sell_related.{}": {
+          "label": "Помощники продажи",
+          "hint": "Помощники, появляющиеся при продаже на Bazaar. Настройте кнопки для автозаполнения количества или цены при создании предложений о продаже и флипе ордеров."
+        },
+
+        "flip_order_price.label": "Цена флипа ордера",
+        "sell_offer_amount.label": "Количество предложения о продаже",
+        "sell_offer_price.label": "Цена предложения о продаже"
+      }
+    },
+
+    "inventory.{}": {
+      "category.label": "Инвентарь",
+      "category.hint": "Настройки функций инвентаря в моде",
+
+      "separator.instant_sell_highlight.label": "Подсветка Instant Sell",
+      "instant_sell_highlight.{}": {
+        "label": "Подсветка Instant Sell",
+        "hint": [
+          "Подсвечивает в инвентаре предметы, которые будут проданы кнопкой Instant Sell."
+        ],
+        "color.label": "Цвет подсветки"
+      },
+
+      "separator.order_status_highlight.label": "Подсветка статуса ордеров",
+      "order_status_highlight.{}": {
+        "label": "Подсветка статуса ордеров",
+        "hint": "Показывает статус ваших ордеров на Bazaar, окрашивая предметы соответствующими цветами.",
+
+        "competitive_color.{}": {
+          "label": "Цвет лучшего предложения",
+          "hint": "Цвет подсветки для ордеров, которые сейчас являются лучшим предложением на рынке."
+        },
+
+        "matched_color.{}": {
+          "label": "Цвет совпадения с рынком",
+          "hint": "Цвет подсветки для ордеров, совпадающих с текущей рыночной ценой."
+        },
+
+        "outbid_color.{}": {
+          "label": "Цвет перебитой ставки",
+          "hint": "Цвет подсветки для ордеров, ставку по которым перебили."
+        }
+      },
+
+      "restrictions.{}": {
+        "separator.introductory.{}": {
+          "label": "Ограничения инвентаря"
+        },
+
+        "category.label": "Ограничения инвентаря",
+
+        "enabled.{}": {
+          "label": "Ограничения инвентаря",
+          "hint": "Блокирует выбранные кнопки Bazaar на основе условий инвентаря или действия, чтобы предотвратить случайные операции на рынке."
+        },
+
+        "features.{}": {
+          "label": "Ограниченные кнопки",
+          "hint": "Кнопки инвентаря, для которых включены ограничения.",
+
+          "target.{}": {
+            "instant_sell.label": "Instant Sell",
+            "sell_sacks.label": "Sell Sacks"
+          }
+        },
+
+        "clicks_required.{}": {
+          "label": "Требуется нажатий",
+          "hint": "Количество нажатий на кнопку функции, необходимое для подтверждения действия."
+        },
+
+        "separator.rules_informational.{}": {
+          "label": "Правила ограничений",
+          "hint": "Управление правилами, которые проверяет функция ограничений"
+        },
+
+        "numeric_restrictions.{}": {
+          "label": "Числовые условия",
+          "hint": "Правила, проверяющие числовые условия (например, общее количество предметов или монет), чтобы ограничить выбранные действия."
+        },
+
+        "string_restrictions.{}": {
+          "label": "Условия по названию",
+          "hint": "Правила, проверяющие конкретные названия или типы предметов, чтобы ограничить выбранные действия."
+        },
+
+        "control.{}": {
+          "targets.{}": {
+            "label": "Функции",
+            "hint": "Функции, для которых действует это правило."
+          },
+
+          "numeric.{}": {
+            "type.{}": {
+              "label": "Тип ограничения",
+              "hint": "Срабатывает ли ограничение по общей стоимости в монетах или по количеству предметов."
+            },
+            "threshold.{}": {
+              "label": "Порог",
+              "hint": "Значение, при превышении которого сработает ограничение."
+            }
+          },
+
+          "name.{}": {
+            "value.{}": {
+              "label": "Название предмета",
+              "hint": "Название предмета, которое вызовет ограничение, если оно присутствует в действии продажи."
+            }
+          }
+        }
+      }
+    },
+
+    "overlays.{}": {
+      "category.label": "Оверлеи",
+      "category.hint": "Настройки оверлеев, создаваемых модом",
+
+      "separator.price_charts.label": "Графики цен",
+      "price_charts.{}": {
+        "label": "Графики цен",
+        "hint": "Добавляет во всплывающие подсказки предметов Bazaar ссылку для быстрого перехода к графикам рыночных цен.",
+        "show_outside_bazaar.{}": {
+          "label": "Показывать вне Bazaar",
+          "hint": "Показывать ли графики цен в подсказках вне меню Bazaar."
+        }
+      },
+
+      "separator.bazaar_limits_visualizer.label": "Лимиты Bazaar",
+      "bazaar_limits_visualizer.{}": {
+        "label": "Лимиты Bazaar",
+        "hint": [
+          "Отображает состояние вашего дневного лимита Bazaar на экранах Bazaar.\n\nПрофили ограничены суммой ",
+          {
+            "text": "15 000 000 000,00 монет",
+            "color": "gold",
+            "hover_event": {
+              "action": "show_text",
+              "value": [
+                { "text": "Дневной лимит Bazaar\n", "color": "gold", "bold": true },
+                { "text": "Сбрасывается в полночь по UTC.\n", "color": "gray" },
+                { "text": "Действует на профиль, а не на аккаунт.", "color": "dark_gray", "italic": true }
+              ]
+            }
+          },
+          " в торгуемых ордерах/предложениях в день."
+        ],
+        "reset_limits.label": "Дневные лимиты ордеров",
+        "reset_limits.runnable": "Сбросить"
+      }
+    },
+
+    "notifications.{}": {
+      "category.label": "Уведомления",
+      "category.hint": "Настройки уведомлений, отправляемых модом",
+
+      "separator.order_notifications.label": "Уведомления об ордерах",
+      "order_notifications.{}": {
+        "label": "Уведомления об ордерах",
+        "hint": "Включает уведомления, связанные со статусом ваших ордеров на Bazaar.",
+        "outbid.{}": {
+          "label": "Ставку по ордеру перебили",
+          "hint": "Настраивает уведомление, показываемое, когда ставку по вашему ордеру перебили."
+        },
+        "filled.{}": {
+          "label": "Ордер выполнен",
+          "hint": "Настраивает уведомление, показываемое, когда ваш ордер выполнен."
+        }
+      },
+
+      "notification.{}": {
+        "enabled.{}": {
+          "label": "Включено",
+          "hint": "Будет ли создаваться уведомление."
+        },
+        "auto_open_bazaar.label": "Автоматически открывать Bazaar",
+        "emit_chat_message.label": "Отправлять сообщение в чат",
+        "emit_client_sound.label": "Воспроизводить звук на клиенте"
+      }
+    },
+
+    "advanced.{}": {
+      "category.label": "Расширенные настройки",
+      "category.hint": "Расширенные настройки процессов и функций мода",
+      "auto_update.{}": {
+        "label": "Автообновление",
+        "hint": "Автоматически обновлять мод при обнаружении обновления."
+      }
+    },
+
+    "developer.{}": {
+      "category.label": "Настройки разработчика",
+      "category.hint": "Настройки разработчика и переключаемые инструменты мода",
+      "enabled.{}": {
+        "label": "Включено",
+        "hint": "Общий переключатель для всех функций и утилит разработчика."
+      },
+      "disable_error_notifications.label": "Отключить уведомления об ошибках",
+      "debug_messages.{}": {
+        "label": "Отладочные сообщения",
+        "hint": "Настраивает отладочные сообщения в чате о процессах и состоянии мода"
+      }
+    }
+  }
+}

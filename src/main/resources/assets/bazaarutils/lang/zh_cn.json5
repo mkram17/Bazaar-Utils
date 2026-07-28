@@ -1,0 +1,429 @@
+{
+  "owo:extended_lang": true,
+
+  "bazaarutils.ref.{}": {
+    "instant_sell": [{
+      "text": "Instant Sell",
+      "color": "green"
+    }],
+
+    "booster_cookie": [{
+      "text": "Booster Cookie",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Booster Cookie\n", "color": "light_purple", "bold": true },
+          { "text": "可使用 Bazaar 订单 API，\n并获得其他 SkyBlock 特权。\n\n", "color": "gray" },
+          { "text": "↗ 点击打开 Wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Booster_Cookie"
+      }
+    }],
+
+    "bazaar_flipper": [{
+      "text": "Bazaar Flipper",
+      "color": "gold",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Bazaar Flipper\n", "color": "gold", "bold": true },
+          { "text": "一项账号升级，可降低交易税\n并提高你的活跃订单上限。\n\n", "color": "gray" },
+          { "text": "↗ 点击打开 Wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Bazaar_Flipper"
+      }
+    }],
+
+    "elizabeth": [{
+      "text": "Elizabeth",
+      "color": "light_purple",
+      "hover_event": {
+        "action": "show_text",
+        "value": [
+          { "text": "Elizabeth\n", "color": "light_purple", "bold": true },
+          { "text": "位于 SkyBlock Hub ", "color": "gray" },
+          { "text": "Community Center", "color": "gray" },
+          { "text": " 的 NPC。\n", "color": "gray" },
+          { "text": "使用 Gems 出售账号升级。\n\n", "color": "gray" },
+          { "text": "↗ 点击打开 Wiki", "color": "dark_gray", "italic": true }
+        ]
+      },
+      "click_event": {
+        "action": "open_url",
+        "url": "https://wiki.hypixel.net/Elizabeth"
+      }
+    }],
+
+    "community_center": [{ "text": "Community Center", "color": "aqua" }],
+    "skyblock_hub": [{ "text": "SkyBlock Hub", "color": "aqua" }]
+  },
+
+  "mod.bazaarutils": "Bazaar Utils",
+  "key.category.minecraft.bazaarutils": "Bazaar Utils",
+
+  "bazaarutils.rconfig.ui.{}": {
+    "constant.{}": {
+      "search": "搜索...",
+      "select": "选择"
+    }
+  },
+
+  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
+    "not_upgraded.label": "未升级",
+    "first_tier.label": "Bazaar Flipper I",
+    "second_tier.label": "Bazaar Flipper II"
+  },
+
+  "bazaarutils.config.{}": {
+
+    "separator.introductory.label": "欢迎使用 Bazaar Utils！",
+    "separator.introductory.hint": "感谢你安装 Bazaar Utils！本模组为 Hypixel Bazaar 提供了多项便利功能。",
+
+    "bazaar_flipper_account_upgrade.{}": {
+      "label": "Bazaar Flipper 账号升级",
+      "hint": [
+        "你的 ", { "translate": "bazaarutils.ref.bazaar_flipper" },
+        " 账号升级等级，会影响交易税的计算与当前的订单上限。",
+        "\n你可以前往 ",
+        { "translate": "bazaarutils.ref.skyblock_hub" }, " 的 ",
+        { "translate": "bazaarutils.ref.community_center" }, "，与 ",
+        { "translate": "bazaarutils.ref.elizabeth" }, " 对话来提升 Bazaar Flipper 等级。"
+      ]
+    },
+
+    "chat.{}": {
+      "category.label": "聊天",
+      "category.hint": "模组聊天功能的相关设置",
+
+      "separator.useless_bazaar_notifications_remover.label": "无用的 Bazaar 提示",
+      "useless_bazaar_notifications_remover.{}": {
+        "label": "无用的 Bazaar 提示",
+        "hint": "移除与 Bazaar 交互时发送到聊天栏的部分临时消息，减少刷屏。",
+        "excluded_notifications.{}": {
+          "label": "排除的提示",
+          "hint": "需要在聊天栏中屏蔽的消息与提示列表。"
+        }
+      },
+
+      "separator.stash_messages_remover.label": "Stash 提示消息",
+      "stash_messages_remover.{}": {
+        "label": "Stash 提示消息",
+        "hint": "移除提醒你从 Stash 中领取物品的聊天消息。"
+      }
+    },
+
+    "buttons.{}": {
+      "category.label": "按钮",
+      "category.hint": "模组添加与管理的按钮的相关设置",
+
+      "separator.mod_buttons.{}": {
+        "label": "模组按钮",
+        "hint": "在物品栏界面添加按钮，以便快速使用模组功能。"
+      },
+
+      "open_settings.{}": {
+        "label": "模组设置按钮",
+        "hint": "在指定菜单中添加一个按钮，用于快速打开模组设置。"
+      },
+
+      "open_orders.{}": {
+        "label": "订单页面按钮",
+        "hint": [
+          "在指定菜单中添加一个按钮，用于快速打开你的订单页面。",
+          "\n\n需要生效中的 ", { "translate": "bazaarutils.ref.booster_cookie" }, "。"
+        ]
+      },
+
+      "separator.container_buttons.{}": {
+        "label": "容器按钮",
+        "hint": "在特定的容器界面中添加辅助按钮。"
+      },
+
+      "cancel_order_and_search.{}": {
+        "label": "取消并搜索按钮",
+        "hint": "在未完成的订单/报价页面添加一个按钮，用于取消订单并立即重新搜索该物品。"
+      },
+
+      "button.{}": {
+        "widget.{}": {
+          "enabled.{}": {
+            "label": "启用",
+            "hint": "是否启用该按钮。"
+          },
+          "size.label": "按钮大小",
+          "spacing.label": "间距"
+        },
+        "container.{}": {
+          "enabled.{}": {
+            "label": "启用",
+            "hint": "是否启用该按钮。"
+          },
+          "item_id.{}": {
+            "label": "物品",
+            "hint": "将作为按钮放置的物品。"
+          },
+          "slot_index.{}": {
+            "label": "槽位编号",
+            "hint": "按钮将被放置的容器槽位。"
+          },
+          "amount_strategy.{}": {
+            "label": "数量策略",
+            "hint": "计算数量的策略。\n\nMAX：按当前操作（即时交易、挂单）所允许的最大数量下单。\nFIXED：按下方配置的数量下单。"
+          },
+          "pricing_position.{}": {
+            "label": "定价策略",
+            "hint": "计算每件物品出价的策略\n\nCOMPETITIVE：出价比当前市场最优报价高 0.1\nMATCHED：出价与当前市场最优报价相同\nOUTBID：出价比当前市场最优报价低 0.1"
+          },
+          "fixed_amount.{}": {
+            "label": "固定数量",
+            "hint": "当数量策略设置为 FIXED 时所使用的数量。"
+          }
+        }
+      },
+
+      "bookmarks.{}": {
+        "category.label": "书签",
+
+        "separator.introductory.{}": {
+          "label": "物品书签",
+          "hint": "物品书签可以让你在 Bazaar 中快速搜索指定物品。"
+        },
+
+        "open_bookmark.{}": {
+          "label": "打开书签",
+          "hint": "配置指定菜单中用于快速搜索书签物品的按钮。"
+        },
+
+        "toggle_bookmark.{}": {
+          "label": "收藏物品",
+          "hint": "在物品页面添加一个按钮，用于切换该物品是否被加入书签以便快速访问。"
+        },
+
+        "reset_bookmarks.label": "已保存的书签",
+        "reset_bookmarks.runnable": "重置"
+      },
+
+      "helpers.{}": {
+        "category.label": "输入助手",
+
+        "separator.buy_related.{}": {
+          "label": "购买助手",
+          "hint": "在 Bazaar 购买时出现的助手。可配置按钮，在即时购买或挂收购单时自动填写数量或价格。"
+        },
+
+        "instant_buy_amount.label": "即时购买数量",
+        "buy_order_amount.label": "收购订单数量",
+        "buy_order_price.label": "收购订单价格",
+
+        "separator.sell_related.{}": {
+          "label": "出售助手",
+          "hint": "在 Bazaar 出售时出现的助手。可配置按钮，在挂出售单或翻转订单时自动填写数量或价格。"
+        },
+
+        "flip_order_price.label": "翻转订单价格",
+        "sell_offer_amount.label": "出售订单数量",
+        "sell_offer_price.label": "出售订单价格"
+      }
+    },
+
+    "inventory.{}": {
+      "category.label": "物品栏",
+      "category.hint": "模组物品栏功能的相关设置",
+
+      "separator.instant_sell_highlight.label": "Instant Sell 高亮",
+      "instant_sell_highlight.{}": {
+        "label": "Instant Sell 高亮",
+        "hint": [
+          "高亮显示物品栏中会被 Instant Sell 按钮卖出的物品。"
+        ],
+        "color.label": "高亮颜色"
+      },
+
+      "separator.order_status_highlight.label": "订单状态高亮",
+      "order_status_highlight.{}": {
+        "label": "订单状态高亮",
+        "hint": "通过为物品染上对应颜色来显示你的 Bazaar 订单状态。",
+
+        "competitive_color.{}": {
+          "label": "最优报价颜色",
+          "hint": "当前为市场最优报价的订单所使用的高亮颜色。"
+        },
+
+        "matched_color.{}": {
+          "label": "持平报价颜色",
+          "hint": "与当前市场价格持平的订单所使用的高亮颜色。"
+        },
+
+        "outbid_color.{}": {
+          "label": "被超越报价颜色",
+          "hint": "已被他人超越报价的订单所使用的高亮颜色。"
+        }
+      },
+
+      "restrictions.{}": {
+        "separator.introductory.{}": {
+          "label": "物品栏限制"
+        },
+
+        "category.label": "物品栏限制",
+
+        "enabled.{}": {
+          "label": "物品栏限制",
+          "hint": "根据物品栏或操作条件锁定指定的 Bazaar 按钮，防止误操作交易。"
+        },
+
+        "features.{}": {
+          "label": "受限按钮",
+          "hint": "启用了限制的物品栏按钮。",
+
+          "target.{}": {
+            "instant_sell.label": "Instant Sell",
+            "sell_sacks.label": "Sell Sacks"
+          }
+        },
+
+        "clicks_required.{}": {
+          "label": "所需点击次数",
+          "hint": "确认该操作所需在功能按钮上点击的次数。"
+        },
+
+        "separator.rules_informational.{}": {
+          "label": "限制规则",
+          "hint": "管理限制功能所检查的规则"
+        },
+
+        "numeric_restrictions.{}": {
+          "label": "数值条件",
+          "hint": "检查数值条件（例如物品总数或金币总额）以限制目标操作的规则。"
+        },
+
+        "string_restrictions.{}": {
+          "label": "名称条件",
+          "hint": "检查特定物品名称或类型以限制目标操作的规则。"
+        },
+
+        "control.{}": {
+          "targets.{}": {
+            "label": "功能",
+            "hint": "该规则生效的功能。"
+          },
+
+          "numeric.{}": {
+            "type.{}": {
+              "label": "限制类型",
+              "hint": "限制是基于金币总价值触发，还是基于物品数量触发。"
+            },
+            "threshold.{}": {
+              "label": "阈值",
+              "hint": "超过该数值时将触发限制。"
+            }
+          },
+
+          "name.{}": {
+            "value.{}": {
+              "label": "物品名称",
+              "hint": "若出售操作中包含该物品名称，则会触发限制。"
+            }
+          }
+        }
+      }
+    },
+
+    "overlays.{}": {
+      "category.label": "覆盖层",
+      "category.hint": "模组创建的覆盖层的相关设置",
+
+      "separator.price_charts.label": "价格图表",
+      "price_charts.{}": {
+        "label": "价格图表",
+        "hint": "在 Bazaar 物品提示框中添加链接，便于快速查看市场价格图表。",
+        "show_outside_bazaar.{}": {
+          "label": "在 Bazaar 之外显示",
+          "hint": "在 Bazaar 菜单之外时，是否仍在提示框中显示价格图表。"
+        }
+      },
+
+      "separator.bazaar_limits_visualizer.label": "Bazaar 限额",
+      "bazaar_limits_visualizer.{}": {
+        "label": "Bazaar 限额",
+        "hint": [
+          "在 Bazaar 界面显示你的每日 Bazaar 限额状态。\n\n每个档案每天的可交易订单/报价上限为 ",
+          {
+            "text": "15,000,000,000.00 金币",
+            "color": "gold",
+            "hover_event": {
+              "action": "show_text",
+              "value": [
+                { "text": "每日 Bazaar 限额\n", "color": "gold", "bold": true },
+                { "text": "于 UTC 午夜重置。\n", "color": "gray" },
+                { "text": "按档案计算，而非按账号计算。", "color": "dark_gray", "italic": true }
+              ]
+            }
+          },
+          "。"
+        ],
+        "reset_limits.label": "每日订单限额",
+        "reset_limits.runnable": "重置"
+      }
+    },
+
+    "notifications.{}": {
+      "category.label": "通知",
+      "category.hint": "模组推送的通知的相关设置",
+
+      "separator.order_notifications.label": "订单通知",
+      "order_notifications.{}": {
+        "label": "订单通知",
+        "hint": "启用与你的 Bazaar 订单状态相关的通知。",
+        "outbid.{}": {
+          "label": "订单被超越报价",
+          "hint": "配置当你的订单被他人超越报价时显示的通知。"
+        },
+        "filled.{}": {
+          "label": "订单已完成",
+          "hint": "配置当你的订单完成时显示的通知。"
+        }
+      },
+
+      "notification.{}": {
+        "enabled.{}": {
+          "label": "启用",
+          "hint": "是否发出该通知。"
+        },
+        "auto_open_bazaar.label": "自动打开 Bazaar",
+        "emit_chat_message.label": "发送聊天消息",
+        "emit_client_sound.label": "播放客户端音效"
+      }
+    },
+
+    "advanced.{}": {
+      "category.label": "高级设置",
+      "category.hint": "模组流程与功能的高级设置",
+      "auto_update.{}": {
+        "label": "自动更新",
+        "hint": "在发现新版本时自动更新模组。"
+      }
+    },
+
+    "developer.{}": {
+      "category.label": "开发者设置",
+      "category.hint": "模组的开发者设置与可切换工具",
+      "enabled.{}": {
+        "label": "启用",
+        "hint": "所有开发者功能与工具的总开关。"
+      },
+      "disable_error_notifications.label": "禁用错误通知",
+      "debug_messages.{}": {
+        "label": "调试消息",
+        "hint": "配置发送到聊天栏的、关于模组流程与状态的调试消息"
+      }
+    }
+  }
+}
