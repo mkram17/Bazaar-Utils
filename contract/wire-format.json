@@ -14,11 +14,20 @@
     "  features/web/OrderSyncService.java  maxOrdersPerSync"
   ],
   "orderSync": {
+    "$comment": [
+      "pricingPosition used to be listed here. It is no longer sent: it is derived from",
+      "market data that moves every ~20s, so any value the mod put on the wire described",
+      "the market as of the last sync rather than now. The website reads the same public",
+      "Hypixel endpoint and derives it per request. The mod still computes it locally for",
+      "its own outbid chat alerts and inventory highlighting, which must work unlinked.",
+      "",
+      "The website still ACCEPTS the field, because installs in the wild keep sending it;",
+      "it is parsed and ignored rather than rejected."
+    ],
     "endpoint": "/api/orders/sync",
     "maxOrdersPerSync": 200,
     "sides": ["BUY", "SELL"],
     "statuses": ["SET", "FILLED"],
-    "pricingPositions": ["COMPETITIVE", "MATCHED", "OUTBID"],
     "maxProductIdLength": 128,
     "maxItemNameLength": 128,
     "maxProfileIdLength": 64,

@@ -1,3 +1,5 @@
+ - Orders now reach the website as soon as chat reports them. Placing, filling, claiming or cancelling an order, and `/bu orders remove`, all update the dashboard within a few seconds instead of waiting until you next open the Manage Orders menu.
+ - Outbid status on the dashboard is now worked out by the website from live bazaar data, so it stays current between syncs instead of being frozen at whatever it was the last time the mod uploaded. In-game outbid alerts are unchanged.
  - Added website account linking. Generate a code on the Bazaar Utils website, run `/bu link <code>` in game, and your bazaar orders show up on the dashboard. Run `/bu link` on its own to check whether this install is linked.
  - Added a Website Sync config category for turning order uploads off without unlinking.
  - Internal code changes

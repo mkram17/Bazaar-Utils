@@ -3,8 +3,6 @@ package com.github.mkram17.bazaarutils.utils.web;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -18,10 +16,15 @@ import java.util.Optional;
  * quietly push full item NBT to the server.</p>
  *
  * <p>Serialized by {@link WebJson}, so this declaration <em>is</em> the wire format: component
- * names become the JSON keys, enums their {@code name()}, and a null {@code pricingPosition} is
- * omitted rather than sent. Names and value domains mirror {@code orderSnapshotSchema} on the
- * website, where a mismatch is rejected with a 400 rather than silently coerced — so renaming a
- * component here is a protocol change.</p>
+ * names become the JSON keys and enums their {@code name()}. Names and value domains mirror
+ * {@code orderSnapshotSchema} on the website, where a mismatch is rejected with a 400 rather than
+ * silently coerced — so renaming a component here is a protocol change.</p>
+ *
+ * <p>Notably absent: {@code pricingPosition}. The mod still computes it — {@code OutbidOrderHandler}
+ * and {@code OrderStatusHighlight} depend on it, and both have to work unlinked — but it is
+ * derived from market data that moves every twenty seconds, so any value sent here described the
+ * market at the moment of the last sync rather than now. The website reads the same public Hypixel
+ * endpoint and derives it per request instead.</p>
  */
 public record OrderSnapshot(
         String productId,
@@ -32,7 +35,6 @@ public record OrderSnapshot(
         double pricePerItem,
         int amountFilled,
         int amountClaimed,
-        @Nullable PricingPosition pricingPosition,
         String profileId
 ) {
     private static final int MAX_STRING_LENGTH = 128;
@@ -96,10 +98,6 @@ public record OrderSnapshot(
                 pricePerItem,
                 amountFilled,
                 amountClaimed,
-                // Derived from live market data, so it is stale the moment it lands. The dashboard
-                // renders it as "as of last sync" rather than as a live signal. Null when the
-                // market data needed to compute it was unavailable, and omitted from the payload.
-                order.getPricingPosition(),
                 UNKNOWN_PROFILE_ID
         ));
     }

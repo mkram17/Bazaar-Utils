@@ -16,8 +16,8 @@ import com.google.gson.Gson;
  *   <li>enums serialize as {@link Enum#name()}, not {@code toString()} — which matters, because
  *       {@code TransactionType.Side} renders itself as "Buy"/"Sell" for chat while the wire
  *       contract is {@code BUY}/{@code SELL};</li>
- *   <li>null fields are omitted rather than emitted as {@code null}, matching the optional
- *       {@code pricingPosition}.</li>
+ *   <li>null fields are omitted rather than emitted as {@code null}, so an optional field the mod
+ *       has no value for simply does not appear.</li>
  * </ul>
  *
  * <p>Responses deserialize with absent fields left null (and absent primitives left zero), so a
