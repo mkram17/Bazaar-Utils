@@ -116,12 +116,14 @@ public final class BazaarUtilsApi {
      * <p>Kept separate from {@link #syncOrders} so callers can compare the serialized form against
      * the last one they sent and skip an identical push.</p>
      *
-     * @param partial whether this snapshot is known not to describe every live order. The server
-     *                closes anything missing from a <em>complete</em> snapshot, so an order the
-     *                mod merely failed to parse must not be sent as one that left the Bazaar.
+     * @param partial  whether this snapshot is known not to describe every live order. The server
+     *                 closes anything missing from a <em>complete</em> snapshot, so an order the
+     *                 mod merely failed to parse must not be sent as one that left the Bazaar.
+     * @param username the name this session is playing under, so the website can keep the display
+     *                 name current. See {@link OrderSyncRequest#username()}.
      */
-    public static String serializeOrderSync(List<OrderSnapshot> orders, boolean partial) {
-        return WebJson.GSON.toJson(new OrderSyncRequest(orders, partial));
+    public static String serializeOrderSync(List<OrderSnapshot> orders, boolean partial, String username) {
+        return WebJson.GSON.toJson(new OrderSyncRequest(orders, partial, username));
     }
 
     /**
@@ -134,8 +136,15 @@ public final class BazaarUtilsApi {
      *                one that had left the Bazaar, so a transient parse failure closed a live
      *                order and the next sync re-opened it as a new one. A partial snapshot updates
      *                what it does mention and closes nothing.</p>
+     * @param username the display name of the session pushing this snapshot.
+     *
+     *                 <p>Not an identity claim — the account is resolved from the bearer token
+     *                 alone, and the sync only runs when the logged-in session already matches the
+     *                 token's account, so this can never name someone else's row. It exists
+     *                 because players rename, and the website had no other way to find out: the
+     *                 name it stored at link time was the name it showed forever.</p>
      */
-    private record OrderSyncRequest(List<OrderSnapshot> orders, boolean partial) {}
+    private record OrderSyncRequest(List<OrderSnapshot> orders, boolean partial, String username) {}
 
     /**
      * Pushes an order snapshot. The account is resolved from the bearer token alone — the payload
