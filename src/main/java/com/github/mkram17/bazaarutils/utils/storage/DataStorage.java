@@ -51,6 +51,21 @@ public class DataStorage<T> {
         for (DataStorage<?> s : toSave) s.saveToSystem();
     }
 
+    /**
+     * Writes this storage now, leaving every other pending storage alone.
+     *
+     * <p>The alternative for a caller that needs one file on disk immediately is
+     * {@link #flushAll()}, which is a worse tool for the job in two ways: it writes every dirty
+     * storage on the caller's thread, and its {@code toArray}/{@code clear} pair is not atomic, so
+     * a storage marked dirty between the two is dropped from the set without being written. Doing
+     * that from an HTTP callback — which is where the one caller lives — means racing the tick
+     * listener for unrelated files, to save one.</p>
+     */
+    public void flush() {
+        REQUIRES_SAVE.remove(this);
+        saveToSystem();
+    }
+
     private final int version;
     private final Function<Integer, Codec<T>> codec;
     private final Codec<T> currentCodec;

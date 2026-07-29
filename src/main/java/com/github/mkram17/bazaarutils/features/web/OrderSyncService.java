@@ -144,7 +144,8 @@ public final class OrderSyncService extends BUListener {
         if (token.isEmpty()) return;
 
         Snapshot snapshot = collectSnapshot();
-        String body = BazaarUtilsApi.serializeOrderSync(snapshot.orders(), snapshot.partial());
+        String body = BazaarUtilsApi.serializeOrderSync(
+                snapshot.orders(), snapshot.partial(), session.get().username());
         String key = session.get().dashlessUuid() + "|" + body;
 
         // The floor: sitting on the orders page must not cost a request every window.
