@@ -19,6 +19,7 @@ import tech.thatgravyboat.skyblockapi.api.events.chat.ChatReceivedEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
@@ -167,7 +168,34 @@ public final class BazaarChatHandler extends BUListener {
      */
     public static void handleFlip(ArrayList<Component> siblings) {
         int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER), 3, 4, priceIndex);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, TransactionType.of(detectSide(siblings), TransactionType.Method.ORDER), 3, 4, priceIndex);
+    }
+
+    /**
+     * Reads the side out of the message text instead of assuming one.
+     *
+     * <p>Cancel and flip messages name the side in prose — "…from cancelling Buy Order!" against
+     * "…Sell Offer!" — which is the same signal {@link #handleFilled} keys off. Both handlers used
+     * to hardcode {@code SELL}, which was inert while nothing consumed their events but is not:
+     * {@link OrderInfo#isSimilarTo} compares side, so a hardcoded side means a cancelled buy order
+     * can never match the order it cancelled.</p>
+     *
+     * <p>Falls back to {@code SELL} to preserve the previous behaviour on a message that names
+     * neither.</p>
+     */
+    private static TransactionType.Side detectSide(List<Component> siblings) {
+        String text = Util.removeFormatting(
+                siblings.stream().map(Component::getString).collect(Collectors.joining(" ")));
+
+        if (text.contains("Sell Offer")) {
+            return TransactionType.Side.SELL;
+        }
+
+        if (text.contains("Buy Order")) {
+            return TransactionType.Side.BUY;
+        }
+
+        return TransactionType.Side.SELL;
     }
 
     /**
@@ -178,7 +206,7 @@ public final class BazaarChatHandler extends BUListener {
     public static void handleCancelled(ArrayList<Component> siblings) {
         int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
 
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_CANCELLED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER), 2, 4, priceIndex);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_CANCELLED, TransactionType.of(detectSide(siblings), TransactionType.Method.ORDER), 2, 4, priceIndex);
     }
 
     /**

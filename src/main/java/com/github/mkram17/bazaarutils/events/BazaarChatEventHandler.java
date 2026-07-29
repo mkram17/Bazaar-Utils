@@ -5,6 +5,7 @@ import com.github.mkram17.bazaarutils.config.features.notification.Notifications
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarChatEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -16,6 +17,8 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.Optional;
+
+import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 /**
  * Consumer of {@link BazaarChatEvent}: this handler <em>reacts to</em> the bazaar chat events that
@@ -135,11 +138,79 @@ public final class BazaarChatEventHandler extends BUListener {
         Optional<Order> orderMatch = order.findOrderInList(UserOrdersStorage.INSTANCE.get());
 
         if (orderMatch.isPresent()) {
-            orderMatch.get().setFilled();
-            PlayerActionUtil.notifyAll(order.getName() + "[" + orderMatch.get().getIndex() + "] was filled", NotificationType.ORDERDATA);
+            Order filled = orderMatch.get();
+
+            filled.setFilled();
+            PlayerActionUtil.notifyAll(order.getName() + "[" + filled.getIndex() + "] was filled", NotificationType.ORDERDATA);
             UserOrdersStorage.INSTANCE.save();
+
+            // The list did not gain or lose an entry, so nothing else announces this. Both fields
+            // setFilled() touches — status and amountFilled — are pushed to the website, and
+            // without an event the change would sit unsent until the player reopens Manage Orders.
+            new UserOrdersChangeEvent(filled, UserOrdersChangeEvent.ChangeTypes.UPDATE).post(EVENT_BUS);
         } else {
             Util.notifyError("Could not find item to fill with info vol: " + order.getVolume() + " name: " + order.getName(), new Exception("Order Filled Event error"));
         }
+    }
+
+    /**
+     * Drops a cancelled order from the tracked list.
+     *
+     * <p>Nothing consumed this event before, so a cancelled order stayed in the list — and on the
+     * website, which reads absence from a snapshot as the only signal an order has closed — until
+     * the player next opened Manage Orders and {@code OrderUpdater} reconciled it away.</p>
+     *
+     * <p>Matching goes through {@link OrderInfo#findOrderInList}, which tries a strict pass and
+     * falls back to a loose one. That can pick the wrong order among near-identical ones, and
+     * that is the intended trade: a wrong guess is corrected by the next Manage Orders visit,
+     * whereas refusing to guess leaves a cancelled order showing as live indefinitely.</p>
+     */
+    @Subscription
+    private void onOrderCancelled(BazaarChatEvent<? extends OrderInfo> event) {
+        if (event.getType() != BazaarChatEvent.BazaarEventTypes.ORDER_CANCELLED) {
+            return;
+        }
+
+        OrderInfo cancelled = event.getOrder();
+        Optional<Order> match = cancelled.findOrderInList(UserOrdersStorage.INSTANCE.get());
+
+        if (match.isEmpty()) {
+            Util.notifyError("Could not find cancelled order vol: " + cancelled.getVolume() + " name: " + cancelled.getName(),
+                    new Exception("Order Cancelled Event error"));
+
+            return;
+        }
+
+        // Posts REMOVE and saves for us.
+        match.get().removeFromUserOrders();
+        PlayerActionUtil.notifyAll("Cancelled " + cancelled.getName(), NotificationType.ORDERDATA);
+    }
+
+    /**
+     * Records that a filled order's proceeds have been collected.
+     *
+     * <p>The Bazaar has no partial claim — clicking an order takes everything currently filled and
+     * unclaimed — so after a claim the claimed amount is by definition the filled amount. That is
+     * the same identity {@code OrderUpdater.parseAmountClaimed} arrives at from lore, where it
+     * reads the unclaimed remainder and subtracts.</p>
+     *
+     * <p>{@code ORDER_CLAIMED} is one of the two events that carries a real {@link Order} resolved
+     * against storage rather than a bare {@link OrderInfo}, so there is nothing to match here.</p>
+     */
+    @Subscription
+    private void onOrderClaimed(BazaarChatEvent<? extends OrderInfo> event) {
+        if (event.getType() != BazaarChatEvent.BazaarEventTypes.ORDER_CLAIMED
+                || !(event.getOrder() instanceof Order order)) {
+            return;
+        }
+
+        if (order.getAmountClaimed() == order.getAmountFilled()) {
+            return;
+        }
+
+        order.setAmountClaimed(order.getAmountFilled());
+        UserOrdersStorage.INSTANCE.save();
+
+        new UserOrdersChangeEvent(order, UserOrdersChangeEvent.ChangeTypes.UPDATE).post(EVENT_BUS);
     }
 }

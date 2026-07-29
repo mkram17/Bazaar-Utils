@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.features.web;
 
 import com.github.mkram17.bazaarutils.config.features.WebsiteConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.bazaar.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -30,12 +31,18 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Pushes the tracked order list to the website after the Manage Orders menu is read.
+ * Pushes the tracked order list to the website whenever it changes.
  *
- * <p>The trigger is deliberately indirect. {@code UserOrdersChangeEvent} fires once per order
- * added or removed, so syncing on it would send a burst of requests every time the page loads.
- * Instead this marks the snapshot dirty and lets a debounced tick handler do the sending, the same
- * shape {@code DataStorage} uses for its own saves.</p>
+ * <p>Every trigger is indirect: it marks the snapshot dirty and lets a debounced tick handler do
+ * the sending, the same shape {@code DataStorage} uses for its own saves. That is what makes it
+ * safe to listen to {@code UserOrdersChangeEvent}, which fires once per order added or removed —
+ * a page load posting one event per order still costs at most one push, because {@link #pending}
+ * is a flag rather than a queue.</p>
+ *
+ * <p>Listening to it is the difference between the website seeing an order when it changes and
+ * seeing it whenever the player next opens Manage Orders. Orders are created, filled, and
+ * cancelled through chat, which the mod hears within a second; without this the website would
+ * wait for a menu visit that might not come for an hour.</p>
  *
  * <p>Three guards sit in front of every push, and each one exists for a specific failure:</p>
  * <ul>
@@ -106,6 +113,20 @@ public final class OrderSyncService extends BUListener {
     @Subscription(priority = Priority.LOW)
     @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
     private void onOrdersPage(ContainerLoadedEvent event) {
+        pending.set(true);
+    }
+
+    /**
+     * Catches every change that happens away from the Manage Orders menu: an order created,
+     * filled, claimed, or cancelled from chat, and {@code /bu orders remove}.
+     *
+     * <p>Deliberately not annotated {@code @OnlyBazaarScreen}. That predicate resolves its screen
+     * context from the event, and only {@code ContainerLoadedEvent} carries one — everything else
+     * falls back to whatever screen happens to be open, which for a chat-driven change is
+     * meaningless and would filter on the player's unrelated inventory.</p>
+     */
+    @Subscription(priority = Priority.LOW)
+    private void onOrdersChanged(UserOrdersChangeEvent event) {
         pending.set(true);
     }
 
