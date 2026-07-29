@@ -13,6 +13,15 @@ import java.util.concurrent.CompletableFuture;
  * protocol: they line up one-for-one with the Zod schemas on the other end. What is deliberately
  * absent is any model object — {@code Order} is subscribed to the event bus and holds a live
  * {@code ItemStack}, so it is converted to {@link OrderSnapshot} first rather than serialized.</p>
+ *
+ * <p><strong>The values below are duplicated on the website and nothing enforces that
+ * mechanically.</strong> {@code contract/wire-format.json} in this repo is the written-down copy —
+ * the same file lives in the website repo, where a test holds its Zod schemas to it. Change one
+ * side and you must change the file and the other side too.</p>
+ *
+ * <p>{@link #normalizeLinkCode} is the one where drift is invisible: the normalized code
+ * <em>is</em> the {@code serverId} nonce, so a mismatch does not raise an error anywhere, it just
+ * makes every link attempt fail verification.</p>
  */
 public final class BazaarUtilsApi {
     private static final String DEFAULT_BASE_URL = "https://bazaarutils.dev";
