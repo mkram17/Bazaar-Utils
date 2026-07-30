@@ -37,6 +37,16 @@ public final class BazaarUtilsApi {
      */
     private static final String BASE_URL_PROPERTY = "bazaarutils.apiUrl";
 
+    /**
+     * Most orders one sync may carry. Matches {@code MAX_ORDERS_PER_SYNC} on the website, which
+     * rejects a longer array outright, and {@code orderSync.maxOrdersPerSync} in
+     * {@code contract/wire-format.json}.
+     *
+     * <p>Lives here rather than in {@code OrderSyncService} because it is part of the wire format,
+     * not a property of the thing that happens to enforce it.</p>
+     */
+    public static final int MAX_ORDERS_PER_SYNC = 200;
+
     private BazaarUtilsApi() {}
 
     public static String baseUrl() {

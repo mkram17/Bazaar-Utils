@@ -52,8 +52,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @Module
 public final class OrderSyncService extends BUListener {
-    /** Matches the server's own ceiling; anything past it would be rejected as an oversized body. */
-    private static final int MAX_ORDERS_PER_SYNC = 200;
+    /** The wire contract's ceiling. Declared in {@link BazaarUtilsApi} because it is protocol. */
+    private static final int MAX_ORDERS_PER_SYNC = BazaarUtilsApi.MAX_ORDERS_PER_SYNC;
 
     /** How long to stop trying after a 402. The subscription will not come back within seconds. */
     private static final long ENTITLEMENT_BACKOFF_MILLIS = Duration.ofHours(1).toMillis();
