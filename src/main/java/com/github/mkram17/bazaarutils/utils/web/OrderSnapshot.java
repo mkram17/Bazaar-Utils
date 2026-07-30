@@ -35,7 +35,12 @@ public record OrderSnapshot(
         @Nullable PricingPosition pricingPosition,
         String profileId
 ) {
-    private static final int MAX_STRING_LENGTH = 128;
+    /**
+     * Longest {@code productId} or {@code itemName} the website accepts. Package-private rather
+     * than private so {@code WireFormatContractTest} can hold it to
+     * {@code contract/wire-format.json}.
+     */
+    static final int MAX_STRING_LENGTH = 128;
 
     /**
      * SkyBlock profiles are not tracked by the mod yet (see the plan's decision 1). The column is
