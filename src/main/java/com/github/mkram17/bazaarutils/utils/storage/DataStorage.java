@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,16 +35,17 @@ public class DataStorage<T> {
         @Subscription
         @TimePassed(duration = "5s")
         public void onTick(TickEvent event) {
-            if (REQUIRES_SAVE.isEmpty()) return;
-            DataStorage<?>[] toSave = REQUIRES_SAVE.toArray(new DataStorage<?>[0]);
-            REQUIRES_SAVE.clear();
-            CompletableFuture.runAsync(() -> {
-                for (DataStorage<?> s : toSave) s.saveToSystem();
-            });
+            flushAll();
         }
     }
 
+    /**
+     * Runs synchronously on the main thread. Encoding walks the live data, which {@link #edit} and its
+     * callers mutate from the main thread — doing it off-thread throws ConcurrentModificationException
+     * mid-encode and loses the save.
+     */
     public static void flushAll() {
+        if (REQUIRES_SAVE.isEmpty()) return;
         DataStorage<?>[] toSave = REQUIRES_SAVE.toArray(new DataStorage<?>[0]);
         REQUIRES_SAVE.clear();
         for (DataStorage<?> s : toSave) s.saveToSystem();

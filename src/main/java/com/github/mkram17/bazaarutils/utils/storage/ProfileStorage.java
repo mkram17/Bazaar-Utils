@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -44,13 +43,16 @@ public class ProfileStorage<T> {
         }
     }
 
+    /**
+     * Runs synchronously on the main thread. Encoding walks the live data, which {@link #edit} and its
+     * callers mutate from the main thread — doing it off-thread throws ConcurrentModificationException
+     * mid-encode and loses the save.
+     */
     public static void flushAll() {
         if (REQUIRES_SAVE.isEmpty()) return;
         ProfileStorage<?>[] toSave = REQUIRES_SAVE.toArray(new ProfileStorage<?>[0]);
         REQUIRES_SAVE.clear();
-        CompletableFuture.runAsync(() -> {
-            for (ProfileStorage<?> storage : toSave) storage.saveToSystem();
-        });
+        for (ProfileStorage<?> storage : toSave) storage.saveToSystem();
     }
 
     @Nullable
@@ -58,8 +60,8 @@ public class ProfileStorage<T> {
 
     /**
      * Immutable pairing of the loaded data with the profile and file it came from. Kept in a single
-     * volatile field so a background save can never observe one profile's data alongside another
-     * profile's path.
+     * field so the three can only ever be swapped together — nothing can observe one profile's data
+     * alongside another profile's path.
      */
     private record Slot<T>(T data, Path path, String profile) {}
 
