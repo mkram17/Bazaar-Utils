@@ -24,6 +24,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
@@ -46,8 +47,7 @@ public class Order extends OrderInfo implements AbstractListener {
             Codec.DOUBLE
                     .fieldOf("price_per_item")
                     .forGetter(Order::getPricePerItem),
-            Codec.STRING
-                    .xmap(TransactionType.Side::valueOf, Enum::name)
+            TransactionType.Side.CODEC
                     .fieldOf("side")
                     .forGetter(order -> order.getTransactionType().getSide()),
             Codec.INT
@@ -55,8 +55,13 @@ public class Order extends OrderInfo implements AbstractListener {
                     .forGetter(Order::getAmountClaimed),
             Codec.INT
                     .optionalFieldOf("amount_filled", 0)
-                    .forGetter(Order::getAmountFilled)
-    ).apply(instance, (name, volume, pricePerItem, side, amountClaimed, amountFilled) -> {
+                    .forGetter(Order::getAmountFilled),
+            // Written out only. Decoding still re-derives it in the OrderInfo constructor, which resolves
+            // it from BazaarDataUtil.
+            Codec.STRING
+                    .optionalFieldOf("product_id", "")
+                    .forGetter(order -> order.getProductID() == null ? "" : order.getProductID())
+    ).apply(instance, (name, volume, pricePerItem, side, amountClaimed, amountFilled, productId) -> {
         Order order = new Order(name, volume, pricePerItem, side, null);
         order.setAmountClaimed(amountClaimed);
         order.setAmountFilled(amountFilled); // restores OrderStatus via existing logic
@@ -125,7 +130,7 @@ public class Order extends OrderInfo implements AbstractListener {
         boolean shouldPlayNotificationSound = settings.isEnabled() && settings.emitClientSound;
         boolean shouldAutoOpenBazaar = settings.isEnabled() && settings.emitClientSound;
 
-        if (!shouldNotifyUser || !UserOrdersStorage.INSTANCE.get().contains(this)) {
+        if (!shouldNotifyUser || !OrderUtil.getUserOrders().contains(this)) {
             return;
         }
 
@@ -169,7 +174,7 @@ public class Order extends OrderInfo implements AbstractListener {
      * @return index of this order within the persisted user order list.
      */
     public int getIndex() {
-        return UserOrdersStorage.INSTANCE.get().indexOf(this);
+        return OrderUtil.getUserOrders().indexOf(this);
     }
 
     /**
@@ -197,7 +202,9 @@ public class Order extends OrderInfo implements AbstractListener {
      * Removes this order from the tracked user orders list and notifies listeners.
      */
     public void removeFromUserOrders() {
-        if (!UserOrdersStorage.INSTANCE.get().remove(this)) {
+        List<Order> userOrders = UserOrdersStorage.INSTANCE.get();
+
+        if (userOrders == null || !userOrders.remove(this)) {
             PlayerActionUtil.notifyAll("Error removing " + name + " from user orders. Item couldn't be found.");
         }
 
