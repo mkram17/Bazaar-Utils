@@ -55,7 +55,7 @@ public class DataStorage<T> {
     private final Function<Integer, Codec<T>> codec;
     private final Codec<T> currentCodec;
     private final Path path;
-    private final T data;
+    private volatile T data;
 
     public DataStorage(int version, Supplier<T> defaultData, String fileName, Function<Integer, Codec<T>> codec) {
         this.version = version;
@@ -75,6 +75,11 @@ public class DataStorage<T> {
 
     public T get() {
         return data;
+    }
+
+    public void set(T newData) {
+        this.data = newData;
+        save();
     }
 
     public void edit(Consumer<T> modifier) {
@@ -102,7 +107,7 @@ public class DataStorage<T> {
             } catch (IOException e) {
                 Util.logError("Failed to create data directory", e);
             }
-            Util.logError("No existing data at %s — initialising defaults".formatted(path), null);
+            Util.logMessage("No existing data at %s — initialising defaults".formatted(path));
 
             return defaultData.get();
         }

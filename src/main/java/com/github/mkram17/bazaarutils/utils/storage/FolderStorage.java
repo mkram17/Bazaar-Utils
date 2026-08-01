@@ -30,11 +30,13 @@ public class FolderStorage<T> {
     public void set(String id, T value) {
         final T captured = value;
 
+        // computeIfAbsent only seeds the value for brand new entries — existing entries keep whatever
+        // was loaded from disk, so the value has to be written explicitly afterwards.
         storages.computeIfAbsent(id, k -> new DataStorage<>(
                 () -> captured,
                 folder + "/" + id,
                 codec
-        )).save();
+        )).set(captured);
     }
 
     @Nullable
