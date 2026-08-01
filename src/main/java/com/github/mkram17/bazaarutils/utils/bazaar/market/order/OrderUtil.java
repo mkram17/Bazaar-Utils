@@ -18,18 +18,14 @@ import java.util.concurrent.CompletableFuture;
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public final class OrderUtil {
-    public static List<Order> getUserOrders() {
-        return UserOrdersStorage.INSTANCE.get();
-    }
-
     /**
-     * Subscribes every persisted order to the event bus. Orders loaded from disk are deserialized
-     * reflectively by Gson, which bypasses the {@link Order} constructor (and therefore its
-     * {@code subscribe()} call), so without this they would never react to Bazaar data updates.
-     * Runtime-created orders subscribe in their constructor and must not be passed here.
+     * Orders are stored per profile and are only loaded once a profile is known, so this returns an
+     * empty list until then rather than {@code null}.
      */
-    public static void subscribeLoadedOrders() {
-        getUserOrders().forEach(Order::subscribe);
+    public static List<Order> getUserOrders() {
+        List<Order> orders = UserOrdersStorage.INSTANCE.get();
+
+        return orders != null ? orders : List.of();
     }
 
     public static Optional<Order> getUserOrderFromIndex(int slotIndex) {
@@ -71,10 +67,14 @@ public final class OrderUtil {
         if (order == null){
             return;
         }
-        UserOrdersStorage.INSTANCE.get().add(order);
+        if (UserOrdersStorage.INSTANCE.get() == null) {
+            Util.notifyError("Cannot track order — no profile has been loaded yet", new Exception("Order tracking error"));
+            return;
+        }
+
+        UserOrdersStorage.INSTANCE.edit(orders -> orders.add(order));
         PlayerActionUtil.notifyAll("Added order: § " + order, NotificationType.ORDERDATA);
         new UserOrdersChangeEvent(order, UserOrdersChangeEvent.ChangeTypes.ADD).post(EVENT_BUS);
-        UserOrdersStorage.INSTANCE.save();
     }
 
     public static double getPriceForPosition(String productID, PricingPosition pricingPosition, TransactionType transactionType) {

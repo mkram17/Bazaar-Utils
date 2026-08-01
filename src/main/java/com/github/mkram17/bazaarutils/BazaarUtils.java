@@ -60,9 +60,8 @@ public class BazaarUtils implements ClientModInitializer {
 
         BazaarUtilsModules.init();
 
-        // Persisted orders are deserialized reflectively (bypassing Order's constructor), so they
-        // are not yet subscribed to the event bus — subscribe them explicitly.
-        OrderUtil.subscribeLoadedOrders();
+        // Persisted orders are decoded through Order.CODEC, which runs the Order constructor and
+        // therefore subscribes them to the event bus already — no explicit subscription pass needed.
 
         if (RepoAPI.isInitialized()) {
             onRepoReady();

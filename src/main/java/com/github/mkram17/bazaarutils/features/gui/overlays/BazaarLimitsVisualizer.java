@@ -38,12 +38,19 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
         ).apply(instance, OrderLimitEntry::new));
     }
 
-    public static void saveLimits() {
-        BazaarLimitsStorage.INSTANCE.save();
+    public static void resetLimits() {
+        BazaarLimitsStorage.INSTANCE.edit(List::clear);
     }
 
+    /**
+     * Limits are stored per profile and are only loaded once a profile is known, so this returns an
+     * empty list until then rather than {@code null}. Use {@link BazaarLimitsStorage#INSTANCE} directly
+     * (via {@code edit}) when the list needs to be modified.
+     */
     public static List<OrderLimitEntry> limits() {
-        return BazaarLimitsStorage.INSTANCE.get();
+        List<OrderLimitEntry> limits = BazaarLimitsStorage.INSTANCE.get();
+
+        return limits != null ? limits : List.of();
     }
 
     @Override
@@ -69,19 +76,15 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
             price = Integer.MAX_VALUE;
         }
 
-        limits().add(new OrderLimitEntry(price, ZonedDateTime.now()));
+        double cappedPrice = price;
 
-        saveLimits();
+        BazaarLimitsStorage.INSTANCE.edit(limits -> limits.add(new OrderLimitEntry(cappedPrice, ZonedDateTime.now())));
     }
 
     public static void removeOldEntries() {
-        limits()
-                .stream()
-                .filter((entry) -> entry.time().isBefore(TimeUtil.LAST_BAZAAR_LIMIT_RESET_TIME))
-                .toList()
-                .forEach(limits()::remove);
-
-        saveLimits();
+        BazaarLimitsStorage.INSTANCE.edit(limits ->
+                limits.removeIf(entry -> entry.time().isBefore(TimeUtil.LAST_BAZAAR_LIMIT_RESET_TIME))
+        );
     }
 
     private static double getTotalOrderedCoins() {

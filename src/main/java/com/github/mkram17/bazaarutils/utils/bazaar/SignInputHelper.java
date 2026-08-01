@@ -3,7 +3,6 @@ package com.github.mkram17.bazaarutils.utils.bazaar;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
-import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -361,7 +360,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
                     null
             );
 
-            return tempOrder.findOrderInList(UserOrdersStorage.INSTANCE.get());
+            return tempOrder.findOrderInList(OrderUtil.getUserOrders());
         }
 
         private Optional<PriceInfo> getOrderPriceInfo(List<Component> loreLines) {

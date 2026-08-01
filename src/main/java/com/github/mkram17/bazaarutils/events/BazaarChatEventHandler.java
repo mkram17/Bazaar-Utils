@@ -132,7 +132,7 @@ public final class BazaarChatEventHandler extends BUListener {
 
         OrderInfo order = event.getOrder();
 
-        Optional<Order> orderMatch = order.findOrderInList(UserOrdersStorage.INSTANCE.get());
+        Optional<Order> orderMatch = order.findOrderInList(OrderUtil.getUserOrders());
 
         if (orderMatch.isPresent()) {
             orderMatch.get().setFilled();

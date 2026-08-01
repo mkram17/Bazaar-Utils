@@ -254,7 +254,7 @@ public class OrderInfo extends PriceInfo {
      * @return immutable list of extracted values
      */
     public static <T> List<T> getVariables(Function<Order, T> variable) {
-        return UserOrdersStorage.INSTANCE.get()
+        return OrderUtil.getUserOrders()
                 .stream()
                 .map(variable)
                 .toList();
