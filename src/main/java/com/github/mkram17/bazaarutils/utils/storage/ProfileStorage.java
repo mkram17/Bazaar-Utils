@@ -73,22 +73,26 @@ public class ProfileStorage<T> {
     @Nullable private volatile Slot<T> slot;
     /** Guards against re-entrant {@link #load()} calls made by codecs that read this storage while decoding. */
     private volatile boolean loading = false;
-    @Nullable private final Consumer<ProfileStorage<T>> onProfileSwitch;
+    /** Receives freshly loaded data once it is the active slot. */
+    @Nullable private final Consumer<T> onLoad;
+    /** Receives data that is about to stop being the active slot, while it is still reachable. */
+    @Nullable private final Consumer<T> onUnload;
 
-    public ProfileStorage(int version, Supplier<@NotNull T> defaultData, String fileName, Function<Integer, Codec<T>> codec, @Nullable Consumer<ProfileStorage<T>> onProfileSwitch) {
+    public ProfileStorage(int version, Supplier<@NotNull T> defaultData, String fileName, Function<Integer, Codec<T>> codec, @Nullable Consumer<T> onLoad, @Nullable Consumer<T> onUnload) {
         this.version = version;
         this.defaultData = defaultData;
         this.fileName = fileName;
         this.codec = codec;
-        this.onProfileSwitch = onProfileSwitch;
+        this.onLoad = onLoad;
+        this.onUnload = onUnload;
     }
 
     public ProfileStorage(int version, Supplier<T> defaultData, String fileName, Function<Integer, Codec<T>> codec) {
-        this(version, defaultData, fileName, codec, null);
+        this(version, defaultData, fileName, codec, null, null);
     }
 
     public ProfileStorage(Supplier<T> defaultData, String fileName, Codec<T> codec) {
-        this(0, defaultData, fileName, v -> codec, null);
+        this(0, defaultData, fileName, v -> codec, null, null);
     }
 
     private boolean isCurrentlyActive() {
@@ -123,8 +127,22 @@ public class ProfileStorage<T> {
             return;
         }
 
-        slot = new Slot<>(newData, current.path(), current.profile());
+        replaceSlot(new Slot<>(newData, current.path(), current.profile()));
         save();
+    }
+
+    /**
+     * The only place {@link #slot} is assigned, so every swap tears down the outgoing data and sets up the
+     * incoming data. {@link #onUnload} runs while the outgoing data is still reachable; {@link #onLoad}
+     * runs once the incoming data is the active slot, so hooks that read this storage see the new value.
+     */
+    private void replaceSlot(Slot<T> next) {
+        Slot<T> outgoing = slot;
+        if (outgoing != null && onUnload != null) onUnload.accept(outgoing.data());
+
+        slot = next;
+
+        if (onLoad != null) onLoad.accept(next.data());
     }
 
     public void edit(Consumer<T> modifier) {
@@ -167,11 +185,14 @@ public class ProfileStorage<T> {
                 Files.createDirectories(path.getParent());
                 Util.logMessage("No existing data for profile=%s file=%s — initialising defaults".formatted(profile, fileName));
 
-                slot = new Slot<>(defaultData.get(), path, profile);
+                replaceSlot(new Slot<>(defaultData.get(), path, profile));
                 saveToSystem();
             } else {
                 try {
-                    slot = new Slot<>(parse(path), path, profile);
+                    // parse() runs before replaceSlot so a decode failure leaves the outgoing data in place.
+                    T parsed = parse(path);
+
+                    replaceSlot(new Slot<>(parsed, path, profile));
                     Util.logMessage("Loaded %s for profile=%s (v%d)".formatted(fileName, profile, this.version));
                 } catch (Exception exception) {
                     Util.logError("Failed to load saved data for profile %s (%s)".formatted(profile, fileName), exception);
@@ -179,7 +200,7 @@ public class ProfileStorage<T> {
                     // Never silently overwrite data we could not read — keep it around so it can be recovered.
                     backup(path);
 
-                    slot = new Slot<>(defaultData.get(), path, profile);
+                    replaceSlot(new Slot<>(defaultData.get(), path, profile));
                     saveToSystem();
                 }
             }
@@ -191,8 +212,6 @@ public class ProfileStorage<T> {
         } finally {
             loading = false;
         }
-
-        if (onProfileSwitch != null) onProfileSwitch.accept(this);
     }
 
     private T parse(Path path) throws IOException {

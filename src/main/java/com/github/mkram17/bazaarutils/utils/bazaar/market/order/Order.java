@@ -77,11 +77,11 @@ public class Order extends OrderInfo implements AbstractListener {
 
     /**
      * Creates a Bazaar order, initializing ItemInfo with slot index and ItemStack of the order.
+     *
+     * <p>The order is inert until {@link #attach()} — constructing one does not put it on the event bus.
      */
     public Order(@NonNull String name, int volume, double pricePerItem, TransactionType.Side side, @Nullable ItemInfo itemInfo) {
         super(name, side, OrderStatus.SET, volume, pricePerItem, itemInfo);
-
-        startTracking();
     }
 
     @Override
@@ -89,9 +89,26 @@ public class Order extends OrderInfo implements AbstractListener {
         EVENT_BUS.register(this);
     }
 
-    private void startTracking() {
-        handleOutbidStatusChange();
+    /**
+     * Starts tracking this order: resolves its initial pricing position and puts it on the event bus.
+     *
+     * <p>An order is registered on the bus if and only if it belongs to the currently loaded profile's
+     * order list, so this is only for {@link OrderUtil} to call — either when an order is first tracked
+     * or when a profile's stored orders are loaded.
+     */
+    void attach() {
+        // Seeds the pricing position without notifying.
+        findPricingPosition().ifPresent(position -> this.pricingPosition = position);
+
         subscribe();
+    }
+
+    /**
+     * Stops tracking this order. Without it a discarded order stays subscribed for the rest of the
+     * session and keeps reacting to every {@link BazaarDataUpdateEvent}. Safe no-op if never attached.
+     */
+    void detach() {
+        EVENT_BUS.unregister(this);
     }
 
     @Subscription
@@ -210,9 +227,7 @@ public class Order extends OrderInfo implements AbstractListener {
 
         new UserOrdersChangeEvent(this, UserOrdersChangeEvent.ChangeTypes.REMOVE).post(EVENT_BUS);
 
-        // Stop tracking: without this the removed order stays subscribed and keeps reacting to
-        // every BazaarDataUpdateEvent for the rest of the session (leak). Safe no-op if never registered.
-        EVENT_BUS.unregister(this);
+        detach();
 
         UserOrdersStorage.INSTANCE.save();
     }

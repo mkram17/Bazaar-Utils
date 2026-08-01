@@ -28,6 +28,22 @@ public final class OrderUtil {
         return orders != null ? orders : List.of();
     }
 
+    /**
+     * Puts a freshly loaded profile's orders on the event bus. {@link Order#attach()} is package-private,
+     * so {@link UserOrdersStorage} goes through here.
+     */
+    public static void attachAll(List<Order> orders) {
+        orders.forEach(Order::attach);
+    }
+
+    /**
+     * Takes a profile's orders off the event bus before they are discarded. Without this they stay
+     * subscribed for the rest of the session and keep notifying for a profile the player has left.
+     */
+    public static void detachAll(List<Order> orders) {
+        orders.forEach(Order::detach);
+    }
+
     public static Optional<Order> getUserOrderFromIndex(int slotIndex) {
         return getUserOrders().stream()
                 .filter(order ->
@@ -73,6 +89,11 @@ public final class OrderUtil {
         }
 
         UserOrdersStorage.INSTANCE.edit(orders -> orders.add(order));
+
+        // Only attached once the order is actually in the list, so a dropped write cannot leave a
+        // subscribed order that nothing tracks.
+        order.attach();
+
         PlayerActionUtil.notifyAll("Added order: § " + order, NotificationType.ORDERDATA);
         new UserOrdersChangeEvent(order, UserOrdersChangeEvent.ChangeTypes.ADD).post(EVENT_BUS);
     }
