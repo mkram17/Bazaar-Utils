@@ -54,8 +54,5 @@ public class OverlaysConfig {
             text = "bazaarutils.config.overlays.bazaar_limits_visualizer.reset_limits.runnable",
             title = "bazaarutils.config.overlays.bazaar_limits_visualizer.reset_limits.label"
     )
-    public static final Runnable RESET_LIMITS_BUTTON = () -> {
-        BazaarLimitsVisualizer.limits().clear();
-        BazaarLimitsVisualizer.saveLimits();
-    };
+    public static final Runnable RESET_LIMITS_BUTTON = BazaarLimitsVisualizer::resetLimits;
 }

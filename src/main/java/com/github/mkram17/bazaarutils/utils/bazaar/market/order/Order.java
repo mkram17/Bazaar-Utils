@@ -2,7 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
-import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.bazaar.BazaarDataUpdateEvent;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.events.AbstractListener;
@@ -12,6 +12,8 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,6 +24,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
@@ -34,6 +37,37 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
  */
 @ToString(callSuper=true)
 public class Order extends OrderInfo implements AbstractListener {
+    public static final Codec<Order> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING
+                    .fieldOf("name")
+                    .forGetter(Order::getName),
+            Codec.INT
+                    .fieldOf("volume")
+                    .forGetter(Order::getVolume),
+            Codec.DOUBLE
+                    .fieldOf("price_per_item")
+                    .forGetter(Order::getPricePerItem),
+            TransactionType.Side.CODEC
+                    .fieldOf("side")
+                    .forGetter(order -> order.getTransactionType().getSide()),
+            Codec.INT
+                    .optionalFieldOf("amount_claimed", 0)
+                    .forGetter(Order::getAmountClaimed),
+            Codec.INT
+                    .optionalFieldOf("amount_filled", 0)
+                    .forGetter(Order::getAmountFilled),
+            // Written out only. Decoding still re-derives it in the OrderInfo constructor, which resolves
+            // it from BazaarDataUtil.
+            Codec.STRING
+                    .optionalFieldOf("product_id", "")
+                    .forGetter(order -> order.getProductID() == null ? "" : order.getProductID())
+    ).apply(instance, (name, volume, pricePerItem, side, amountClaimed, amountFilled, productId) -> {
+        Order order = new Order(name, volume, pricePerItem, side, null);
+        order.setAmountClaimed(amountClaimed);
+        order.setAmountFilled(amountFilled); // restores OrderStatus via existing logic
+        return order;
+    }));
+
     public static final int OUTBID_ORDER_NOTIFICATIONS = 3; // number of notifications to send when an order becomes outdated
 
     @Getter @Setter
@@ -43,11 +77,11 @@ public class Order extends OrderInfo implements AbstractListener {
 
     /**
      * Creates a Bazaar order, initializing ItemInfo with slot index and ItemStack of the order.
+     *
+     * <p>The order is inert until {@link #attach()} — constructing one does not put it on the event bus.
      */
     public Order(@NonNull String name, int volume, double pricePerItem, TransactionType.Side side, @Nullable ItemInfo itemInfo) {
         super(name, side, OrderStatus.SET, volume, pricePerItem, itemInfo);
-
-        startTracking();
     }
 
     @Override
@@ -55,9 +89,26 @@ public class Order extends OrderInfo implements AbstractListener {
         EVENT_BUS.register(this);
     }
 
-    private void startTracking() {
-        handleOutbidStatusChange();
+    /**
+     * Starts tracking this order: resolves its initial pricing position and puts it on the event bus.
+     *
+     * <p>An order is registered on the bus if and only if it belongs to the currently loaded profile's
+     * order list, so this is only for {@link OrderUtil} to call — either when an order is first tracked
+     * or when a profile's stored orders are loaded.
+     */
+    void attach() {
+        // Seeds the pricing position without notifying.
+        findPricingPosition().ifPresent(position -> this.pricingPosition = position);
+
         subscribe();
+    }
+
+    /**
+     * Stops tracking this order. Without it a discarded order stays subscribed for the rest of the
+     * session and keeps reacting to every {@link BazaarDataUpdateEvent}. Safe no-op if never attached.
+     */
+    void detach() {
+        EVENT_BUS.unregister(this);
     }
 
     @Subscription
@@ -96,7 +147,7 @@ public class Order extends OrderInfo implements AbstractListener {
         boolean shouldPlayNotificationSound = settings.isEnabled() && settings.emitClientSound;
         boolean shouldAutoOpenBazaar = settings.isEnabled() && settings.emitClientSound;
 
-        if (!shouldNotifyUser || !UserOrdersStorage.INSTANCE.get().contains(this)) {
+        if (!shouldNotifyUser || !OrderUtil.getUserOrders().contains(this)) {
             return;
         }
 
@@ -140,7 +191,7 @@ public class Order extends OrderInfo implements AbstractListener {
      * @return index of this order within the persisted user order list.
      */
     public int getIndex() {
-        return UserOrdersStorage.INSTANCE.get().indexOf(this);
+        return OrderUtil.getUserOrders().indexOf(this);
     }
 
     /**
@@ -168,15 +219,15 @@ public class Order extends OrderInfo implements AbstractListener {
      * Removes this order from the tracked user orders list and notifies listeners.
      */
     public void removeFromUserOrders() {
-        if (!UserOrdersStorage.INSTANCE.get().remove(this)) {
+        List<Order> userOrders = UserOrdersStorage.INSTANCE.get();
+
+        if (userOrders == null || !userOrders.remove(this)) {
             PlayerActionUtil.notifyAll("Error removing " + name + " from user orders. Item couldn't be found.");
         }
 
         new UserOrdersChangeEvent(this, UserOrdersChangeEvent.ChangeTypes.REMOVE).post(EVENT_BUS);
 
-        // Stop tracking: without this the removed order stays subscribed and keeps reacting to
-        // every BazaarDataUpdateEvent for the rest of the session (leak). Safe no-op if never registered.
-        EVENT_BUS.unregister(this);
+        detach();
 
         UserOrdersStorage.INSTANCE.save();
     }

@@ -1,36 +1,42 @@
 package com.github.mkram17.bazaarutils.utils.storage;
 
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.mojang.serialization.Codec;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
 public class FolderStorage<T> {
-
     private final String folder;
-    private final Type dataType;
+    private final Codec<T> codec;
     private final Map<String, DataStorage<T>> storages = new LinkedHashMap<>();
     private final Path folderPath;
 
-    public FolderStorage(String folder, Type dataType) {
+    public FolderStorage(String folder, Codec<T> codec) {
         this.folder = folder;
-        this.dataType = dataType;
+        this.codec = codec;
         this.folderPath = DataStorage.DEFAULT_PATH.resolve(folder);
         load();
     }
 
-    public void add(T value) { set(String.valueOf(value.hashCode()), value); }
+    public void add(T value) {
+        set(String.valueOf(value.hashCode()), value);
+    }
 
     public void set(String id, T value) {
-        DataStorage<T> storage = storages.computeIfAbsent(id,
-                k -> new DataStorage<>(() -> value, folder + "/" + id, dataType));
-        storage.set(value);
-        storage.save();
+        final T captured = value;
+
+        // computeIfAbsent only seeds the value for brand new entries — existing entries keep whatever
+        // was loaded from disk, so the value has to be written explicitly afterwards.
+        storages.computeIfAbsent(id, k -> new DataStorage<>(
+                () -> captured,
+                folder + "/" + id,
+                codec
+        )).set(captured);
     }
 
     @Nullable
@@ -50,13 +56,22 @@ public class FolderStorage<T> {
         return Collections.unmodifiableMap(result);
     }
 
-    public boolean contains(String id) { return storages.containsKey(id); }
+    public boolean contains(String id) {
+        return storages.containsKey(id);
+    }
 
-    public void refresh() { storages.clear(); load(); }
+    public void refresh() {
+        storages.clear(); load();
+    }
 
     private void load() {
-        try { Files.createDirectories(folderPath); }
-        catch (IOException e) { Util.logError("Failed to create folder: " + folderPath, e); return; }
+        try {
+            Files.createDirectories(folderPath);
+        } catch (IOException e) {
+            Util.logError("Failed to create folder storage directory — path=%s".formatted(folderPath), e);
+
+            return;
+        }
 
         try (Stream<Path> files = Files.list(folderPath)) {
             files.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".json"))
@@ -64,14 +79,19 @@ public class FolderStorage<T> {
                         String id = file.getFileName().toString().replace(".json", "");
                         try {
                             storages.put(id, new DataStorage<>(
-                                    () -> { throw new IllegalStateException("No default for folder entry: " + id); },
-                                    folder + "/" + id, dataType));
-                        } catch (Exception e) {
-                            Util.logError("Failed to load folder entry: " + file, e);
+                                    () -> { throw new IllegalStateException("No default for folder entry: %s".formatted(id)); },
+                                    folder + "/" + id, codec
+                            ));
+                        } catch (Exception exception) {
+                            Util.logError("Failed to load folder entry — skipping file=%s".formatted(file), exception);
                         }
                     });
-        } catch (IOException e) {
-            Util.logError("Failed to list folder: " + folderPath, e);
+        } catch (IOException exception) {
+            Util.logError("Failed to list folder storage directory — path=%s".formatted(folderPath), exception);
+
+            return;
         }
+
+        Util.logMessage("FolderStorage loaded — folder=%s entries=%s".formatted(folder, storages.size()));
     }
 }

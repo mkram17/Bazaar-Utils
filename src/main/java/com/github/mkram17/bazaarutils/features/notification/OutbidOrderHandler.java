@@ -1,10 +1,10 @@
 package com.github.mkram17.bazaarutils.features.notification;
 
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
-import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import net.minecraft.network.chat.MutableComponent;
@@ -45,7 +45,7 @@ public class OutbidOrderHandler implements ToggleableFeature {
     }
 
     public static List<Order> getOutbidOrders() {
-        return UserOrdersStorage.INSTANCE.get()
+        return OrderUtil.getUserOrders()
                 .stream()
                 .filter(order -> order.getPricingPosition() == PricingPosition.OUTBID && order.getStatus() != OrderStatus.FILLED)
                 .toList();

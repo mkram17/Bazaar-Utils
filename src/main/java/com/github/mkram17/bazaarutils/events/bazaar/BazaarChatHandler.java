@@ -4,10 +4,10 @@ import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
-import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -397,7 +397,7 @@ public final class BazaarChatHandler extends BUListener {
      * @return the matching bazaar order if found, empty otherwise
      */
     private static Optional<Order> getOrderInfo(OrderInfo item) {
-        Optional<Order> orderOptional = item.findOrderInList(UserOrdersStorage.INSTANCE.get());
+        Optional<Order> orderOptional = item.findOrderInList(OrderUtil.getUserOrders());
 
         if (orderOptional.isEmpty()) {
             PlayerActionUtil.notifyAll("Could not find claimed item: " + item.getName(), NotificationType.ORDERDATA);

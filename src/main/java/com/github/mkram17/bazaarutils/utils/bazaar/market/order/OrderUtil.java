@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.bazaar.UserOrdersChangeEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
@@ -18,18 +18,30 @@ import java.util.concurrent.CompletableFuture;
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 public final class OrderUtil {
+    /**
+     * Orders are stored per profile and are only loaded once a profile is known, so this returns an
+     * empty list until then rather than {@code null}.
+     */
     public static List<Order> getUserOrders() {
-        return UserOrdersStorage.INSTANCE.get();
+        List<Order> orders = UserOrdersStorage.INSTANCE.get();
+
+        return orders != null ? orders : List.of();
     }
 
     /**
-     * Subscribes every persisted order to the event bus. Orders loaded from disk are deserialized
-     * reflectively by Gson, which bypasses the {@link Order} constructor (and therefore its
-     * {@code subscribe()} call), so without this they would never react to Bazaar data updates.
-     * Runtime-created orders subscribe in their constructor and must not be passed here.
+     * Puts a freshly loaded profile's orders on the event bus. {@link Order#attach()} is package-private,
+     * so {@link UserOrdersStorage} goes through here.
      */
-    public static void subscribeLoadedOrders() {
-        getUserOrders().forEach(Order::subscribe);
+    public static void attachAll(List<Order> orders) {
+        orders.forEach(Order::attach);
+    }
+
+    /**
+     * Takes a profile's orders off the event bus before they are discarded. Without this they stay
+     * subscribed for the rest of the session and keep notifying for a profile the player has left.
+     */
+    public static void detachAll(List<Order> orders) {
+        orders.forEach(Order::detach);
     }
 
     public static Optional<Order> getUserOrderFromIndex(int slotIndex) {
@@ -71,10 +83,19 @@ public final class OrderUtil {
         if (order == null){
             return;
         }
-        UserOrdersStorage.INSTANCE.get().add(order);
+        if (UserOrdersStorage.INSTANCE.get() == null) {
+            Util.notifyError("Cannot track order — no profile has been loaded yet", new Exception("Order tracking error"));
+            return;
+        }
+
+        UserOrdersStorage.INSTANCE.edit(orders -> orders.add(order));
+
+        // Only attached once the order is actually in the list, so a dropped write cannot leave a
+        // subscribed order that nothing tracks.
+        order.attach();
+
         PlayerActionUtil.notifyAll("Added order: § " + order, NotificationType.ORDERDATA);
         new UserOrdersChangeEvent(order, UserOrdersChangeEvent.ChangeTypes.ADD).post(EVENT_BUS);
-        UserOrdersStorage.INSTANCE.save();
     }
 
     public static double getPriceForPosition(String productID, PricingPosition pricingPosition, TransactionType transactionType) {

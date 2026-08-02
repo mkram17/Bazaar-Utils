@@ -56,7 +56,7 @@ public class BazaarDataUtil {
 
             return OptionalInt.of(0);
         } catch (Exception e) {
-            Util.notifyError("Error in getOrderCountOptional for productID=" + productId, e);
+            Util.notifyError("Error in getOrderCountOptional for productId=" + productId, e);
 
             return OptionalInt.empty();
         }
@@ -112,7 +112,7 @@ public class BazaarDataUtil {
                 }
             };
         } catch (Exception e) {
-            Util.notifyError("Error in findItemPriceOptional for productID=" + productId, e);
+            Util.notifyError("Error in findItemPriceOptional for productId=" + productId, e);
 
             return OptionalDouble.empty();
         }

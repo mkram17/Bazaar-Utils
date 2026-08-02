@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market.order;
 
-import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -254,7 +254,7 @@ public class OrderInfo extends PriceInfo {
      * @return immutable list of extracted values
      */
     public static <T> List<T> getVariables(Function<Order, T> variable) {
-        return UserOrdersStorage.INSTANCE.get()
+        return OrderUtil.getUserOrders()
                 .stream()
                 .map(variable)
                 .toList();

@@ -6,7 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
-import com.github.mkram17.bazaarutils.utils.storage.BazaarLimitsStorage;
+import com.github.mkram17.bazaarutils.utils.codecs.ZonedDateTimeCodec;
+import com.github.mkram17.bazaarutils.data.stored.BazaarLimitsStorage;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
@@ -20,6 +21,8 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.ToggleableFeature;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets.WidgetManager;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
@@ -28,14 +31,26 @@ import net.minecraft.ChatFormatting;
 public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeature {
     private static final double COIN_LIMIT = 15_000_000_000d;
 
-    public record OrderLimitEntry(double price, ZonedDateTime time) {}
-
-    public static void saveLimits() {
-        BazaarLimitsStorage.INSTANCE.save();
+    public record OrderLimitEntry(double price, ZonedDateTime time) {
+        public static final Codec<OrderLimitEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.DOUBLE.fieldOf("price").forGetter(OrderLimitEntry::price),
+                ZonedDateTimeCodec.CODEC.fieldOf("time").forGetter(OrderLimitEntry::time)
+        ).apply(instance, OrderLimitEntry::new));
     }
 
+    public static void resetLimits() {
+        BazaarLimitsStorage.INSTANCE.edit(List::clear);
+    }
+
+    /**
+     * Limits are stored per profile and are only loaded once a profile is known, so this returns an
+     * empty list until then rather than {@code null}. Use {@link BazaarLimitsStorage#INSTANCE} directly
+     * (via {@code edit}) when the list needs to be modified.
+     */
     public static List<OrderLimitEntry> limits() {
-        return BazaarLimitsStorage.INSTANCE.get();
+        List<OrderLimitEntry> limits = BazaarLimitsStorage.INSTANCE.get();
+
+        return limits != null ? limits : List.of();
     }
 
     @Override
@@ -61,19 +76,15 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
             price = Integer.MAX_VALUE;
         }
 
-        limits().add(new OrderLimitEntry(price, ZonedDateTime.now()));
+        double cappedPrice = price;
 
-        saveLimits();
+        BazaarLimitsStorage.INSTANCE.edit(limits -> limits.add(new OrderLimitEntry(cappedPrice, ZonedDateTime.now())));
     }
 
     public static void removeOldEntries() {
-        limits()
-                .stream()
-                .filter((entry) -> entry.time().isBefore(TimeUtil.LAST_BAZAAR_LIMIT_RESET_TIME))
-                .toList()
-                .forEach(limits()::remove);
-
-        saveLimits();
+        BazaarLimitsStorage.INSTANCE.edit(limits ->
+                limits.removeIf(entry -> entry.time().isBefore(TimeUtil.LAST_BAZAAR_LIMIT_RESET_TIME))
+        );
     }
 
     private static double getTotalOrderedCoins() {
