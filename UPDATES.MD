@@ -76,6 +76,9 @@ shows the right numbers instead of mixing them together. Bookmarks stay shared a
 - **The Bazaar limit display** shows your daily 15,000,000,000 coin limit per profile with a reset button
   in the config.
 - REI, Skyblocker and Firmament compatibility handling is still in place.
+- **Orders now record who placed them.** On a co-op profile the Bazaar labels each order with the
+  member who placed it, and the mod now reads that, so a co-op member's orders can be told apart
+  from your own.
 ---
 ## Fixes
 - There are too many fixes to list here, but using the mod should now be a less buggy experience.
