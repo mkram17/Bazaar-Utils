@@ -1,0 +1,59 @@
+{
+  "$comment": [
+    "The wire format shared by the Bazaar Utils website and the Bazaar Utils mod.",
+    "",
+    "These values are duplicated by necessity: the website declares them as Zod",
+    "schemas, the mod as Java records and constants, and neither can import the",
+    "other. This file is the single written-down copy, and lib/minecraft/contract.test.ts",
+    "asserts the website's schemas still agree with it. A change here is a protocol",
+    "change and needs a matching change in mkram17/Bazaar-Utils.",
+    "",
+    "The mod's counterparts live in:",
+    "  utils/web/OrderSnapshot.java   enums, string caps",
+    "  utils/web/BazaarUtilsApi.java  normalizeLinkCode, maxOrdersPerSync, request records"
+  ],
+  "orderSync": {
+    "$comment": [
+      "profileId names the SkyBlock profile an order was tracked on. The mod sends a",
+      "real value now that it tracks profiles; it sends \"\" only when a snapshot is",
+      "collected before the profile is known, which the server's non-null default",
+      "already covers.",
+      "",
+      "This matters for closure. A complete snapshot means 'these are all the open",
+      "orders' and absence is what closes a row, so the server has to scope that to",
+      "(account, profileId) — a player who switches profiles otherwise closes every",
+      "order belonging to the profile they just left, and re-opens them as new rows on",
+      "switching back."
+    ],
+    "endpoint": "/api/orders/sync",
+    "maxOrdersPerSync": 200,
+    "sides": ["BUY", "SELL"],
+    "statuses": ["SET", "FILLED"],
+    "pricingPositions": ["COMPETITIVE", "MATCHED", "OUTBID"],
+    "maxProductIdLength": 128,
+    "maxItemNameLength": 128,
+    "maxProfileIdLength": 64,
+    "maxUsernameLength": 16,
+    "usernamePattern": "^[A-Za-z0-9_]{1,16}$"
+  },
+  "linkCode": {
+    "endpoint": "/api/link/confirm",
+    "alphabet": "23456789ABCDEFGHJKMNPQRSTUVWXYZ",
+    "length": 8,
+    "maxSubmittedLength": 32,
+    "$comment": [
+      "normalizeLinkCode must agree character for character on both sides: the",
+      "normalized code IS the serverId nonce the mod passes to joinServer and the",
+      "website passes to hasJoined, so any divergence turns every link attempt into a",
+      "silent verification failure rather than a visible error."
+    ],
+    "normalization": [
+      { "input": "abcdefgh", "output": "ABCDEFGH" },
+      { "input": "  ABCD1234  ", "output": "ABCD1234" },
+      { "input": "ABCD-1234", "output": "ABCD1234" },
+      { "input": "AB CD 12 34", "output": "ABCD1234" },
+      { "input": "ab-cd 12-34", "output": "ABCD1234" },
+      { "input": "", "output": "" }
+    ]
+  }
+}

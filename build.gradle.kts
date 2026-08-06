@@ -83,9 +83,30 @@ val hypixelModApiVersion = deps["hypixel_mod_api_version"]
 val owoLibVersion = deps["owo_version"]
 val resourcefulConfigVersion = deps["resourcefulconfig_version"]
 val autoUpdateVersion = deps["autoupdate_version"]
+val junitVersion = deps["junit_version"]
 val skyblockerVersion = deps["skyblocker_version"]
 group = property("maven_group")!!
 val versionNumber = property("mod_version").toString().trim()
+
+/**
+ * Key/value pairs from a `.env` at the repo root, or empty when there is none.
+ *
+ * `System.getenv` reads the process environment and nothing else -- a `.env` file is a convention,
+ * not something the JVM knows about, so it has no effect unless something puts it there. For a
+ * Gradle or IDE launch, that something is [loom]'s run config below.
+ */
+val dotenv: Map<String, String> = rootProject.file(".env").let { file ->
+    if (!file.exists()) return@let emptyMap()
+
+    file.readLines()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() && !it.startsWith("#") && it.contains('=') }
+        .associate { line ->
+            val (key, value) = line.split("=", limit = 2)
+
+            key.trim() to value.trim().removeSurrounding("\"").removeSurrounding("'")
+        }
+}
 val releaseChannel = property("mod_release_channel").toString().trim().ifEmpty { "stable" }.lowercase()
 
 require(releaseChannel in setOf("stable", "beta", "alpha")) {
@@ -144,6 +165,11 @@ dependencies {
 
     testCompileOnly("org.projectlombok:lombok:$lombokVersion")
     testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
+
+    // Unit tests. Deliberately the only test dependency: the one suite here reads
+    // constants and a JSON file, so it needs no Minecraft runtime and no fixtures.
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     // Mixin Constraints
     include(implementation("com.moulberry:mixinconstraints:$mixinConstraintsVersion")!!)
 
@@ -180,11 +206,35 @@ sourceSets {
     main {
         java.srcDir(generateModuleRegistry.flatMap { it.outputDir })
     }
+    // Stonecutter builds each version out of versions/<mc>, but the sources are shared
+    // from the repo root. Set this explicitly rather than relying on that mapping
+    // extending to tests.
+    test {
+        java.setSrcDirs(listOf(rootProject.file("src/test/java")))
+        resources.setSrcDirs(emptyList<File>())
+    }
 }
 
 tasks {
     classes {
         dependsOn(buildtimeInjectionTask)
+    }
+
+    test {
+        useJUnitPlatform()
+
+        // The contract file is at the repo root; the test's working directory is the
+        // per-version build directory, so hand it the resolved path rather than making
+        // the test guess how deep it is.
+        systemProperty(
+            "bazaarutils.contractFile",
+            rootProject.file("contract/wire-format.json").absolutePath
+        )
+
+        testLogging {
+            events("failed")
+            showStandardStreams = false
+        }
     }
 
     processResources {
@@ -221,6 +271,11 @@ loom {
     runConfigs.all {
         ideConfigGenerated(true) // Run configurations are not created for subprojects by default
         runDir = "../../run" // Use a shared run folder and create separate worlds
+
+        // Puts .env into the dev client's environment, so BAZAARUTILS_API_URL can point the mod at
+        // a website running on localhost. Without this the file is inert and the mod silently
+        // falls back to production.
+        dotenv.forEach { (key, value) -> environmentVariable(key, value) }
     }
 }
 java {

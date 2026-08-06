@@ -51,6 +51,20 @@ public class DataStorage<T> {
         for (DataStorage<?> s : toSave) s.saveToSystem();
     }
 
+    /**
+     * Writes this storage now, leaving every other pending storage alone.
+     *
+     * <p>For a caller that needs one file on disk immediately — rather than at the next tick — this
+     * is the narrow tool. {@link #flushAll()} would also write every unrelated dirty storage on the
+     * caller's thread, racing the tick listener that was about to write them anyway.</p>
+     *
+     * <p>Does file IO on the calling thread.</p>
+     */
+    public void flush() {
+        REQUIRES_SAVE.remove(this);
+        saveToSystem();
+    }
+
     private final int version;
     private final Function<Integer, Codec<T>> codec;
     private final Codec<T> currentCodec;

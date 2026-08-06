@@ -39,6 +39,14 @@ public class PlayerActionUtil {
         notifyAll(Component.literal(message).withStyle(ChatFormatting.WHITE));
     }
 
+    /**
+     * Same as {@link #notifyAll(Component)}, for callers that are not on the client thread —
+     * anything writing chat from an HTTP callback or another worker has to hop back first.
+     */
+    public static void notifyAllFromAnyThread(Component message) {
+        Minecraft.getInstance().execute(() -> notifyAll(message));
+    }
+
     //only used for developer messages and debugging. notifyAll(String/Text messsage) is used to send messages to the player
     public static void notifyAll(String message, NotificationType notificationType) {
         String callingName = Util.getCallingClassName();
