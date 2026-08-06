@@ -5,7 +5,6 @@ import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.*;
 import de.hysky.skyblocker.config.SkyblockerConfig;
 import de.hysky.skyblocker.config.SkyblockerConfigManager;
-import lombok.Getter;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.BufferedReader;
@@ -23,7 +22,6 @@ public class BUCompatibilityHelper {
     private static final String REI_CONFIG_FIELD = "horizontalEntriesBoundariesColumns";
     private static final int HORIZONTALENTRIESBOUNDARIESCOLUMS_VALUE = 16;
     public static final String FIRMAMENT_MODID = "firmament";
-    @Getter
 
     private static final Gson GSON_WRITER = new GsonBuilder().setPrettyPrinting().create();
 
@@ -98,33 +96,13 @@ public class BUCompatibilityHelper {
     public static boolean isSkyblockerLoaded() {
         return FabricLoader.getInstance().isModLoaded(SKYBLOCKER_MOD_ID);
     }
-    //true == success, false == failure
-
-    public static void setSkyblockerBazaarOverlayValue(boolean enabled) {
-        if (!isSkyblockerLoaded()) {
-            Util.logMessage("Skyblocker not loaded, cannot change its config.");
-            return;
-        }
-        if(enabled) {
-            if(isSkyblockerBazaarOverlayEnabled()) {
-                Util.logMessage("Skyblocker Bazaar Overlay already enabled.");
-                return;
-            }
-            tryEnableSkyblockerBazaarOverlay();
-        } else {
-            if(!isSkyblockerBazaarOverlayEnabled()) {
-                Util.logMessage("Skyblocker Bazaar Overlay already disabled.");
-                return;
-            }
-            tryDisableSkyblockerBazaarOverlay();
-        }
-    }
 
     public static boolean isSkyblockerBazaarOverlayEnabled() {
         if (!isSkyblockerLoaded()) {
             Util.logMessage("Skyblocker not loaded, cannot check its config.");
             return false;
         }
+
         try {
             SkyblockerConfig skyblockerConfig = SkyblockerConfigManager.get();
             return skyblockerConfig.uiAndVisuals.searchOverlay.enableBazaar;
@@ -133,47 +111,34 @@ public class BUCompatibilityHelper {
             return false;
         }
     }
-    private static void tryDisableSkyblockerBazaarOverlay() {
+
+    /**
+     * Turns Skyblocker's own Bazaar search overlay on or off, which the mod does when its overlay
+     * would sit on top of ours.
+     *
+     * <p>Every access to Skyblocker's config catches {@link NoClassDefFoundError} as well as
+     * exceptions: the class is compiled against but only present when Skyblocker is installed at a
+     * version that still has this field.</p>
+     */
+    public static void setSkyblockerBazaarOverlayValue(boolean enabled) {
+        String state = enabled ? "enabled" : "disabled";
+
         if (!isSkyblockerLoaded()) {
             Util.logMessage("Skyblocker not loaded, cannot change its config.");
             return;
         }
-        try {
-            boolean currentValue = isSkyblockerBazaarOverlayEnabled();
-            PlayerActionUtil.notifyAll("Skyblocker Bazaar Overlay current state: " + currentValue, NotificationType.GUI);
 
-            if (currentValue) {
-                SkyblockerConfigManager.update((config) -> config.uiAndVisuals.searchOverlay.enableBazaar = false);
-                PlayerActionUtil.notifyAll("Attempting to disable Skyblocker Bazaar Overlay...", NotificationType.GUI);
-
-                PlayerActionUtil.notifyAll("Disabled Skyblocker Bazaar search overlay.", NotificationType.GUI);
-            } else {
-                PlayerActionUtil.notifyAll("Skyblocker Bazaar Overlay already disabled.", NotificationType.GUI);
-            }
-        } catch (NoClassDefFoundError | NoSuchFieldError | Exception e) {
-            Util.notifyError("Failed to access or modify Skyblocker config setting.", e);
-        }
-    }
-
-    private static void tryEnableSkyblockerBazaarOverlay() {
-        if (!FabricLoader.getInstance().isModLoaded(SKYBLOCKER_MOD_ID)) {
-            Util.logMessage("Skyblocker not loaded, cannot enable its config setting.");
+        if (isSkyblockerBazaarOverlayEnabled() == enabled) {
+            Util.logMessage("Skyblocker Bazaar Overlay already " + state + ".");
             return;
         }
+
         try {
-            if (!isSkyblockerBazaarOverlayEnabled()) {
-                Util.logMessage("Attempting to enable Skyblocker Bazaar Overlay...");
-                SkyblockerConfigManager.update((x) -> x.uiAndVisuals.searchOverlay.enableBazaar = true);
+            SkyblockerConfigManager.update(config -> config.uiAndVisuals.searchOverlay.enableBazaar = enabled);
 
-                PlayerActionUtil.notifyAll("Enabled Skyblocker Bazaar search overlay.", NotificationType.GUI);
-            } else {
-                Util.logMessage("Skyblocker Bazaar Overlay already enabled.");
-            }
-
+            PlayerActionUtil.notifyAll("Skyblocker Bazaar search overlay " + state + ".", NotificationType.GUI);
         } catch (NoClassDefFoundError | NoSuchFieldError | Exception e) {
-            Util.notifyError("Failed to access or modify Skyblocker config setting (enable attempt).", e);
+            Util.notifyError("Failed to modify Skyblocker config setting.", e);
         }
-
     }
-    
 }

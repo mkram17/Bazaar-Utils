@@ -120,15 +120,14 @@ public class OrderInfo extends PriceInfo {
         int orderCount = orderCountOpt.getAsInt();
 
         // The two sides are mirror images: a buyer gets ahead by bidding above the market, a
-        // seller by asking below it. Flipping the comparison for a seller lets one set of rules
-        // read "above the market is ahead, below it is behind".
-        boolean isSell = transactionType == null || transactionType.getSide() != TransactionType.Side.BUY;
-        int aheadOfMarket = isSell
-                ? Double.compare(marketPrice, pricePerItem)
-                : Double.compare(pricePerItem, marketPrice);
+        // seller by asking below it. Naming which of the two values has to be the higher one
+        // leaves a single comparison for both.
+        boolean isBuy = transactionType != null && transactionType.getSide() == TransactionType.Side.BUY;
+        double ahead = isBuy ? pricePerItem : marketPrice;
+        double behind = isBuy ? marketPrice : pricePerItem;
 
-        if (aheadOfMarket > 0) return Optional.of(PricingPosition.COMPETITIVE);
-        if (aheadOfMarket < 0) return Optional.of(PricingPosition.OUTBID);
+        if (ahead > behind) return Optional.of(PricingPosition.COMPETITIVE);
+        if (ahead < behind) return Optional.of(PricingPosition.OUTBID);
 
         // Priced exactly at the market: matched only if somebody else is there too, otherwise
         // this order is the market and counts as competitive.

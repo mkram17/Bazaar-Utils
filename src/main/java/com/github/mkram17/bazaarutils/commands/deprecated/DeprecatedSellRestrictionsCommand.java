@@ -1,29 +1,11 @@
 package com.github.mkram17.bazaarutils.commands.deprecated;
 
-import com.github.mkram17.bazaarutils.commands.BUCommand;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
-import lombok.Getter;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 @Command
 @Deprecated
-public final class DeprecatedSellRestrictionsCommand implements BUCommand {
-    @Getter
-    public final String commandName = "sellrestrictions";
-
-    @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
-        return base.executes(context -> {
-            PlayerActionUtil.notifyAll("""
-                This command has been deprecated as of version 1.0.0.
-                
-                To access the system replacing this feature, take a look at the "Instant Sell Rules" category in the "Inventory" Mod Config.
-                """
-            );
-
-            return 1;
-        });
+public final class DeprecatedSellRestrictionsCommand extends RetiredCommand {
+    public DeprecatedSellRestrictionsCommand() {
+        super("sellrestrictions", "the \"Instant Sell Rules\" category in the \"Inventory\" Mod Config");
     }
 }

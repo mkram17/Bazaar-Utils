@@ -11,7 +11,6 @@ import net.minecraft.ChatFormatting;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 @Command
 public final class DiscordCommand implements BUCommand {
@@ -28,11 +27,7 @@ public final class DiscordCommand implements BUCommand {
 
             client.schedule(() -> client.setScreen(new ConfirmLinkScreen(confirmed -> {
                 if (confirmed) {
-                    try {
-                        net.minecraft.util.Util.getPlatform().openUri(new URI(Util.DISCORD_LINK));
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
+                    net.minecraft.util.Util.getPlatform().openUri(URI.create(Util.DISCORD_LINK));
                 }
                 Minecraft.getInstance().setScreen(null);
             }, Util.DISCORD_LINK, true)));

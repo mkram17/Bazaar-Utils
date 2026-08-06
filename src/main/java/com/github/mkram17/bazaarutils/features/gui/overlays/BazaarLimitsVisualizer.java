@@ -101,21 +101,16 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
     }
 
     private static TextDisplayWidget createLimitWidget(WidgetManager.ScreenWidgetDimensions dimensions) {
-        double ordered = BazaarLimitsVisualizer.getTotalOrderedCoins();
+        double ordered = getTotalOrderedCoins();
         String current = Util.formatNumberWithPrefix(ordered);
-        String max = Util.formatNumberWithPrefix(BazaarLimitsVisualizer.COIN_LIMIT);
+        String max = Util.formatNumberWithPrefix(COIN_LIMIT);
 
-        ChatFormatting color = (ordered >= BazaarLimitsVisualizer.COIN_LIMIT) ? ChatFormatting.RED : ChatFormatting.GREEN;
+        ChatFormatting color = (ordered >= COIN_LIMIT) ? ChatFormatting.RED : ChatFormatting.GREEN;
         Component message = Component.literal("Bazaar Order Limit: ").withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(current).withStyle(color))
                 .append(Component.literal(" / " + max).withStyle(ChatFormatting.GRAY));
 
-        int spacing = BUCompatibilityHelper.isSkyblockerLoaded() ? 26 : 5;
-
-        int x = dimensions.x();
-        int y = dimensions.y() - spacing - OVERLAY_HEIGHT;
-
-        return new TextDisplayWidget(x, y, OVERLAY_WIDTH, TEXT_HEIGHT, message, TextDisplayWidget.Alignment.LEFT);
+        return line(dimensions, 0, message);
     }
 
     private static TextDisplayWidget createTimeUntilResetWidget(WidgetManager.ScreenWidgetDimensions dimensions) {
@@ -131,11 +126,18 @@ public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeat
         Component timeText = Component.literal("Until Reset: ").withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(timeLabel).withStyle(urgencyColor));
 
-        int spacing = BUCompatibilityHelper.isSkyblockerLoaded() ? 26 : 5;
+        return line(dimensions, 1, timeText);
+    }
 
-        int x = dimensions.x();
-        int y = dimensions.y() - spacing - OVERLAY_HEIGHT + TEXT_HEIGHT + LINE_GAP;
+    /** Clearance above the bazaar window; Skyblocker puts its own bar in the near gap. */
+    private static final int SPACING = 5;
+    private static final int SPACING_WITH_SKYBLOCKER = 26;
 
-        return new TextDisplayWidget(x, y, OVERLAY_WIDTH, TEXT_HEIGHT, timeText, TextDisplayWidget.Alignment.LEFT);
+    /** One line of the overlay, stacked upward from just above the bazaar window. */
+    private static TextDisplayWidget line(WidgetManager.ScreenWidgetDimensions dimensions, int lineIndex, Component text) {
+        int spacing = BUCompatibilityHelper.isSkyblockerLoaded() ? SPACING_WITH_SKYBLOCKER : SPACING;
+        int y = dimensions.y() - spacing - OVERLAY_HEIGHT + lineIndex * (TEXT_HEIGHT + LINE_GAP);
+
+        return new TextDisplayWidget(dimensions.x(), y, OVERLAY_WIDTH, TEXT_HEIGHT, text, TextDisplayWidget.Alignment.LEFT);
     }
 }
