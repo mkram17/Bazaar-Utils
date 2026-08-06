@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.utils.storage.LinkStorage;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -116,21 +117,23 @@ public final class AccountLinker {
             return;
         }
 
-        Optional<BazaarUtilsApi.ConfirmedLink> link = response.as(BazaarUtilsApi.ConfirmedLink.class);
+        BazaarUtilsApi.ConfirmedLink link = response.as(BazaarUtilsApi.ConfirmedLink.class).orElse(null);
 
         // A 2xx that is not our API's JSON almost always means the mod is pointed at the wrong
         // host — a landing page or a proxy will happily answer 200 with HTML. Saying so beats
         // "no token", which describes the symptom and hides the cause.
-        if (link.isEmpty()) {
-            notifyAllFromAnyThread(error("Got a reply from " + BazaarUtilsApi.baseUrl()
+        if (link == null) {
+            String url = BazaarUtilsApi.baseUrl();
+
+            notifyAllFromAnyThread(error("Got a reply from " + url
                     + " that was not a Bazaar Utils API response. Check that it points at the website."));
             Util.logError("Link confirm returned %d from %s with a non-API body: %s"
-                    .formatted(response.status(), BazaarUtilsApi.baseUrl(), snippet(response.body())), null);
+                    .formatted(response.status(), url, snippet(response.body())), null);
 
             return;
         }
 
-        String token = link.map(BazaarUtilsApi.ConfirmedLink::token).filter(value -> !value.isBlank()).orElse(null);
+        String token = nonBlank(link.token()).orElse(null);
 
         if (token == null) {
             notifyAllFromAnyThread(error("The website accepted the link but sent no token. Try again."));
@@ -141,30 +144,25 @@ public final class AccountLinker {
 
         // Both of these are echoed back from Mojang's answer, so prefer them; the local session is
         // only a fallback for a response shape that changed.
-        String uuid = link.map(BazaarUtilsApi.ConfirmedLink::uuid)
-                .filter(value -> !value.isBlank())
-                .orElseGet(session::dashlessUuid);
-
-        String username = link.map(BazaarUtilsApi.ConfirmedLink::username)
-                .filter(value -> !value.isBlank())
-                .orElseGet(session::username);
+        String uuid = nonBlank(link.uuid()).orElseGet(session::dashlessUuid);
+        String username = nonBlank(link.username()).orElseGet(session::username);
 
         LinkStorage.store(token, uuid, username);
-
-        // Empty from a server that does not report it, which is not the same as "not entitled" —
-        // an unknown answer keeps the ordinary message rather than warning about a subscription
-        // the account may well have.
-        Optional<Boolean> entitled = link.map(BazaarUtilsApi.ConfirmedLink::entitled);
 
         // Clears the entitlement backoff and the last-sent payload, both of which describe a link
         // that no longer applies. Without it, buying a subscription and re-linking would still sit
         // out the rest of the hour a previous 402 imposed.
         if (BazaarUtilsModules.OrderSyncService != null) {
-            BazaarUtilsModules.OrderSyncService.onLinked(entitled);
+            BazaarUtilsModules.OrderSyncService.onLinked(link.entitled());
         }
 
         notifyAllFromAnyThread(Component.literal("Linked as " + username + "! ").withStyle(ChatFormatting.GREEN)
-                .append(Component.literal(followUp(entitled)).withStyle(ChatFormatting.GRAY)));
+                .append(Component.literal(followUp(link.entitled())).withStyle(ChatFormatting.GRAY)));
+    }
+
+    /** A field the server sent something usable in, as opposed to omitted or left blank. */
+    private static Optional<String> nonBlank(String value) {
+        return Optional.ofNullable(value).filter(text -> !text.isBlank());
     }
 
     /**
@@ -173,13 +171,17 @@ public final class AccountLinker {
      * <p>A link with no active subscription succeeds and then syncs nothing. Saying so here is the
      * whole point: the alternative is promising orders will sync and letting the player discover
      * otherwise from a refused push seconds later, which reads as the link itself having broken.</p>
+     *
+     * @param entitled null from a server that does not report it, which is not the same as "not
+     *                 entitled" — an unknown answer keeps the ordinary message rather than warning
+     *                 about a subscription the account may well have.
      */
-    private static String followUp(Optional<Boolean> entitled) {
+    private static String followUp(@Nullable Boolean entitled) {
         if (!WebsiteConfig.SYNC_ORDERS_TOGGLE) {
             return "Turn on Website Sync in the settings to start syncing your orders.";
         }
 
-        if (entitled.filter(value -> !value).isPresent()) {
+        if (Boolean.FALSE.equals(entitled)) {
             return OrderSyncService.ENTITLEMENT_MESSAGE;
         }
 

@@ -17,6 +17,7 @@ import com.github.mkram17.bazaarutils.utils.web.MinecraftSessionUtil;
 import com.github.mkram17.bazaarutils.utils.web.OrderSnapshot;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.TimePassed;
 import tech.thatgravyboat.skyblockapi.api.events.time.TickEvent;
@@ -87,15 +88,15 @@ public final class OrderSyncService extends BUListener {
      * the hour, and the first snapshot under the new link could be skipped as a duplicate of one
      * pushed under the old one.</p>
      *
-     * @param entitled what the website reported about the freshly linked account, or empty from a
+     * @param entitled what the website reported about the freshly linked account, or null from a
      *                 server that does not say. A known-unentitled link has already been explained
      *                 in the link message itself, so the 402 the next push is certain to get must
      *                 not repeat it — the player would see the same thing twice, seconds apart.
      */
-    public void onLinked(Optional<Boolean> entitled) {
+    public void onLinked(@Nullable Boolean entitled) {
         blockedUntilMillis = 0;
         lastSentKey = null;
-        entitlementAnnounced = entitled.filter(value -> !value).isPresent();
+        entitlementAnnounced = Boolean.FALSE.equals(entitled);
         pending.set(true);
     }
 
