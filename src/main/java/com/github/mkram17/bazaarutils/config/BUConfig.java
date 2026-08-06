@@ -80,4 +80,10 @@ public final class BUConfig {
             translation = "bazaarutils.config.modify_indicator.hint"
     )
     public static ModifyIndicator MODIFY_INDICATOR = ModifyIndicator.AT_MODIFICATION;
+
+    @ConfigButton(
+            text = "bazaarutils.config.reset_config.runnable",
+            title = "bazaarutils.config.reset_config.label"
+    )
+    public static final Runnable RESET_CONFIG_BUTTON = ConfigUtil::confirmResetToDefaults;
 }
