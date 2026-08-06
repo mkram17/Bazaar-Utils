@@ -119,29 +119,20 @@ public class OrderInfo extends PriceInfo {
 
         int orderCount = orderCountOpt.getAsInt();
 
-        if (transactionType != null && transactionType.getSide() == TransactionType.Side.BUY) {
-            if (this.pricePerItem > marketPrice) {
-                return Optional.of(PricingPosition.COMPETITIVE);
-            } else if (this.pricePerItem < marketPrice) {
-                return Optional.of(PricingPosition.OUTBID);
-            } else {
-                if (orderCount > 1) {
-                    return Optional.of(PricingPosition.MATCHED);
-                }
-            }
-        } else {
-            if (pricePerItem < marketPrice) {
-                return Optional.of(PricingPosition.COMPETITIVE);
-            } else if (pricePerItem > marketPrice) {
-                return Optional.of(PricingPosition.OUTBID);
-            } else {
-                if (orderCount > 1) {
-                    return Optional.of(PricingPosition.MATCHED);
-                }
-            }
-        }
+        // The two sides are mirror images: a buyer gets ahead by bidding above the market, a
+        // seller by asking below it. Flipping the comparison for a seller lets one set of rules
+        // read "above the market is ahead, below it is behind".
+        boolean isSell = transactionType == null || transactionType.getSide() != TransactionType.Side.BUY;
+        int aheadOfMarket = isSell
+                ? Double.compare(marketPrice, pricePerItem)
+                : Double.compare(pricePerItem, marketPrice);
 
-        return Optional.of(PricingPosition.COMPETITIVE);
+        if (aheadOfMarket > 0) return Optional.of(PricingPosition.COMPETITIVE);
+        if (aheadOfMarket < 0) return Optional.of(PricingPosition.OUTBID);
+
+        // Priced exactly at the market: matched only if somebody else is there too, otherwise
+        // this order is the market and counts as competitive.
+        return Optional.of(orderCount > 1 ? PricingPosition.MATCHED : PricingPosition.COMPETITIVE);
     }
 
     public double getMarketPrice(TransactionType.Side transactionSide) {

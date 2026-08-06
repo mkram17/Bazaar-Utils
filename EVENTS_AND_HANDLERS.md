@@ -36,7 +36,7 @@ public final class BazaarChatHandler extends BUListener {
 }
 ```
 
-`BUListener` also exposes a `protected void registerFabricEvents()` no-op hook, for the rare listener that additionally needs a raw Fabric callback registered at subscribe time. Override it if you need one; nothing in the tree currently does.
+`BUListener` also exposes a `protected void registerFabricEvents()` no-op hook, for the rare listener that additionally needs a raw Fabric callback registered at subscribe time. Override it if you need one — `JoinMessages` and `RestrictionHelper` do.
 
 ## The module annotation pipeline
 
@@ -78,7 +78,7 @@ Providers are registered as services in `src/main/resources/META-INF/services/te
 Two easy things to get backwards:
 
 - **Priority is inverted from what you may expect: lower value runs first.** [`Priority.FIRST`](src/main/java/com/github/mkram17/bazaarutils/utils/Priority.java) is `Integer.MIN_VALUE` and runs before everything; `Priority.LAST` is `Integer.MAX_VALUE` and runs last. Prefer the named tiers (`FIRST`, `HIGHEST`, `HIGH`, `NORMAL`, `LOW`, `LOWEST`, `LAST`) over raw integers. This matches SkyblockAPI, and is the opposite of Meteor's Orbit bus that the mod used previously.
-- **A `@Subscription` method declared on an abstract base class needs `inherited = true`.** The bus only registers subscription methods declared directly on the instance's own class unless the annotation opts in. `RestrictionHelper` (the base of `InstantSellRestrictions` / `SellSacksRestrictions`) uses `@Subscription(inherited = true)` for exactly this reason.
+- **A `@Subscription` method declared on an abstract base class needs `inherited = true`.** The bus only registers subscription methods declared directly on the instance's own class unless the annotation opts in. `RestrictionHelper` (the base of `InstantSellRestrictions` / `SellSacksRestrictions`, via `SellableRestrictions`) and `InputHelperDispatcher` (the base of `AmountHelpers` / `PriceHelpers`) use `@Subscription(inherited = true)` for exactly this reason.
 
 ## Defining a new event
 

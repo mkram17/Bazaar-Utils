@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.data.SellableAPI;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
@@ -21,7 +20,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ScreenInitializedEvent;
@@ -32,13 +30,6 @@ import java.util.stream.Collectors;
 
 @Module
 public class InstantSellHighlight extends BUListener implements SlotHighlight, ToggleableFeature, ScreenConstrained {
-    public static final Identifier IDENTIFIER = Identifier.tryBuild(BazaarUtils.MOD_ID, "highlights/standard_background");
-
-    @Override
-    public Identifier getIdentifier() {
-        return IDENTIFIER;
-    }
-
     private static final Map<Integer, Integer> colorCache = new ConcurrentHashMap<>();
 
     private void populateCache(Set<String> names, AbstractContainerScreen<ChestMenu> screen, Inventory playerInventory) {

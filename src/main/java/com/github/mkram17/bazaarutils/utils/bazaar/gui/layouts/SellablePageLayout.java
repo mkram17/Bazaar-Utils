@@ -8,7 +8,6 @@ import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenSwitch;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -28,23 +27,17 @@ public final class SellablePageLayout {
 
     public static Optional<ItemInfo> getInstantSellItem(@NotNull ScreenContext context) {
         return ScreenSwitch.<Optional<ItemInfo>>on(context)
-                .when(OVERVIEW_SCREENS, ctx -> getSlot(ctx, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot))
-                .when(BazaarScreenType.PRODUCT_PAGE, ctx -> getSlot(ctx, BazaarSlots.PRODUCT_PAGE.SELL_INSTANTLY.slot))
-                .when(BazaarScreenType.PRODUCTS_CATALOG_PAGE, ctx -> getSlot(ctx, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_INVENTORY.slot))
+                .when(OVERVIEW_SCREENS, ctx -> SlotLookup.getInventoryItem(ctx, BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY.slot))
+                .when(BazaarScreenType.PRODUCT_PAGE, ctx -> SlotLookup.getInventoryItem(ctx, BazaarSlots.PRODUCT_PAGE.SELL_INSTANTLY.slot))
+                .when(BazaarScreenType.PRODUCTS_CATALOG_PAGE, ctx -> SlotLookup.getInventoryItem(ctx, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_INVENTORY.slot))
                 .orElse(Optional.empty());
     }
 
     public static Optional<ItemInfo> getSellSacksItem(@NotNull ScreenContext context) {
         return ScreenSwitch.<Optional<ItemInfo>>on(context)
-                .when(OVERVIEW_SCREENS, ctx -> getSlot(ctx, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot))
-                .when(BazaarScreenType.PRODUCT_PAGE, ctx -> getSlot(ctx, BazaarSlots.PRODUCT_PAGE.SELL_SACKS.slot))
-                .when(BazaarScreenType.PRODUCTS_CATALOG_PAGE, ctx -> getSlot(ctx, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_SACKS.slot))
+                .when(OVERVIEW_SCREENS, ctx -> SlotLookup.getInventoryItem(ctx, BazaarSlots.OVERVIEW_PAGE.SELL_SACKS.slot))
+                .when(BazaarScreenType.PRODUCT_PAGE, ctx -> SlotLookup.getInventoryItem(ctx, BazaarSlots.PRODUCT_PAGE.SELL_SACKS.slot))
+                .when(BazaarScreenType.PRODUCTS_CATALOG_PAGE, ctx -> SlotLookup.getInventoryItem(ctx, BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_SACKS.slot))
                 .orElse(Optional.empty());
-    }
-
-    private static Optional<ItemInfo> getSlot(
-            @NotNull ScreenContext context,
-            BazaarSlots.BazaarSlot slot) {
-        return context.as(ContainerScreen.class).flatMap(screen -> SlotLookup.getInventoryItem(screen.getMenu().getContainer(), slot));
     }
 }

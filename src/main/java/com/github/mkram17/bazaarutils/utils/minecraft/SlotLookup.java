@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.utils.minecraft;
 
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerQuery;
 import net.minecraft.client.Minecraft;
@@ -22,6 +23,12 @@ public class SlotLookup {
         return slot.query(inventory)
                 .first(inventory)
                 .filter(item -> !item.isEmpty());
+    }
+
+    /** As above, against whatever container the screen in {@code context} is showing. */
+    public static Optional<ItemInfo> getInventoryItem(ScreenContext context, BazaarSlots.BazaarSlot slot) {
+        return context.as(ContainerScreen.class)
+                .flatMap(screen -> getInventoryItem(screen.getMenu().getContainer(), slot));
     }
 
     public static Optional<Integer> getInventorySlotFromItemStack(Container inventory, ItemStack wanted) {

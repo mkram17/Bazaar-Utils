@@ -5,8 +5,10 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.minecraft.SlotInteractionEvent;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.minecraft.SlotHighlight;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -46,32 +48,36 @@ public abstract class MixinAbstractContainerScreen extends Screen {
 
 	@Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItem(Lnet/minecraft/world/item/ItemStack;III)V"))
 	private void drawOnItem_OrderStatusHighlight(GuiGraphics context, Slot slot, int x, int y, CallbackInfo ci) {
-		if (slot == null || !slot.hasItem() || !BazaarUtilsModules.OrderStatusHighlight.isEnabled()
-				|| !ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE)) {
-			return;
-		}
-
-		if (Minecraft.getInstance().player != null && slot.container == Minecraft.getInstance().player.getInventory()) {
-			return;
-		}
-
-		Integer color = BazaarUtilsModules.OrderStatusHighlight.getHighlightColor(slot.getContainerSlot());
-		if (color != null) draw(context, slot.x, slot.y, BazaarUtilsModules.OrderStatusHighlight.getIdentifier(), color);
+		// Orders live in the chest, so the player's own slots are not ours to tint.
+		drawHighlight(context, slot, BazaarUtilsModules.OrderStatusHighlight,
+				BazaarUtilsModules.OrderStatusHighlight.isEnabled()
+						&& ScreenManager.getInstance().isCurrent(BazaarScreenType.ORDERS_PAGE),
+				false);
 	}
 
 	@Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItem(Lnet/minecraft/world/item/ItemStack;III)V"))
 	private void drawOnItem_InstantSellHighlight(GuiGraphics context, Slot slot, int x, int y, CallbackInfo ci) {
-		if (slot == null || !slot.hasItem() || !BazaarUtilsModules.InstantSellHighlight.isEnabled()
-				|| !ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE)) {
-			return;
-		}
+		// The reverse: what an instant sell would consume is held by the player, not the chest.
+		drawHighlight(context, slot, BazaarUtilsModules.InstantSellHighlight,
+				BazaarUtilsModules.InstantSellHighlight.isEnabled()
+						&& ScreenManager.getInstance().isCurrent(BazaarScreenType.MAIN_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE),
+				true);
+	}
 
-		if (Minecraft.getInstance().player != null && slot.container != Minecraft.getInstance().player.getInventory()) {
-			return;
-		}
+	/**
+	 * Tints one slot if {@code highlight} has a colour for it. {@code onPlayerInventory} picks
+	 * which half of the screen the highlight owns — the two callers want opposite halves, and
+	 * their slot indices overlap, so getting this wrong tints unrelated items.
+	 */
+	@Unique
+	private void drawHighlight(GuiGraphics context, Slot slot, SlotHighlight highlight, boolean applies, boolean onPlayerInventory) {
+		if (slot == null || !slot.hasItem() || !applies) return;
 
-		Integer color = BazaarUtilsModules.InstantSellHighlight.getHighlightColor(slot.getContainerSlot());
-		if (color != null) draw(context, slot.x, slot.y, BazaarUtilsModules.InstantSellHighlight.getIdentifier(), color);
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (player != null && (slot.container == player.getInventory()) != onPlayerInventory) return;
+
+		Integer color = highlight.getHighlightColor(slot.getContainerSlot());
+		if (color != null) draw(context, slot.x, slot.y, highlight.getIdentifier(), color);
 	}
 
 	@Unique

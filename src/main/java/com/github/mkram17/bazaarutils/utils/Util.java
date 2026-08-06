@@ -8,13 +8,13 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.ChatFormatting;
 import org.apache.logging.log4j.LogManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,30 +26,26 @@ public class Util {
             "/bu tax {amount} to set bazaar tax. This is important for the mod to function correctly. /bu customorders to see current Custom Orders. /bu customorder {order amount} {slot number} to make new Custom Order /bu customorder remove {customorder number} to remove Custom Order (find number by using /bu customorders) \n---------------------------\n  ";
     public static final String DISCORD_LINK = "https://discord.gg/xDKjvm5hQd";
 
-    public static final Component DISCORD_TEXT = Component.literal("Discord server")
-            .withStyle(style -> {
-                try {
-                    return style
-                            .withBold(true)
-                            .withClickEvent(new ClickEvent.OpenUrl(new URI(DISCORD_LINK)))
-                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to join the Discord!")));
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+    public static final String CHANGELOG_LINK = "https://modrinth.com/mod/bazaar-utils/changelog";
 
-    public static final Component CHANGELOG = Component.literal("Click To See Changelog")
-            .withStyle(style -> {
-                try {
-                    return style
-                            .withBold(true)
-                            .withClickEvent(new ClickEvent.OpenUrl(new URI("https://modrinth.com/mod/bazaar-utils/changelog")))
-                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to see the changelog")))
-                            .applyFormat(ChatFormatting.GREEN);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+    /**
+     * Text that opens {@code url} when clicked, hovering with {@code hoverText}.
+     *
+     * <p>{@link URI#create} rather than the checked constructor: every URL passed here is a
+     * literal in this file, so a malformed one is a bug to surface at class load — not something
+     * for each call site to wrap in its own try/catch.</p>
+     */
+    public static MutableComponent link(String text, String url, String hoverText) {
+        return Component.literal(text).withStyle(style -> style
+                .withClickEvent(new ClickEvent.OpenUrl(URI.create(url)))
+                .withHoverEvent(new HoverEvent.ShowText(Component.literal(hoverText))));
+    }
+
+    public static final Component DISCORD_TEXT = link("Discord server", DISCORD_LINK, "Click to join the Discord!")
+            .withStyle(ChatFormatting.BOLD);
+
+    public static final Component CHANGELOG = link("Click To See Changelog", CHANGELOG_LINK, "Click to see the changelog")
+            .withStyle(ChatFormatting.BOLD, ChatFormatting.GREEN);
 
     public static void logMessage(String message) {
         String callingName = getCallingClassName();
@@ -72,16 +68,11 @@ public class Util {
     public static void notifyError(String message, Throwable e) {
         String callingName = getCallingClassName();
         String simpleCallingName = callingName.substring(callingName.lastIndexOf(".") + 1);
-        Component messageText = Component.literal("[" + BazaarUtils.MOD_NAME + " Error]: " + message + ". Click here for support.")
-                .withStyle(style -> {
-                    try {
-                        return style.withColor(ChatFormatting.RED)
-                                .withClickEvent(new ClickEvent.OpenUrl(new URI("https://discord.gg/xDKjvm5hQd")))
-                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to join the Discord for support")));
-                    } catch (URISyntaxException uriSyntaxException) {
-                        throw new RuntimeException(uriSyntaxException);
-                    }
-                });
+        Component messageText = link(
+                "[" + BazaarUtils.MOD_NAME + " Error]: " + message + ". Click here for support.",
+                DISCORD_LINK,
+                "Click to join the Discord for support"
+        ).withStyle(ChatFormatting.RED);
 
         if (!BazaarUtilsModules.DisableErrorNotifications.isEnabled()) {
             PlayerActionUtil.sendPlayerMessage(messageText);

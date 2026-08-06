@@ -9,33 +9,23 @@ import net.minecraft.sounds.SoundEvents;
 import java.util.concurrent.CompletableFuture;
 
 public class SoundUtil {
+    /**
+     * Plays {@code sound} locally, retrying in a second if the client is not in a world yet.
+     * A sound requested during load is normal, not an error, so nothing is logged for it.
+     */
     public static void playSound(SoundEvent sound, float volume) {
         Minecraft client = Minecraft.getInstance();
-        var player = client.player;
 
-        if (client.level == null || player == null || client.getSoundManager() == null) {
-//            Util.logError("Failed to play sound due to null value", new Throwable());
+        if (client.level == null || client.player == null || client.getSoundManager() == null) {
             Util.tickExecuteLater(20, () -> playSound(sound, volume));
             return;
         }
 
-
-        SimpleSoundInstance soundInstance = SimpleSoundInstance.forLocalAmbience(sound, 1f, volume);
-
-        client.getSoundManager().play(soundInstance);
+        client.getSoundManager().play(SimpleSoundInstance.forLocalAmbience(sound, 1f, volume));
     }
+
     public static void playSound(Holder<SoundEvent> soundEntry, float volume) {
-        Minecraft client = Minecraft.getInstance();
-
-        if (client == null || client.getSoundManager() == null || client.level == null) {
-            Util.logError("Failed to play sound due to null value", new Throwable());
-            Util.tickExecuteLater(20, () -> playSound(soundEntry, volume));
-            return;
-        }
-
-        SimpleSoundInstance soundInstance = SimpleSoundInstance.forLocalAmbience(soundEntry.value(), 1f, volume);
-
-        client.getSoundManager().play(soundInstance);
+        playSound(soundEntry.value(), volume);
     }
 
     public static void notifyMultipleTimes(int notifyNum){

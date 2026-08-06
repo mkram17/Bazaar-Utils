@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.features.gui.inventory;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
@@ -24,7 +23,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.Identifier;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerInitializedEvent;
@@ -38,13 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 //drawing done in MixinHandledScreen
 @Module
 public class OrderStatusHighlight extends BUListener implements ToggleableFeature, ScreenConstrained, SlotHighlight {
-    public static final Identifier IDENTIFIER = Identifier.tryBuild(BazaarUtils.MOD_ID, "highlights/standard_background");
-
-    @Override
-    public Identifier getIdentifier() {
-        return IDENTIFIER;
-    }
-
     private static final Map<Integer, Integer> colorCache = new ConcurrentHashMap<>();
     private static final Map<Integer, List<Component>> tooltipCache = new ConcurrentHashMap<>();
 

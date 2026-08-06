@@ -22,7 +22,8 @@ import java.util.Optional;
  * and predicates.</p>
  *
  * <p>A subclass that additionally needs a raw Fabric callback registered at subscribe time can
- * override the no-op {@link #registerFabricEvents()} hook. No listener currently overrides it.</p>
+ * override the no-op {@link #registerFabricEvents()} hook, as {@code JoinMessages} and
+ * {@code RestrictionHelper} do.</p>
  */
 public abstract class BUListener implements AbstractListener {
     @Getter
