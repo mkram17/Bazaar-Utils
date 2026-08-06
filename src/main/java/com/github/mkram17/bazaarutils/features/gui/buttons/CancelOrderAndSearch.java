@@ -11,13 +11,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 @ConfigObject
-public class CancelOrderAndSearch extends BUListener implements ItemButton {
-    @Override
+public class CancelOrderAndSearch extends BUListener {
+
     public int getSlotIndex() {
         return ButtonsConfig.CANCEL_ORDER_AND_SEARCH.slotIndex;
     }
 
-    @Override
     public ItemRef getItemRef() {
         return ItemRef.of(Items.BLUE_TERRACOTTA);
     }

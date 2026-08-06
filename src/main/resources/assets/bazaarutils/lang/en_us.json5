@@ -2,6 +2,13 @@
   "owo:extended_lang": true,
 
   "bazaarutils.ref.{}": {
+    "mark_indicator": [
+      {
+        "text": "₿",
+        "color": "gold"
+      }
+    ],
+
     "instant_sell": [{
       "text": "Instant Sell",
       "color": "green"
@@ -96,6 +103,27 @@
         { "translate": "bazaarutils.ref.community_center" }, " in the ",
         { "translate": "bazaarutils.ref.skyblock_hub" }, "."
       ]
+    },
+
+    "modify_indicator.{}": {
+      "label": "Modify Indicator",
+      "hint": [
+        "Item modified or added by Bazaar Utils will have a small indicator (",
+        { "translate":  "bazaarutils.ref.mark_indicator" }, ") to signal modification."
+      ],
+      "prefix.label": "Prefix in name",
+      "suffix.label": "Suffix in name",
+      "lore.label": "Last line in lore",
+      "at_modification.label": "At Modification",
+      "disabled.label": "No indicator"
+    },
+
+    "highlight.{}": {
+      "style.{}": {
+        "background.label": "Background Fill",
+        "foreground.label": "Foreground Tint",
+        "border.label": "Border Outline"
+      }
     },
 
     "chat.{}": {
@@ -240,9 +268,11 @@
       "separator.instant_sell_highlight.label": "Instant Sell Highlight",
       "instant_sell_highlight.{}": {
         "label": "Instant Sell Highlight",
-        "hint": [
-          "Highlights items in your inventory that would be sold by the Instant Sell button."
-        ],
+        "hint": "Highlights items in your inventory that would be sold by the Instant Sell button.",
+        "style.{}": {
+          "label": "Highlight Style",
+          "hint": "Determines how the highlight color is rendered on matching inventory slots."
+        },
         "color.label": "Highlight Color"
       },
 
@@ -250,6 +280,10 @@
       "order_status_highlight.{}": {
         "label": "Order Status Highlight",
         "hint": "Highlights the status of your Bazaar Orders by coloring the items with representative colors.",
+        "style.{}": {
+          "label": "Highlight Style",
+          "hint": "Determines how the status colors are rendered on your order slots."
+        },
 
         "competitive_color.{}": {
           "label": "Competitive Color",

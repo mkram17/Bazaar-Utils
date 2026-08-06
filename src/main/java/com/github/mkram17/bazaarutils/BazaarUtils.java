@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils;
 
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
+import com.github.mkram17.bazaarutils.generated.*;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsRepo;
@@ -13,9 +13,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
 
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsPreInitModules;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.generated.BazaarUtilsLateInitModules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.thatgravyboat.repolib.api.RepoAPI;
@@ -59,6 +56,8 @@ public class BazaarUtils implements ClientModInitializer {
         BazaarUtilsCommands.init();
 
         BazaarUtilsModules.init();
+
+        BazaarUtilsItemModifiers.init();
 
         // Persisted orders are decoded through Order.CODEC, which runs the Order constructor and
         // therefore subscribes them to the event bus already — no explicit subscription pass needed.

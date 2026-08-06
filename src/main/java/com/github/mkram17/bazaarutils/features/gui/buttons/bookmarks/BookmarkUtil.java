@@ -1,36 +1,77 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.data.stored.BookmarksStorage;
-import lombok.Getter;
-import net.minecraft.client.gui.components.WidgetSprites;
-import net.minecraft.resources.Identifier;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
+import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
 
-import java.util.List;
 import java.util.Optional;
 
-public class BookmarkUtil {
-    @Getter
-    public static Optional<Bookmark> currentBookmarkOpt = Optional.empty();
+@Module
+public final class BookmarkUtil extends BUListener {
+    record PageContext(String productId, ItemStack itemStack, String name, @Nullable Bookmark bookmark) {
+        boolean isBookmarked() {
+            return bookmark != null;
+        }
 
-    public static final Identifier DEFAULT_WIDGET_TEXTURE = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/bookmark_widget_base");
-    public static final Identifier HOVER_WIDGET_TEXTURE = Identifier.tryBuild(BazaarUtils.MOD_ID, "widget/bookmark_widget_hover");
-
-    public static final WidgetSprites SLOT_BUTTON_TEXTURES = new WidgetSprites(DEFAULT_WIDGET_TEXTURE, HOVER_WIDGET_TEXTURE);
-
-    public static void saveBookmarks() {
-        BookmarksStorage.INSTANCE.save();
+        Bookmark toBookmark() {
+            return new Bookmark(name, itemStack, productId);
+        }
     }
 
-    public static List<Bookmark> getBookmarks() {
-        return BookmarksStorage.INSTANCE.get();
+    private static @Nullable PageContext currentPage = null;
+
+    public static void setCurrentBookmark(@Nullable Bookmark bookmark) {
+        if (currentPage == null) return;
+        currentPage = new PageContext(currentPage.productId(), currentPage.itemStack(), currentPage.name(), bookmark);
     }
 
-    private BookmarkUtil() {}
+    public static Optional<PageContext> currentPage() {
+        return Optional.ofNullable(currentPage);
+    }
 
-    public static Optional<Bookmark> findMatchingBookmark(String itemName) {
-        return BookmarkUtil.getBookmarks().stream()
-                .filter(data -> data.name().equals(itemName))
-                .findAny();
+    public BookmarkUtil() {}
+
+    @Subscription
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(BazaarScreenType.PRODUCT_PAGE)
+    private void onContainerLoaded(ContainerLoadedEvent event) {
+        var storage = BookmarksStorage.INSTANCE.get();
+        if (storage == null) return;
+
+        var context = event.asContext();
+
+        var productId = ProductPageLayout.getDisplayProductInfo(context).orElse(null);
+        var stack = ProductPageLayout.getDisplayItem(context).map(ItemInfo::itemStack).orElse(null);
+        var name = Optional.ofNullable(stack).map(ItemStack::getCustomName).map(Component::getString).orElse(null);
+
+        if (productId == null || name == null) {
+            Util.logMessage("BookmarkUtil: no product info on ITEM_PAGE — clearing currentPage");
+            currentPage = null;
+
+            return;
+        }
+
+        Bookmark existing = storage.stream()
+                .filter(bookmark -> bookmark.productId().equals(productId))
+                .findFirst().orElse(null);
+
+        currentPage = new PageContext(productId, stack, name, existing);
+    }
+
+    @Subscription
+    private void onScreenChange(ScreenChangeEvent.Post event) {
+        currentPage = null;
     }
 }

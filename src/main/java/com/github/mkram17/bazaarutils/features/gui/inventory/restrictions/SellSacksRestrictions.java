@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.data.SellableAPI;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
-import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
@@ -15,11 +15,12 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.AbstractItemModifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-@Module
+@ItemModifier
 public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictions.SellSacksState> {
     public record SellSacksState(
             @NotNull
@@ -40,13 +41,12 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
     }
 
     @Override
-    protected String getMessagePrefix() {
-        return "Sell sacks protected by rules:";
-    }
-
-    @Override
     protected List<RestrictionControl<?>> getRestrictors() {
         return InventoryConfig.RestrictionRules.restrictors(RestrictionTarget.SELL_SACKS);
+    }
+
+    public SellSacksRestrictions() {
+        super("Sell Sacks Restrictions");
     }
 
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.MAIN_PAGE, BazaarScreenType.SEARCH_PAGE, BazaarScreenType.PRODUCTS_CATALOG_PAGE, BazaarScreenType.PRODUCT_PAGE);
@@ -56,8 +56,16 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
         return SCREENS;
     }
 
-    public SellSacksRestrictions() {
-        super("Sell Sacks Restrictions");
+    public final EnumSet<AbstractItemModifier.ModifierSource> MODIFIER_SOURCES = EnumSet.of(ModifierSource.CONTAINER);
+
+    @Override
+    public EnumSet<AbstractItemModifier.ModifierSource> getModifierSources() {
+        return MODIFIER_SOURCES; // to prevent instantiating the LIST every single iteration
+    }
+
+    @Override
+    protected String getMessagePrefix() {
+        return "Sell sacks protected by rules:";
     }
 
     @Override
