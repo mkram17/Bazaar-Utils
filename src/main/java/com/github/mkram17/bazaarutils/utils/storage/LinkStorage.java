@@ -21,13 +21,16 @@ import com.github.mkram17.bazaarutils.utils.web.MinecraftSessionUtil;
  * account A's token and land on account A's dashboard.</p>
  */
 public final class LinkStorage {
+    /** How much of a token {@link LinkData#tokenPrefix} keeps. */
+    private static final int TOKEN_PREFIX_LENGTH = 8;
+
     private LinkStorage() {}
 
     public static final class LinkData {
         /** Bearer token, shown by the website exactly once at link time. */
         public String token;
 
-        /** First 8 characters of the token. Not a secret — it exists so a user can tell installs apart. */
+        /** The token's first characters. Not a secret — it exists so a user can tell installs apart. */
         public String tokenPrefix;
 
         /** Dashless lowercase UUID of the account this token was issued for. */
@@ -39,10 +42,25 @@ public final class LinkStorage {
 
     public static final DataStorage<LinkData> INSTANCE = new DataStorage<>(LinkData::new, "website_link", LinkData.class);
 
-    public static boolean isLinked() {
+    /**
+     * The stored link, or empty when there is nothing usable to read.
+     *
+     * <p>Every accessor below goes through this. A half-written file, or the empty data
+     * {@link #clear()} leaves behind, must read as "not linked" rather than as a link with null
+     * fields that each caller has to check for itself.</p>
+     */
+    private static Optional<LinkData> linked() {
         LinkData data = INSTANCE.get();
 
-        return data.token != null && !data.token.isBlank() && data.uuid != null && !data.uuid.isBlank();
+        return isSet(data.token) && isSet(data.uuid) ? Optional.of(data) : Optional.empty();
+    }
+
+    private static boolean isSet(String value) {
+        return value != null && !value.isBlank();
+    }
+
+    public static boolean isLinked() {
+        return linked().isPresent();
     }
 
     /**
@@ -51,13 +69,9 @@ public final class LinkStorage {
      * must go through it rather than reading {@link #INSTANCE} directly.
      */
     public static Optional<String> tokenFor(UUID profileId) {
-        if (!isLinked()) return Optional.empty();
-
-        LinkData data = INSTANCE.get();
-
-        return data.uuid.equals(MinecraftSessionUtil.dashless(profileId))
-                ? Optional.of(data.token)
-                : Optional.empty();
+        return linked()
+                .filter(data -> data.uuid.equals(MinecraftSessionUtil.dashless(profileId)))
+                .map(data -> data.token);
     }
 
     /**
@@ -69,27 +83,21 @@ public final class LinkStorage {
      * saying the opposite.</p>
      */
     public static boolean isStoredToken(String token) {
-        LinkData data = INSTANCE.get();
-
-        return isLinked() && data.token.equals(token);
+        return linked().filter(data -> data.token.equals(token)).isPresent();
     }
 
     public static Optional<String> linkedUsername() {
-        LinkData data = INSTANCE.get();
-
-        return isLinked() ? Optional.ofNullable(data.username) : Optional.empty();
+        return linked().map(data -> data.username);
     }
 
     public static Optional<String> tokenPrefix() {
-        LinkData data = INSTANCE.get();
-
-        return isLinked() ? Optional.ofNullable(data.tokenPrefix) : Optional.empty();
+        return linked().map(data -> data.tokenPrefix);
     }
 
     public static void store(String token, String uuid, String username) {
         LinkData data = new LinkData();
         data.token = token;
-        data.tokenPrefix = token.length() >= 8 ? token.substring(0, 8) : token;
+        data.tokenPrefix = token.substring(0, Math.min(TOKEN_PREFIX_LENGTH, token.length()));
         data.uuid = uuid;
         data.username = username;
 
