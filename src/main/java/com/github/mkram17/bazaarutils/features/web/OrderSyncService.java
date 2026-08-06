@@ -230,8 +230,8 @@ public final class OrderSyncService extends BUListener {
      * What to tell a player whose token was refused.
      *
      * <p>Keyed off the server's {@code reason} rather than its prose, so the text can name the
-     * actual cause. The old single message asserted the link had gone invalid, which was a guess:
-     * a 401 covers an unlinked account and a token superseded by another install just as much.</p>
+     * actual cause: a 401 covers an unlinked account and a token superseded by another install
+     * just as much as a link that went bad, and only the server knows which.</p>
      */
     private static String reconnectMessage(JsonHttpClient.Response response) {
         String cause = switch (response.errorReason().orElse("")) {

@@ -115,10 +115,6 @@ public final class LinkStorage {
      * issued once and is unrecoverable afterwards, so a crash in that window would cost the user a
      * re-link.
      *
-     * <p>Writes this storage only. It used to call {@code flushAll()}, which wrote every dirty
-     * storage on this thread — racing the tick listener that does the same, for files that had
-     * nothing to do with linking.</p>
-     *
      * <p>Does file IO on the calling thread; call it off the render thread.</p>
      */
     private static void persistNow() {

@@ -80,24 +80,21 @@ public final class MinecraftSessionUtil {
      * "Mojang is down, try later" versus "this session can never do this".
      */
     public static String describeFailure(AuthenticationException exception) {
-        if (exception instanceof AuthenticationUnavailableException) {
-            return "Mojang's session servers are unreachable. Try again in a few minutes.";
-        }
-
-        if (exception instanceof InvalidCredentialsException || exception instanceof ForcedUsernameChangeException) {
-            return "Your Minecraft session is not valid. Restart the game and log in again.";
-        }
-
-        if (exception instanceof InsufficientPrivilegesException) {
-            return "This account is not allowed to use multiplayer, so it cannot be verified.";
-        }
-
-        if (exception instanceof UserBannedException) {
-            return "This account is banned from multiplayer, so it cannot be verified.";
-        }
-
-        return "Could not verify your Minecraft session. Linking requires a genuine (non-offline) login.";
+        return switch (exception) {
+            case AuthenticationUnavailableException ignored ->
+                    "Mojang's session servers are unreachable. Try again in a few minutes.";
+            case InvalidCredentialsException ignored -> STALE_SESSION;
+            case ForcedUsernameChangeException ignored -> STALE_SESSION;
+            case InsufficientPrivilegesException ignored ->
+                    "This account is not allowed to use multiplayer, so it cannot be verified.";
+            case UserBannedException ignored ->
+                    "This account is banned from multiplayer, so it cannot be verified.";
+            default -> "Could not verify your Minecraft session. Linking requires a genuine (non-offline) login.";
+        };
     }
+
+    /** Two different exceptions mean the same thing to a player: log in again. */
+    private static final String STALE_SESSION = "Your Minecraft session is not valid. Restart the game and log in again.";
 
     /** Strips dashes and lowercases, matching the website's stored form. */
     public static String dashless(UUID uuid) {

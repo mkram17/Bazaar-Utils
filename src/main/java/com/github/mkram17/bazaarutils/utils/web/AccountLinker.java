@@ -44,9 +44,9 @@ public final class AccountLinker {
             return;
         }
 
-        Optional<MinecraftSessionUtil.Session> session = MinecraftSessionUtil.currentSession();
+        MinecraftSessionUtil.Session session = MinecraftSessionUtil.currentSession().orElse(null);
 
-        if (session.isEmpty()) {
+        if (session == null) {
             notifyAllFromAnyThread(error("Could not read your Minecraft session. Linking requires a genuine (non-offline) login."));
 
             return;
@@ -67,13 +67,13 @@ public final class AccountLinker {
 
         CompletableFuture
                 .runAsync(() -> joinServer(code), JsonHttpClient.executor())
-                .thenCompose(ignored -> BazaarUtilsApi.confirmLink(code, session.get().username()))
+                .thenCompose(ignored -> BazaarUtilsApi.confirmLink(code, session.username()))
                 .whenComplete((response, throwable) -> {
                     try {
                         if (throwable != null) {
                             handleFailure(throwable);
                         } else {
-                            handleResponse(response, session.get());
+                            handleResponse(response, session);
                         }
                     } finally {
                         IN_FLIGHT.set(false);
