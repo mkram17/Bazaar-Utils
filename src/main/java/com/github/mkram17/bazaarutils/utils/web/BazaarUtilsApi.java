@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -64,23 +65,17 @@ public final class BazaarUtilsApi {
     public record Endpoint(String url, String source) {}
 
     public static Endpoint resolveBaseUrl() {
-        String property = System.getProperty(BASE_URL_PROPERTY);
-
-        if (property != null && !property.isBlank()) {
-            return new Endpoint(trimTrailingSlash(property.trim()), "system property " + BASE_URL_PROPERTY);
-        }
-
-        String environment = System.getenv(BASE_URL_ENV);
-
-        if (environment != null && !environment.isBlank()) {
-            return new Endpoint(trimTrailingSlash(environment.trim()), "environment variable " + BASE_URL_ENV);
-        }
-
-        return new Endpoint(DEFAULT_BASE_URL, "built-in default");
+        return override(System.getProperty(BASE_URL_PROPERTY), "system property " + BASE_URL_PROPERTY)
+                .or(() -> override(System.getenv(BASE_URL_ENV), "environment variable " + BASE_URL_ENV))
+                .orElseGet(() -> new Endpoint(DEFAULT_BASE_URL, "built-in default"));
     }
 
-    private static String trimTrailingSlash(String url) {
-        return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+    /** An override that was actually set, trimmed of the whitespace and trailing slash callers add. */
+    private static Optional<Endpoint> override(String value, String source) {
+        return Optional.ofNullable(value)
+                .map(String::trim)
+                .filter(url -> !url.isEmpty())
+                .map(url -> new Endpoint(url.endsWith("/") ? url.substring(0, url.length() - 1) : url, source));
     }
 
     /**
@@ -130,16 +125,11 @@ public final class BazaarUtilsApi {
     public record ConfirmedLink(String token, String username, String uuid, Boolean entitled) {}
 
     /**
-     * Serializes an order snapshot into the sync request body.
+     * Serializes an order snapshot into the sync request body. {@link OrderSyncRequest} documents
+     * what {@code partial} and {@code username} mean to the server.
      *
      * <p>Kept separate from {@link #syncOrders} so callers can compare the serialized form against
      * the last one they sent and skip an identical push.</p>
-     *
-     * @param partial  whether this snapshot is known not to describe every live order. The server
-     *                 closes anything missing from a <em>complete</em> snapshot, so an order the
-     *                 mod merely failed to parse must not be sent as one that left the Bazaar.
-     * @param username the name this session is playing under, so the website can keep the display
-     *                 name current. See {@link OrderSyncRequest#username()}.
      */
     public static String serializeOrderSync(List<OrderSnapshot> orders, boolean partial, String username) {
         return WebJson.GSON.toJson(new OrderSyncRequest(orders, partial, username));
