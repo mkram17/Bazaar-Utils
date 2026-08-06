@@ -43,10 +43,15 @@ public record OrderSnapshot(
     static final int MAX_STRING_LENGTH = 128;
 
     /**
-     * SkyBlock profiles are not tracked by the mod yet (see the plan's decision 1). The column is
-     * non-null on the server and defaults to this, meaning "pushed by a mod without profile
-     * support" — sending it explicitly makes the eventual switch a one-line change here rather
-     * than a schema migration there.
+     * Longest {@code profileId} the website accepts. A profile whose name somehow exceeds it is
+     * sent unlabelled rather than rejected: a 400 would cost the whole sync, not one field.
+     */
+    static final int MAX_PROFILE_ID_LENGTH = 64;
+
+    /**
+     * What the server reads as "pushed by a mod that does not know its profile". The column is
+     * non-null there and defaults to this, so it stays the value for a snapshot collected before
+     * any {@code ProfileChangeEvent} has been seen.
      */
     private static final String UNKNOWN_PROFILE_ID = "";
 
@@ -57,8 +62,13 @@ public record OrderSnapshot(
      * product ID, a volume the parser returned {@code -1} for. Dropping those one at a time keeps
      * a single unparseable order from costing the whole sync a 400. Callers are expected to report
      * how many were dropped — see {@code OrderSyncService}.</p>
+     *
+     * @param profileId the SkyBlock profile these orders were loaded under. Orders are stored per
+     *                  profile, so an unlabelled snapshot merges every profile the player has into
+     *                  one bucket — and since absence is the server's close signal, syncing after a
+     *                  profile switch then closes the orders belonging to the profile just left.
      */
-    public static Optional<OrderSnapshot> of(Order order) {
+    public static Optional<OrderSnapshot> of(Order order, String profileId) {
         String productId = order.getProductID();
         String itemName = order.getName();
 
@@ -105,8 +115,14 @@ public record OrderSnapshot(
                 // renders it as "as of last sync" rather than as a live signal. Null when the
                 // market data needed to compute it was unavailable, and omitted from the payload.
                 order.getPricingPosition(),
-                UNKNOWN_PROFILE_ID
+                sendableProfileId(profileId)
         ));
+    }
+
+    private static String sendableProfileId(String profileId) {
+        return profileId == null || profileId.isBlank() || profileId.length() > MAX_PROFILE_ID_LENGTH
+                ? UNKNOWN_PROFILE_ID
+                : profileId;
     }
 
     private static boolean isUnusable(String value) {

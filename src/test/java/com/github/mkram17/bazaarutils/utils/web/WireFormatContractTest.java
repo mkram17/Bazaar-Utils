@@ -133,6 +133,16 @@ class WireFormatContractTest {
     }
 
     @Test
+    @DisplayName("The profile id cap matches the contract")
+    void profileIdCapMatches() {
+        assertEquals(
+                orderSync.get("maxProfileIdLength").getAsInt(),
+                OrderSnapshot.MAX_PROFILE_ID_LENGTH,
+                "profileId cap"
+        );
+    }
+
+    @Test
     @DisplayName("normalizeLinkCode agrees with the website on every listed case")
     void normalizationMatches() {
         // The one that fails silently. The normalized code IS the serverId nonce the website

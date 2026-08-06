@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.TimePassed;
+import tech.thatgravyboat.skyblockapi.api.events.profile.ProfileChangeEvent;
 import tech.thatgravyboat.skyblockapi.api.events.time.TickEvent;
 
 import java.time.Duration;
@@ -129,6 +130,25 @@ public final class OrderSyncService extends BUListener {
     }
 
     /**
+     * A profile switch retires everything this service knows.
+     *
+     * <p>{@link #ordersPageRead} is the claim that the stored order list came from a Bazaar this
+     * session actually read. Order storage is per profile, so a switch replaces that list with the
+     * new profile's persisted one — which describes whatever its Bazaar looked like when it was
+     * last played. That is exactly the stale data the flag keeps off the wire at startup, and the
+     * new profile has to earn it back by having its own orders page read.</p>
+     *
+     * <p>{@link #lastSentKey} goes too. It says "the server already has this", which was only ever
+     * true of the profile it was recorded under.</p>
+     */
+    @Subscription
+    private void onProfileChange(ProfileChangeEvent event) {
+        ordersPageRead = false;
+        pending.set(false);
+        lastSentKey = null;
+    }
+
+    /**
      * The debounce. {@code @TimePassed} caps this handler at one run per window, so a page that
      * loads repeatedly still produces at most one push per 5 seconds.
      */
@@ -163,6 +183,9 @@ public final class OrderSyncService extends BUListener {
         if (token == null) return;
 
         Snapshot snapshot = collectSnapshot();
+
+        if (snapshot == null) return;
+
         String body = BazaarUtilsApi.serializeOrderSync(snapshot.orders(), snapshot.partial(), session.username());
         String key = session.dashlessUuid() + "|" + body;
 
@@ -303,8 +326,21 @@ public final class OrderSyncService extends BUListener {
         }
     }
 
-    private static Snapshot collectSnapshot() {
+    /**
+     * @return null when there is no profile loaded to describe, which is not the same as a profile
+     *         with no orders. Order storage is per profile and reports null until the first
+     *         {@code ProfileChangeEvent} lands, and an empty complete snapshot is how the server is
+     *         told every order is gone — so "nothing to read yet" must skip the push, not send one.
+     */
+    private static @Nullable Snapshot collectSnapshot() {
         List<Order> orders = UserOrdersStorage.INSTANCE.get();
+
+        if (orders == null) return null;
+
+        // Labels the snapshot with the profile the orders were actually read from, not whichever
+        // one is current by the time the request goes out.
+        String profileId = UserOrdersStorage.INSTANCE.loadedProfile().orElse("");
+
         List<OrderSnapshot> collected = new ArrayList<>();
 
         // The cap counts orders the server will accept, not orders that exist, so an order that
@@ -313,7 +349,7 @@ public final class OrderSyncService extends BUListener {
         int read = 0;
 
         while (read < orders.size() && collected.size() < MAX_ORDERS_PER_SYNC) {
-            OrderSnapshot.of(orders.get(read++)).ifPresent(collected::add);
+            OrderSnapshot.of(orders.get(read++), profileId).ifPresent(collected::add);
         }
 
         if (read < orders.size()) {

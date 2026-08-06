@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -114,6 +115,20 @@ public class ProfileStorage<T> {
         Slot<T> current = slot;
 
         return current == null ? null : current.data();
+    }
+
+    /**
+     * The profile the currently loaded data belongs to, or empty when nothing is loaded yet.
+     *
+     * <p>Deliberately the slot's profile rather than {@link #currentProfile}: a caller that is about
+     * to label the data it just read needs the profile that data <em>came from</em>. The two differ
+     * for as long as a switch has been seen but the reload has not happened, and labelling one
+     * profile's orders with another's is worse than not labelling them at all.</p>
+     */
+    public Optional<String> loadedProfile() {
+        Slot<T> current = slot;
+
+        return current == null ? Optional.empty() : Optional.of(current.profile());
     }
 
     public void set(T newData) {
