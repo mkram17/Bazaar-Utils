@@ -318,14 +318,18 @@ public class ItemModifiers extends BUListener {
             });
 
             builder.onClick(button -> {
-                Result result = Result.UNMODIFIED;
+                boolean acted = false;
 
                 for (AbstractItemModifier modifier : matching) {
-                    result = modifier.onClick(stack, button, slot, context);
+                    Result result = modifier.onClick(stack, button, slot, context);
+                    acted |= result.acted();
+
                     if (!result.propagate()) break;
                 }
 
-                return result.acted() ? kotlin.Unit.INSTANCE : null;
+                // Any handler acting has to swallow the click, otherwise an earlier
+                // modifier's action is lost and the click still reaches the server.
+                return acted ? kotlin.Unit.INSTANCE : null;
             });
         });
 
