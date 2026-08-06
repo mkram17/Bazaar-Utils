@@ -67,20 +67,24 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
 
     public PriceCharts() {}
 
+    private static @Nullable String cleanName(ItemStack stack) {
+        return DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
+    }
+
+    private static boolean shouldShow(@Nullable String key) {
+        return key != null && SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName);
+    }
+
     @Override
     public boolean appliesTo(ItemStack stack) {
         if (stack.isEmpty() || ItemTag.GLASS_PANES.contains(stack)) return false;
 
-        String key = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
-
-        return SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName);
+        return shouldShow(cleanName(stack));
     }
 
     @Override
     public Result modifyLore(ItemStack stack, List<Component> lore, @Nullable Result previous, @Nullable ScreenContext context) {
-        String key = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
-
-        if (!SHOW_CACHE.computeIfAbsent(key, OrderInfo::isValidName)) return Result.UNMODIFIED;
+        if (!shouldShow(cleanName(stack))) return Result.UNMODIFIED;
 
         return withMerger(lore, merger -> {
             copyAll(merger);
@@ -107,9 +111,9 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
     public Result onClick(ItemStack stack, int button, @Nullable Slot slot, @Nullable ScreenContext context) {
         if (!Minecraft.getInstance().hasShiftDown() || !Minecraft.getInstance().hasControlDown()) return Result.UNMODIFIED;
 
-        String key = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCLEAN_NAME());
+        String key = cleanName(stack);
 
-        if (!SHOW_CACHE.getOrDefault(key, false)) return Result.UNMODIFIED;
+        if (key == null || !SHOW_CACHE.getOrDefault(key, false)) return Result.UNMODIFIED;
 
         Optional<String> productId = BazaarDataUtil.findProductIdOptional(key); // All cached items are safe
         if (productId.isEmpty()) return Result.UNMODIFIED;
