@@ -98,6 +98,14 @@ public final class MinecraftSessionUtil {
 
     /** Strips dashes and lowercases, matching the website's stored form. */
     public static String dashless(UUID uuid) {
-        return uuid.toString().replace("-", "").toLowerCase(Locale.ROOT);
+        return dashless(uuid.toString());
+    }
+
+    /**
+     * The same normalization for a UUID that arrives as text — off the wire, or out of storage —
+     * where nothing has guaranteed its casing or dashes.
+     */
+    public static String dashless(String uuid) {
+        return uuid.replace("-", "").toLowerCase(Locale.ROOT);
     }
 }

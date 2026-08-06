@@ -25,6 +25,7 @@ import tech.thatgravyboat.skyblockapi.api.events.time.TickEvent;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.github.mkram17.bazaarutils.utils.PlayerActionUtil.notifyAllFromAnyThread;
@@ -69,6 +70,17 @@ public final class OrderSyncService extends BUListener {
     private final AtomicBoolean pending = new AtomicBoolean(false);
     private final AtomicBoolean inFlight = new AtomicBoolean(false);
 
+    /**
+     * Whether the Manage Orders menu has been read since the game started.
+     *
+     * <p>{@code UserOrdersStorage} is persisted, so it holds a list on startup that describes
+     * whatever the Bazaar looked like when the game last closed — or, on a fresh install, nothing
+     * at all. A snapshot built from that is not evidence of anything, and a complete snapshot is
+     * how the server is told an order is gone. Nothing may be pushed until the menu has actually
+     * been read at least once.</p>
+     */
+    private volatile boolean ordersPageRead;
+
     /** {@code uuid|body} of the last push the server accepted. */
     private volatile String lastSentKey;
 
@@ -85,6 +97,11 @@ public final class OrderSyncService extends BUListener {
      * the hour, and the first snapshot under the new link could be skipped as a duplicate of one
      * pushed under the old one.</p>
      *
+     * <p>The push it queues is gated on {@link #ordersPageRead}. Linking is the one moment the
+     * mod is asked to send without the menu having been opened, and on a fresh install the stored
+     * order list is empty — pushing that as a complete snapshot would close every order the
+     * account already has on the website, which is exactly what re-linking is not supposed to do.</p>
+     *
      * @param entitled what the website reported about the freshly linked account, or null from a
      *                 server that does not say. A known-unentitled link has already been explained
      *                 in the link message itself, so the 402 the next push is certain to get must
@@ -94,7 +111,10 @@ public final class OrderSyncService extends BUListener {
         blockedUntilMillis = 0;
         lastSentKey = null;
         entitlementAnnounced = Boolean.FALSE.equals(entitled);
-        pending.set(true);
+
+        if (ordersPageRead) {
+            pending.set(true);
+        }
     }
 
     /**
@@ -104,6 +124,7 @@ public final class OrderSyncService extends BUListener {
     @Subscription(priority = Priority.LOW)
     @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
     private void onOrdersPage(ContainerLoadedEvent event) {
+        ordersPageRead = true;
         pending.set(true);
     }
 
@@ -157,7 +178,22 @@ public final class OrderSyncService extends BUListener {
                     .formatted(snapshot.dropped()));
         }
 
-        BazaarUtilsApi.syncOrders(token, body).whenComplete((response, throwable) -> {
+        // Building the request can fail before there is ever a future to complete: a malformed
+        // BAZAARUTILS_API_URL override makes URI parsing or the http/https scheme check throw
+        // right here. Letting that escape would leave inFlight set for the rest of the session,
+        // silently killing syncing even after the override is corrected.
+        CompletableFuture<JsonHttpClient.Response> request;
+
+        try {
+            request = BazaarUtilsApi.syncOrders(token, body);
+        } catch (RuntimeException exception) {
+            inFlight.set(false);
+            Util.logError("Could not build the order sync request; check the API URL", exception);
+
+            return;
+        }
+
+        request.whenComplete((response, throwable) -> {
             try {
                 if (throwable != null) {
                     // Already retried by the HTTP layer. Nothing here is worth a chat message —

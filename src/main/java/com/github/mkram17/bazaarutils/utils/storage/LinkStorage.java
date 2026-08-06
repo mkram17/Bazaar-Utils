@@ -98,11 +98,23 @@ public final class LinkStorage {
         LinkData data = new LinkData();
         data.token = token;
         data.tokenPrefix = token.substring(0, Math.min(TOKEN_PREFIX_LENGTH, token.length()));
-        data.uuid = uuid;
+        data.uuid = normalizeUuid(uuid);
         data.username = username;
 
         INSTANCE.set(data);
         persistNow();
+    }
+
+    /**
+     * Forces the stored UUID into the dashless lowercase form {@link #tokenFor} compares against.
+     *
+     * <p>The value comes off the wire, and the wire format does not pin its casing or dashes. An
+     * unnormalized one is not a visible error anywhere: the link saves, {@code /bu link} reports
+     * it as connected, and every sync afterwards is dropped by the account-switch guard because
+     * the equality never holds.</p>
+     */
+    private static String normalizeUuid(String uuid) {
+        return uuid == null ? null : MinecraftSessionUtil.dashless(uuid);
     }
 
     public static void clear() {

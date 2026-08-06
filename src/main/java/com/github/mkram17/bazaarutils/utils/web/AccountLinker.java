@@ -88,10 +88,25 @@ public final class AccountLinker {
                     + "/dashboard/minecraft, then run /bu link <code>.").withStyle(ChatFormatting.GRAY);
         }
 
-        String username = LinkStorage.linkedUsername().orElse("your account");
-        String prefix = LinkStorage.tokenPrefix().orElse("????????");
+        String summary = "Linked as " + LinkStorage.linkedUsername().orElse("your account")
+                + " (token " + LinkStorage.tokenPrefix().orElse("????????") + "…)";
 
-        return Component.literal("Linked as " + username + " (token " + prefix + "…). ")
+        // Every push is filtered by the owning UUID, so a link that belongs to another Minecraft
+        // account syncs nothing and says nothing. Reporting it as a working link would leave the
+        // player watching a dashboard that never updates with no way to find out why. A session we
+        // cannot read at all is not evidence of a mismatch, so it keeps the ordinary message.
+        boolean otherAccount = MinecraftSessionUtil.currentSession()
+                .map(session -> LinkStorage.tokenFor(session.profileId()).isEmpty())
+                .orElse(false);
+
+        if (otherAccount) {
+            return Component.literal(summary + ", but that is a different Minecraft account than the one "
+                            + "you are logged in as, so nothing will sync. Run /bu link <code> to link this "
+                            + "account instead.")
+                    .withStyle(ChatFormatting.YELLOW);
+        }
+
+        return Component.literal(summary + ". ")
                 .withStyle(ChatFormatting.GREEN)
                 .append(Component.literal(WebsiteConfig.SYNC_ORDERS_TOGGLE
                                 ? "Order syncing is on."
