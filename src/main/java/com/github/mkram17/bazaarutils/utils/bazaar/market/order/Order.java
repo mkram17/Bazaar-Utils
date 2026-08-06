@@ -145,7 +145,7 @@ public class Order extends OrderInfo implements AbstractListener {
 
         boolean shouldNotifyUser = settings.isEnabled() && settings.emitChatMessage;
         boolean shouldPlayNotificationSound = settings.isEnabled() && settings.emitClientSound;
-        boolean shouldAutoOpenBazaar = settings.isEnabled() && settings.emitClientSound;
+        boolean shouldAutoOpenBazaar = settings.isEnabled() && settings.autoOpenBazaar;
 
         if (!shouldNotifyUser || !OrderUtil.getUserOrders().contains(this)) {
             return;
