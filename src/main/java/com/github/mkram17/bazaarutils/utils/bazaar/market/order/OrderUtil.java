@@ -83,8 +83,8 @@ public final class OrderUtil {
             return -1;
         }
 
-        OptionalDouble marketSellPriceOpt = BazaarDataUtil.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER));
-        OptionalDouble marketBuyPriceOpt = BazaarDataUtil.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
+        OptionalDouble marketSellPriceOpt = BazaarDataUtil.findItemPriceOptional(productID, TransactionType.SELL_ORDER);
+        OptionalDouble marketBuyPriceOpt = BazaarDataUtil.findItemPriceOptional(productID, TransactionType.BUY_ORDER);
 
         if(marketBuyPriceOpt.isEmpty() || marketSellPriceOpt.isEmpty()) {
             Util.notifyError("Could not resolve market prices for " + productID + " when calculating price for position. Buy price present: " + marketBuyPriceOpt.isPresent() + " Sell price present: " + marketSellPriceOpt.isPresent(), new Exception("Price resolution error"));

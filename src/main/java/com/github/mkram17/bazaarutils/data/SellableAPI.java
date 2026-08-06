@@ -176,10 +176,10 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
             Optional<String> productId = BazaarDataUtil.findProductIdOptional(name);
             if (productId.isEmpty()) return false;
 
-            OptionalDouble topPrice = BazaarDataUtil.findItemPriceOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER));
+            OptionalDouble topPrice = BazaarDataUtil.findItemPriceOptional(productId.get(), TransactionType.BUY_ORDER);
             if (topPrice.isEmpty() || topPrice.getAsDouble() == 0.0) return false;
 
-            OptionalInt orderCount = BazaarDataUtil.getOrderCountOptional(productId.get(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER), topPrice.getAsDouble());
+            OptionalInt orderCount = BazaarDataUtil.getOrderCountOptional(productId.get(), TransactionType.BUY_ORDER, topPrice.getAsDouble());
             return orderCount.isPresent() && orderCount.getAsInt() > 0;
         }
     }
@@ -199,10 +199,10 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
 
         SellablePageLayout.getInstantSellItem(context).ifPresent(info -> {
             InstantSell.parse(info.itemStack(), context);
-            Targets.parse(event, InstantSell.orders(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+            Targets.parse(event, InstantSell.orders(), TransactionType.INSTANT_SELL);
 
             if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE)) {
-                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT)));
+                InstantSell.otherItems().ifPresent(other -> Targets.parseOtherItems(event, other.volume(), TransactionType.INSTANT_SELL));
             }
         });
 
@@ -223,12 +223,12 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
         if (name == null) return;
 
         if (InstantSell.orders().stream().anyMatch(order -> order.getName().equalsIgnoreCase(name))) {
-            Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+            Targets.stamp(item, TransactionType.INSTANT_SELL);
             return;
         }
 
         if (InstantSell.otherItems().isPresent() && Targets.hasActiveBuyOrders(name)) {
-            Targets.stamp(item, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+            Targets.stamp(item, TransactionType.INSTANT_SELL);
         }
     }
 

@@ -167,7 +167,7 @@ public final class BazaarChatHandler extends BUListener {
      */
     public static void handleFlip(ArrayList<Component> siblings) {
         int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER), 3, 4, priceIndex);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_FLIPPED, TransactionType.SELL_ORDER, 3, 4, priceIndex);
     }
 
     /**
@@ -178,7 +178,7 @@ public final class BazaarChatHandler extends BUListener {
     public static void handleCancelled(ArrayList<Component> siblings) {
         int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
 
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_CANCELLED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER), 2, 4, priceIndex);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.ORDER_CANCELLED, TransactionType.SELL_ORDER, 2, 4, priceIndex);
     }
 
     /**
@@ -189,7 +189,7 @@ public final class BazaarChatHandler extends BUListener {
     public static void handleInstaSell(ArrayList<Component> siblings) {
         int priceIndex = TextSearch.indexOf(siblings, "for") + 1;
 
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_SELL, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT), 2, 4, priceIndex);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_SELL, TransactionType.INSTANT_SELL, 2, 4, priceIndex);
     }
 
     /**
@@ -198,7 +198,7 @@ public final class BazaarChatHandler extends BUListener {
      * @param siblings the text components of the message
      */
     public static void handleInstaBuy(ArrayList<Component> siblings) {
-        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_BUY, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT), 2, 4, 6);
+        processOrderEvent(siblings, BazaarChatEvent.BazaarEventTypes.INSTA_BUY, TransactionType.INSTANT_BUY, 2, 4, 6);
     }
 
     /**

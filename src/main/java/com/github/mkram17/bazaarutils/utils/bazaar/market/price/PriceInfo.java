@@ -40,7 +40,7 @@ public class PriceInfo {
         if (transactionType == null) {
             // if the transactionType is null, its value does not matter, but the rest of the code expects one.
             //TODO revisit whether this still needs to have default value
-            this.transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
+            this.transactionType = TransactionType.SELL_ORDER;
         }
     }
 }

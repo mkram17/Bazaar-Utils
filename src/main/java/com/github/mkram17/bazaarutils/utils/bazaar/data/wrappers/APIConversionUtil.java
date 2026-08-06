@@ -36,12 +36,12 @@ public final class APIConversionUtil {
         List<ProductOrder> buy = new ArrayList<>();
 
         if (apiProduct.getSellSummary() != null) {
-            var convertedSellSummaries = convertAPIProductSummaries(apiProduct.getSellSummary(), TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT));
+            var convertedSellSummaries = convertAPIProductSummaries(apiProduct.getSellSummary(), TransactionType.INSTANT_SELL);
             sell.addAll(convertedSellSummaries);
         }
 
         if (apiProduct.getBuySummary() != null) {
-            var convertedBuySummaries = convertAPIProductSummaries(apiProduct.getBuySummary(), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT));
+            var convertedBuySummaries = convertAPIProductSummaries(apiProduct.getBuySummary(), TransactionType.INSTANT_BUY);
             buy.addAll(convertedBuySummaries);
         }
 

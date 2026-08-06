@@ -66,13 +66,32 @@ public class TransactionType {
     @Getter
     private final Method method;
 
+    /** Buying at the current ask, without an order. */
+    public static final TransactionType INSTANT_BUY = new TransactionType(Side.BUY, Method.INSTANT);
+
+    /** Selling at the current bid, without an offer. */
+    public static final TransactionType INSTANT_SELL = new TransactionType(Side.SELL, Method.INSTANT);
+
+    /** A buy order resting on the book. */
+    public static final TransactionType BUY_ORDER = new TransactionType(Side.BUY, Method.ORDER);
+
+    /** A sell offer resting on the book. */
+    public static final TransactionType SELL_ORDER = new TransactionType(Side.SELL, Method.ORDER);
+
     private TransactionType(Side side, Method method) {
         this.side = side; this.method = method;
         this.priceType = resolvePriceType(side, method);
     }
 
+    /**
+     * The instance for a side+method pair. There are only four, and the type is immutable, so the
+     * constants above are returned rather than a fresh object — prefer naming one of them directly
+     * where both values are known at the call site.
+     */
     public static TransactionType of(Side side, Method method) {
-        return new TransactionType(side, method);
+        if (method == Method.INSTANT) return side == Side.BUY ? INSTANT_BUY : INSTANT_SELL;
+
+        return side == Side.BUY ? BUY_ORDER : SELL_ORDER;
     }
 
     /**

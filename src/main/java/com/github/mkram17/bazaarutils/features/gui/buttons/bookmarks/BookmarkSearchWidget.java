@@ -48,8 +48,8 @@ public class BookmarkSearchWidget {
             MutableComponent text = Component.literal(bookmark.name()).withStyle(ChatFormatting.BOLD);
 
             Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withBold(false);
-            text.append(Component.literal("\nInsta Buy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT))) + " coins").setStyle(style));
-            text.append(Component.literal("\nInsta Sell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.INSTANT))) + " coins").setStyle(style));
+            text.append(Component.literal("\nInsta Buy: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType.INSTANT_BUY)) + " coins").setStyle(style));
+            text.append(Component.literal("\nInsta Sell: " + Util.getPrettyString(OrderUtil.getPriceForPosition(bookmark.productID(), PricingPosition.MATCHED, TransactionType.INSTANT_SELL)) + " coins").setStyle(style));
 
             ItemSlotButtonWidget button = new ItemSlotButtonWidget(
                     buttonX,
