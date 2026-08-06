@@ -350,7 +350,7 @@ public class ItemModifiers extends BUListener {
         List<AbstractItemModifier> applied = new ArrayList<>();
         Result result = Result.UNMODIFIED;
 
-        for (AbstractItemModifier modifier : MODIFIERS) {
+        for (AbstractItemModifier modifier : allModifiers().toList()) {
             if (!modifier.isEnabled() || !modifier.getModifierSources().contains(source)) continue;
             if (!modifier.appliesToScreen(context)) continue;
             if (!modifier.appliesTo(stack)) continue;
@@ -379,7 +379,7 @@ public class ItemModifiers extends BUListener {
         var context = ScreenManager.getInstance().currentOrNull();
         AbstractItemModifier.ModifierSource source = resolveTooltipSource(stack, context);
 
-        for (AbstractItemModifier modifier : MODIFIERS) {
+        for (AbstractItemModifier modifier : allModifiers().toList()) {
             if (!modifier.isEnabled() || !modifier.getModifierSources().contains(source)) continue;
             if (!modifier.appliesToScreen(context)) continue;
             if (!modifier.appliesTo(stack)) continue;
