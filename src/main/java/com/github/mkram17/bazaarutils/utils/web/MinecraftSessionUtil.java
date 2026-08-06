@@ -28,6 +28,9 @@ import java.util.UUID;
  * without credentials — cannot link. That is deliberate; the alternative is linking blind.</p>
  */
 public final class MinecraftSessionUtil {
+    /** Two different exceptions mean the same thing to a player: log in again. */
+    private static final String STALE_SESSION = "Your Minecraft session is not valid. Restart the game and log in again.";
+
     private MinecraftSessionUtil() {}
 
     /** The identity of the currently logged-in client. */
@@ -92,9 +95,6 @@ public final class MinecraftSessionUtil {
             default -> "Could not verify your Minecraft session. Linking requires a genuine (non-offline) login.";
         };
     }
-
-    /** Two different exceptions mean the same thing to a player: log in again. */
-    private static final String STALE_SESSION = "Your Minecraft session is not valid. Restart the game and log in again.";
 
     /** Strips dashes and lowercases, matching the website's stored form. */
     public static String dashless(UUID uuid) {

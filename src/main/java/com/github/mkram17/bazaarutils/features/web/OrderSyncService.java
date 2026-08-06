@@ -23,6 +23,7 @@ import tech.thatgravyboat.skyblockapi.api.events.base.predicates.TimePassed;
 import tech.thatgravyboat.skyblockapi.api.events.time.TickEvent;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -268,19 +269,22 @@ public final class OrderSyncService extends BUListener {
 
     private static Snapshot collectSnapshot() {
         List<Order> orders = UserOrdersStorage.INSTANCE.get();
-        int considered = Math.min(orders.size(), MAX_ORDERS_PER_SYNC);
+        List<OrderSnapshot> collected = new ArrayList<>();
 
-        if (orders.size() > considered) {
-            Util.logMessage("Order sync capped at %d orders; %d were not sent."
-                    .formatted(MAX_ORDERS_PER_SYNC, orders.size() - considered));
+        // The cap counts orders the server will accept, not orders that exist, so an order that
+        // fails to parse costs a slot in neither. Everything past the point this stops is what
+        // makes the snapshot truncated.
+        int read = 0;
+
+        while (read < orders.size() && collected.size() < MAX_ORDERS_PER_SYNC) {
+            OrderSnapshot.of(orders.get(read++)).ifPresent(collected::add);
         }
 
-        List<OrderSnapshot> collected = orders.stream()
-                .limit(considered)
-                .flatMap(order -> OrderSnapshot.of(order).stream())
-                .toList();
+        if (read < orders.size()) {
+            Util.logMessage("Order sync capped at %d orders; %d were not sent."
+                    .formatted(MAX_ORDERS_PER_SYNC, orders.size() - read));
+        }
 
-        // Whatever the cap let through and OrderSnapshot could not describe.
-        return new Snapshot(collected, considered - collected.size(), orders.size() > considered);
+        return new Snapshot(collected, read - collected.size(), read < orders.size());
     }
 }
