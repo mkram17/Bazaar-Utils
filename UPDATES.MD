@@ -59,6 +59,10 @@ follows your Minecraft language setting.
 ### Per-profile data
 Your tracked orders and daily Bazaar limit are now stored per SkyBlock profile, so switching profiles
 shows the right numbers instead of mixing them together. Bookmarks stay shared across profiles.
+### Reset all settings
+A **Reset** button at the top of the settings screen, and a `/bu resetconfig` command, put every
+setting back to its default. Both ask for confirmation first. Your bookmarks, tracked orders and
+daily limits are not touched.
 ---
 ## Improvements
 - **Custom buy amounts are now "Input Helpers"** and are configured in the settings screen instead of
