@@ -5,8 +5,6 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
-import com.github.mkram17.bazaarutils.misc.NotificationType;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -68,8 +66,6 @@ public final class BookmarkUtil extends BUListener {
         Bookmark existing = storage.stream()
                 .filter(bookmark -> bookmark.productId().equals(productId))
                 .findFirst().orElse(null);
-
-        PlayerActionUtil.notifyAll("%s — bookmarked=%b".formatted(productId, existing != null), NotificationType.FEATURE);
 
         currentPage = new PageContext(productId, stack, name, existing);
     }
