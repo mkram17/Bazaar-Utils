@@ -13,6 +13,18 @@
     "  utils/web/BazaarUtilsApi.java  normalizeLinkCode, maxOrdersPerSync, request records"
   ],
   "orderSync": {
+    "$comment": [
+      "profileId names the SkyBlock profile an order was tracked on. The mod sends a",
+      "real value now that it tracks profiles; it sends \"\" only when a snapshot is",
+      "collected before the profile is known, which the server's non-null default",
+      "already covers.",
+      "",
+      "This matters for closure. A complete snapshot means 'these are all the open",
+      "orders' and absence is what closes a row, so the server has to scope that to",
+      "(account, profileId) — a player who switches profiles otherwise closes every",
+      "order belonging to the profile they just left, and re-opens them as new rows on",
+      "switching back."
+    ],
     "endpoint": "/api/orders/sync",
     "maxOrdersPerSync": 200,
     "sides": ["BUY", "SELL"],
