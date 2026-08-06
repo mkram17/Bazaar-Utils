@@ -23,12 +23,11 @@ import tech.thatgravyboat.skyblockapi.api.events.base.predicates.TimePassed;
 import tech.thatgravyboat.skyblockapi.api.events.time.TickEvent;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.github.mkram17.bazaarutils.utils.PlayerActionUtil.notifyAllFromAnyThread;
+import static com.github.mkram17.bazaarutils.utils.web.BazaarUtilsApi.MAX_ORDERS_PER_SYNC;
 
 /**
  * Pushes the tracked order list to the website after the Manage Orders menu is read.
@@ -53,9 +52,6 @@ import static com.github.mkram17.bazaarutils.utils.PlayerActionUtil.notifyAllFro
  */
 @Module
 public final class OrderSyncService extends BUListener {
-    /** The wire contract's ceiling. Declared in {@link BazaarUtilsApi} because it is protocol. */
-    private static final int MAX_ORDERS_PER_SYNC = BazaarUtilsApi.MAX_ORDERS_PER_SYNC;
-
     /** How long to stop trying after a 402. The subscription will not come back within seconds. */
     private static final long ENTITLEMENT_BACKOFF_MILLIS = Duration.ofHours(1).toMillis();
 
@@ -134,20 +130,19 @@ public final class OrderSyncService extends BUListener {
             return;
         }
 
-        Optional<MinecraftSessionUtil.Session> session = MinecraftSessionUtil.currentSession();
+        MinecraftSessionUtil.Session session = MinecraftSessionUtil.currentSession().orElse(null);
 
-        if (session.isEmpty()) return;
+        if (session == null) return;
 
-        Optional<String> token = LinkStorage.tokenFor(session.get().profileId());
-
-        // Empty means either "nothing linked" or "linked to a different Minecraft account". Both
+        // Null means either "nothing linked" or "linked to a different Minecraft account". Both
         // are ordinary states, not errors, so they stay silent.
-        if (token.isEmpty()) return;
+        String token = LinkStorage.tokenFor(session.profileId()).orElse(null);
+
+        if (token == null) return;
 
         Snapshot snapshot = collectSnapshot();
-        String body = BazaarUtilsApi.serializeOrderSync(
-                snapshot.orders(), snapshot.partial(), session.get().username());
-        String key = session.get().dashlessUuid() + "|" + body;
+        String body = BazaarUtilsApi.serializeOrderSync(snapshot.orders(), snapshot.partial(), session.username());
+        String key = session.dashlessUuid() + "|" + body;
 
         // The floor: sitting on the orders page must not cost a request every window.
         if (key.equals(lastSentKey)) return;
@@ -161,14 +156,14 @@ public final class OrderSyncService extends BUListener {
                     .formatted(snapshot.dropped()));
         }
 
-        BazaarUtilsApi.syncOrders(token.get(), body).whenComplete((response, throwable) -> {
+        BazaarUtilsApi.syncOrders(token, body).whenComplete((response, throwable) -> {
             try {
                 if (throwable != null) {
                     // Already retried by the HTTP layer. Nothing here is worth a chat message —
                     // a dropped sync fixes itself the next time the orders page opens.
                     Util.logError("Order sync request failed", throwable);
                 } else {
-                    handleResponse(response, key, token.get());
+                    handleResponse(response, key, token);
                 }
             } finally {
                 inFlight.set(false);
@@ -255,7 +250,7 @@ public final class OrderSyncService extends BUListener {
      * What was collected, and whether it is the whole picture.
      *
      * @param dropped   orders that could not be described well enough to send
-     * @param truncated whether the list was cut short at {@link #MAX_ORDERS_PER_SYNC}
+     * @param truncated whether the list was cut short at {@link BazaarUtilsApi#MAX_ORDERS_PER_SYNC}
      */
     private record Snapshot(List<OrderSnapshot> orders, int dropped, boolean truncated) {
         /**
@@ -273,29 +268,19 @@ public final class OrderSyncService extends BUListener {
 
     private static Snapshot collectSnapshot() {
         List<Order> orders = UserOrdersStorage.INSTANCE.get();
-        List<OrderSnapshot> collected = new ArrayList<>();
-        int dropped = 0;
-        boolean truncated = false;
+        int considered = Math.min(orders.size(), MAX_ORDERS_PER_SYNC);
 
-        for (Order order : orders) {
-            if (collected.size() >= MAX_ORDERS_PER_SYNC) {
-                Util.logMessage("Order sync capped at %d orders; %d were not sent."
-                        .formatted(MAX_ORDERS_PER_SYNC, orders.size() - MAX_ORDERS_PER_SYNC));
-
-                truncated = true;
-
-                break;
-            }
-
-            Optional<OrderSnapshot> snapshot = OrderSnapshot.of(order);
-
-            if (snapshot.isPresent()) {
-                collected.add(snapshot.get());
-            } else {
-                dropped++;
-            }
+        if (orders.size() > considered) {
+            Util.logMessage("Order sync capped at %d orders; %d were not sent."
+                    .formatted(MAX_ORDERS_PER_SYNC, orders.size() - considered));
         }
 
-        return new Snapshot(collected, dropped, truncated);
+        List<OrderSnapshot> collected = orders.stream()
+                .limit(considered)
+                .flatMap(order -> OrderSnapshot.of(order).stream())
+                .toList();
+
+        // Whatever the cap let through and OrderSnapshot could not describe.
+        return new Snapshot(collected, considered - collected.size(), orders.size() > considered);
     }
 }

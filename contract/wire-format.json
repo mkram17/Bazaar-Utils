@@ -9,9 +9,8 @@
     "change and needs a matching change in mkram17/Bazaar-Utils.",
     "",
     "The mod's counterparts live in:",
-    "  utils/web/OrderSnapshot.java        enums, string caps",
-    "  utils/web/BazaarUtilsApi.java       normalizeLinkCode, request records",
-    "  features/web/OrderSyncService.java  maxOrdersPerSync"
+    "  utils/web/OrderSnapshot.java   enums, string caps",
+    "  utils/web/BazaarUtilsApi.java  normalizeLinkCode, maxOrdersPerSync, request records"
   ],
   "orderSync": {
     "endpoint": "/api/orders/sync",
