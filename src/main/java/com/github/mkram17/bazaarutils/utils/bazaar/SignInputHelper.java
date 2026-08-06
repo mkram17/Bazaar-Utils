@@ -371,7 +371,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             if (matcher.find()) {
                 try {
                     // Flip orders are always on the buy side; the sell price is computed after matching
-                    return Optional.of(new PriceInfo(Double.parseDouble(matcher.group(1).replace(",", "")), TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER)));
+                    return Optional.of(new PriceInfo(Double.parseDouble(matcher.group(1).replace(",", "")), TransactionType.BUY_ORDER));
                 } catch (NumberFormatException e) {
                     Util.notifyError("Error parsing order price in TransactionFlip", e);
                 }

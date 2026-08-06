@@ -6,23 +6,21 @@ import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
-import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
-import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
-import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 
-import java.util.stream.IntStream;
-
 @Getter
 @ConfigObject
-public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount implements ListEntryInfoProvider {
+public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount {
+    /** Key of the slot layout this button is placed on; see {@code SlotRendererProvider}. */
+    private static final String SLOT_PROVIDER = "bazaar:sell_offer_amount";
+
     @ConfigEntry(
             id = "item_id",
             translation = "bazaarutils.config.buttons.button.container.item_id.label"
@@ -42,8 +40,8 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
             value = "The container slot where the button will be registered at",
             translation = "bazaarutils.config.buttons.button.container.slot_index.hint"
     )
-    @ContainerSlot(rows = 4, cols = 9, provider = "bazaar:sell_offer_amount")
-    @ConfigOption.Range(min = 0, max = 35)
+    @ContainerSlot(rows = 4, cols = 9, provider = SLOT_PROVIDER)
+    @ConfigOption.Range(min = 0, max = SlotProviders.MAX_SLOT_INDEX)
     @ConfigOption.Renderer("bazaarutils:slot")
     public int slotIndex;
 
@@ -72,12 +70,7 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
     )
     public int fixedAmount = 1;
 
-    public TransactionType transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
-
-    @Override
-    public ItemRef getItemRef() {
-        return ItemRef.of(this::getItemId);
-    }
+    public TransactionType transactionType = TransactionType.SELL_ORDER;
 
     private static final ScreenMatcher<BazaarScreenType> SCREENS = BazaarScreenMatcher.of(BazaarScreenType.SELL_OFFER_AMOUNT);
 
@@ -92,7 +85,7 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
     }
 
     public SellOfferAmountHelper() {
-        this(getNextSlotIndex());
+        this(SlotProviders.firstUnlockedSlot(SLOT_PROVIDER));
     }
 
     @Override
@@ -111,18 +104,5 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
             case MAX -> "Offers the whole of your inventory";
             case FIXED -> "Offers " + fixedAmount + " items";
         });
-    }
-
-    @Override
-    public Component getDescription(int index) {
-        return Component.literal("Slot " + slotIndex + " · " + resolveItem().getName().getString());
-    }
-
-    private static int getNextSlotIndex() {
-        return IntStream.rangeClosed(0, 35)
-                .filter(i -> !SlotProviders.get("bazaar:sell_offer_amount").getStack(i)
-                        .getOrDefault(CustomDataComponents.SLOT_SELECTOR_LOCKED, false))
-                .findFirst()
-                .orElse(35);
     }
 }

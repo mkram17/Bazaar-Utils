@@ -7,7 +7,9 @@ import com.github.mkram17.bazaarutils.utils.SoundUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemButton;
+import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
+import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +19,7 @@ import tech.thatgravyboat.skyblockapi.api.events.screen.SlotClickEvent;
 
 import java.util.Optional;
 
-public abstract class InputHelper<T> implements ItemButton, ScreenConstrained {
+public abstract class InputHelper<T> implements ItemButton, ScreenConstrained, ListEntryInfoProvider {
     @Getter
     protected String name;
 
@@ -25,6 +27,27 @@ public abstract class InputHelper<T> implements ItemButton, ScreenConstrained {
      * The market action which this helper is operating on (to buy, to sell; instant, order).
      */
     protected abstract TransactionType getTransactionType();
+
+    /**
+     * The item shown as this button. Declared here rather than resolved here because each helper
+     * exposes it as its own {@code @ConfigEntry} — resourcefulconfig only reads fields declared on
+     * the concrete class, so the field cannot be hoisted even though its use can.
+     */
+    public abstract String getItemId();
+
+    @Override
+    public ItemRef getItemRef() {
+        return ItemRef.of(this::getItemId);
+    }
+
+    /**
+     * The subtitle of this helper's row in the config list. Every helper says the same thing here;
+     * what distinguishes them is {@code getTitle}, which each one supplies.
+     */
+    @Override
+    public Component getDescription(int index) {
+        return Component.literal("Slot " + getSlotIndex() + " · " + resolveItem().getName().getString());
+    }
 
 //    Event cycle routines stuff
 
