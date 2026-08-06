@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.Nullable;
+import tech.thatgravyboat.skyblockapi.helpers.McPlayer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -43,6 +44,14 @@ public class OrderInfo extends PriceInfo {
 
     @Getter @Setter
     private ItemInfo itemInfo;
+
+    /**
+     * Username from the order's {@code By:} lore line. Hypixel writes that line on every order while
+     * the profile is in a co-op and omits it entirely otherwise, so {@code null} means "solo profile,
+     * or not seen on the orders page yet" — never "placed by me".
+     */
+    @Getter @Setter
+    private @Nullable String author;
 
     /**
      * Creates a container that tracks market data for a specific Bazaar product.
@@ -289,9 +298,23 @@ public class OrderInfo extends PriceInfo {
     }
 
     /**
+     * Whether a co-op member other than the local player placed this order.
+     *
+     * <p>Derived per call rather than stored, so a persisted order stays correct if the client is
+     * later signed in as a different account.
+     */
+    public boolean isCoopOrder() {
+        return author != null && !author.equalsIgnoreCase(McPlayer.INSTANCE.getName());
+    }
+
+    /**
      * Converts the current container into a fully tracked {@link Order}.
      */
     public Order toBazaarOrder() {
-        return new Order(name, volume, pricePerItem, transactionType.getSide(), null);
+        Order order = new Order(name, volume, pricePerItem, transactionType.getSide(), null);
+
+        order.setAuthor(author);
+
+        return order;
     }
 }

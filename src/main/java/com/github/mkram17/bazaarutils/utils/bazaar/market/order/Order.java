@@ -60,11 +60,17 @@ public class Order extends OrderInfo implements AbstractListener {
             // it from BazaarDataUtil.
             Codec.STRING
                     .optionalFieldOf("product_id", "")
-                    .forGetter(order -> order.getProductID() == null ? "" : order.getProductID())
-    ).apply(instance, (name, volume, pricePerItem, side, amountClaimed, amountFilled, productId) -> {
+                    .forGetter(order -> order.getProductID() == null ? "" : order.getProductID()),
+            // Optional so orders written before authorship was tracked still decode; absent means
+            // "author unknown", which isCoopOrder treats as not-coop.
+            Codec.STRING
+                    .optionalFieldOf("author")
+                    .forGetter(order -> Optional.ofNullable(order.getAuthor()))
+    ).apply(instance, (name, volume, pricePerItem, side, amountClaimed, amountFilled, productId, author) -> {
         Order order = new Order(name, volume, pricePerItem, side, null);
         order.setAmountClaimed(amountClaimed);
         order.setAmountFilled(amountFilled); // restores OrderStatus via existing logic
+        author.ifPresent(order::setAuthor);
         return order;
     }));
 
