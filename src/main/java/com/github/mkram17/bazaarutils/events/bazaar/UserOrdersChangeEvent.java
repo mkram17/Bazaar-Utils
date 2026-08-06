@@ -19,7 +19,6 @@ import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
  *     switch (event.getChangeType()) {
  *         case ADD -> handleNewOrder(event.getOrder());
  *         case REMOVE -> handleRemovedOrder(event.getOrder());
- *         case UPDATE -> handleUpdatedOrder(event.getOrder());
  *     }
  * }
  * }
@@ -36,9 +35,7 @@ public final class UserOrdersChangeEvent extends SkyBlockEvent {
         /** A new order was added to the tracked orders */
         ADD,
         /** An existing order was removed from the tracked orders */
-        REMOVE,
-        /** An existing order was updated (e.g., volume or price changed) */
-        UPDATE
+        REMOVE
     }
     
     /**

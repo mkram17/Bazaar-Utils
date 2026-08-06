@@ -101,7 +101,6 @@ Field lists and usage examples are in each class's javadoc — follow the link.
 | [`SlotInteractionEvent`](src/main/java/com/github/mkram17/bazaarutils/events/minecraft/SlotInteractionEvent.java) | `events.minecraft` | Cancellable; every slot interaction — mouse and keyboard — on a container screen. | `MixinAbstractContainerScreen` |
 | [`BazaarChatEvent<T>`](src/main/java/com/github/mkram17/bazaarutils/events/bazaar/BazaarChatEvent.java) | `events.bazaar` | A parsed bazaar chat action (order created / filled / claimed / flipped / insta-sell / insta-buy). | `BazaarChatHandler` |
 | [`BazaarDataUpdateEvent`](src/main/java/com/github/mkram17/bazaarutils/events/bazaar/BazaarDataUpdateEvent.java) | `events.bazaar` | Fresh bazaar market data arrived from the Hypixel API. | `BazaarDataManager` |
-| [`UserOrdersChangeEvent`](src/main/java/com/github/mkram17/bazaarutils/events/bazaar/UserOrdersChangeEvent.java) | `events.bazaar` | The tracked user-orders list changed (add / remove / update). | `OrderUtil`, `Order` |
-| [`OutbidOrderEvent`](src/main/java/com/github/mkram17/bazaarutils/events/bazaar/OutbidOrderEvent.java) | `events.bazaar` | An order was outbid or became competitive again. **Defined but not currently posted anywhere.** | — |
+| [`UserOrdersChangeEvent`](src/main/java/com/github/mkram17/bazaarutils/events/bazaar/UserOrdersChangeEvent.java) | `events.bazaar` | The tracked user-orders list changed (add / remove). | `OrderUtil`, `Order` |
 
 Listeners that fire or consume these (they are handlers, not events): `ContainerLoadedHandler` posts `ContainerLoadedEvent`; `BazaarChatHandler` parses chat and *posts* `BazaarChatEvent`; `BazaarChatEventHandler` *consumes* `BazaarChatEvent`.
