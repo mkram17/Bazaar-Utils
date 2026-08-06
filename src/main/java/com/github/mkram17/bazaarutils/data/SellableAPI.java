@@ -8,7 +8,7 @@ import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.components.InstantSellParser;
-import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.SellableLore;
 import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
  *
  * {@code SellSacks} is imprecise as players can hold very well over 1300 products on their sacks,
  * and thus for any sellable context (a scoped catalog page or the direct bazaar overview),
- * most items will be folded onto {@link SellSacksParser.SellSacksResult.OtherItems}.
+ * most items will be folded onto {@link SellableLore.OtherItems}.
  *
  * This is a limitation per the lack of a proper {@code BazaarScreenType} -> {@code CATALOGS} reference
  * to simply index via {@link SacksAPI}, because Hypixel doesn't offer a proper endpoint of the Bazaar Catalogs/Products.
@@ -54,8 +54,8 @@ import java.util.stream.Collectors;
 @Module
 public class SellableAPI extends BUListener implements ScreenConstrained {
     private record SellDataState(
-            @Nullable InstantSellParser.InstantSellResult instantSell,
-            @Nullable SellSacksParser.SellSacksResult sellSacks,
+            @Nullable SellableLore.Result instantSell,
+            @Nullable SellableLore.Result sellSacks,
             Map<ItemStack, TransactionType> targets
     ) {
         static SellDataState empty() {
@@ -76,7 +76,7 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
             return cache != null ? cache.items() : List.of();
         }
 
-        public static Optional<InstantSellParser.InstantSellResult.OtherItems> otherItems() {
+        public static Optional<SellableLore.OtherItems> otherItems() {
             var cache = STATE.get().instantSell();
 
             return cache != null ? cache.otherItems() : Optional.empty();
@@ -84,8 +84,8 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
 
         public static void parse(ItemStack stack, ScreenContext context) {
             var result = context.is(BazaarScreenType.PRODUCT_PAGE)
-                    ? InstantSellParser.parseProductPageOrder(stack).orElse(new InstantSellParser.InstantSellResult(List.of(), Optional.empty()))
-                    : InstantSellParser.parseInstantSellOrders(stack);
+                    ? InstantSellParser.parseProductPageOrder(stack).orElse(SellableLore.Result.empty())
+                    : SellableLore.parse(stack);
 
             STATE.updateAndGet(data -> new SellDataState(result, data.sellSacks(), data.targets()));
         }
@@ -102,14 +102,14 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
             return cache != null ? cache.items() : List.of();
         }
 
-        public static Optional<SellSacksParser.SellSacksResult.OtherItems> otherItems() {
+        public static Optional<SellableLore.OtherItems> otherItems() {
             var cache = STATE.get().sellSacks();
 
             return cache != null ? cache.otherItems() : Optional.empty();
         }
 
         public static void parse(ItemStack stack) {
-            var result = SellSacksParser.parseSackOrders(stack);
+            var result = SellableLore.parse(stack);
 
             STATE.updateAndGet(data -> new SellDataState(data.instantSell(), result, data.targets()));
         }

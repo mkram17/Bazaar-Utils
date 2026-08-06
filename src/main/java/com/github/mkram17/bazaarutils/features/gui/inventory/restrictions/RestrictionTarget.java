@@ -6,30 +6,24 @@ import com.teamresourceful.resourcefulconfig.api.types.info.Translatable;
 import net.minecraft.network.chat.Component;
 
 public enum RestrictionTarget implements TooltipProvider, Translatable {
-    INSTANT_SELL {
-        @Override
-        public String getTranslationKey() {
-            return "bazaarutils.config.inventory.restrictions.features.target.instant_sell.label";
-        }
+    INSTANT_SELL("instant_sell"),
+    SELL_SACKS("sell_sacks");
 
-        @Override
-        public Component getTooltip() {
-            return Component.translatable("bazaarutils.config.inventory.restrictions.features.target.instant_sell.label");
-        }
-    },
-    SELL_SACKS {
-        @Override
-        public String getTranslationKey() {
-            return "bazaarutils.config.inventory.restrictions.features.target.sell_sacks.label";
-        }
+    private final String translationKey;
 
-        @Override
-        public Component getTooltip() {
-            return Component.translatable("bazaarutils.config.inventory.restrictions.features.target.sell_sacks.label");
-        }
-    };
+    RestrictionTarget(String id) {
+        this.translationKey = "bazaarutils.config.inventory.restrictions.features.target." + id + ".label";
+    }
 
-    public abstract String getTranslationKey();
+    @Override
+    public String getTranslationKey() {
+        return translationKey;
+    }
+
+    @Override
+    public Component getTooltip() {
+        return Component.translatable(translationKey);
+    }
 
     public static boolean isRestrictorFeatureEnabled(RestrictionTarget target) {
         for (RestrictionTarget scoped : InventoryConfig.RestrictionRules.RESTRICTIONS_ENABLED_FEATURES) {

@@ -13,74 +13,19 @@ import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Parses the product page's Instant Sell button. The catalog and overview pages phrase the same
+ * offer as a per-product list, which {@link SellableLore} reads instead.
+ *
  * @see com.github.mkram17.bazaarutils.data.SellableAPI
  */
 public final class InstantSellParser {
-    /** Parsed result from an Instant Sell container. */
-    public record InstantSellResult(List<OrderInfo> items, Optional<OtherItems> otherItems) {
-        /** Volume folded under the "Other items" aggregation line — volume and total value actionable only, no per-product breakdown. */
-        public record OtherItems(int volume, double totalValue) {}
-    }
-
     private InstantSellParser() {}
-
-    /** Each sellable-item entry in an instant-sell lore:
-     *  " 432x Fig Log for 1,296 coins"
-     *  Siblings: [" ", quantity(green), "x "(gray), product(white), "for "(gray), "NNN coins"(gold)]
-     */
-    private static final Pattern ITEM_LINE_PATTERN = Pattern.compile("(?<volume>[\\d,]+)x (?<product>.+?) for (?<price>[\\d,.]+) coins");
-
-    /**
-     * Parses the instant-sell button present on catalog/overview pages
-     * for data of what's currently sellable under the current screen context.
-     *
-     * <p>Targets</p>
-     * <ul>
-     *  <li>{@code MAIN_PAGE | SEARCH_PAGE}: {@code BazaarSlots.OVERVIEW_PAGE.SELL_INVENTORY},</li>
-     *  <li>{@code PRODUCTS_CATALOG_PAGE}: {@code BazaarSlots.PRODUCTS_CATALOG_PAGE.SELL_INVENTORY}</li>
-     * </ul>
-     */
-    public static InstantSellResult parseInstantSellOrders(ItemStack instantSellStack) {
-        List<OrderInfo> items = new ArrayList<>();
-        Optional<InstantSellResult.OtherItems> otherItems = Optional.empty();
-
-        for (Component line : LoreParser.lines(instantSellStack)) {
-            Matcher matcher = ITEM_LINE_PATTERN.matcher(line.getString());
-            if (!matcher.find()) continue;
-
-            String product = matcher.group("product").trim();
-
-            try {
-                int volume = Util.parseNumber(matcher.group("volume"));
-
-                // Items with no buy orders appear with 0 quantity — skip them
-                // rather than dividing by zero or producing a meaningless order.
-                if (volume == 0) {
-                    Util.logMessage("parseOrders: skipping '%s' — 0 quantity (no buy orders)".formatted(product));
-
-                    continue;
-                }
-
-                double totalPrice = Double.parseDouble(matcher.group("price").replace(",", ""));
-                double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
-
-                if (product.equals("Other items")) {
-                    otherItems = Optional.of(new InstantSellResult.OtherItems(volume, totalPrice));
-                } else {
-                    items.add(new OrderInfo(product, TransactionType.Side.BUY, null, volume, pricePerUnit, null));
-                }
-            } catch (Exception ignored) {}
-        }
-
-        return new InstantSellResult(List.copyOf(items), otherItems);
-    }
 
     /** "Amount: 896x" — the "x" is a separate sibling but getString() concatenates */
     private static final Pattern AMOUNT_PATTERN = Pattern.compile("Amount: (?<amount>[\\d,]+)x");
@@ -106,7 +51,7 @@ public final class InstantSellParser {
      *  <li>{@code PRODUCT_PAGE}: {@code BazaarSlots.PRODUCT_PAGE.SELL_INSTANTLY},</li>
      * </ul>
      */
-    public static Optional<InstantSellResult> parseProductPageOrder(ItemStack sellInstantlyStack) {
+    public static Optional<SellableLore.Result> parseProductPageOrder(ItemStack sellInstantlyStack) {
         List<Component> lines = LoreParser.lines(sellInstantlyStack);
 
         // Name is still read positionally — line 0 is always the item name
@@ -189,7 +134,7 @@ public final class InstantSellParser {
 
             PlayerActionUtil.notifyAll("InstantSell (item page) parsed: %s %dx@%.4f".formatted(product, result.getVolume(), result.getPricePerItem()), NotificationType.GUI);
 
-            return Optional.of(new InstantSellResult(List.of(result), Optional.empty()));
+            return Optional.of(new SellableLore.Result(List.of(result), Optional.empty()));
 
         } catch (Exception exception) {
             Util.logError("parseProductPageOrder: arithmetic failed for '%s' — amount='%s' price='%s'".formatted(product, amountStr, priceStr), exception);
