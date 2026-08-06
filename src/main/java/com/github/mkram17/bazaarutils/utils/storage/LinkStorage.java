@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.github.mkram17.bazaarutils.utils.web.MinecraftSessionUtil;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /**
  * The mod's half of the website link: one bearer token, plus the Minecraft account it belongs to.
@@ -26,21 +28,39 @@ public final class LinkStorage {
 
     private LinkStorage() {}
 
-    public static final class LinkData {
-        /** Bearer token, shown by the website exactly once at link time. */
-        public String token;
+    /**
+     * @param token       bearer token, shown by the website exactly once at link time
+     * @param tokenPrefix the token's first characters — not a secret, it exists so a user can tell
+     *                    installs apart
+     * @param uuid        dashless lowercase UUID of the account this token was issued for
+     * @param username    display only, and refreshed on link; players rename, so this is never a key
+     */
+    public record LinkData(String token, String tokenPrefix, String uuid, String username) {
+        /** What {@link #clear()} leaves behind, and what a missing file loads as. */
+        public static final LinkData EMPTY = new LinkData("", "", "", "");
 
-        /** The token's first characters. Not a secret — it exists so a user can tell installs apart. */
-        public String tokenPrefix;
+        public static final Codec<LinkData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.STRING.optionalFieldOf("token", "").forGetter(LinkData::token),
+                Codec.STRING.optionalFieldOf("tokenPrefix", "").forGetter(LinkData::tokenPrefix),
+                Codec.STRING.optionalFieldOf("uuid", "").forGetter(LinkData::uuid),
+                Codec.STRING.optionalFieldOf("username", "").forGetter(LinkData::username)
+        ).apply(instance, LinkData::new));
 
-        /** Dashless lowercase UUID of the account this token was issued for. */
-        public String uuid;
+        // Every field is optional on disk and nullable at the call sites that build one, but
+        // Codec.STRING cannot encode a null — so absent has to mean blank, not null.
+        public LinkData {
+            token = orBlank(token);
+            tokenPrefix = orBlank(tokenPrefix);
+            uuid = orBlank(uuid);
+            username = orBlank(username);
+        }
 
-        /** Display only, and refreshed on link. Players rename, so this is never a key. */
-        public String username;
+        private static String orBlank(String value) {
+            return value == null ? "" : value;
+        }
     }
 
-    public static final DataStorage<LinkData> INSTANCE = new DataStorage<>(LinkData::new, "website_link", LinkData.class);
+    public static final DataStorage<LinkData> INSTANCE = new DataStorage<>(() -> LinkData.EMPTY, "website_link", LinkData.CODEC);
 
     /**
      * The stored link, or empty when there is nothing usable to read.
@@ -52,7 +72,7 @@ public final class LinkStorage {
     private static Optional<LinkData> linked() {
         LinkData data = INSTANCE.get();
 
-        return isSet(data.token) && isSet(data.uuid) ? Optional.of(data) : Optional.empty();
+        return isSet(data.token()) && isSet(data.uuid()) ? Optional.of(data) : Optional.empty();
     }
 
     private static boolean isSet(String value) {
@@ -70,8 +90,8 @@ public final class LinkStorage {
      */
     public static Optional<String> tokenFor(UUID profileId) {
         return linked()
-                .filter(data -> data.uuid.equals(MinecraftSessionUtil.dashless(profileId)))
-                .map(data -> data.token);
+                .filter(data -> data.uuid().equals(MinecraftSessionUtil.dashless(profileId)))
+                .map(LinkData::token);
     }
 
     /**
@@ -83,25 +103,27 @@ public final class LinkStorage {
      * saying the opposite.</p>
      */
     public static boolean isStoredToken(String token) {
-        return linked().filter(data -> data.token.equals(token)).isPresent();
+        return linked().filter(data -> data.token().equals(token)).isPresent();
     }
 
+    // Both of these are display-only, and a link can carry neither. Filtering keeps "stored but
+    // blank" reading as absent, the way a null field did before these became codec-backed.
     public static Optional<String> linkedUsername() {
-        return linked().map(data -> data.username);
+        return linked().map(LinkData::username).filter(LinkStorage::isSet);
     }
 
     public static Optional<String> tokenPrefix() {
-        return linked().map(data -> data.tokenPrefix);
+        return linked().map(LinkData::tokenPrefix).filter(LinkStorage::isSet);
     }
 
     public static void store(String token, String uuid, String username) {
-        LinkData data = new LinkData();
-        data.token = token;
-        data.tokenPrefix = token.substring(0, Math.min(TOKEN_PREFIX_LENGTH, token.length()));
-        data.uuid = normalizeUuid(uuid);
-        data.username = username;
+        INSTANCE.set(new LinkData(
+                token,
+                token.substring(0, Math.min(TOKEN_PREFIX_LENGTH, token.length())),
+                normalizeUuid(uuid),
+                username
+        ));
 
-        INSTANCE.set(data);
         persistNow();
     }
 
@@ -118,7 +140,7 @@ public final class LinkStorage {
     }
 
     public static void clear() {
-        INSTANCE.set(new LinkData());
+        INSTANCE.set(LinkData.EMPTY);
         persistNow();
     }
 

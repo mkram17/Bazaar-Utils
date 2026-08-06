@@ -10,7 +10,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
 import com.github.mkram17.bazaarutils.utils.storage.LinkStorage;
-import com.github.mkram17.bazaarutils.utils.storage.UserOrdersStorage;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.utils.web.BazaarUtilsApi;
 import com.github.mkram17.bazaarutils.utils.web.JsonHttpClient;
 import com.github.mkram17.bazaarutils.utils.web.MinecraftSessionUtil;
