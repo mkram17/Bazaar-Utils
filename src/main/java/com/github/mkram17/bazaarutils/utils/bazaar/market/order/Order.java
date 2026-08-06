@@ -143,11 +143,9 @@ public class Order extends OrderInfo implements AbstractListener {
     private void onOutbid(boolean isOutbid) {
         NotificationsConfig.NotificationSettings settings = NotificationsConfig.ORDER_NOTIFICATIONS_OUTBID;
 
-        boolean shouldNotifyUser = settings.isEnabled() && settings.emitChatMessage;
-        boolean shouldPlayNotificationSound = settings.isEnabled() && settings.emitClientSound;
-        boolean shouldAutoOpenBazaar = settings.isEnabled() && settings.autoOpenBazaar;
-
-        if (!shouldNotifyUser || !OrderUtil.getUserOrders().contains(this)) {
+        // Only the guards that apply to every channel gate the method; each channel then checks its
+        // own toggle, so chat, sound and auto-open are independent as the config presents them.
+        if (!settings.isEnabled() || !OrderUtil.getUserOrders().contains(this)) {
             return;
         }
 
@@ -155,35 +153,37 @@ public class Order extends OrderInfo implements AbstractListener {
             return;
         }
 
-        MutableComponent message;
-
         if (isOutbid) {
-            message = OutbidOrderHandler.getOutbidMessage(this);
-
-            if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
-                message.append(Component.literal(". Market Price: " + this.getMarketPrice(this.getTransactionType().getSide()) + " Order Price: " + this.getPricePerItem()));
-            }
-
-            if (shouldAutoOpenBazaar) {
+            if (settings.autoOpenBazaar) {
                 OrderUtil.openBazaar();
             }
 
-            Minecraft client = Minecraft.getInstance();
-
-            var player = client.player;
-
-            if (shouldPlayNotificationSound && player != null) {
+            if (settings.emitClientSound && Minecraft.getInstance().player != null) {
                 SoundUtil.notifyMultipleTimes(OUTBID_ORDER_NOTIFICATIONS);
             }
 
-            Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyChatCommand(message, "managebazaarorders"));
-        } else if (getPricingPosition() == PricingPosition.COMPETITIVE) {
-            message = OutbidOrderHandler.getCompetitiveMessage(this);
-            Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyAll(message));
-        } else {
-            message = OutbidOrderHandler.getMatchedMessage(this);
-            Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyAll(message));
+            if (settings.emitChatMessage) {
+                MutableComponent message = OutbidOrderHandler.getOutbidMessage(this);
+
+                if (DeveloperConfig.DEVELOPER_MODE_TOGGLE) {
+                    message.append(Component.literal(". Market Price: " + this.getMarketPrice(this.getTransactionType().getSide()) + " Order Price: " + this.getPricePerItem()));
+                }
+
+                Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyChatCommand(message, "managebazaarorders"));
+            }
+
+            return;
         }
+
+        if (!settings.emitChatMessage) {
+            return;
+        }
+
+        MutableComponent message = getPricingPosition() == PricingPosition.COMPETITIVE
+                ? OutbidOrderHandler.getCompetitiveMessage(this)
+                : OutbidOrderHandler.getMatchedMessage(this);
+
+        Util.tickExecuteLater(2, () -> PlayerActionUtil.notifyAll(message));
     }
 
 
