@@ -166,34 +166,36 @@ public class ItemModifiers extends BUListener {
     }
 
     // Some DataTypes/ItemModifiers depend on the ChestLoadedEvent to have fired before they
-    // can assert their data. InventoryChangeEvent fires before ChestLoadedEvent,
-    // so those stacks are skipped on first pass. This sweeps unmodified
-    // slots at LOW priority — after all parsers have stamped their components.
+    // can assert their data. InventoryChangeEvent fires before ChestLoadedEvent, so those
+    // modifiers are skipped on first pass — including on stacks a broader modifier already
+    // claimed. This clears and re-runs every slot at LOWEST priority, after all parsers
+    // have stamped their components.
     @Subscription(priority = Subscription.LOWEST)
     @OnlyOnSkyBlock
     private void onContainerLoaded(ContainerLoadedEvent event) {
-        for (Slot slot : event.getContainerSlots()) {
-            if (!slot.hasItem()) continue;
+        reapplySlots(event.getContainerSlots(), AbstractItemModifier.ModifierSource.CONTAINER, event.asContext());
+        reapplySlots(event.getPlayerSlots(), AbstractItemModifier.ModifierSource.PLAYER_INVENTORY, event.asContext());
+    }
 
-            ItemStack stack = slot.getItem();
-            if (MODIFIED_ITEMS.containsKey(stack)) continue;
-
-            ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
-            if (visual != null && MODIFIED_ITEMS.containsKey(visual)) continue;
-
-            tryModify(slot.getItem(), AbstractItemModifier.ModifierSource.CONTAINER, event.asContext(), slot);
-        }
-
-        for (Slot slot : event.getPlayerSlots()) {
+    private static void reapplySlots(List<Slot> slots, AbstractItemModifier.ModifierSource source, @Nullable ScreenContext context) {
+        for (Slot slot : slots) {
             if (!slot.hasItem()) continue;
 
             ItemStack stack = slot.getItem();
 
-            ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
-            if (visual != null && MODIFIED_ITEMS.containsKey(visual)) continue;
-
-            tryModify(slot.getItem(), AbstractItemModifier.ModifierSource.PLAYER_INVENTORY, event.asContext(), slot);
+            clear(stack);
+            tryModify(stack, source, context, slot);
         }
+    }
+
+    // MODIFIED_ITEMS is keyed by the visual stack tryModify produced, so the original
+    // has to be resolved through the accessor before it can be looked up.
+    private static boolean isModified(ItemStack stack) {
+        if (MODIFIED_ITEMS.containsKey(stack)) return true;
+
+        ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
+
+        return visual != null && MODIFIED_ITEMS.containsKey(visual);
     }
 
     public static void clear(ItemStack stack) {
@@ -256,7 +258,8 @@ public class ItemModifiers extends BUListener {
         }
     }
 
-    public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source, @Nullable ScreenContext context, @Nullable Slot slot) {        if (stack.isEmpty() || MODIFIED_ITEMS.containsKey(stack)) return;
+    public static void tryModify(ItemStack stack, AbstractItemModifier.ModifierSource source, @Nullable ScreenContext context, @Nullable Slot slot) {
+        if (stack.isEmpty() || isModified(stack)) return;
 
         List<AbstractItemModifier> matching = allModifiers()
                 .filter(ToggleableFeature::isEnabled)
