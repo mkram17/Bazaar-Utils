@@ -188,14 +188,22 @@ public class ItemModifiers extends BUListener {
         }
     }
 
-    // MODIFIED_ITEMS is keyed by the visual stack tryModify produced, so the original
-    // has to be resolved through the accessor before it can be looked up.
-    private static boolean isModified(ItemStack stack) {
-        if (MODIFIED_ITEMS.containsKey(stack)) return true;
+    // MODIFIED_ITEMS is keyed by the visual stack tryModify produced, so a lookup that
+    // starts from the original has to resolve through the accessor first.
+    private static ItemStack modifiedKey(ItemStack stack) {
+        if (MODIFIED_ITEMS.containsKey(stack)) return stack;
 
         ItemStack visual = VisualItemAccessorKt.getVisualItem(stack);
 
-        return visual != null && MODIFIED_ITEMS.containsKey(visual);
+        return visual != null ? visual : stack;
+    }
+
+    private static boolean isModified(ItemStack stack) {
+        return MODIFIED_ITEMS.containsKey(modifiedKey(stack));
+    }
+
+    private static List<AbstractItemModifier> modifiersFor(ItemStack stack) {
+        return MODIFIED_ITEMS.getOrDefault(modifiedKey(stack), List.of());
     }
 
     public static void clear(ItemStack stack) {
@@ -360,7 +368,7 @@ public class ItemModifiers extends BUListener {
             if (!result.propagate()) break;
         }
 
-        List<AbstractItemModifier> standardModifiers = MODIFIED_ITEMS.getOrDefault(stack, List.of());
+        List<AbstractItemModifier> standardModifiers = modifiersFor(stack);
         if (applied.isEmpty() && standardModifiers.isEmpty()) return;
 
         Stream.concat(applied.stream(), standardModifiers.stream())
