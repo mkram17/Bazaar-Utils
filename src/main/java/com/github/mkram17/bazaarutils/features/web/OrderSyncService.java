@@ -4,7 +4,6 @@ import com.github.mkram17.bazaarutils.config.features.WebsiteConfig;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -17,7 +16,6 @@ import com.github.mkram17.bazaarutils.utils.web.JsonHttpClient;
 import com.github.mkram17.bazaarutils.utils.web.MinecraftSessionUtil;
 import com.github.mkram17.bazaarutils.utils.web.OrderSnapshot;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import tech.thatgravyboat.skyblockapi.api.events.base.predicates.TimePassed;
@@ -28,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.github.mkram17.bazaarutils.utils.PlayerActionUtil.notifyAllFromAnyThread;
 
 /**
  * Pushes the tracked order list to the website after the Manage Orders menu is read.
@@ -205,7 +205,7 @@ public final class OrderSyncService extends BUListener {
 
                 LinkStorage.clear();
                 lastSentKey = null;
-                notifyPlayer(Component.literal(reconnectMessage(response)).withStyle(ChatFormatting.RED));
+                notifyAllFromAnyThread(Component.literal(reconnectMessage(response)).withStyle(ChatFormatting.RED));
             }
 
             // 402 is specifically "the link is fine, the subscription is not", separated from 401
@@ -218,7 +218,7 @@ public final class OrderSyncService extends BUListener {
                 // on it from in game.
                 if (!entitlementAnnounced) {
                     entitlementAnnounced = true;
-                    notifyPlayer(Component.literal(response.errorMessage().orElse(ENTITLEMENT_MESSAGE))
+                    notifyAllFromAnyThread(Component.literal(response.errorMessage().orElse(ENTITLEMENT_MESSAGE))
                             .withStyle(ChatFormatting.RED));
                 }
             }
@@ -296,10 +296,5 @@ public final class OrderSyncService extends BUListener {
         }
 
         return new Snapshot(collected, dropped, truncated);
-    }
-
-    /** Callbacks land on an HTTP worker; chat has to be written from the client thread. */
-    private static void notifyPlayer(Component message) {
-        Minecraft.getInstance().execute(() -> PlayerActionUtil.notifyAll(message));
     }
 }

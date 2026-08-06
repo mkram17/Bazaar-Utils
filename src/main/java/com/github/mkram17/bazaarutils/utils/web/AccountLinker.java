@@ -3,18 +3,18 @@ package com.github.mkram17.bazaarutils.utils.web;
 import com.github.mkram17.bazaarutils.config.features.WebsiteConfig;
 import com.github.mkram17.bazaarutils.features.web.OrderSyncService;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsModules;
-import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.storage.LinkStorage;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.github.mkram17.bazaarutils.utils.PlayerActionUtil.notifyAllFromAnyThread;
 
 /**
  * Drives the two-step link handshake behind {@code /bu link <code>}.
@@ -38,7 +38,7 @@ public final class AccountLinker {
         String code = BazaarUtilsApi.normalizeLinkCode(rawCode);
 
         if (code.isEmpty()) {
-            notifyPlayer(error("Enter the code shown on the website: /bu link <code>"));
+            notifyAllFromAnyThread(error("Enter the code shown on the website: /bu link <code>"));
 
             return;
         }
@@ -46,18 +46,18 @@ public final class AccountLinker {
         Optional<MinecraftSessionUtil.Session> session = MinecraftSessionUtil.currentSession();
 
         if (session.isEmpty()) {
-            notifyPlayer(error("Could not read your Minecraft session. Linking requires a genuine (non-offline) login."));
+            notifyAllFromAnyThread(error("Could not read your Minecraft session. Linking requires a genuine (non-offline) login."));
 
             return;
         }
 
         if (!IN_FLIGHT.compareAndSet(false, true)) {
-            notifyPlayer(error("A link attempt is already in progress."));
+            notifyAllFromAnyThread(error("A link attempt is already in progress."));
 
             return;
         }
 
-        notifyPlayer(info("Verifying your Minecraft session with Mojang..."));
+        notifyAllFromAnyThread(info("Verifying your Minecraft session with Mojang..."));
 
         // Where the request went, and which knob decided that. The value alone is not enough --
         // when it is unexpected, the next question is always "set by what?".
@@ -110,7 +110,7 @@ public final class AccountLinker {
         if (!response.isSuccess()) {
             // Every failure path on the website answers with a message written for a player to
             // read, so prefer it over anything invented here.
-            notifyPlayer(error(response.errorMessage().orElseGet(() -> fallbackMessage(response.status()))));
+            notifyAllFromAnyThread(error(response.errorMessage().orElseGet(() -> fallbackMessage(response.status()))));
             Util.logMessage("Link confirm failed with status " + response.status());
 
             return;
@@ -122,7 +122,7 @@ public final class AccountLinker {
         // host — a landing page or a proxy will happily answer 200 with HTML. Saying so beats
         // "no token", which describes the symptom and hides the cause.
         if (link.isEmpty()) {
-            notifyPlayer(error("Got a reply from " + BazaarUtilsApi.baseUrl()
+            notifyAllFromAnyThread(error("Got a reply from " + BazaarUtilsApi.baseUrl()
                     + " that was not a Bazaar Utils API response. Check that it points at the website."));
             Util.logError("Link confirm returned %d from %s with a non-API body: %s"
                     .formatted(response.status(), BazaarUtilsApi.baseUrl(), snippet(response.body())), null);
@@ -133,7 +133,7 @@ public final class AccountLinker {
         String token = link.map(BazaarUtilsApi.ConfirmedLink::token).filter(value -> !value.isBlank()).orElse(null);
 
         if (token == null) {
-            notifyPlayer(error("The website accepted the link but sent no token. Try again."));
+            notifyAllFromAnyThread(error("The website accepted the link but sent no token. Try again."));
             Util.logError("Link confirm succeeded without a token in the response: " + snippet(response.body()), null);
 
             return;
@@ -163,7 +163,7 @@ public final class AccountLinker {
             BazaarUtilsModules.OrderSyncService.onLinked(entitled);
         }
 
-        notifyPlayer(Component.literal("Linked as " + username + "! ").withStyle(ChatFormatting.GREEN)
+        notifyAllFromAnyThread(Component.literal("Linked as " + username + "! ").withStyle(ChatFormatting.GREEN)
                 .append(Component.literal(followUp(entitled)).withStyle(ChatFormatting.GRAY)));
     }
 
@@ -190,7 +190,7 @@ public final class AccountLinker {
         Throwable cause = throwable instanceof CompletionException ? throwable.getCause() : throwable;
 
         if (cause instanceof LinkFailure failure) {
-            notifyPlayer(error(failure.getMessage()));
+            notifyAllFromAnyThread(error(failure.getMessage()));
 
             return;
         }
@@ -200,7 +200,7 @@ public final class AccountLinker {
                 .map(detail -> " — " + detail)
                 .orElse(". Check your connection and try again.");
 
-        notifyPlayer(error("Could not reach " + endpoint.url() + reason));
+        notifyAllFromAnyThread(error("Could not reach " + endpoint.url() + reason));
         Util.logError("Link confirm request to %s (from %s) failed".formatted(endpoint.url(), endpoint.source()), cause);
     }
 
@@ -229,13 +229,6 @@ public final class AccountLinker {
 
     private static Component error(String message) {
         return Component.literal(message).withStyle(ChatFormatting.RED);
-    }
-
-    /**
-     * Chat has to be written from the client thread, and these callbacks land on an HTTP worker.
-     */
-    private static void notifyPlayer(Component message) {
-        Minecraft.getInstance().execute(() -> PlayerActionUtil.notifyAll(message));
     }
 
     /** Carries an already player-readable explanation out of the async chain. */
