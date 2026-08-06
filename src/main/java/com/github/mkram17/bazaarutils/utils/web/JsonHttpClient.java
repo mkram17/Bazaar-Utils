@@ -3,6 +3,7 @@ package com.github.mkram17.bazaarutils.utils.web;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.JsonParseException;
+import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;
@@ -14,13 +15,17 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -63,7 +68,9 @@ public final class JsonHttpClient {
         }
     };
 
-    private static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(2, THREAD_FACTORY);
+    // Backoff waits are timed by CompletableFuture's own delay scheduler, so these threads only
+    // ever run request work and nothing here has to schedule.
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(2, THREAD_FACTORY);
 
     private static final HttpClient CLIENT = HttpClient.newBuilder()
             .connectTimeout(CONNECT_TIMEOUT)
@@ -170,48 +177,30 @@ public final class JsonHttpClient {
                     if (throwable != null) {
                         // An IOException here is a connection or timeout failure; both are worth
                         // another try. Anything else is a bug and should surface immediately.
-                        if (attempt >= MAX_ATTEMPTS || !isTransport(throwable)) {
-                            return CompletableFuture.<Response>failedFuture(throwable);
-                        }
-
-                        Util.logMessage("%s failed (%s), retrying (attempt %d/%d)"
-                                .formatted(request.uri(), throwable.getMessage(), attempt + 1, MAX_ATTEMPTS));
-
-                        return retry(request, attempt);
+                        return attempt < MAX_ATTEMPTS && isTransport(throwable)
+                                ? retry(request, attempt, "failed (" + throwable.getMessage() + ")")
+                                : CompletableFuture.<Response>failedFuture(throwable);
                     }
 
                     Response response = new Response(httpResponse.statusCode(), httpResponse.body());
 
-                    if (!isRetryable(response.status()) || attempt >= MAX_ATTEMPTS) {
-                        return CompletableFuture.completedFuture(response);
-                    }
-
-                    Util.logMessage("%s returned %d, retrying (attempt %d/%d)"
-                            .formatted(request.uri(), response.status(), attempt + 1, MAX_ATTEMPTS));
-
-                    return retry(request, attempt);
+                    return attempt < MAX_ATTEMPTS && isRetryable(response.status())
+                            ? retry(request, attempt, "returned " + response.status())
+                            : CompletableFuture.completedFuture(response);
                 })
                 .thenCompose(future -> future);
     }
 
-    private static CompletableFuture<Response> retry(HttpRequest request, int attempt) {
-        long delayMillis = INITIAL_BACKOFF_MILLIS << (attempt - 1);
+    /** Waits out this attempt's backoff on the pool, then sends again. */
+    private static CompletableFuture<Response> retry(HttpRequest request, int attempt, String why) {
+        Util.logMessage("%s %s, retrying (attempt %d/%d)"
+                .formatted(request.uri(), why, attempt + 1, MAX_ATTEMPTS));
 
-        CompletableFuture<Response> next = new CompletableFuture<>();
+        Executor delayed = CompletableFuture.delayedExecutor(
+                INITIAL_BACKOFF_MILLIS << (attempt - 1), TimeUnit.MILLISECONDS, EXECUTOR);
 
-        EXECUTOR.schedule(
-                () -> send(request, attempt + 1).whenComplete((response, throwable) -> {
-                    if (throwable != null) {
-                        next.completeExceptionally(throwable);
-                    } else {
-                        next.complete(response);
-                    }
-                }),
-                delayMillis,
-                java.util.concurrent.TimeUnit.MILLISECONDS
-        );
-
-        return next;
+        return CompletableFuture.supplyAsync(() -> send(request, attempt + 1), delayed)
+                .thenCompose(future -> future);
     }
 
     private static boolean isRetryable(int status) {
@@ -227,15 +216,13 @@ public final class JsonHttpClient {
      * genuinely be transient (a dev server still starting up), so those still get their retries.</p>
      */
     private static boolean isTransport(Throwable throwable) {
-        boolean sawIoFailure = false;
+        List<Throwable> chain = causeChain(throwable);
 
-        for (Throwable current = throwable; current != null; current = current.getCause()) {
-            if (current instanceof SSLException || current instanceof UnknownHostException) return false;
-            if (current instanceof IOException) sawIoFailure = true;
-            if (current.getCause() == current) break;
+        if (chain.stream().anyMatch(cause -> cause instanceof SSLException || cause instanceof UnknownHostException)) {
+            return false;
         }
 
-        return sawIoFailure;
+        return chain.stream().anyMatch(cause -> cause instanceof IOException);
     }
 
     /**
@@ -245,26 +232,37 @@ public final class JsonHttpClient {
      * fine and the URL is wrong.</p>
      */
     public static Optional<String> describeTransportFailure(Throwable throwable) {
-        for (Throwable current = throwable; current != null; current = current.getCause()) {
-            if (current instanceof SSLException) {
-                return Optional.of("the URL starts with https but the server answered in plain HTTP — check the scheme");
-            }
+        return causeChain(throwable).stream()
+                .map(JsonHttpClient::describe)
+                .filter(Objects::nonNull)
+                .findFirst();
+    }
 
-            if (current instanceof UnknownHostException) {
-                return Optional.of("that hostname does not resolve");
-            }
+    private static @Nullable String describe(Throwable cause) {
+        return switch (cause) {
+            case SSLException ignored ->
+                    "the URL starts with https but the server answered in plain HTTP — check the scheme";
+            case UnknownHostException ignored -> "that hostname does not resolve";
+            case ConnectException ignored -> "nothing is listening on that host and port";
+            case HttpTimeoutException ignored -> "the request timed out";
+            default -> null;
+        };
+    }
 
-            if (current instanceof ConnectException) {
-                return Optional.of("nothing is listening on that host and port");
-            }
+    /**
+     * The throwable and everything it wraps, outermost first.
+     *
+     * <p>What matters about a transport failure is almost never the outermost exception — the JDK
+     * client wraps the real cause — so both readers above walk the whole chain. Cycles are rare but
+     * real, and one would hang the game thread that asked, so already-seen links end the walk.</p>
+     */
+    private static List<Throwable> causeChain(Throwable throwable) {
+        List<Throwable> chain = new ArrayList<>();
 
-            if (current instanceof HttpTimeoutException) {
-                return Optional.of("the request timed out");
-            }
-
-            if (current.getCause() == current) break;
+        for (Throwable current = throwable; current != null && !chain.contains(current); current = current.getCause()) {
+            chain.add(current);
         }
 
-        return Optional.empty();
+        return chain;
     }
 }
