@@ -1,11 +1,12 @@
-package com.github.mkram17.bazaarutils.utils.storage;
+package com.github.mkram17.bazaarutils.utils.storage.profile;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
-import com.google.gson.*;
+import com.github.mkram17.bazaarutils.utils.storage.DataStorage;
+import com.github.mkram17.bazaarutils.utils.storage.JsonStorageIO;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
@@ -15,28 +16,29 @@ import tech.thatgravyboat.skyblockapi.api.events.time.TickEvent;
 import tech.thatgravyboat.skyblockapi.helpers.McPlayer;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ProfileStorage<T> {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Set<ProfileStorage<?>> REQUIRES_SAVE = ConcurrentHashMap.newKeySet();
 
     @PreInitModule
     public static final class Listener extends BUListener {
-        @Subscription(priority = Integer.MIN_VALUE)
+        @Subscription(priority = Priority.FIRST)
         public void onProfileSwitch(ProfileChangeEvent event) {
             Util.logMessage("Profile switch → %s".formatted(event.getName()));
             currentProfile = event.getName();
         }
 
-        @Subscription(priority = Integer.MAX_VALUE)
+        @Subscription(priority = Priority.LAST)
         @TimePassed(duration = "5s")
         public void onTick(TickEvent event) {
             flushAll();
@@ -50,20 +52,24 @@ public class ProfileStorage<T> {
      */
     public static void flushAll() {
         if (REQUIRES_SAVE.isEmpty()) return;
-        ProfileStorage<?>[] toSave = REQUIRES_SAVE.toArray(new ProfileStorage<?>[0]);
-        REQUIRES_SAVE.clear();
-        for (ProfileStorage<?> storage : toSave) storage.saveToSystem();
+
+        for (ProfileStorage<?> storage : List.copyOf(REQUIRES_SAVE)) {
+            if (!REQUIRES_SAVE.remove(storage)) continue;
+            if (!storage.saveToSystem()) {
+                REQUIRES_SAVE.add(storage);
+            }
+        }
     }
 
     @Nullable
-    private static String currentProfile = null;
+    private static volatile String currentProfile = null;
 
     /**
-     * Immutable pairing of the loaded data with the profile and file it came from. Kept in a single
-     * field so the three can only ever be swapped together — nothing can observe one profile's data
-     * alongside another profile's path.
+     * Immutable pairing of the loaded data with the player UUID, profile name, and file it came from.
+     * Kept in a single field so the four can only ever be swapped together — nothing can observe one
+     * player/profile's data alongside another's path.
      */
-    private record Slot<T>(T data, Path path, String profile) {}
+    private record Slot<T>(T data, Path path, UUID playerUuid, String profile) {}
 
     private final int version;
     private final Supplier<@NotNull T> defaultData;
@@ -97,8 +103,11 @@ public class ProfileStorage<T> {
 
     private boolean isCurrentlyActive() {
         Slot<T> current = slot;
+        UUID activeUuid = McPlayer.INSTANCE.getUuid();
 
-        return current != null && current.profile().equals(currentProfile);
+        return current != null
+                && Objects.equals(current.profile(), currentProfile)
+                && Objects.equals(current.playerUuid(), activeUuid);
     }
 
     public @Nullable T get() {
@@ -108,7 +117,9 @@ public class ProfileStorage<T> {
             return current == null ? null : current.data();
         }
 
-        saveToSystem();
+        if (REQUIRES_SAVE.remove(this) && !saveToSystem()) {
+            REQUIRES_SAVE.add(this);
+        }
         load();
 
         Slot<T> current = slot;
@@ -127,7 +138,7 @@ public class ProfileStorage<T> {
             return;
         }
 
-        replaceSlot(new Slot<>(newData, current.path(), current.profile()));
+        replaceSlot(new Slot<>(newData, current.path(), current.playerUuid(), current.profile()));
         save();
     }
 
@@ -136,13 +147,13 @@ public class ProfileStorage<T> {
      * incoming data. {@link #onUnload} runs while the outgoing data is still reachable; {@link #onLoad}
      * runs once the incoming data is the active slot, so hooks that read this storage see the new value.
      */
-    private void replaceSlot(Slot<T> next) {
+    private void replaceSlot(@Nullable Slot<T> next) {
         Slot<T> outgoing = slot;
         if (outgoing != null && onUnload != null) onUnload.accept(outgoing.data());
 
         slot = next;
 
-        if (onLoad != null) onLoad.accept(next.data());
+        if (next != null && onLoad != null) onLoad.accept(next.data());
     }
 
     public void edit(Consumer<T> modifier) {
@@ -158,6 +169,7 @@ public class ProfileStorage<T> {
     }
 
     public void delete() {
+        REQUIRES_SAVE.remove(this);
         Slot<T> current = slot;
         if (current == null) return;
 
@@ -166,18 +178,21 @@ public class ProfileStorage<T> {
             Util.logMessage("Deleted %s".formatted(DataStorage.DEFAULT_PATH.relativize(current.path())));
         } catch (IOException exception) {
             Util.logError("Failed to delete %s".formatted(DataStorage.DEFAULT_PATH.relativize(current.path())), exception);
+        } finally {
+            replaceSlot(null);
         }
     }
 
     private void load() {
         String profile = currentProfile;
-        if (profile == null || loading) return;
+        UUID playerUuid = McPlayer.INSTANCE.getUuid();
+        if (playerUuid == null || profile == null || profile.isBlank() || loading) return;
 
         loading = true;
 
         try {
             Path path = DataStorage.DEFAULT_PATH
-                    .resolve(McPlayer.INSTANCE.getUuid().toString())
+                    .resolve(playerUuid.toString())
                     .resolve(profile)
                     .resolve(fileName + ".json");
 
@@ -185,79 +200,47 @@ public class ProfileStorage<T> {
                 Files.createDirectories(path.getParent());
                 Util.logMessage("No existing data for profile=%s file=%s — initialising defaults".formatted(profile, fileName));
 
-                replaceSlot(new Slot<>(defaultData.get(), path, profile));
+                replaceSlot(new Slot<>(defaultData.get(), path, playerUuid, profile));
                 saveToSystem();
             } else {
                 try {
-                    // parse() runs before replaceSlot so a decode failure leaves the outgoing data in place.
-                    T parsed = parse(path);
+                    // readAndMigrate runs before replaceSlot so a decode failure leaves the outgoing data in place.
+                    var result = JsonStorageIO.readAndMigrate(path, this.version, codec);
 
-                    replaceSlot(new Slot<>(parsed, path, profile));
+                    replaceSlot(new Slot<>(result.value(), path, playerUuid, profile));
+                    if (result.migrated()) save();
                     Util.logMessage("Loaded %s for profile=%s (v%d)".formatted(fileName, profile, this.version));
                 } catch (Exception exception) {
                     Util.logError("Failed to load saved data for profile %s (%s)".formatted(profile, fileName), exception);
 
                     // Never silently overwrite data we could not read — keep it around so it can be recovered.
-                    backup(path);
+                    JsonStorageIO.quarantine(path);
 
-                    replaceSlot(new Slot<>(defaultData.get(), path, profile));
+                    replaceSlot(new Slot<>(defaultData.get(), path, playerUuid, profile));
                     saveToSystem();
                 }
             }
         } catch (Exception exception) {
             // Leaves the slot untouched so the next get() retries instead of latching onto stale/absent data.
             Util.logError("Failed to resolve profile data for profile=%s file=%s".formatted(profile, fileName), exception);
-
-            return;
         } finally {
             loading = false;
         }
     }
 
-    private T parse(Path path) throws IOException {
-        JsonObject root = JsonParser.parseString(
-                Files.readString(path, StandardCharsets.UTF_8)
-        ).getAsJsonObject();
-
-        int fileVersion = root.get("@bazaarutils:version").getAsInt();
-        JsonElement dataEl = root.get("@bazaarutils:data");
-
-        if (fileVersion < this.version) {
-            Util.logMessage("Migrating %s v%d → v%d".formatted(fileName, fileVersion, this.version));
-        }
-
-        for (int v = fileVersion; v < this.version; v++) {
-            T intermediate = codec.apply(v).parse(JsonOps.INSTANCE, dataEl).getOrThrow();
-            dataEl = codec.apply(v + 1).encodeStart(JsonOps.INSTANCE, intermediate).getOrThrow();
-        }
-
-        return codec.apply(this.version).parse(JsonOps.INSTANCE, dataEl).getOrThrow();
-    }
-
-    private static void backup(Path path) {
-        try {
-            Path backup = path.resolveSibling(path.getFileName() + ".corrupt-" + System.currentTimeMillis());
-            Files.move(path, backup);
-            Util.logMessage("Backed up unreadable data to %s".formatted(backup.getFileName()));
-        } catch (IOException exception) {
-            Util.logError("Failed to back up unreadable data at %s".formatted(path), exception);
-        }
-    }
-
-    private void saveToSystem() {
+    private boolean saveToSystem() {
         Slot<T> current = slot;
-        if (current == null) return;
+        if (current == null) return true;
 
         try {
-            Files.createDirectories(current.path().getParent());
-            JsonElement encoded = codec.apply(version).encodeStart(JsonOps.INSTANCE, current.data()).getOrThrow();
-            JsonObject root = new JsonObject();
-            root.addProperty("@bazaarutils:version", version);
-            root.add("@bazaarutils:data", encoded);
-            Files.writeString(current.path(), GSON.toJson(root), StandardCharsets.UTF_8);
+            JsonStorageIO.writeAtomic(current.path(), version, codec.apply(version), current.data());
             Util.logMessage("Saved %s for profile=%s".formatted(fileName, current.profile()));
+
+            return true;
         } catch (Exception exception) {
             Util.logError("Failed to write %s for profile %s — your progress may not be saved".formatted(fileName, current.profile()), exception);
+
+            return false;
         }
     }
 }
