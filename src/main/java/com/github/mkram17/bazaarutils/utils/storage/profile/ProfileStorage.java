@@ -1,8 +1,9 @@
-package com.github.mkram17.bazaarutils.utils.storage;
+package com.github.mkram17.bazaarutils.utils.storage.profile;
 
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
+import com.github.mkram17.bazaarutils.utils.storage.DataStorage;
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
