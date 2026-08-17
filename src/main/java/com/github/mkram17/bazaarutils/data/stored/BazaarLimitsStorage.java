@@ -1,7 +1,7 @@
 package com.github.mkram17.bazaarutils.data.stored;
 
 import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
-import com.github.mkram17.bazaarutils.utils.storage.ProfileStorage;
+import com.github.mkram17.bazaarutils.utils.storage.profile.ProfileStorage;
 import com.mojang.serialization.Codec;
 
 import java.util.ArrayList;
