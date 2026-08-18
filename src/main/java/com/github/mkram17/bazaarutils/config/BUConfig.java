@@ -8,7 +8,6 @@ import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.config.features.gui.OverlaysConfig;
 import com.github.mkram17.bazaarutils.config.features.notification.NotificationsConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
-import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.ModifyIndicator;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import com.teamresourceful.resourcefulconfig.api.types.entries.Observable;
@@ -75,20 +74,6 @@ public final class BUConfig {
             translation = "bazaarutils.config.automatic_updates.hint"
     )
     public static boolean AUTOMATIC_UPDATES_TOGGLE = true;
-
-    @ConfigEntry(
-            id = "bazaar_flipper_account_upgrade",
-            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.label"
-    )
-    @Comment(
-            value = """
-                    The tier of your §6Bazaar Flipper§r Account Upgrade, which is factored in on tax calculation and current order limits.
-                    
-                    Your Bazaar Flipper level can be upgraded by talking to §dElizabeth§r, at the §bCommunity Center§r, in the §bSkyBlock Hub§r.
-                    """,
-            translation = "bazaarutils.config.bazaar_flipper_account_upgrade.hint"
-    )
-    public static PlayerAccountUpgrades.BazaarFlipper USER_BAZAAR_FLIPPER_ACCOUNT_UPGRADE = PlayerAccountUpgrades.BazaarFlipper.NOT_UPGRADED;
 
     @ConfigEntry(
             id = "modify_indicator",

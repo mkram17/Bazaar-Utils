@@ -31,23 +31,6 @@
       }
     }],
 
-    "bazaar_flipper": [{
-      "text": "Bazaar Flipper",
-      "color": "gold",
-      "hover_event": {
-        "action": "show_text",
-        "value": [
-          { "text": "Bazaar Flipper\n", "color": "gold", "bold": true },
-          { "text": "An Account Upgrade that reduces tax\nand increases your active order limit.\n\n", "color": "gray" },
-          { "text": "↗ Click to open wiki", "color": "dark_gray", "italic": true }
-        ]
-      },
-      "click_event": {
-        "action": "open_url",
-        "url": "https://wiki.hypixel.net/Bazaar_Flipper"
-      }
-    }],
-
     "elizabeth": [{
       "text": "Elizabeth",
       "color": "light_purple",

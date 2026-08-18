@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.data;
 
+import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
@@ -14,6 +15,7 @@ import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TaxContext;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
@@ -88,10 +90,16 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
             return cache != null ? cache.otherItems() : Optional.empty();
         }
 
-        public static void parse(ItemStack stack, ScreenContext context) {
+        public static void parse(ItemStack stack, ScreenContext context, Optional<ProfileKey> keyOpt) {
             var result = context.is(BazaarScreenType.PRODUCT_PAGE)
                     ? InstantSellParser.parseProductPageOrder(stack)
-                    .map(InstantSellParser.ProductSellResult::toSellableList)
+                    .map(parsed -> {
+                        if (keyOpt.isPresent() && parsed.observedTax().isPresent()) {
+                            TaxContext.reconcileObservedTax(parsed.observedTax().getAsDouble(), keyOpt.get());
+                        }
+
+                        return parsed.toSellableList();
+                    })
                     .orElse(SellableItemList.EMPTY)
                     : InstantSellParser.parseInstantSellOrders(stack);
 
@@ -207,10 +215,11 @@ public final class SellableAPI extends BUListener implements ScreenConstrained {
     @OnlyOnSkyBlock
     @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
+        var keyOpt = ProfileKey.current();
         var context = event.asContext();
 
         SellablePageLayout.getInstantSellItem(context).ifPresent(info -> {
-            InstantSell.parse(info.itemStack(), context);
+            InstantSell.parse(info.itemStack(), context, keyOpt);
             Targets.parse(event, InstantSell.orders(), TransactionType.INSTANT_SELL);
 
             if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE)) {
