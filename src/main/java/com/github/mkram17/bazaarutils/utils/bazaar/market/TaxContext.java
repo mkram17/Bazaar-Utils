@@ -1,8 +1,7 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.market;
 
-import com.github.mkram17.bazaarutils.config.BUConfig;
+import com.github.mkram17.bazaarutils.data.stored.BazaarProfileFlags;
 import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
-import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
@@ -32,12 +31,10 @@ public class TaxContext extends BUListener {
     /**
      * {@code key}'s recorded tier's base tax percent, multiplied by 4 when Quad Taxes is
      * active. Use everywhere tax is <em>applied</em> (sell matching, coin back-calculation,
-     * etc). Tier is per-profile — see {@code UserOrdersStorage.ProfileData.bazaarFlipperTier}
-     * — Quad Taxes isn't; it's a Mayor perk, the same for every profile at any given moment,
-     * which is why only this half of the calculation takes a key.
+     * etc). Tier is per-profile — see {@link BazaarProfileFlags.Data#bazaarFlipperTier}
      */
     public static double effectiveTaxPercent(@NotNull ProfileKey key) {
-        double base = UserOrdersStorage.get(key).bazaarFlipperTier().getUserBazaarTax();
+        double base = BazaarProfileFlags.get(key).bazaarFlipperTier().getUserBazaarTax();
 
         return isQuadTaxes() ? base * 4.0 : base;
     }

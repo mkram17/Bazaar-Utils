@@ -2,6 +2,7 @@ package com.github.mkram17.bazaarutils.utils.bazaar.components;
 
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
+import com.github.mkram17.bazaarutils.data.stored.BazaarProfileFlags;
 import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
 import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
@@ -209,14 +210,14 @@ public final class InstantSellParser {
 
     private static void reconcileTax(double observedPercent, ProfileKey key) {
         double normalizedTax = TaxContext.normalizeObserved(observedPercent);
-        var currentTier = UserOrdersStorage.get(key).bazaarFlipperTier();
+        var currentTier = BazaarProfileFlags.get(key).bazaarFlipperTier();
 
         for (PlayerAccountUpgrades.BazaarFlipper tier : PlayerAccountUpgrades.BazaarFlipper.values()) {
             if (Math.round(tier.getUserBazaarTax() * 10) == Math.round(normalizedTax * 10)) {
                 if (currentTier != tier) {
                     Util.logMessage("reconcileTax: %s → %s (observed %.4g%%%s)".formatted(currentTier, tier, observedPercent, TaxContext.isQuadTaxes() ? " [quad taxes /4 → " + normalizedTax + "%]" : ""));
 
-                    UserOrdersStorage.markBazaarFlipperTier(key, tier);
+                    BazaarProfileFlags.markBazaarFlipperTier(key, tier);
 
                     PlayerActionUtil.notifyAll("Bazaar Flipper tier auto-detected as %s from observed tax.".formatted(tier.name()));
                 }
