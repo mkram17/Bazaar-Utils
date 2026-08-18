@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.data;
 
+import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
 import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
@@ -81,9 +82,9 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
             return cache != null ? cache.otherItems() : Optional.empty();
         }
 
-        public static void parse(ItemStack stack, ScreenContext context) {
+        public static void parse(ItemStack stack, ScreenContext context, ProfileKey key) {
             var result = context.is(BazaarScreenType.PRODUCT_PAGE)
-                    ? InstantSellParser.parseProductPageOrder(stack).orElse(new InstantSellParser.InstantSellResult(List.of(), Optional.empty()))
+                    ? InstantSellParser.parseProductPageOrder(stack, key).orElse(new InstantSellParser.InstantSellResult(List.of(), Optional.empty()))
                     : InstantSellParser.parseInstantSellOrders(stack);
 
             STATE.updateAndGet(data -> new SellDataState(result, data.sellSacks(), data.targets()));
@@ -190,10 +191,11 @@ public class SellableAPI extends BUListener implements ScreenConstrained {
     @OnlyOnSkyBlock
     @OnlyBazaarScreen(useConstraintsInterface = true)
     private void onContainerLoaded(ContainerLoadedEvent event) {
+        var key = ProfileKey.requireProfile("SellableAPI"); if (key == null) return;
         var context = event.asContext();
 
         SellablePageLayout.getInstantSellItem(context).ifPresent(info -> {
-            InstantSell.parse(info.itemStack(), context);
+            InstantSell.parse(info.itemStack(), context, key);
             Targets.parse(event, InstantSell.orders(), TransactionType.INSTANT_SELL);
 
             if (context.is(BazaarScreenType.MAIN_PAGE) || context.is(BazaarScreenType.SEARCH_PAGE)) {
