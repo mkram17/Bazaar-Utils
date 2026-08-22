@@ -1,9 +1,12 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("net.fabricmc.fabric-loom") version "1.17.19"
     `maven-publish`
-    java
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
+    id("org.jetbrains.kotlin.jvm") version "2.4.10"
     id("com.gradleup.shadow") version "9.2.2"
+    java
 }
 
 base {
@@ -182,49 +185,70 @@ sourceSets {
     }
 }
 
-tasks {
-    classes {
-        dependsOn(buildtimeInjectionTask)
-    }
+tasks.withType<JavaCompile>().configureEach {
+    options.release = 25
+}
 
-    processResources {
-        inputs.property("version", project.version)
-        inputs.property("mcVersion", mcVersion)
-        inputs.property("minor_update_notes", rootProject.property("minor_update_notes") as String)
-
-        filesMatching("fabric.mod.json") {
-            expand(mapOf(
-                "version" to project.version,
-                "mod_version" to rootProject.property("mod_version"),
-                "mcVersion" to mcVersion,
-                "maxMcVersion" to maxMcVersion,
-                "minor_update_notes" to rootProject.property("minor_update_notes")
-            ))
-        }
-    }
-
-    jar {
-        from("LICENSE"){
-            rename { "${it}_${archiveBaseName.get()}" }
-        }
-    }
-
-    shadowJar {
-        configurations = listOf(project.configurations.shadow.get())
-    }
-    remapJar {
-        dependsOn(shadowJar)
-        inputFile.set(shadowJar.get().archiveFile)
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_25
     }
 }
+
+java {
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
+}
+
+tasks.processResources {
+    inputs.property("version", project.version)
+    inputs.property("mcVersion", mcVersion)
+    inputs.property("minor_update_notes", rootProject.property("minor_update_notes") as String)
+
+    filesMatching("fabric.mod.json") {
+        expand(mapOf(
+            "version" to project.version,
+            "mod_version" to rootProject.property("mod_version"),
+            "mcVersion" to mcVersion,
+            "maxMcVersion" to maxMcVersion,
+            "minor_update_notes" to rootProject.property("minor_update_notes")
+        ))
+    }
+}
+
+tasks.classes {
+    dependsOn(buildtimeInjectionTask)
+}
+
+tasks.jar {
+    enabled = false
+}
+
+tasks.shadowJar {
+    archiveClassifier.set("")
+
+    configurations = listOf(project.configurations.shadow.get())
+
+    from("LICENSE") {
+        rename { "${it}_${archiveBaseName.get()}" }
+    }
+}
+
+tasks.assemble {
+    dependsOn(tasks.shadowJar)
+}
+
 loom {
     runConfigs.all {
         generateRunConfig.set(true)
         runDirectory.set(layout.projectDirectory.dir("../../run"))
     }
-}
-java {
-    withSourcesJar()
 }
 
 publishMods {
