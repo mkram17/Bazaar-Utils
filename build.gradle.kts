@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.15-SNAPSHOT"
+    id("net.fabricmc.fabric-loom") version "1.17.19"
     `maven-publish`
     java
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
@@ -65,6 +65,7 @@ repositories {
 class ModDependencies {
     operator fun get(name: String) = property("deps.$name").toString()
 }
+
 val deps = ModDependencies()
 val mcVersion = stonecutter.current.version
 val maxMcVersion = deps["core.maxMcVersion"]
@@ -84,6 +85,7 @@ val owoLibVersion = deps["owo_version"]
 val resourcefulConfigVersion = deps["resourcefulconfig_version"]
 val autoUpdateVersion = deps["autoupdate_version"]
 val skyblockerVersion = deps["skyblocker_version"]
+
 group = property("maven_group")!!
 val versionNumber = property("mod_version").toString().trim()
 val releaseChannel = property("mod_release_channel").toString().trim().ifEmpty { "stable" }.lowercase()
@@ -104,26 +106,26 @@ val releaseLabel = "$versionNumber-$releaseChannel$prereleaseSuffix"
 version = "$releaseLabel+mc$mcVersion"
 
 dependencies {
+    // Mojang Minecraft dependency (no mappings required for 26.1+)
     minecraft("com.mojang:minecraft:${mcVersion}")
-    mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc:fabric-loader:${deps["fabricLoaderVersion"]}")
 
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${deps["fabric_api"]}")
+    implementation("net.fabricmc:fabric-loader:${deps["fabricLoaderVersion"]}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${deps["fabric_api"]}")
 
-    modLocalRuntime("maven.modrinth:hypixel-mod-api:$hypixelModApiVersion")
-    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:$devAuthVersion")
+    localRuntime("maven.modrinth:hypixel-mod-api:$hypixelModApiVersion")
+    runtimeOnly("me.djtheredstoner:DevAuth-fabric:$devAuthVersion")
 
-    modImplementation("tech.thatgravyboat:skyblock-api:${deps["skyblock_api_version"]}") {
+    implementation("tech.thatgravyboat:skyblock-api:${deps["skyblock_api_version"]}") {
         capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${deps["skyblock_api_platform"]}") }
     }
     include("tech.thatgravyboat:skyblock-api:${deps["skyblock_api_version"]}") {
-        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${deps["skyblock_api_platform"]}-remapped") }
+        capabilities { requireCapability("tech.thatgravyboat:skyblock-api-${deps["skyblock_api_platform"]}") }
     }
 
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
-    modImplementation("net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion")
+    implementation("net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion")
 
-    modImplementation("net.hypixel:hypixel-api-transport-apache:$hypixelApiVersion")
+    implementation("net.hypixel:hypixel-api-transport-apache:$hypixelApiVersion")
     include("net.hypixel:hypixel-api-transport-apache:$hypixelApiVersion")
     include("net.hypixel:hypixel-api-core:$hypixelApiVersion")
 
@@ -133,28 +135,26 @@ dependencies {
     include("commons-logging:commons-logging:$commonsLoggingVersion")
     include("commons-codec:commons-codec:$commonsCodecVersion")
 
-    // Config lib and settings screen
-    modImplementation("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-$resourcefulConfigVersion")
-
-    modCompileOnly("com.terraformersmc:modmenu:$modMenuVersion")
+    implementation("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-$resourcefulConfigVersion")
+    compileOnly("com.terraformersmc:modmenu:$modMenuVersion")
 
     // Project Lombok
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
-
     testCompileOnly("org.projectlombok:lombok:$lombokVersion")
     testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
-    // Mixin Constraints
+
     include(implementation("com.moulberry:mixinconstraints:$mixinConstraintsVersion")!!)
 
     //gson extras for easy type adapters
     implementation("org.danilopianini:gson-extras:$gsonExtrasVersion")
     include("org.danilopianini:gson-extras:$gsonExtrasVersion")
+
     // Skyblocker for compatibility
-    modCompileOnly("maven.modrinth:skyblocker-liap:v$skyblockerVersion")
+    compileOnly("maven.modrinth:skyblocker-liap:v$skyblockerVersion")
 
     // Owo Lib for lang features
-    modImplementation("io.wispforest:owo-lib:$owoLibVersion")
+    implementation("io.wispforest:owo-lib:$owoLibVersion")
 
     // Auto Update Library
     implementation("moe.nea:libautoupdate:$autoUpdateVersion")
@@ -219,8 +219,8 @@ tasks {
 }
 loom {
     runConfigs.all {
-        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
-        runDir = "../../run" // Use a shared run folder and create separate worlds
+        generateRunConfig.set(true)
+        runDirectory.set(layout.projectDirectory.dir("../../run"))
     }
 }
 java {
@@ -228,9 +228,8 @@ java {
 }
 
 publishMods {
-    file = tasks.remapJar.get().archiveFile
-    additionalFiles.from(tasks.remapSourcesJar.get().archiveFile)
-    version = project.version.toString()
+    file.set(tasks.shadowJar.get().archiveFile)
+    version.set(project.version.toString())
 
     type = when (releaseChannel) {
         "alpha" -> ALPHA
