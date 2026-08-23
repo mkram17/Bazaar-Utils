@@ -1,30 +1,50 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
+import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.utils.ResourceManager;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.repolib.api.RepoAPI;
 import tech.thatgravyboat.skyblockapi.api.data.SkyBlockCategory;
 import tech.thatgravyboat.skyblockapi.api.datatype.DataTypeItemStackKt;
 import tech.thatgravyboat.skyblockapi.api.datatype.DataTypes;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.hypixel.HypixelJoinEvent;
+import tech.thatgravyboat.skyblockapi.api.events.location.ServerDisconnectEvent;
 import tech.thatgravyboat.skyblockapi.api.repo.apis.SkyBlockItemsRepo;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-public final class ItemsRepo {
+@Module
+public final class ItemsRepo extends BUListener {
 
-    private static final Map<String, ItemStack> RESOLVED_CACHE = new HashMap<>();
+    private static final Map<String, ItemStackTemplate> RESOLVED_CACHE = new HashMap<>();
     private static List<ItemStack> SKYBLOCK_ITEMS_CACHE = List.of();
     private static boolean SKYBLOCK_REPO_READY = false;
+    private static boolean IN_HYPIXEL_SESSION = false;
 
     public ItemsRepo() {}
+
+    @Subscription
+    private void onHypixelJoin(HypixelJoinEvent event) {
+        IN_HYPIXEL_SESSION = true;
+        buildSkyBlockItemsCache();
+    }
+
+    @Subscription
+    private void onServerDisconnect(ServerDisconnectEvent event) {
+        IN_HYPIXEL_SESSION = false;
+    }
 
     /**
      * Typed representation of an {@code @ItemTag} value.
@@ -82,11 +102,15 @@ public final class ItemsRepo {
         }
     }
 
+    // 26.1 doesn't bind default components onto item holders until a world/session is joined;
+    // constructing an ItemStack off repo data before that throws "Components not bound yet"
+    // out of Holder.Reference#components
     public static void buildSkyBlockItemsCache() {
-        if (SKYBLOCK_REPO_READY) return;
-        SKYBLOCK_REPO_READY = true;
+        if (!IN_HYPIXEL_SESSION || !BazaarUtils.isLateInitDone()) return;
 
         SKYBLOCK_ITEMS_CACHE = buildSkyBlockItems();
+        SKYBLOCK_REPO_READY = true;
+
         Util.logMessage("SkyBlock items cache built — %s items".formatted(SKYBLOCK_ITEMS_CACHE.size()));
     }
 
@@ -95,15 +119,21 @@ public final class ItemsRepo {
      * Tries SkyBlock first (if ready), then falls back to the vanilla registry.
      */
     public static @Nullable ItemStack resolve(String rawId) {
+        ItemStackTemplate template = resolveTemplate(rawId);
+
+        return template != null ? template.create() : null;
+    }
+
+    public static @Nullable ItemStackTemplate resolveTemplate(String rawId) {
         if (rawId == null || rawId.isEmpty()) return null;
 
         return RESOLVED_CACHE.computeIfAbsent(rawId, id -> {
             if (SKYBLOCK_REPO_READY) {
                 ItemStack result = SkyBlockItemsRepo.INSTANCE.getItemStack(id);
-                if (result != null) return result;
+                if (result != null) return ItemStackTemplate.fromNonEmptyStack(result);
             }
 
-            return resolveVanilla(id);
+            return resolveVanillaTemplate(id);
         });
     }
 
@@ -138,7 +168,7 @@ public final class ItemsRepo {
             case ItemFilter.All ignored -> {
                 List<ItemStack> vanilla = getVanillaItems(null);
                 if (!SKYBLOCK_REPO_READY) yield vanilla;
-                yield Stream.concat(vanilla.stream(), skyBlockItems().stream()).toList();
+                yield Stream.concat(vanilla.stream(), skyBlockItems().stream().map(ItemStack::copy)).toList();
             }
 
             case ItemFilter.VanillaTag(Identifier tagId) -> getVanillaItems(tagId);
@@ -166,6 +196,15 @@ public final class ItemsRepo {
                 .orElse(null);
     }
 
+    private static @Nullable ItemStackTemplate resolveVanillaTemplate(String id) {
+        Identifier identifier = Identifier.tryParse(id);
+        if (identifier == null) return null;
+
+        return BuiltInRegistries.ITEM.getOptional(identifier)
+                .map(ItemStackTemplate::new)
+                .orElse(null);
+    }
+
     private static List<ItemStack> getVanillaItems(@Nullable Identifier tagId) {
         Stream<Item> items = BuiltInRegistries.ITEM.stream();
 
@@ -190,9 +229,9 @@ public final class ItemsRepo {
         return skyBlockItems().stream()
                 .filter(stack -> {
                     SkyBlockCategory stackCategory = DataTypeItemStackKt.getData(stack, DataTypes.INSTANCE.getCATEGORY());
-
                     return stackCategory != null && target.equals(stackCategory, false);
                 })
+                .map(ItemStack::copy)
                 .toList();
     }
 
@@ -211,6 +250,7 @@ public final class ItemsRepo {
 
         return skyBlockItems().stream()
                 .filter(stack -> conversions.containsKey(Util.stripFormatCodes(stack.getHoverName().getString()).toLowerCase(Locale.ROOT)))
+                .map(ItemStack::copy)
                 .toList();
     }
 

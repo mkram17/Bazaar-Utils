@@ -6,11 +6,15 @@ import com.teamresourceful.resourcefulconfig.client.components.options.types.Str
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ItemStringOptionWidget extends StringOptionWidget implements ResetableWidget {
     private final Supplier<String> getter;
+
+    private String lastResolvedId;
+    private String lastResolvedName;
 
     public ItemStringOptionWidget(Supplier<String> getter, Function<String, Boolean> setter) {
         super(getter, setter, false);
@@ -20,12 +24,18 @@ public class ItemStringOptionWidget extends StringOptionWidget implements Reseta
     @Override
     public void updateIfFocused() {
         if (!isFocused()) {
-            ItemStack stack = ItemsRepo.resolve(getter.get());
-            String name = stack != null
-                    ? ChatFormatting.stripFormatting(stack.getHoverName().getString())
-                    : getter.get();
+            String id = getter.get();
 
-            setValue(name);
+            if (!Objects.equals(id, lastResolvedId)) {
+                lastResolvedId = id;
+
+                ItemStack stack = ItemsRepo.resolve(id);
+                lastResolvedName = stack != null
+                        ? ChatFormatting.stripFormatting(stack.getHoverName().getString())
+                        : id;
+            }
+
+            setValue(lastResolvedName);
             setCursorPosition(0);
             setHighlightPos(0);
             setTextColor(0xFFE0E0E0);

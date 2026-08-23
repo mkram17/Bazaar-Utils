@@ -22,6 +22,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -31,6 +32,9 @@ public class ItemOptionWidget extends SelectorOptionWidget {
     private final List<ItemStack> items;
     private final Supplier<String> getter;
     private final Consumer<String> setter;
+
+    private String lastResolvedId;
+    private ItemStack lastResolvedStack;
 
     public ItemOptionWidget(List<ItemStack> items, Supplier<String> getter, Consumer<String> setter) {
         super(ModSprites.BUTTON, SELECT);
@@ -43,10 +47,14 @@ public class ItemOptionWidget extends SelectorOptionWidget {
     protected void extractContents(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         super.extractContents(graphics, mouseX, mouseY, delta);
 
-        ItemStack stack = ItemsRepo.resolve(getter.get());
+        String id = getter.get();
+        if (!Objects.equals(id, lastResolvedId)) {
+            lastResolvedId = id;
+            lastResolvedStack = ItemsRepo.resolve(id);
+        }
 
-        if (stack != null) {
-            graphics.item(stack, getX(), getY());
+        if (lastResolvedStack != null) {
+            graphics.item(lastResolvedStack, getX(), getY());
         }
     }
 

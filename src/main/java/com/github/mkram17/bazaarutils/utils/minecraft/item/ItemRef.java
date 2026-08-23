@@ -1,14 +1,15 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item;
 
 import com.github.mkram17.bazaarutils.utils.minecraft.item.groups.StateItemGroup;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public sealed interface ItemRef {
-    record Direct(Item item) implements ItemRef {}
+    record Direct(ItemStackTemplate template) implements ItemRef {}
     record ById(Supplier<String> id) implements ItemRef {}
     record Stateful<S>(Optional<ItemRef> source, Supplier<S> state, List<StateItemGroup<S>> groups) implements ItemRef {
         static <S> Stateful<S> of(Supplier<S> state, List<StateItemGroup<S>> groups) {
@@ -16,8 +17,12 @@ public sealed interface ItemRef {
         }
     }
 
-    static ItemRef of(Item item) {
-        return new Direct(item);
+    static ItemRef of(ItemStackTemplate template) {
+        return new Direct(template);
+    }
+
+    static ItemRef of(ItemStack stack) {
+        return new Direct(ItemStackTemplate.fromNonEmptyStack(stack));
     }
 
     static ItemRef of(String id) {

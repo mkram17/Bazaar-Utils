@@ -1,6 +1,8 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.item.groups;
 
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.item.ItemStackTemplate;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -20,11 +22,16 @@ public record StateItemGroup<S>(Set<Item> recognized, Map<S, StateItem> states) 
         return recognized == ANY || recognized.contains(item);
     }
 
-    public Item forState(S state, Item configured) {
+    /** Convenience overload for checking a resolved {@link ItemInstance} — live stack or template — directly. */
+    public boolean contains(ItemInstance instance) {
+        return contains(instance.typeHolder().value());
+    }
+
+    public ItemStackTemplate forState(S state, ItemStackTemplate configured) {
         StateItem stateItem = states.getOrDefault(state, StateItem.configured());
 
         return switch (stateItem) {
-            case StateItem.Fixed(Item item) -> item;
+            case StateItem.Fixed(ItemStackTemplate template) -> template;
             case StateItem.Configured() -> configured;
         };
     }
@@ -49,7 +56,7 @@ public record StateItemGroup<S>(Set<Item> recognized, Map<S, StateItem> states) 
     public static <S> StateItemGroup<S> of(Map<S, StateItem> states) {
         Set<Item> recognized = states.values().stream()
                 .filter(state -> state instanceof StateItem.Fixed)
-                .map(state -> ((StateItem.Fixed) state).item())
+                .map(state -> ((StateItem.Fixed) state).template().typeHolder().value())
                 .collect(Collectors.toSet());
 
         return new StateItemGroup<>(recognized, states);
@@ -63,8 +70,8 @@ public record StateItemGroup<S>(Set<Item> recognized, Map<S, StateItem> states) 
             this.recognized = recognized;
         }
 
-        public Builder<S> on(S state, Item item) {
-            states.put(state, StateItem.of(item));
+        public Builder<S> on(S state, ItemStackTemplate template) {
+            states.put(state, StateItem.of(template));
             return this;
         }
 

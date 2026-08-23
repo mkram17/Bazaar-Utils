@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils;
 import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.generated.*;
 import com.github.mkram17.bazaarutils.misc.BUCompatibilityHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
+import com.github.mkram17.bazaarutils.utils.Util;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemsRepo;
 import com.github.mkram17.bazaarutils.utils.update.UpdateUtil;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
@@ -63,11 +63,15 @@ public class BazaarUtils implements ClientModInitializer {
         // therefore subscribes them to the event bus already — no explicit subscription pass needed.
 
         if (RepoAPI.isInitialized()) {
-            onRepoReady();
+            lateInitialize();
         }
     }
 
-    private static final AtomicBoolean repoReady = new AtomicBoolean(false);
+    private static final AtomicBoolean lateInitDone = new AtomicBoolean(false);
+
+    public static boolean isLateInitDone() {
+        return lateInitDone.get();
+    }
 
     @Subscription(event = RepoStatusEvent.class)
     public void onRepoStatus(RepoStatusEvent event) {
@@ -75,19 +79,19 @@ public class BazaarUtils implements ClientModInitializer {
             LOGGER.warn("SkyblockAPI repo did not load successfully (status: {}); continuing with late init anyway.", event.getStatus());
         }
 
-        onRepoReady();
+        lateInitialize();
     }
 
-    private void onRepoReady() {
-        if (!repoReady.compareAndSet(false, true)) return;
+    private void lateInitialize() {
+        if (lateInitDone.compareAndSet(false, true)) {
+            // The repo-status event is posted from repolib's async worker thread; marshal onto the
+            // client thread before touching the (unsynchronized) event bus and command registration.
+            Minecraft.getInstance().execute(() -> {
+                BazaarUtilsLateInitModules.init();
 
-        // The repo-status event is posted from repolib's async worker thread; marshal onto the
-        // client thread before touching the (unsynchronized) event bus and command registration.
-        Minecraft.getInstance().execute(() -> {
-            ItemsRepo.buildSkyBlockItemsCache();
-
-            BazaarUtilsLateInitModules.init();
-            UpdateUtil.checkForUpdates();
-        });
+                UpdateUtil.checkForUpdates();
+                Util.tickExecuteLater(1, ItemsRepo::buildSkyBlockItemsCache);
+            });
+        }
     }
 }
