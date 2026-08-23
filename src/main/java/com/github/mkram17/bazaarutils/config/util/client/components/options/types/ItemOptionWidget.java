@@ -9,8 +9,8 @@ import com.teamresourceful.resourcefulconfig.client.components.ModSprites;
 import com.teamresourceful.resourcefulconfig.client.components.options.text.TextBox;
 import com.teamresourceful.resourcefulconfig.client.utils.ListenableState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.CharacterEvent;
@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,13 +40,13 @@ public class ItemOptionWidget extends SelectorOptionWidget {
     }
 
     @Override
-    protected void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderContents(context, mouseX, mouseY, delta);
+    protected void extractContents(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractContents(graphics, mouseX, mouseY, delta);
 
         ItemStack stack = ItemsRepo.resolve(getter.get());
 
         if (stack != null) {
-            context.renderItem(stack, getX(), getY());
+            graphics.item(stack, getX(), getY());
         }
     }
 
@@ -167,10 +168,10 @@ public class ItemOptionWidget extends SelectorOptionWidget {
 
             this.searchBox = new TextBox(ow - PADDING * 2, SEARCH_HEIGHT, searchState) {
                 @Override
-                public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-                    context.blitSprite(RenderPipelines.GUI_TEXTURED, ModSprites.BUTTON, getX(), getY(), getWidth(), getHeight());
-                    super.renderWidget(context, mouseX, mouseY, delta);
-                    this.applyCursor(context);
+                public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+                    graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ModSprites.BUTTON, getX(), getY(), getWidth(), getHeight());
+                    super.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
+                    this.applyCursor(graphics);
                 }
             };
             this.searchBox.setPosition(ox + PADDING, oy + PADDING);
@@ -181,16 +182,16 @@ public class ItemOptionWidget extends SelectorOptionWidget {
         }
 
         @Override
-        public void renderBackground(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-            super.renderBackground(context, mouseX, mouseY, delta);
+        public void extractBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+            super.extractBackground(graphics, mouseX, mouseY, delta);
 
             if (maxScroll() > 0) {
                 int trackTop = oy + PADDING + SEARCH_HEIGHT + SPACING;
                 int trackHeight = visibleRows() * ContainerCell.CELL_SIZE;
                 int thumbHeight = Math.max(6, trackHeight * MAX_ROWS / totalRows());
                 int thumbTop = trackTop + (trackHeight - thumbHeight) * scrollOffset / Math.max(1, maxScroll());
-                context.fill(ox + ow - 3, trackTop, ox + ow - 1, trackTop + trackHeight, 0x44FFFFFF);
-                context.fill(ox + ow - 3, thumbTop, ox + ow - 1, thumbTop + thumbHeight, 0xAAFFFFFF);
+                graphics.fill(ox + ow - 3, trackTop, ox + ow - 1, trackTop + trackHeight, 0x44FFFFFF);
+                graphics.fill(ox + ow - 3, thumbTop, ox + ow - 1, thumbTop + thumbHeight, 0xAAFFFFFF);
             }
         }
 

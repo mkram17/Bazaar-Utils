@@ -98,13 +98,13 @@ public final class OrderUpdater extends BUListener {
 
         order.setItemInfo(parsedItemInfo);
 
-        Optional<? extends ItemLore> loreComponent = order.getItemInfo().itemStack().getComponentsPatch().get(DataComponents.LORE);
+        ItemLore loreComponent = order.getItemInfo().itemStack().get(DataComponents.LORE);
 
-        if (loreComponent == null || loreComponent.isEmpty()) {
+        if (loreComponent == null) {
             return;
         }
 
-        List<Component> loreLines = loreComponent.get().styledLines();
+        List<Component> loreLines = loreComponent.styledLines();
 
         int amountFilled = parseAmountFilled(loreLines);
         int amountClaimed = parseAmountClaimed(loreLines, amountFilled);
@@ -130,7 +130,7 @@ public final class OrderUpdater extends BUListener {
 
     private static OrderInfo parseOrderFromItemStack(ItemStack stack) {
         String title = stack.getHoverName().getString();
-        Optional<? extends ItemLore> loreComponent = stack.getComponentsPatch().get(DataComponents.LORE);
+        Optional<ItemLore> loreComponent = Optional.ofNullable(stack.get(DataComponents.LORE));
 
         ItemInfo itemInfo = new ItemInfo(mapScreenIndexToInventoryIndex(stack), stack);
 

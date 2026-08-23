@@ -1,12 +1,12 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button.OnPress;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.MutableComponent;
+import org.jspecify.annotations.NonNull;
 
 public class ItemSlotButtonWidget extends ImageButton {
     private final ItemStack itemStack;
@@ -18,14 +18,14 @@ public class ItemSlotButtonWidget extends ImageButton {
     }
 
     @Override
-    public void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderContents(context, mouseX, mouseY, delta);
+    public void extractContents(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractContents(graphics, mouseX, mouseY, delta);
 
         if (this.itemStack != null && !this.itemStack.isEmpty()) {
             int itemX = this.getX() + (this.width - 16) / 2;
             int itemY = this.getY() + (this.height - 16) / 2;
 
-            context.renderItem(this.itemStack, itemX, itemY);
+            graphics.item(this.itemStack, itemX, itemY);
         }
     }
 }

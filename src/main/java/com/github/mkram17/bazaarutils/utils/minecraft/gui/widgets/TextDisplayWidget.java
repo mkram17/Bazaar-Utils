@@ -2,10 +2,11 @@ package com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 public class TextDisplayWidget extends AbstractWidget {
     public enum Alignment {
@@ -28,7 +29,7 @@ public class TextDisplayWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         Font textRenderer = Minecraft.getInstance().font;
 
         int textY = this.getY() + (this.height - textRenderer.lineHeight) / 2;
@@ -38,7 +39,7 @@ public class TextDisplayWidget extends AbstractWidget {
             case RIGHT  -> this.getX() + this.width - textRenderer.width(text);
         };
 
-        context.drawString(textRenderer, text, textX, textY, 0xFFFFFFFF, false);
+        graphics.text(textRenderer, text, textX, textY, 0xFFFFFFFF, false);
     }
 
     @Override

@@ -3,9 +3,9 @@ package com.github.mkram17.bazaarutils.config.util.client.components.options;
 import com.teamresourceful.resourcefulconfig.client.components.ModSprites;
 import com.teamresourceful.resourcefulconfig.client.screens.base.OverlayScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractSelectorOverlay extends OverlayScreen {
@@ -20,10 +20,10 @@ public abstract class AbstractSelectorOverlay extends OverlayScreen {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderBackground(context, mouseX, mouseY, delta);
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, ModSprites.ACCENT, ox, oy, ow, oh);
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, ModSprites.BUTTON, ox + 1, oy + 1, ow - 2, oh - 2);
+    public void extractBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractBackground(graphics, mouseX, mouseY, delta);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ModSprites.ACCENT, ox, oy, ow, oh);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ModSprites.BUTTON, ox + 1, oy + 1, ow - 2, oh - 2);
     }
 
     @Override

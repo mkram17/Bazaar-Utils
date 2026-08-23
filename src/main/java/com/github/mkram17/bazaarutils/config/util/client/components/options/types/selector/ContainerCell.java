@@ -3,9 +3,9 @@ package com.github.mkram17.bazaarutils.config.util.client.components.options.typ
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.teamresourceful.resourcefulconfig.client.components.base.BaseWidget;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.Item;
@@ -34,20 +34,20 @@ public class ContainerCell extends BaseWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_SPRITE, getX(), getY(), CELL_SIZE, CELL_SIZE);
+    protected void extractWidgetRenderState(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_SPRITE, getX(), getY(), CELL_SIZE, CELL_SIZE);
 
         if (selected) {
-            context.fill(getX() + 1, getY() + 1, getX() + CELL_SIZE - 1, getY() + CELL_SIZE - 1, 0x8800AA00);
+            graphics.fill(getX() + 1, getY() + 1, getX() + CELL_SIZE - 1, getY() + CELL_SIZE - 1, 0x8800AA00);
         } else if (isHovered()) {
-            context.fill(getX() + 1, getY() + 1, getX() + CELL_SIZE - 1, getY() + CELL_SIZE - 1, 0x80FFFFFF);
+            graphics.fill(getX() + 1, getY() + 1, getX() + CELL_SIZE - 1, getY() + CELL_SIZE - 1, 0x80FFFFFF);
         }
 
         if (!stack.isEmpty()) {
-            context.renderItem(stack, getX() + 1, getY() + 1);
+            graphics.item(stack, getX() + 1, getY() + 1);
 
             if (isHovered() && !stack.getOrDefault(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT).hideTooltip()) {
-                context.setComponentTooltipForNextFrame(
+                graphics.setComponentTooltipForNextFrame(
                         Minecraft.getInstance().font,
                         stack.getTooltipLines(Item.TooltipContext.EMPTY, null, TooltipFlag.NORMAL),
                         mouseX, mouseY
@@ -55,7 +55,7 @@ public class ContainerCell extends BaseWidget {
             }
         }
 
-        this.applyCursor(context);
+        this.applyCursor(graphics);
     }
 
     @Override

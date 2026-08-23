@@ -2,7 +2,6 @@ package com.github.mkram17.bazaarutils.commands.orders;
 
 import com.github.mkram17.bazaarutils.commands.BUCommand;
 import com.github.mkram17.bazaarutils.commands.OrdersCommands;
-import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
@@ -11,7 +10,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -28,7 +27,7 @@ public final class RemoveOrderCommand implements BUCommand {
 
     @Override
     public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
-        return base.then(ClientCommandManager.argument("index", IntegerArgumentType.integer(0)).executes(this::removeByIndex));
+        return base.then(ClientCommands.argument("index", IntegerArgumentType.integer(0)).executes(this::removeByIndex));
     }
 
     private int removeByIndex(CommandContext<FabricClientCommandSource> context) {

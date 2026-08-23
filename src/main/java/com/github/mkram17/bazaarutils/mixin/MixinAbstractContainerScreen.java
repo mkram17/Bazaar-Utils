@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.events.minecraft.SlotInteractionEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,12 +25,12 @@ public abstract class MixinAbstractContainerScreen extends Screen {
 	// through — mouse clicks, number-key hotbar swaps, the drop key, double-click — so posting the
 	// cancellable SlotInteractionEvent here keeps the insta-sell / sell-sacks safety gate covering
 	// keyboard-driven sells, which the mouse-only event silently missed.
-	@Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V", at = @At("HEAD"), cancellable = true)
-	private void onSlotClicked_RestrictionGate(Slot slot, int slotId, int button, ClickType clickType, CallbackInfo ci) {
+	@Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ContainerInput;)V", at = @At("HEAD"), cancellable = true)
+	private void onSlotClicked_RestrictionGate(Slot slot, int slotId, int button, ContainerInput actionType, CallbackInfo ci) {
 		if (slot == null) return;
 
 		AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
-		if (new SlotInteractionEvent(screen, slot, slotId, button, clickType).post(BazaarUtils.EVENT_BUS)) {
+		if (new SlotInteractionEvent(screen, slot, slotId, button, actionType).post(BazaarUtils.EVENT_BUS)) {
 			ci.cancel();
 		}
 	}

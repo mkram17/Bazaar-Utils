@@ -104,7 +104,9 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip implem
 
     @Override
     public Component getDescription(int index) {
-        return Component.literal("Slot " + slotIndex + " · " + resolveStack().getItem().getName().getString());
+        var stack = resolveStack();
+
+        return Component.literal("Slot " + slotIndex + " · " + stack.getItem().getName(stack).getString());
     }
 
     private static int getNextSlotIndex() {
