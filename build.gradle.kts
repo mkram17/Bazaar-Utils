@@ -247,13 +247,13 @@ publishMods {
         projectId = "c4u7nzUZ"
         minecraftVersions.add(mcVersion)
 
-        requires("fabric-api", "resourceful-config")
+        requires("fabric-api", "resourceful-config", "fabric-language-kotlin", "owo-lib")
         optional("modmenu")
     }
     github {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "mkram17/Bazaar-Utils"
-        commitish = "modern"
+        commitish = "v1.0.0"
         tagName = "v" + project.version.toString()
         type = when (releaseChannel) {
             "alpha" -> ALPHA
