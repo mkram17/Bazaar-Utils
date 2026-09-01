@@ -3,13 +3,17 @@ package com.github.mkram17.bazaarutils.config.util.client;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.config.util.api.SlotElement;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigUI;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.resources.Identifier;
 
+@PreInitModule
 public final class SlotRendererProvider {
-    private SlotRendererProvider() {}
+    public SlotRendererProvider() {
+        register();
+    }
 
     public static void register() {
         ResourcefulConfigUI.registerElementRenderer(
