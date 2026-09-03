@@ -405,6 +405,12 @@
         ],
         "reset_limits.label": "Daily Order Limits",
         "reset_limits.runnable": "Reset"
+      },
+
+      "separator.watermark.label": "Watermark",
+      "watermark.{}": {
+        "label": "Watermark",
+        "hint": "Shows the Bazaar Utils logo and name in the top left corner of the screen while a Bazaar menu is open."
       }
     },
 
