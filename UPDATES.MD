@@ -59,6 +59,9 @@ follows your Minecraft language setting.
 ### Per-profile data
 Your tracked orders and daily Bazaar limit are now stored per SkyBlock profile, so switching profiles
 shows the right numbers instead of mixing them together. Bookmarks stay shared across profiles.
+### Watermark
+The Bazaar Utils logo and name sit in the top left corner whenever a Bazaar menu is open, so it's
+obvious the mod is running. On by default; turn it off under **Overlays**.
 ---
 ## Improvements
 - **Custom buy amounts are now "Input Helpers"** and are configured in the settings screen instead of
