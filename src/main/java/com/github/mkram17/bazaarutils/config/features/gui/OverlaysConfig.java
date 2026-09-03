@@ -55,4 +55,15 @@ public class OverlaysConfig {
             title = "bazaarutils.config.overlays.bazaar_limits_visualizer.reset_limits.label"
     )
     public static final Runnable RESET_LIMITS_BUTTON = BazaarLimitsVisualizer::resetLimits;
+
+    @ConfigEntry(
+            id = "watermark",
+            translation = "bazaarutils.config.overlays.watermark.label"
+    )
+    @Comment(
+            value = "Shows the Bazaar Utils logo and name in the top left corner of the screen while a Bazaar menu is open.",
+            translation = "bazaarutils.config.overlays.watermark.hint"
+    )
+    @ConfigOption.Separator(value = "bazaarutils.config.overlays.separator.watermark.label")
+    public static boolean WATERMARK_TOGGLE = true;
 }
