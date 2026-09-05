@@ -126,6 +126,13 @@
       }
     },
 
+    "reset_config.{}": {
+      "label": "Reset All Settings",
+      "runnable": "Reset",
+      "confirm.title": "Reset all Bazaar Utils settings?",
+      "confirm.message": "Every setting returns to its default. Bookmarks, tracked orders and daily limits are kept."
+    },
+
     "chat.{}": {
       "category.label": "Chat",
       "category.hint": "Configurations for the chat features of the mod",

@@ -67,6 +67,10 @@ default; under **Overlays** you can pick which side it sits on and how many rows
 ### Watermark
 The Bazaar Utils logo and name sit in the top left corner whenever a Bazaar menu is open, so it's
 obvious the mod is running. On by default; turn it off under **Overlays**.
+### Reset all settings
+A **Reset** button at the top of the settings screen, and a `/bu resetconfig` command, put every
+setting back to its default. Both ask for confirmation first. Your bookmarks, tracked orders and
+daily limits are not touched.
 ---
 ## Improvements
 - **Custom buy amounts are now "Input Helpers"** and are configured in the settings screen instead of
