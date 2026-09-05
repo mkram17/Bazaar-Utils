@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.sign;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.SignOpenEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Priority;
 import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.client.Minecraft;
@@ -24,11 +25,8 @@ public class SignManager {
     /** Handlers queued for the next sign open; drained by {@link SignQueueDispatcher} in order. */
     private static final Queue<Function<SignOpenEvent, Result>> PENDING = new ConcurrentLinkedQueue<>();
 
-    static {
-        BazaarUtils.EVENT_BUS.register(new SignQueueDispatcher());
-    }
-
-    private static final class SignQueueDispatcher {
+    @PreInitModule
+    public static final class SignQueueDispatcher extends BUListener {
         @Subscription(priority = Priority.FIRST)
         private void onSignOpen(SignOpenEvent event) {
             Function<SignOpenEvent, Result> handler;
