@@ -59,6 +59,11 @@ follows your Minecraft language setting.
 ### Per-profile data
 Your tracked orders and daily Bazaar limit are now stored per SkyBlock profile, so switching profiles
 shows the right numbers instead of mixing them together. Bookmarks stay shared across profiles.
+### Orders Overlay
+Your own orders are now listed beside the main Bazaar screen, so you can see their status without
+opening the orders menu. Rows are sorted by what needs attention first — outbid, then goods waiting
+to be claimed, then closest to filling — and are coloured to match the order status highlights. On by
+default; under **Overlays** you can pick which side it sits on and how many rows it shows.
 ---
 ## Improvements
 - **Custom buy amounts are now "Input Helpers"** and are configured in the settings screen instead of

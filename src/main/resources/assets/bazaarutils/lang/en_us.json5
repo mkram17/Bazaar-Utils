@@ -405,6 +405,22 @@
         ],
         "reset_limits.label": "Daily Order Limits",
         "reset_limits.runnable": "Reset"
+      },
+
+      "separator.user_orders_overlay.label": "Your Orders",
+      "user_orders_overlay.{}": {
+        "label": "Your Orders",
+        "hint": "Lists your own orders next to the main Bazaar screen, so you can read their status without opening the orders menu.",
+        "side.{}": {
+          "label": "Side",
+          "hint": "Which side of the Bazaar screen the list is anchored to. It is placed clear of the mod buttons and bookmarks already on that side.",
+          "left.label": "Left",
+          "right.label": "Right"
+        },
+        "max_rows.{}": {
+          "label": "Rows Shown",
+          "hint": "How many orders to list. Orders that do not fit are summarised on a final line."
+        }
       }
     },
 
