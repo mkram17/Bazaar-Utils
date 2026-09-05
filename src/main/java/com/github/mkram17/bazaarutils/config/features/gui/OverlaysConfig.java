@@ -66,7 +66,7 @@ public class OverlaysConfig {
             translation = "bazaarutils.config.overlays.user_orders_overlay.hint"
     )
     @ConfigOption.Separator(value = "bazaarutils.config.overlays.separator.user_orders_overlay.label")
-    public static boolean USER_ORDERS_OVERLAY_TOGGLE = false;
+    public static boolean USER_ORDERS_OVERLAY_TOGGLE = true;
 
     @ConfigEntry(
             id = "user_orders_overlay:side",
