@@ -116,6 +116,17 @@ public final class InventoryConfig {
     @ConfigOption.Color(alpha = true)
     public static int ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR = 0xFFFF5555;
 
+    @ConfigEntry(
+            id = "coop_order_claim_confirmation",
+            translation = "bazaarutils.config.inventory.coop_order_claim_confirmation.label"
+    )
+    @Comment(
+            value = "Asks for a second click before claiming an order a co-op member placed, so their goods aren't swept up while clearing your own.\n\nHas no effect outside a co-op.",
+            translation = "bazaarutils.config.inventory.coop_order_claim_confirmation.hint"
+    )
+    @ConfigOption.Separator(value = "bazaarutils.config.inventory.separator.coop_order_claim_confirmation.label")
+    public static boolean COOP_ORDER_CLAIM_CONFIRMATION_TOGGLE = true;
+
     @Category(value = "restrictions")
     @ConfigInfo(
             title = "Restrictions Rules",

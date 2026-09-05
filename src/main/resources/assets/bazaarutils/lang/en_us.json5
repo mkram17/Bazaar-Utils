@@ -301,6 +301,12 @@
         }
       },
 
+      "separator.coop_order_claim_confirmation.label": "Co-op Order Claims",
+      "coop_order_claim_confirmation.{}": {
+        "label": "Confirm Co-op Order Claims",
+        "hint": "Asks for a second click before claiming an order a co-op member placed, so their goods aren't swept up while clearing your own.\n\nHas no effect outside a co-op."
+      },
+
       "restrictions.{}": {
         "separator.introductory.{}": {
           "label": "Inventory Restrictions"

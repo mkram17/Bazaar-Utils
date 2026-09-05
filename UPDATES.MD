@@ -59,6 +59,10 @@ follows your Minecraft language setting.
 ### Per-profile data
 Your tracked orders and daily Bazaar limit are now stored per SkyBlock profile, so switching profiles
 shows the right numbers instead of mixing them together. Bookmarks stay shared across profiles.
+### Co-op order claim confirmation
+Claiming an order a co-op member placed now takes a second click, so their goods don't get swept up
+while you clear your own. The prompt names who placed it. On by default, and inert outside a co-op;
+turn it off under **Inventory**.
 ---
 ## Improvements
 - **Custom buy amounts are now "Input Helpers"** and are configured in the settings screen instead of
