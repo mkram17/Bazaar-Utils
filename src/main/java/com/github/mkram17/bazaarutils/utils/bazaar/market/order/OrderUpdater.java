@@ -17,11 +17,14 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Module
 public final class OrderUpdater extends BUListener {
@@ -39,6 +42,13 @@ public final class OrderUpdater extends BUListener {
     private static final String LORE_OFFER_AMOUNT = "Offer amount: ";
     private static final String WORD_UNIT = "unit:";
     private static final double FILL_TOLERANCE_RATIO = 0.05; //5%
+
+    /**
+     * Matches "By: [MVP+] PlayerName" and the rankless "By: PlayerName". Hypixel writes this line on
+     * every order while the profile is in a co-op and omits it entirely otherwise, so a miss is the
+     * normal case on a solo profile rather than a parse failure.
+     */
+    private static final Pattern COOP_AUTHOR_PATTERN = Pattern.compile("By: (?:\\[.*?] )?(?<username>\\S+)");
 
     @Subscription(priority = Priority.HIGH)
     @OnlyBazaarScreen(BazaarScreenType.ORDERS_PAGE)
@@ -126,6 +136,19 @@ public final class OrderUpdater extends BUListener {
         order.setPricePerItem(pricePerItem);
         order.setTolerance(0.0);
 
+        order.setAuthor(parseAuthor(loreLines));
+    }
+
+    private static @Nullable String parseAuthor(List<Component> lore) {
+        for (Component line : lore) {
+            // Stripped first: a legacy-coded rank prefix such as "[MVP§c+§b]" would otherwise leave
+            // colour codes glued to the captured username.
+            Matcher matcher = COOP_AUTHOR_PATTERN.matcher(Util.stripFormatCodes(line.getString()));
+
+            if (matcher.find()) return matcher.group("username");
+        }
+
+        return null;
     }
 
     private static OrderInfo parseOrderFromItemStack(ItemStack stack) {
@@ -166,7 +189,12 @@ public final class OrderUpdater extends BUListener {
 
         String cleanName = stripPrefix(title, side);
 
-        return new OrderInfo(cleanName, side, null, volume, unitPrice, itemInfo);
+        OrderInfo parsed = new OrderInfo(cleanName, side, null, volume, unitPrice, itemInfo);
+
+        // Carried onto the tracked order by toBazaarOrder when this turns out to be a new order.
+        parsed.setAuthor(parseAuthor(loreLines));
+
+        return parsed;
     }
 
     private static TransactionType.Side detectTransactionSide(String title) {
