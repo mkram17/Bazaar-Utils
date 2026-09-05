@@ -59,7 +59,9 @@ public class WidgetManager extends BUListener {
         if (!(screen instanceof AccessorScreen accessor)) return;
 
         accessor.getChildren().stream()
-                .filter(element -> element instanceof ItemSlotButtonWidget || element instanceof TextDisplayWidget)
+                .filter(element -> element instanceof ItemSlotButtonWidget
+                        || element instanceof TextDisplayWidget
+                        || element instanceof LogoDisplayWidget)
                 .toList()
                 .forEach(accessor::unregisterWidget);
     }

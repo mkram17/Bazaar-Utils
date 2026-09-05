@@ -64,6 +64,9 @@ Your own orders are now listed beside the main Bazaar screen, so you can see the
 opening the orders menu. Rows are sorted by what needs attention first — outbid, then goods waiting
 to be claimed, then closest to filling — and are coloured to match the order status highlights. On by
 default; under **Overlays** you can pick which side it sits on and how many rows it shows.
+### Watermark
+The Bazaar Utils logo and name sit in the top left corner whenever a Bazaar menu is open, so it's
+obvious the mod is running. On by default; turn it off under **Overlays**.
 ---
 ## Improvements
 - **Custom buy amounts are now "Input Helpers"** and are configured in the settings screen instead of

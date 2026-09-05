@@ -88,4 +88,15 @@ public class OverlaysConfig {
     )
     @ConfigOption.Range(min = 1, max = 20)
     public static int USER_ORDERS_OVERLAY_MAX_ROWS = 8;
+
+    @ConfigEntry(
+            id = "watermark",
+            translation = "bazaarutils.config.overlays.watermark.label"
+    )
+    @Comment(
+            value = "Shows the Bazaar Utils logo and name in the top left corner of the screen while a Bazaar menu is open.",
+            translation = "bazaarutils.config.overlays.watermark.hint"
+    )
+    @ConfigOption.Separator(value = "bazaarutils.config.overlays.separator.watermark.label")
+    public static boolean WATERMARK_TOGGLE = true;
 }
