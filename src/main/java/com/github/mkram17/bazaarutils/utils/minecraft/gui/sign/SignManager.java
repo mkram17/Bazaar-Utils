@@ -14,7 +14,6 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
-import tech.thatgravyboat.skyblockapi.api.events.screen.ContainerCloseEvent;
 
 import java.util.Optional;
 import java.util.Queue;
@@ -22,36 +21,57 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
 public class SignManager {
+    /**
+     * How long a queued handler stays eligible for the next sign.
+     *
+     * <p>Expiry rather than clearing on container close: the chest closing is the same server-side
+     * transition that opens the sign, so a close-triggered clear races the very sign open it is
+     * meant to serve. SkyblockAPI posts {@code ContainerCloseEvent} a tick behind the clientbound
+     * close packet, which usually puts it after the sign open — but only usually.
+     */
+    private static final long HANDLER_TTL_MILLIS = 5_000L;
+
+    private record PendingHandler(Function<SignOpenEvent, Result> handler, long expiresAtMillis) {
+        static PendingHandler of(Function<SignOpenEvent, Result> handler) {
+            return new PendingHandler(handler, System.currentTimeMillis() + HANDLER_TTL_MILLIS);
+        }
+
+        boolean isExpired() {
+            return System.currentTimeMillis() > expiresAtMillis;
+        }
+    }
+
     /** Handlers queued for the next sign open; drained by {@link SignQueueDispatcher} in order. */
-    private static final Queue<Function<SignOpenEvent, Result>> PENDING = new ConcurrentLinkedQueue<>();
+    private static final Queue<PendingHandler> PENDING = new ConcurrentLinkedQueue<>();
 
     @PreInitModule
     public static final class SignQueueDispatcher extends BUListener {
         @Subscription(priority = Priority.FIRST)
         private void onSignOpen(SignOpenEvent event) {
-            Function<SignOpenEvent, Result> handler;
+            PendingHandler pending;
 
-            while ((handler = PENDING.poll()) != null) {
-                Result result = handler.apply(event);
+            while ((pending = PENDING.poll()) != null) {
+                if (pending.isExpired()) continue;
 
-                if (!result.propagate()) break;
+                if (!pending.handler().apply(event).propagate()) {
+                    // Claiming the sign also discards the rest: they were queued for a different one.
+                    PENDING.clear();
+
+                    break;
+                }
             }
-        }
-
-        @Subscription(priority = Priority.FIRST)
-        private void onContainerClosed(ContainerCloseEvent event) {
-            PENDING.clear();
         }
     }
 
     /**
      * Queues a handler for the next sign that opens. Handlers run in order against a single
      * {@link SignOpenEvent}; return {@link Result#CONSUMED} once you've claimed the sign so
-     * nothing else queued fires on it. The whole queue clears on {@link ContainerCloseEvent},
-     * so a handler waiting on a sign that never opens doesn't fire on some later, unrelated one.
+     * nothing else queued fires on it. A handler whose sign never opens expires after
+     * {@link #HANDLER_TTL_MILLIS}, so it can't fire on some later, unrelated one.
      */
     public static void runOnNextSignOpen(Function<SignOpenEvent, Result> handler) {
-        PENDING.add(handler);
+        PENDING.removeIf(PendingHandler::isExpired);
+        PENDING.add(PendingHandler.of(handler));
     }
 
     public static void setSignText(String text, boolean closeAfter) {
