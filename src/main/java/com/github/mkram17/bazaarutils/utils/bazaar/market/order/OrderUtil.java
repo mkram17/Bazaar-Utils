@@ -99,9 +99,18 @@ public final class OrderUtil {
     }
 
     public static double getPriceForPosition(String productID, PricingPosition pricingPosition, TransactionType transactionType) {
+        return getPriceForPositionOptional(productID, pricingPosition, transactionType).orElse(-1);
+    }
+
+    /**
+     * Same resolution as {@link #getPriceForPosition}, but reports an unresolvable price as an
+     * empty result instead of the {@code -1} sentinel — so callers that must not present or act on
+     * a bogus price can tell the two apart.
+     */
+    public static OptionalDouble getPriceForPositionOptional(String productID, PricingPosition pricingPosition, TransactionType transactionType) {
         if (productID == null || pricingPosition == null || transactionType == null) {
             Util.notifyError("Call to OrderUtil.getPriceForPosition contained a null param", new Exception("Price resolution error"));
-            return -1;
+            return OptionalDouble.empty();
         }
 
         OptionalDouble marketSellPriceOpt = BazaarDataUtil.findItemPriceOptional(productID, TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER));
@@ -109,13 +118,13 @@ public final class OrderUtil {
 
         if(marketBuyPriceOpt.isEmpty() || marketSellPriceOpt.isEmpty()) {
             Util.notifyError("Could not resolve market prices for " + productID + " when calculating price for position. Buy price present: " + marketBuyPriceOpt.isPresent() + " Sell price present: " + marketSellPriceOpt.isPresent(), new Exception("Price resolution error"));
-            return -1;
+            return OptionalDouble.empty();
         }
 
         double marketBuyPrice = marketBuyPriceOpt.getAsDouble();
         double marketSellPrice = marketSellPriceOpt.getAsDouble();
 
-        return switch (transactionType.getPriceType()) {
+        return OptionalDouble.of(switch (transactionType.getPriceType()) {
             case PriceType.INSTABUY -> switch (pricingPosition) {
                 case COMPETITIVE -> marketSellPrice - 0.1;
                 case MATCHED -> marketSellPrice;
@@ -126,6 +135,6 @@ public final class OrderUtil {
                 case MATCHED -> marketBuyPrice;
                 case OUTBID -> marketBuyPrice - 0.1;
             };
-        };
+        });
     }
 }

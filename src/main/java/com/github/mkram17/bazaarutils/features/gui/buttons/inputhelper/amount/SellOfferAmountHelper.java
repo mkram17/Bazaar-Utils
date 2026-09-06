@@ -21,6 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 @Getter
@@ -104,8 +105,8 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
     }
 
     @Override
-    protected int computeMaxValue(TransactionState state) {
-        return state.playerInventory().getNonEquipmentItems().stream()
+    protected OptionalInt computeMaxValue(TransactionState state) {
+        return OptionalInt.of(state.playerInventory().getNonEquipmentItems().stream()
                 .filter(stack -> !stack.isEmpty())
                 .filter(stack -> Optional.ofNullable(stack.getCustomName())
                         .map(Component::getString)
@@ -113,7 +114,7 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
                         .map(productId -> productId.equals(state.productId()))
                         .orElse(false))
                 .mapToInt(ItemStack::getCount)
-                .sum();
+                .sum());
     }
 
     @Override

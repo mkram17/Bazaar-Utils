@@ -23,6 +23,7 @@ import lombok.Getter;
 import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 @Getter
@@ -106,8 +107,8 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
     }
 
     @Override
-    protected int computeMaxValue(TransactionAmount.TransactionState state) {
-        return SlotLookup.getInventoryItem(state.container(), BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot)
+    protected OptionalInt computeMaxValue(TransactionAmount.TransactionState state) {
+        return OptionalInt.of(SlotLookup.getInventoryItem(state.container(), BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot)
                 .map(ItemInfo::itemStack)
                 .flatMap(TransactionPageLayout::findOptionAmount)
                 .map(value -> (int) Math.floor(value))
@@ -127,7 +128,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
                             return isSameItem ? maxStackSize - stack.getCount() : 0;
                         })
                         .sum()
-                );
+                ));
     }
 
     @Override

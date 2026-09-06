@@ -17,8 +17,6 @@ import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -33,6 +31,8 @@ import tech.thatgravyboat.skyblockapi.api.profile.currency.CurrencyAPI;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,18 +65,25 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
     /**
      * Wraps the lazily-computed, memoized result of {@link #resolveInput}.
      *
-     * <p>On first {@link #get()} call the memoized supplier fires {@code resolveInput} exactly
-     * once and caches the result for the lifetime of this container load.
+     * <p>On first {@link #get()} call {@code resolveInput} fires and, if it resolved, the result
+     * is cached for the lifetime of this container load. A failed resolution is deliberately not
+     * cached: market data can land after the first render, and freezing that miss would leave the
+     * button showing — and the sign filled with — a value that never recovers.
      */
     protected class WorkingValue {
-        private final Supplier<ResolvedInput> resolver;
+        private final T state;
+
+        @Nullable
+        private ResolvedInput resolved;
 
         WorkingValue(T state) {
-            this.resolver = Suppliers.memoize(() -> resolveInput(state));
+            this.state = state;
         }
 
-        public ResolvedInput get() {
-            return resolver.get();
+        public Optional<ResolvedInput> get() {
+            if (resolved == null) resolved = resolveInput(state).orElse(null);
+
+            return Optional.ofNullable(resolved);
         }
     }
 
@@ -115,6 +122,14 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         return new WorkingValue(state);
     }
 
+    /**
+     * The working value as the button's stack-size overlay, or blank while it cannot be resolved —
+     * a button showing nothing reads better than one showing a placeholder that isn't a real amount.
+     */
+    protected String formatWorkingValue(T state) {
+        return getWorkingValue(state).get().map(ResolvedInput::format).orElse("");
+    }
+
     @Override
     protected void resetState() {
         workingValue = null;
@@ -123,12 +138,19 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
     @Override
     protected void handleAction(T state, Runnable resetState) {
+        Optional<ResolvedInput> input = getWorkingValue(state).get();
+
+        // Opening a sign we have nothing to type into it just strands the player on it.
+        if (input.isEmpty()) {
+            Util.logMessage("Cannot handle action for " + name + ", input could not be resolved.");
+
+            return;
+        }
+
         ContainerManager.clickSlot(state.inputSign().slotIndex(), 0);
 
-        ResolvedInput input = getWorkingValue(state).get();
-
         SignManager.runOnNextSignOpen(event -> {
-            SignManager.setSignText(input.format(), true);
+            SignManager.setSignText(input.get().format(), true);
 
             resetState.run();
 
@@ -136,7 +158,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         });
     }
 
-    protected abstract ResolvedInput resolveInput(T state);
+    protected abstract Optional<ResolvedInput> resolveInput(T state);
 
     public abstract static class TransactionAmount extends SignInputHelper<TransactionAmount.TransactionState> {
         public record TransactionState(
@@ -209,22 +231,24 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected String getButtonItemStackSize(TransactionState state) {
-            return getWorkingValue(state).get().format();
+            return formatWorkingValue(state);
         }
 
         @Override
-        protected ResolvedInput resolveInput(TransactionState state) {
-            int amount = switch (getAmountStrategy()) {
+        protected Optional<ResolvedInput> resolveInput(TransactionState state) {
+            OptionalInt amount = switch (getAmountStrategy()) {
                 case MAX -> computeMaxValue(state);
-                case FIXED -> computeFixedValue(state);
+                case FIXED -> OptionalInt.of(computeFixedValue(state));
             };
 
-            return new ResolvedInput.Value(amount);
+            return amount.isPresent()
+                    ? Optional.of(new ResolvedInput.Value(amount.getAsInt()))
+                    : Optional.empty();
         }
 
         protected abstract int computeFixedValue(TransactionState state);
 
-        protected abstract int computeMaxValue(TransactionState state);
+        protected abstract OptionalInt computeMaxValue(TransactionState state);
     }
 
     public abstract static class TransactionCost extends SignInputHelper<TransactionCost.TransactionState> {
@@ -273,14 +297,16 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected String getButtonItemStackSize(TransactionState state) {
-            return getWorkingValue(state).get().format();
+            return formatWorkingValue(state);
         }
 
         @Override
-        protected ResolvedInput resolveInput(TransactionState state) {
-            return new ResolvedInput.Value(
-                    OrderUtil.getPriceForPosition(state.productId(), getPricingPosition(), getTransactionType())
-            );
+        protected Optional<ResolvedInput> resolveInput(TransactionState state) {
+            OptionalDouble price = OrderUtil.getPriceForPositionOptional(state.productId(), getPricingPosition(), getTransactionType());
+
+            return price.isPresent()
+                    ? Optional.of(new ResolvedInput.Value(price.getAsDouble()))
+                    : Optional.empty();
         }
     }
 

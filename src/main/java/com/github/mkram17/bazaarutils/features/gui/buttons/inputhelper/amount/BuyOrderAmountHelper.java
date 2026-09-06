@@ -21,6 +21,8 @@ import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvide
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 @Getter
@@ -104,12 +106,17 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
     }
 
     @Override
-    protected int computeMaxValue(TransactionAmount.TransactionState state) {
-        int amountCanAfford = (int) (state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()));
+    protected OptionalInt computeMaxValue(TransactionAmount.TransactionState state) {
+        OptionalDouble price = OrderUtil.getPriceForPositionOptional(state.productId(), PricingPosition.COMPETITIVE, getTransactionType());
 
-        return TransactionPageLayout.findBuyOrderAmountLimit(state.inputSign().itemStack())
+        // A missing or non-positive price divides into an amount that is nonsense rather than large.
+        if (price.isEmpty() || price.getAsDouble() <= 0) return OptionalInt.empty();
+
+        int amountCanAfford = (int) (state.purse() / price.getAsDouble());
+
+        return OptionalInt.of(TransactionPageLayout.findBuyOrderAmountLimit(state.inputSign().itemStack())
                             .map(limit -> Math.min(amountCanAfford, limit))
-                            .orElse(amountCanAfford);
+                            .orElse(amountCanAfford));
     }
 
     @Override
