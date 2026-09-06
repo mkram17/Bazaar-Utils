@@ -7,6 +7,7 @@ import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Util;
 import moe.nea.libautoupdate.*;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.metadata.CustomValue;
@@ -85,6 +86,11 @@ public final class UpdateUtil {
     }
 
     public static void checkForUpdates() {
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            Util.logMessage("Skipping self-update check: development environment.");
+            return;
+        }
+
         CompletableFuture.runAsync(() -> {
             UpdateContext context = getUpdateContext();
             context.cleanup();
