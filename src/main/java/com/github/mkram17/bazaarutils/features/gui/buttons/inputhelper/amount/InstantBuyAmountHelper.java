@@ -21,9 +21,7 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvider;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 

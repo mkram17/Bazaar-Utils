@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.concurrent.Callable;
 
 public abstract class InputHelper<T> implements ItemButton {
     @Getter
