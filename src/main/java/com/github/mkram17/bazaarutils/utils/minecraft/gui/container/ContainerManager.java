@@ -13,10 +13,10 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -98,7 +98,7 @@ public class ContainerManager {
         int syncId = menu.get().containerId;
 
         Util.tickExecuteLater(1, () ->
-                interactionManager.handleInventoryMouseClick(syncId, slotIndex, button, ClickType.PICKUP, player)
+                interactionManager.handleContainerInput(syncId, slotIndex, button, ContainerInput.PICKUP, player)
         );
     }
 }

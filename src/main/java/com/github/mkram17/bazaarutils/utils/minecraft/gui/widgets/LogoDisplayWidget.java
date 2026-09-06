@@ -2,12 +2,13 @@ package com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.NonNull;
 
 /**
  * A square GUI sprite with a label beside it, the label centred against the sprite's height.
@@ -30,15 +31,15 @@ public class LogoDisplayWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         Font textRenderer = Minecraft.getInstance().font;
 
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, this.getX(), this.getY(), spriteSize, spriteSize);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, this.getX(), this.getY(), spriteSize, spriteSize);
 
         int textY = this.getY() + (spriteSize - textRenderer.lineHeight) / 2;
 
         // Shadowed: this draws over whatever screen is open, so it needs to stay legible on any background.
-        context.drawString(textRenderer, label, this.getX() + spriteSize + GAP, textY, 0xFFFFFFFF, true);
+        graphics.text(textRenderer, label, this.getX() + spriteSize + GAP, textY, 0xFFFFFFFF, true);
     }
 
     @Override

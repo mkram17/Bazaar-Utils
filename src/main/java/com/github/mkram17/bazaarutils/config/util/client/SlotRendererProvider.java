@@ -3,13 +3,17 @@ package com.github.mkram17.bazaarutils.config.util.client;
 import com.github.mkram17.bazaarutils.config.features.gui.ButtonsConfig;
 import com.github.mkram17.bazaarutils.config.util.api.SlotElement;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigUI;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.resources.Identifier;
 
+@PreInitModule
 public final class SlotRendererProvider {
-    private SlotRendererProvider() {}
+    public SlotRendererProvider() {
+        register();
+    }
 
     public static void register() {
         ResourcefulConfigUI.registerElementRenderer(
@@ -36,7 +40,7 @@ public final class SlotRendererProvider {
                         case 14 -> SlotProviders.stack(Items.CHEST, 16).named("Buy a thousand!").locked().build();
                         case 16 -> SlotProviders.stack(Items.OAK_SIGN).named("Custom Amount").locked().build();
                         case 31 -> SlotProviders.stack(Items.ARROW).named("Go Back").locked().build();
-                        default -> SlotProviders.stack(Items.GRAY_STAINED_GLASS_PANE).hideTooltip().build();
+                        default -> SlotProviders.stack(Items.STAINED_GLASS_PANE.gray()).hideTooltip().build();
                     };
                 }
         );
@@ -54,7 +58,7 @@ public final class SlotRendererProvider {
                         case 16 -> SlotProviders.stack(Items.OAK_SIGN).named("Custom Price").locked().build();
                         case 30 -> SlotProviders.stack(Items.ARROW).named("Go Back").locked().build();
                         case 31 -> SlotProviders.stack(Items.BARRIER).named("Cancel Buy Order").locked().build();
-                        default -> SlotProviders.stack(Items.GRAY_STAINED_GLASS_PANE).hideTooltip().build();
+                        default -> SlotProviders.stack(Items.STAINED_GLASS_PANE.gray()).hideTooltip().build();
                     };
                 }
         );
@@ -66,7 +70,7 @@ public final class SlotRendererProvider {
                 case 12 -> SlotProviders.stack(Items.PAPER).named("Buy Order").locked().build();
                 case 30 -> SlotProviders.stack(Items.ARROW).named("Go Back").locked().build();
                 case 31 -> SlotProviders.stack(Items.BARRIER).named("Cancel Buy Order").locked().build();
-                default -> SlotProviders.stack(Items.GRAY_STAINED_GLASS_PANE).hideTooltip().build();
+                default -> SlotProviders.stack(Items.STAINED_GLASS_PANE.gray()).hideTooltip().build();
             };
         });
 
@@ -82,7 +86,7 @@ public final class SlotRendererProvider {
                         case 14 -> SlotProviders.stack(Items.CHEST).named("Fill my inventory!").locked().build();
                         case 16 -> SlotProviders.stack(Items.OAK_SIGN).named("Custom Amount").locked().build();
                         case 31 -> SlotProviders.stack(Items.ARROW).named("Go Back").locked().build();
-                        default -> SlotProviders.stack(Items.GRAY_STAINED_GLASS_PANE).hideTooltip().build();
+                        default -> SlotProviders.stack(Items.STAINED_GLASS_PANE.gray()).hideTooltip().build();
                     };
                 }
         );
@@ -99,7 +103,7 @@ public final class SlotRendererProvider {
                         case 14 -> SlotProviders.stack(Items.CHEST).named("Sell whole inventory!").locked().build();
                         case 16 -> SlotProviders.stack(Items.OAK_SIGN).named("Custom Amount").locked().build();
                         case 31 -> SlotProviders.stack(Items.ARROW).named("Go Back").locked().build();
-                        default -> SlotProviders.stack(Items.GRAY_STAINED_GLASS_PANE).hideTooltip().build();
+                        default -> SlotProviders.stack(Items.STAINED_GLASS_PANE.gray()).hideTooltip().build();
                     };
                 }
         );
@@ -117,7 +121,7 @@ public final class SlotRendererProvider {
                         case 16 -> SlotProviders.stack(Items.OAK_SIGN).named("Custom Price").locked().build();
                         case 30 -> SlotProviders.stack(Items.ARROW).named("Go Back").locked().build();
                         case 31 -> SlotProviders.stack(Items.BARRIER).named("Cancel Sell Offer").locked().build();
-                        default -> SlotProviders.stack(Items.GRAY_STAINED_GLASS_PANE).hideTooltip().build();
+                        default -> SlotProviders.stack(Items.STAINED_GLASS_PANE.gray()).hideTooltip().build();
                     };
                 }
         );
@@ -129,7 +133,7 @@ public final class SlotRendererProvider {
                 case 12 -> SlotProviders.stack(Items.PAPER).named("Sell Offer").locked().build();
                 case 30 -> SlotProviders.stack(Items.ARROW).named("Go Back").locked().build();
                 case 31 -> SlotProviders.stack(Items.BARRIER).named("Cancel Sell Offer").locked().build();
-                default -> SlotProviders.stack(Items.GRAY_STAINED_GLASS_PANE).hideTooltip().build();
+                default -> SlotProviders.stack(Items.STAINED_GLASS_PANE.gray()).hideTooltip().build();
             };
         });
 
@@ -141,7 +145,7 @@ public final class SlotRendererProvider {
                 case 13 -> SlotProviders.stack(Items.CHEST).named("Sell half your inventory!").locked().build();
                 case 15 -> SlotProviders.stack(Items.CHEST).named("Sell whole inventory!").locked().build();
                 case 31 -> SlotProviders.stack(Items.ARROW).named("Go Back").locked().build();
-                default -> SlotProviders.stack(Items.GRAY_STAINED_GLASS_PANE).hideTooltip().build();
+                default -> SlotProviders.stack(Items.STAINED_GLASS_PANE.gray()).hideTooltip().build();
             };
         });
 
@@ -152,10 +156,10 @@ public final class SlotRendererProvider {
                     if (slotIndex < 0 || slotIndex > 35) return ItemStack.EMPTY;
 
                     return switch (slotIndex) {
-                        case 11 -> SlotProviders.stack(Items.RED_TERRACOTTA).named("Cancel Order").locked().build();
+                        case 11 -> SlotProviders.stack(Items.DYED_TERRACOTTA.red()).named("Cancel Order").locked().build();
                         case 15 -> SlotProviders.stack(Items.NAME_TAG).named("Flip Order").locked().build();
                         case 31 -> SlotProviders.stack(Items.ARROW).named("Go Back").locked().build();
-                        default -> SlotProviders.stack(Items.GRAY_STAINED_GLASS_PANE).hideTooltip().build();
+                        default -> SlotProviders.stack(Items.STAINED_GLASS_PANE.gray()).hideTooltip().build();
                     };
                 }
         );

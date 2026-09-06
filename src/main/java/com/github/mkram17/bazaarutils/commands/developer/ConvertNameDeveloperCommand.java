@@ -9,7 +9,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -24,7 +24,7 @@ public final class ConvertNameDeveloperCommand implements BUCommand {
 
     @Override
     public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
-        return base.then(ClientCommandManager.argument("item name", StringArgumentType.string()).executes(this::convertNameToId));
+        return base.then(ClientCommands.argument("item name", StringArgumentType.string()).executes(this::convertNameToId));
     }
 
     private int convertNameToId(CommandContext<FabricClientCommandSource> context) {

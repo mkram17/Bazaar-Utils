@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.modules.Module;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import lombok.Getter;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
@@ -30,7 +30,7 @@ public final class BazaarUtilsCommand implements BUCommand {
 
     private void registerWithCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, List<BUCommand> subcommands) {
         for (String prefix : PREFIXES) {
-            LiteralArgumentBuilder<FabricClientCommandSource> base = getCommandBuilder(ClientCommandManager.literal(prefix));
+            LiteralArgumentBuilder<FabricClientCommandSource> base = getCommandBuilder(ClientCommands.literal(prefix));
 
             subcommands.forEach(command -> command.getCommandBuilders().forEach(base::then));
 

@@ -3,8 +3,6 @@ package com.github.mkram17.bazaarutils.config.util;
 import com.github.mkram17.bazaarutils.BazaarUtils;
 import com.github.mkram17.bazaarutils.config.BUConfig;
 import com.github.mkram17.bazaarutils.config.patcher.ConfigPatches;
-import com.github.mkram17.bazaarutils.config.util.client.ItemRendererProvider;
-import com.github.mkram17.bazaarutils.config.util.client.SlotRendererProvider;
 import com.github.mkram17.bazaarutils.utils.Util;
 import com.google.gson.JsonObject;
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen;
@@ -26,7 +24,6 @@ import java.util.function.UnaryOperator;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.CONFIGURATOR;
 
-
 public class ConfigUtil {
 
     public static final Map<Integer, UnaryOperator<JsonObject>> PATCHES = ConfigPatches.loadPatches();
@@ -44,8 +41,8 @@ public class ConfigUtil {
 
     public static void openGUI() {
         Minecraft client = Minecraft.getInstance();
-        Screen parent = client.screen;
-        client.schedule(() -> client.setScreen(createGUI(parent)));
+        Screen parent = client.gui.screen();
+        client.schedule(() -> client.gui.setScreen(createGUI(parent)));
     }
 
     /**
@@ -84,13 +81,13 @@ public class ConfigUtil {
      */
     public static void confirmResetToDefaults() {
         Minecraft client = Minecraft.getInstance();
-        Screen parent = client.screen;
+        Screen parent = client.gui.screen();
 
-        client.setScreen(new ConfirmScreen(
+        client.gui.setScreen(new ConfirmScreen(
                 confirmed -> {
                     if (confirmed) resetToDefaults();
 
-                    client.setScreen(parent);
+                    client.gui.setScreen(parent);
 
                     if (confirmed && parent instanceof ConfigScreen screen) screen.updateOptions();
                 },
@@ -123,9 +120,6 @@ public class ConfigUtil {
                             "— expected VERSION = " + (PATCHES.size() + 1)
             );
         }
-        
-        ItemRendererProvider.register();
-        SlotRendererProvider.register();
 
         configurator.register(BUConfig.class, event ->
                 PATCHES.forEach((version, patch) ->

@@ -67,7 +67,7 @@ public class WidgetManager extends BUListener {
     }
 
     public static Optional<ScreenWidgetDimensions> getScreenDimensions(ScreenType... required) {
-        if (!(Minecraft.getInstance().screen instanceof AccessorAbstractContainerScreen screen)) {
+        if (!(Minecraft.getInstance().gui.screen() instanceof AccessorAbstractContainerScreen screen)) {
             return Optional.empty();
         }
 

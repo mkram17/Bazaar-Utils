@@ -1,13 +1,13 @@
 {
   "required": true,
   "package": "com.github.mkram17.bazaarutils.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "plugin": "com.moulberry.mixinconstraints.ConstraintsMixinPlugin",
   "injectors": {
     "defaultRequire": 1
   },
   "client": [
-    "MinecraftMixin",
+    "GuiMixin",
     "AccessorAbstractContainerScreen",
     "AccessorScreen",
     "AccessorSignEditScreen",

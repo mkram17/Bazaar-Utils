@@ -120,7 +120,7 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
 
         String link = "https://skyblock.finance/items/" + productId.get();
 
-        Minecraft.getInstance().setScreen(new ConfirmLinkScreen(confirmed -> {
+        Minecraft.getInstance().gui.setScreen(new ConfirmLinkScreen(confirmed -> {
             if (confirmed) {
                 try {
                     net.minecraft.util.Util.getPlatform().openUri(new URI(link));
@@ -129,7 +129,7 @@ public class PriceCharts implements LoreModifier, AbstractItemModifier {
                 }
             }
 
-            Minecraft.getInstance().setScreen(null);
+            Minecraft.getInstance().gui.setScreen(null);
         }, link, true));
 
         return Result.CONSUMED;

@@ -1,6 +1,6 @@
 package com.github.mkram17.bazaarutils.features.util;
 
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 
 public abstract class BUKeybinding {
@@ -13,7 +13,7 @@ public abstract class BUKeybinding {
     }
 
     private static void registerKeybinding(KeyMapping keyBinding){
-        KeyBindingHelper.registerKeyBinding(keyBinding);
+        KeyMappingHelper.registerKeyMapping(keyBinding);
     }
 
     protected void registerOnPressed(){}

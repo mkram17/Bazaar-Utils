@@ -12,6 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public record ItemRenderer(ItemElement element) implements ResourcefulConfigElementRenderer {
     @Override
@@ -29,6 +31,7 @@ public record ItemRenderer(ItemElement element) implements ResourcefulConfigElem
         ResourcefulConfigValueEntry entry = element.valueEntry();
 
         List<ItemStack> items = ItemsRepo.getItems(element.tag());
+        Set<String> allowedIds = items.stream().map(ItemsRepo::identify).collect(Collectors.toUnmodifiableSet());
 
         ItemOptionWidget itemWidget = new ItemOptionWidget(items, entry::getString, entry::setString);
 
@@ -39,7 +42,7 @@ public record ItemRenderer(ItemElement element) implements ResourcefulConfigElem
                     if (resolved == null) return false;
 
                     String resolvedId = ItemsRepo.identify(resolved);
-                    if (items.stream().noneMatch(stack -> ItemsRepo.identify(stack).equals(resolvedId))) return false;
+                    if (!allowedIds.contains(resolvedId)) return false;
 
                     entry.setString(s);
 

@@ -8,6 +8,7 @@ import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import lombok.Getter;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 
 @ConfigObject
@@ -17,15 +18,17 @@ public class CancelOrderAndSearch extends BUListener {
         return ButtonsConfig.CANCEL_ORDER_AND_SEARCH.slotIndex;
     }
 
+    private static final ItemStackTemplate ITEM_TEPLATE = new ItemStackTemplate(Items.DYED_TERRACOTTA.blue());
+
     public ItemRef getItemRef() {
-        return ItemRef.of(Items.BLUE_TERRACOTTA);
+        return ItemRef.of(ITEM_TEPLATE);
     }
 
     @Getter
     private transient ItemStack replacementItem;
 
     public CancelOrderAndSearch() {
-        this.replacementItem = Items.BLUE_TERRACOTTA.getDefaultInstance();
+        this.replacementItem = Items.DYED_TERRACOTTA.blue().getDefaultInstance();
     }
 
     private transient OrderInfo orderInfo;

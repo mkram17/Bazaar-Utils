@@ -2,10 +2,11 @@ package com.github.mkram17.bazaarutils.utils.minecraft.gui.widgets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 import java.util.function.Supplier;
 
@@ -40,7 +41,7 @@ public class TextDisplayWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         Font textRenderer = Minecraft.getInstance().font;
         Component current = text.get();
 
@@ -51,7 +52,7 @@ public class TextDisplayWidget extends AbstractWidget {
             case RIGHT  -> this.getX() + this.width - textRenderer.width(current);
         };
 
-        context.drawString(textRenderer, current, textX, textY, 0xFFFFFFFF, false);
+        graphics.text(textRenderer, current, textX, textY, 0xFFFFFFFF, false);
     }
 
     @Override

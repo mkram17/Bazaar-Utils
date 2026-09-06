@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.commands;
 import com.github.mkram17.bazaarutils.generated.BazaarUtilsCommands;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 
@@ -56,10 +56,10 @@ public interface BUCommand {
     default List<LiteralArgumentBuilder<FabricClientCommandSource>> getCommandBuilders() {
         List<LiteralArgumentBuilder<FabricClientCommandSource>> builders = new ArrayList<>();
 
-        builders.add(getCommandBuilder(ClientCommandManager.literal(getCommandName())));
+        builders.add(getCommandBuilder(ClientCommands.literal(getCommandName())));
 
         for (String alias : getAliases()) {
-            builders.add(getCommandBuilder(ClientCommandManager.literal(alias)));
+            builders.add(getCommandBuilder(ClientCommands.literal(alias)));
         }
 
         return builders;

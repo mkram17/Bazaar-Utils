@@ -171,7 +171,7 @@ public class BazaarSlots {
         CANCEL_FILLED_BUY_ORDER (new BazaarSlot(
                 SlotLookup.IndexReference.fixed(11),
                 (query) -> query
-                        .itemType(Items.RED_TERRACOTTA)
+                        .itemType(Items.DYED_TERRACOTTA.red())
                         .withCustomName("Cancel Order")
                         .withLore("Cannot cancel order while there are goods to claim!")
                 )
@@ -189,7 +189,7 @@ public class BazaarSlots {
         CANCEL_UNFILLED_BUY_ORDER(new BazaarSlot(
                 SlotLookup.IndexReference.fixed(11),
                 (query) -> query
-                        .itemType(Items.GREEN_TERRACOTTA)
+                        .itemType(Items.DYED_TERRACOTTA.green())
                         .withCustomName("Cancel Order")
                         .withLore("x missing items.")
         )
@@ -198,7 +198,7 @@ public class BazaarSlots {
         CANCEL_SELL_OFFER(new BazaarSlot(
                 SlotLookup.IndexReference.fixed(13),
                 (query) -> query
-                        .itemType(Items.GREEN_TERRACOTTA)
+                        .itemType(Items.DYED_TERRACOTTA.green())
                         .withCustomName("Cancel Order")
                         .withLore("x items.")
                 )

@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 public interface ItemButton extends AbstractItemModifier {
     Item DEFAULT_ITEM = Items.BARRIER;
+    ItemStackTemplate DEFAULT_TEMPLATE = new ItemStackTemplate(DEFAULT_ITEM);
 
     float BUTTON_VOLUME = 0.2f;
     Holder<SoundEvent> BUTTON_SOUND = SoundEvents.UI_BUTTON_CLICK;
@@ -84,32 +86,36 @@ public interface ItemButton extends AbstractItemModifier {
     }
 
     default ItemStack resolveStack() {
+        return resolveTemplate().create();
+    }
+
+    default ItemStackTemplate resolveTemplate() {
         return switch (getItemRef()) {
-            case ItemRef.Direct(Item item) -> new ItemStack(item);
+            case ItemRef.Direct(ItemStackTemplate template) -> template;
             case ItemRef.ById(var id) -> resolveId(id.get());
-            case ItemRef.Stateful<?> stateful -> resolveStatefulStack(stateful);
+            case ItemRef.Stateful<?> stateful -> resolveStatefulTemplate(stateful);
         };
     }
 
-    private static ItemStack resolveId(String rawId) {
-        ItemStack resolved = ItemsRepo.resolve(rawId);
+    private static ItemStackTemplate resolveId(String rawId) {
+        ItemStackTemplate resolved = ItemsRepo.resolveTemplate(rawId);
 
-        return resolved != null ? resolved : DEFAULT_ITEM.getDefaultInstance();
+        return resolved != null ? resolved : DEFAULT_TEMPLATE;
     }
 
-    private static <S> ItemStack resolveStatefulStack(ItemRef.Stateful<S> stateful) {
-        ItemStack resolved = stateful.source()
+    private static <S> ItemStackTemplate resolveStatefulTemplate(ItemRef.Stateful<S> stateful) {
+        ItemStackTemplate resolved = stateful.source()
                 .map(source -> switch (source) {
-                    case ItemRef.Direct(Item item) -> new ItemStack(item);
+                    case ItemRef.Direct(ItemStackTemplate template) -> template;
                     case ItemRef.ById(var id) -> resolveId(id.get());
                     case ItemRef.Stateful<?> ignored -> throw new IllegalStateException("Stateful ItemRef cannot nest another Stateful as its source");
                 })
-                .orElse(new ItemStack(DEFAULT_ITEM));
+                .orElse(DEFAULT_TEMPLATE);
 
         S state = stateful.state().get();
 
         for (StateItemGroup<S> group : stateful.groups()) {
-            if (group.contains(resolved.getItem())) return new ItemStack(group.forState(state, resolved.getItem()));
+            if (group.contains(resolved)) return group.forState(state, resolved);
         }
 
         return resolved;

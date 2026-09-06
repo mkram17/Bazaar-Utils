@@ -9,7 +9,7 @@ import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.advancements.criterion.MinMaxBounds.Ints;
+import net.minecraft.advancements.predicates.MinMaxBounds.Ints;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;

@@ -9,7 +9,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -26,7 +26,7 @@ public final class QueryOrderCommand implements BUCommand {
 
     @Override
     public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
-        return base.then(ClientCommandManager.argument("index", IntegerArgumentType.integer(0)).executes(this::queryByIndex));
+        return base.then(ClientCommands.argument("index", IntegerArgumentType.integer(0)).executes(this::queryByIndex));
     }
 
     private int queryByIndex(CommandContext<FabricClientCommandSource> context) {

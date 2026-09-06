@@ -3,7 +3,7 @@ package com.github.mkram17.bazaarutils.events.minecraft;
 import lombok.Getter;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 import tech.thatgravyboat.skyblockapi.api.events.base.CancellableSkyBlockEvent;
@@ -26,7 +26,7 @@ import tech.thatgravyboat.skyblockapi.api.events.base.CancellableSkyBlockEvent;
  * </p>
  *
  * @see Slot
- * @see ClickType
+ * @see ContainerInput
  */
 @Getter
 public class SlotInteractionEvent extends CancellableSkyBlockEvent {
@@ -48,7 +48,7 @@ public class SlotInteractionEvent extends CancellableSkyBlockEvent {
     private final int slotId;
 
     /**
-     * The mouse button, or — for {@link ClickType#SWAP} — the target hotbar index.
+     * The mouse button, or — for {@link ContainerInput#SWAP} — the target hotbar index.
      */
     private final int button;
 
@@ -56,7 +56,7 @@ public class SlotInteractionEvent extends CancellableSkyBlockEvent {
      * The type of interaction vanilla resolved this click to.
      */
     @NotNull
-    private final ClickType clickType;
+    private final ContainerInput actionType;
 
     /**
      * Whether the interacted slot belongs to the player's inventory rather than the container.
@@ -70,12 +70,12 @@ public class SlotInteractionEvent extends CancellableSkyBlockEvent {
             @NotNull Slot slot,
             int slotId,
             int button,
-            @NotNull ClickType clickType) {
+            @NotNull ContainerInput actionType) {
         this.screen = screen;
         this.slot = slot;
         this.slotId = slotId;
         this.button = button;
-        this.clickType = clickType;
+        this.actionType = actionType;
         this.inPlayerInventory = slot.container instanceof Inventory;
     }
 }
