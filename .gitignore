@@ -2,6 +2,9 @@
 #**/DevOnly/
 .gradle/
 build/
+# ...but the buildSrc bytecode-injection tasks live in a Java source package
+# named `build`, which the unanchored rule above would otherwise swallow
+!buildSrc/src/main/java/com/github/mkram17/bazaarutils/build/
 out/
 classes/
 
