@@ -1,12 +1,14 @@
 package com.github.mkram17.bazaarutils.utils.minecraft.gui.sign;
 
-import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.minecraft.SignOpenEvent;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Priority;
+import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.PreInitModule;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import net.minecraft.client.Minecraft;
@@ -16,29 +18,60 @@ import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class SignManager {
-    /** One-shot callbacks to run the next time a sign opens; drained by {@link SignOpenDispatcher}. */
-    private static final Queue<Consumer<SignOpenEvent>> PENDING = new ConcurrentLinkedQueue<>();
+    /**
+     * How long a queued handler stays eligible for the next sign.
+     *
+     * <p>Expiry rather than clearing on container close: the chest closing is the same server-side
+     * transition that opens the sign, so a close-triggered clear races the very sign open it is
+     * meant to serve. SkyblockAPI posts {@code ContainerCloseEvent} a tick behind the clientbound
+     * close packet, which usually puts it after the sign open — but only usually.
+     */
+    private static final long HANDLER_TTL_MILLIS = 5_000L;
 
-    static {
-        BazaarUtils.EVENT_BUS.register(new SignOpenDispatcher());
+    private record PendingHandler(Function<SignOpenEvent, Result> handler, long expiresAtMillis) {
+        static PendingHandler of(Function<SignOpenEvent, Result> handler) {
+            return new PendingHandler(handler, System.currentTimeMillis() + HANDLER_TTL_MILLIS);
+        }
+
+        boolean isExpired() {
+            return System.currentTimeMillis() > expiresAtMillis;
+        }
     }
 
-    private static final class SignOpenDispatcher {
+    /** Handlers queued for the next sign open; drained by {@link SignQueueDispatcher} in order. */
+    private static final Queue<PendingHandler> PENDING = new ConcurrentLinkedQueue<>();
+
+    @PreInitModule
+    public static final class SignQueueDispatcher extends BUListener {
         @Subscription(priority = Priority.FIRST)
         private void onSignOpen(SignOpenEvent event) {
-            Consumer<SignOpenEvent> action;
+            PendingHandler pending;
 
-            while ((action = PENDING.poll()) != null) {
-                action.accept(event);
+            while ((pending = PENDING.poll()) != null) {
+                if (pending.isExpired()) continue;
+
+                if (!pending.handler().apply(event).propagate()) {
+                    // Claiming the sign also discards the rest: they were queued for a different one.
+                    PENDING.clear();
+
+                    break;
+                }
             }
         }
     }
 
-    public static void runOnNextSignOpen(Consumer<SignOpenEvent> action) {
-        PENDING.add(action);
+    /**
+     * Queues a handler for the next sign that opens. Handlers run in order against a single
+     * {@link SignOpenEvent}; return {@link Result#CONSUMED} once you've claimed the sign so
+     * nothing else queued fires on it. A handler whose sign never opens expires after
+     * {@link #HANDLER_TTL_MILLIS}, so it can't fire on some later, unrelated one.
+     */
+    public static void runOnNextSignOpen(Function<SignOpenEvent, Result> handler) {
+        PENDING.removeIf(PendingHandler::isExpired);
+        PENDING.add(PendingHandler.of(handler));
     }
 
     public static void setSignText(String text, boolean closeAfter) {

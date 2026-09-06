@@ -3,10 +3,14 @@ package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
+import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
+import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
@@ -18,6 +22,8 @@ import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvide
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 @Getter
@@ -101,8 +107,33 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
     }
 
     @Override
+    protected OptionalInt computeMaxValue(TransactionAmount.TransactionState state) {
+        return OptionalInt.of(SlotLookup.getInventoryItem(state.container(), BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot)
+                .map(ItemInfo::itemStack)
+                .flatMap(TransactionPageLayout::findOptionAmount)
+                .map(value -> (int) Math.floor(value))
+                .orElse(state.playerInventory()
+                        .getNonEquipmentItems()
+                        .stream()
+                        .mapToInt(stack -> {
+                            int maxStackSize = state.productItem().itemStack().getMaxStackSize();
+                            if (stack.isEmpty()) return maxStackSize;
+
+                            boolean isSameItem = Optional.ofNullable(stack.getCustomName())
+                                    .map(Component::getString)
+                                    .flatMap(BazaarDataUtil::findProductIdOptional)
+                                    .map(id -> id.equals(state.productId()))
+                                    .orElse(false);
+
+                            return isSameItem ? maxStackSize - stack.getCount() : 0;
+                        })
+                        .sum()
+                ));
+    }
+
+    @Override
     protected Component getButtonItemText(TransactionState state) {
-        return Component.nullToEmpty("Offer " + getButtonItemStackSize(state) + " items.");
+        return Component.nullToEmpty("Purchase " + getButtonItemStackSize(state) + " items.");
     }
 
     @Override

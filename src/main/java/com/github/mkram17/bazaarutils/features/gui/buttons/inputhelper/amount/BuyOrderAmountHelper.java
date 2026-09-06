@@ -6,6 +6,9 @@ import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderUtil;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
@@ -18,6 +21,8 @@ import com.teamresourceful.resourcefulconfig.api.types.info.ListEntryInfoProvide
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 @Getter
@@ -98,6 +103,20 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
     @Override
     protected int computeFixedValue(TransactionState state) {
         return getFixedAmount();
+    }
+
+    @Override
+    protected OptionalInt computeMaxValue(TransactionAmount.TransactionState state) {
+        OptionalDouble price = OrderUtil.getPriceForPositionOptional(state.productId(), PricingPosition.COMPETITIVE, getTransactionType());
+
+        // A missing or non-positive price divides into an amount that is nonsense rather than large.
+        if (price.isEmpty() || price.getAsDouble() <= 0) return OptionalInt.empty();
+
+        int amountCanAfford = (int) (state.purse() / price.getAsDouble());
+
+        return OptionalInt.of(TransactionPageLayout.findBuyOrderAmountLimit(state.inputSign().itemStack())
+                            .map(limit -> Math.min(amountCanAfford, limit))
+                            .orElse(amountCanAfford));
     }
 
     @Override

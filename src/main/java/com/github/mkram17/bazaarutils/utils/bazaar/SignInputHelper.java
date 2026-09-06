@@ -1,10 +1,9 @@
 package com.github.mkram17.bazaarutils.utils.bazaar;
 
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
-import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
@@ -14,30 +13,26 @@ import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
-import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.LoreParser;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.container.ContainerManager;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.sign.SignManager;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.scores.ScoreHolder;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import tech.thatgravyboat.skyblockapi.api.profile.currency.CurrencyAPI;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,6 +46,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         record Value(Number amount) implements ResolvedInput {
             public String format() {
                 double d = amount.doubleValue();
+
                 return d == (long) d
                         ? String.valueOf((long) d)
                         : String.valueOf(Util.truncateNum(d));
@@ -66,13 +62,40 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         String format();
     }
 
+    /**
+     * Wraps the lazily-computed, memoized result of {@link #resolveInput}.
+     *
+     * <p>On first {@link #get()} call {@code resolveInput} fires and, if it resolved, the result
+     * is cached for the lifetime of this container load. A failed resolution is deliberately not
+     * cached: market data can land after the first render, and freezing that miss would leave the
+     * button showing — and the sign filled with — a value that never recovers.
+     */
+    protected class WorkingValue {
+        private final T state;
+
+        @Nullable
+        private ResolvedInput resolved;
+
+        WorkingValue(T state) {
+            this.state = state;
+        }
+
+        public Optional<ResolvedInput> get() {
+            if (resolved == null) resolved = resolveInput(state).orElse(null);
+
+            return Optional.ofNullable(resolved);
+        }
+    }
+
     @Getter
     @NotNull
     protected BazaarSlots.BazaarSlot inputSignRef;
 
+    @Nullable
+    private WorkingValue workingValue;
+
     public SignInputHelper(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
         super(name);
-
         this.inputSignRef = inputSignRef;
     }
 
@@ -80,20 +103,64 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
         return inputSignRef.query(inventory).first(inventory);
     }
 
-    @Override
-    protected void handleAction(T state) {
-        ContainerManager.clickSlot(state.inputSign().slotIndex(), 0);
+    /**
+     * Returns the live {@link WorkingValue} for this container load, creating it on first access.
+     * All render and action paths read through here so {@link #resolveInput} is called at most once.
+     */
+    protected WorkingValue getWorkingValue(T state) {
+        if (workingValue == null) workingValue = createWorkingValue(state);
 
-        ResolvedInput input = resolveInput(state);
-
-        SignManager.runOnNextSignOpen(event -> SignManager.setSignText(input.format(), true));
+        return workingValue;
     }
 
-    protected abstract ResolvedInput resolveInput(T state);
+    /**
+     * Factory method for subclasses that need custom step/clamp logic for scroll.
+     * The default implementation returns a plain {@link WorkingValue} backed by
+     * {@link #resolveInput}.
+     */
+    protected WorkingValue createWorkingValue(T state) {
+        return new WorkingValue(state);
+    }
+
+    /**
+     * The working value as the button's stack-size overlay, or blank while it cannot be resolved —
+     * a button showing nothing reads better than one showing a placeholder that isn't a real amount.
+     */
+    protected String formatWorkingValue(T state) {
+        return getWorkingValue(state).get().map(ResolvedInput::format).orElse("");
+    }
+
+    @Override
+    protected void resetState() {
+        workingValue = null;
+        super.resetState();
+    }
+
+    @Override
+    protected void handleAction(T state, Runnable resetState) {
+        Optional<ResolvedInput> input = getWorkingValue(state).get();
+
+        // Opening a sign we have nothing to type into it just strands the player on it.
+        if (input.isEmpty()) {
+            Util.logMessage("Cannot handle action for " + name + ", input could not be resolved.");
+
+            return;
+        }
+
+        ContainerManager.clickSlot(state.inputSign().slotIndex(), 0);
+
+        SignManager.runOnNextSignOpen(event -> {
+            SignManager.setSignText(input.get().format(), true);
+
+            resetState.run();
+
+            return Result.CONSUMED;
+        });
+    }
+
+    protected abstract Optional<ResolvedInput> resolveInput(T state);
 
     public abstract static class TransactionAmount extends SignInputHelper<TransactionAmount.TransactionState> {
-        private static final Pattern PURSE_PATTERN = Pattern.compile("(Purse|Piggy): (?<purse>[0-9,.]+)");
-
         public record TransactionState(
                 @NotNull
                 Double purse,
@@ -147,53 +214,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (productId.isEmpty()) return Optional.empty();
 
-            Optional<Double> purse = Optional.of(Minecraft.getInstance())
-                    .flatMap(client -> Optional.ofNullable(client.level))
-                    .flatMap(world -> Optional.of(world.getScoreboard()))
-                    .flatMap(scoreboard -> {
-                        Objective objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
-
-                        if (objective == null) {
-                            return Optional.empty();
-                        }
-
-                        ObjectArrayList<String> scoreboardLines = new ObjectArrayList<>();
-
-                        for (ScoreHolder scoreHolder : scoreboard.getTrackedPlayers()) {
-                            if (scoreboard.listPlayerScores(scoreHolder).containsKey(objective)) {
-                                PlayerTeam team = scoreboard.getPlayersTeam(scoreHolder.getScoreboardName());
-
-                                if (team != null) {
-                                    String line = team.getPlayerPrefix().getString() + team.getPlayerSuffix().getString();
-
-                                    if (!line.trim().isEmpty()) {
-                                        scoreboardLines.add(ChatFormatting.stripFormatting(line));
-                                    }
-                                }
-                            }
-                        }
-
-                        return Optional.of(scoreboardLines);
-                    })
-                    .flatMap(lines -> {
-                        for (String line : lines) {
-                            if (line.contains("Purse:") || line.contains("Piggy:")) {
-                                Matcher matcher = PURSE_PATTERN.matcher(line);
-
-                                if (matcher.find()) {
-                                    try {
-                                        return Optional.of(Double.parseDouble(matcher.group("purse").replace(",", "")));
-                                    } catch (NumberFormatException e) {
-                                        Util.notifyError("Failed to parse purse from scoreboard", e);
-                                    }
-                                }
-                            }
-                        }
-
-                        return Optional.empty();
-                    });
-
-            if (purse.isEmpty()) return Optional.empty();
+            double purse = CurrencyAPI.INSTANCE.getPurse();
 
             Optional<Inventory> playerInventory = Optional.of(Minecraft.getInstance())
                     .flatMap(client -> Optional.ofNullable(client.player))
@@ -201,7 +222,7 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
             if (playerInventory.isEmpty()) return Optional.empty();
 
-            return Optional.of(new TransactionState(purse.get(), productId.get(), productItem.get(), inputSign.get(), playerInventory.get(), container, event.getScreen()));
+            return Optional.of(new TransactionState(purse, productId.get(), productItem.get(), inputSign.get(), playerInventory.get(), container, event.getScreen()));
         }
 
         public TransactionAmount(@NotNull String name, @NotNull BazaarSlots.BazaarSlot inputSignRef) {
@@ -210,62 +231,24 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected String getButtonItemStackSize(TransactionState state) {
-            ResolvedInput input = resolveInput(state);
-
-            return input.format();
+            return formatWorkingValue(state);
         }
 
         @Override
-        protected ResolvedInput resolveInput(TransactionState state) {
-            int amount = switch (getAmountStrategy()) {
+        protected Optional<ResolvedInput> resolveInput(TransactionState state) {
+            OptionalInt amount = switch (getAmountStrategy()) {
                 case MAX -> computeMaxValue(state);
-                case FIXED -> computeFixedValue(state);
+                case FIXED -> OptionalInt.of(computeFixedValue(state));
             };
 
-            return new ResolvedInput.Value(amount);
+            return amount.isPresent()
+                    ? Optional.of(new ResolvedInput.Value(amount.getAsInt()))
+                    : Optional.empty();
         }
 
         protected abstract int computeFixedValue(TransactionState state);
 
-        protected int computeMaxValue(TransactionState state) {
-            return switch (getTransactionType().getMethod()) {
-                case INSTANT -> {
-                    if (getTransactionType().isBuy()) {
-                        yield SlotLookup.getInventoryItem(state.container(), BazaarSlots.INSTANT_BUY.INPUT_FILLING_AMOUNT.slot)
-                            .map(ItemInfo::itemStack)
-                            .flatMap(TransactionPageLayout::findOptionAmount)
-                            .map(value -> (int) Math.floor(value))
-                            .orElse((int) state.playerInventory()
-                                    .getNonEquipmentItems()
-                                    .stream()
-                                    .filter(ItemStack::isEmpty)
-                                    .count()
-                            );
-                    }
-                    // Should be impossible to reach, as there is no sign to input a custom amount on items to instant sell.
-                    // TODO: consider refactors needed for this case not to exist
-                    yield 0;
-                }
-                case ORDER -> {
-                    if (getTransactionType().isBuy()) {
-                        int amountCanAfford = (int) (state.purse() / OrderUtil.getPriceForPosition(state.productId(), PricingPosition.COMPETITIVE, getTransactionType()));
-
-                        yield TransactionPageLayout.findBuyOrderAmountLimit(state.inputSign().itemStack())
-                                .map(limit -> Math.min(amountCanAfford, limit))
-                                .orElse(amountCanAfford);
-                    }
-                    yield state.playerInventory().getNonEquipmentItems().stream()
-                            .filter(stack -> !stack.isEmpty())
-                            .filter(stack -> Optional.ofNullable(stack.getCustomName())
-                                    .map(Component::getString)
-                                    .flatMap(BazaarDataUtil::findProductIdOptional)
-                                    .map(productId -> productId.equals(state.productId()))
-                                    .orElse(false))
-                            .mapToInt(ItemStack::getCount)
-                            .sum();
-                }
-            };
-        }
+        protected abstract OptionalInt computeMaxValue(TransactionState state);
     }
 
     public abstract static class TransactionCost extends SignInputHelper<TransactionCost.TransactionState> {
@@ -300,11 +283,9 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
             Container container = event.getContainer();
 
             Optional<ItemInfo> inputSign = getInputSign(container);
-
             if (inputSign.isEmpty()) return Optional.empty();
 
             Optional<String> productId = getItemProductId(inputSign.get());
-
             if (productId.isEmpty()) return Optional.empty();
 
             return Optional.of(new TransactionState(productId.get(), inputSign.get(), container, event.getScreen()));
@@ -316,14 +297,16 @@ public abstract class SignInputHelper<T extends SignInputState> extends InputHel
 
         @Override
         protected String getButtonItemStackSize(TransactionState state) {
-            ResolvedInput input = resolveInput(state);
-
-            return input.format();
+            return formatWorkingValue(state);
         }
 
         @Override
-        protected ResolvedInput resolveInput(TransactionState state) {
-            return new ResolvedInput.Value(OrderUtil.getPriceForPosition(state.productId(), getPricingPosition(), getTransactionType()));
+        protected Optional<ResolvedInput> resolveInput(TransactionState state) {
+            OptionalDouble price = OrderUtil.getPriceForPositionOptional(state.productId(), getPricingPosition(), getTransactionType());
+
+            return price.isPresent()
+                    ? Optional.of(new ResolvedInput.Value(price.getAsDouble()))
+                    : Optional.empty();
         }
     }
 
