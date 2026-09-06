@@ -12,7 +12,7 @@ public abstract class AbstractSelectorOverlay extends OverlayScreen {
     protected int ox, oy, ow, oh;
 
     protected AbstractSelectorOverlay() {
-        super(Minecraft.getInstance().screen);
+        super(Minecraft.getInstance().gui.screen());
     }
 
     protected boolean isOverOverlay(double mouseX, double mouseY) {

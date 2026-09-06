@@ -46,7 +46,7 @@ public final class ContainerLoadedHandler extends BUListener {
             @Override
             public void run() {
                 // Ensure we are still on the same screen
-                if (client.screen != container) return;
+                if (client.gui.screen() != container) return;
 
                 Container inventory = chest.getContainer();
 

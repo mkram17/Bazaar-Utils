@@ -60,7 +60,7 @@ public class ItemOptionWidget extends SelectorOptionWidget {
 
     @Override
     public void onPress(@NotNull InputWithModifiers modifiers) {
-        Minecraft.getInstance().setScreen(new ItemSelector(this));
+        Minecraft.getInstance().gui.setScreen(new ItemSelector(this));
     }
 
     public static class ItemSelector extends AbstractSelectorOverlay {

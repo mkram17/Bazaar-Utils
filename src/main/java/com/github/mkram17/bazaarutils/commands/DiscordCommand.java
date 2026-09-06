@@ -26,7 +26,7 @@ public final class DiscordCommand implements BUCommand {
         return base.executes(context -> {
             Minecraft client = Minecraft.getInstance();
 
-            client.schedule(() -> client.setScreen(new ConfirmLinkScreen(confirmed -> {
+            client.schedule(() -> client.gui.setScreen(new ConfirmLinkScreen(confirmed -> {
                 if (confirmed) {
                     try {
                         net.minecraft.util.Util.getPlatform().openUri(new URI(Util.DISCORD_LINK));
@@ -34,7 +34,7 @@ public final class DiscordCommand implements BUCommand {
                         throw new RuntimeException(e);
                     }
                 }
-                Minecraft.getInstance().setScreen(null);
+                Minecraft.getInstance().gui.setScreen(null);
             }, Util.DISCORD_LINK, true)));
 
             return 1;

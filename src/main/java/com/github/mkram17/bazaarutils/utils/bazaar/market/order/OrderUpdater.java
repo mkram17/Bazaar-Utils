@@ -280,7 +280,7 @@ public final class OrderUpdater extends BUListener {
     private static List<ItemStack> extractOrderStacks(List<ItemStack> screenStacks) {
         List<ItemStack> result = new ArrayList<>();
         for (ItemStack stack : screenStacks) {
-            if (stack.is(Items.BLACK_STAINED_GLASS_PANE)) continue;
+            if (stack.is(Items.STAINED_GLASS_PANE.black())) continue;
             if (stack.is(Items.ARROW)) break; // stop at navigation arrow
             result.add(stack);
         }

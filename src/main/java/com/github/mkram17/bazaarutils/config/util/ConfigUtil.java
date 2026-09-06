@@ -41,8 +41,8 @@ public class ConfigUtil {
 
     public static void openGUI() {
         Minecraft client = Minecraft.getInstance();
-        Screen parent = client.screen;
-        client.schedule(() -> client.setScreen(createGUI(parent)));
+        Screen parent = client.gui.screen();
+        client.schedule(() -> client.gui.setScreen(createGUI(parent)));
     }
 
     /**
@@ -81,13 +81,13 @@ public class ConfigUtil {
      */
     public static void confirmResetToDefaults() {
         Minecraft client = Minecraft.getInstance();
-        Screen parent = client.screen;
+        Screen parent = client.gui.screen();
 
-        client.setScreen(new ConfirmScreen(
+        client.gui.setScreen(new ConfirmScreen(
                 confirmed -> {
                     if (confirmed) resetToDefaults();
 
-                    client.setScreen(parent);
+                    client.gui.setScreen(parent);
 
                     if (confirmed && parent instanceof ConfigScreen screen) screen.updateOptions();
                 },

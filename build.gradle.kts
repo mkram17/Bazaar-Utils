@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("net.fabricmc.fabric-loom") version "1.17.19"
+    id("net.fabricmc.fabric-loom") version "1.17.20"
     `maven-publish`
     id("me.modmuss50.mod-publish-plugin") version "2.0.0"
     id("org.jetbrains.kotlin.jvm") version "2.4.10"
