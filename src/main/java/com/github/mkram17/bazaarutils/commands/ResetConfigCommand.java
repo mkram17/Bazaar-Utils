@@ -6,7 +6,7 @@ import com.github.mkram17.bazaarutils.utils.annotations.modules.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -30,7 +30,7 @@ public final class ResetConfigCommand implements BUCommand {
     public LiteralArgumentBuilder<FabricClientCommandSource> getCommandBuilder(LiteralArgumentBuilder<FabricClientCommandSource> base) {
         return base
                 .executes(this::warn)
-                .then(ClientCommandManager.literal(CONFIRM).executes(this::reset));
+                .then(ClientCommands.literal(CONFIRM).executes(this::reset));
     }
 
     private int warn(CommandContext<FabricClientCommandSource> context) {
