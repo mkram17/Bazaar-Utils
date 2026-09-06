@@ -33,7 +33,7 @@ public class SlotOptionWidget extends SelectorOptionWidget {
 
     @Override
     public void onPress(@NotNull net.minecraft.client.input.InputWithModifiers modifiers) {
-        Minecraft.getInstance().setScreen(new SlotSelector(this, element, getter.get(), setter));
+        Minecraft.getInstance().gui.setScreen(new SlotSelector(this, element, getter.get(), setter));
     }
 
     public static class SlotSelector extends AbstractSelectorOverlay {

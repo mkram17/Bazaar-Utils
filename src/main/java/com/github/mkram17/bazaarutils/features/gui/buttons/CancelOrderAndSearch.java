@@ -18,7 +18,7 @@ public class CancelOrderAndSearch extends BUListener {
         return ButtonsConfig.CANCEL_ORDER_AND_SEARCH.slotIndex;
     }
 
-    private static final ItemStackTemplate ITEM_TEPLATE = new ItemStackTemplate(Items.BLUE_TERRACOTTA);
+    private static final ItemStackTemplate ITEM_TEPLATE = new ItemStackTemplate(Items.DYED_TERRACOTTA.blue());
 
     public ItemRef getItemRef() {
         return ItemRef.of(ITEM_TEPLATE);
@@ -28,7 +28,7 @@ public class CancelOrderAndSearch extends BUListener {
     private transient ItemStack replacementItem;
 
     public CancelOrderAndSearch() {
-        this.replacementItem = Items.BLUE_TERRACOTTA.getDefaultInstance();
+        this.replacementItem = Items.DYED_TERRACOTTA.blue().getDefaultInstance();
     }
 
     private transient OrderInfo orderInfo;

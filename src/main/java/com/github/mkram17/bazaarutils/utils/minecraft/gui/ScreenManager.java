@@ -212,8 +212,8 @@ public class ScreenManager {
     public static <T extends Screen> Optional<T> getScreen(Class<T> type) {
         Minecraft client = Minecraft.getInstance();
 
-        return type.isInstance(client.screen)
-                ? Optional.of(type.cast(client.screen))
+        return type.isInstance(client.gui.screen())
+                ? Optional.of(type.cast(client.gui.screen()))
                 : Optional.empty();
     }
 
@@ -245,7 +245,7 @@ public class ScreenManager {
             }
 
             client.player.connection.send(new ServerboundContainerClosePacket(client.player.containerMenu.containerId));
-            client.setScreen(null);
+            client.gui.setScreen(null);
             client.player.containerMenu = client.player.inventoryMenu;
         } catch (Exception exception) {
             Util.notifyError("Error encountered while closing screen with custom method", exception);

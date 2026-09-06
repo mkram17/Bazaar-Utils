@@ -195,7 +195,7 @@ public final class ButtonsConfig {
                 id = "size",
                 translation = "bazaarutils.config.buttons.button.widget.size.label"
         )
-        public int size = 117;
+        public int size = 18;
 
         @ConfigEntry(
                 id = "spacing",

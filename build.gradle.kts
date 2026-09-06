@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("net.fabricmc.fabric-loom") version "1.17.19"
+    id("net.fabricmc.fabric-loom") version "1.17.20"
     `maven-publish`
     id("me.modmuss50.mod-publish-plugin") version "2.0.0"
     id("org.jetbrains.kotlin.jvm") version "2.4.10"
@@ -270,13 +270,13 @@ publishMods {
         projectId = "c4u7nzUZ"
         minecraftVersions.add(mcVersion)
 
-        requires("fabric-api", "resourceful-config")
+        requires("fabric-api", "resourceful-config", "fabric-language-kotlin", "owo-lib")
         optional("modmenu")
     }
     github {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "mkram17/Bazaar-Utils"
-        commitish = "modern"
+        commitish = "v1.0.0"
         tagName = "v" + project.version.toString()
         type = when (releaseChannel) {
             "alpha" -> ALPHA
@@ -287,5 +287,9 @@ publishMods {
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         projectId = "1342860"
+        minecraftVersions.add(mcVersion)
+        // fabric.mod.json declares "environment": "client"
+        clientRequired = true
+        serverRequired = false
     }
 }
