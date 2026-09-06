@@ -287,5 +287,9 @@ publishMods {
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         projectId = "1342860"
+        minecraftVersions.add(mcVersion)
+        // fabric.mod.json declares "environment": "client"
+        clientRequired = true
+        serverRequired = false
     }
 }
