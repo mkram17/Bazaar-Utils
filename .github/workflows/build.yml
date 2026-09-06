@@ -1,36 +1,46 @@
-# Automatically build the project and run any configured tests for every push
-# and submitted pull request. This can help catch issues that only occur on
-# certain platforms or Java versions, and provides a first line of defence
-# against bad commits.
+# Automatically build the project and run any configured tests for every pull
+# request, and for every push to a long-lived branch. This can help catch
+# issues that only occur on certain platforms or Java versions, and provides a
+# first line of defence against bad commits.
+#
+# `push` is deliberately limited to the release branches: a branch with an open
+# PR would otherwise build every commit twice, once for `push` and once for
+# `pull_request`.
 
 name: build
-on: [pull_request, push]
+on:
+  pull_request:
+  push:
+    branches:
+      - v1.0.0
+
+# Supersede in-flight builds of a PR when new commits are pushed to it, but let
+# builds of the release branch itself run to completion.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  JAVA_VERSION: 25 # Current Java LTS
 
 jobs:
   build:
-    strategy:
-      matrix:
-        # Use these Java versions
-        java: [
-          25,    # Current Java LTS
-        ]
     runs-on: ubuntu-22.04
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
       - name: validate gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
-      - name: setup jdk ${{ matrix.java }}
+      - name: setup jdk ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java }}
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: 'microsoft'
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
       - name: capture build artifacts
-        if: ${{ matrix.java == '25' }} # Only upload artifacts built from latest java
         uses: actions/upload-artifact@v4
         with:
           name: Mod JARs
