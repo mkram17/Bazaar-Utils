@@ -13,7 +13,7 @@ public class ObservableConfigRefreshMixin {
 
     @Inject(method = "accept", at = @At("TAIL"))
     private void bazaarutils$onAccept(Object value, CallbackInfo ci) {
-        if (Minecraft.getInstance().screen instanceof ConfigScreen configScreen) {
+        if (Minecraft.getInstance().gui.screen() instanceof ConfigScreen configScreen) {
             configScreen.updateOptions();
         }
     }
