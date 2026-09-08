@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.config.features.gui;
 
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.features.gui.overlays.BazaarLimitsVisualizer;
 import com.github.mkram17.bazaarutils.features.gui.overlays.PriceCharts;
 import com.github.mkram17.bazaarutils.features.gui.overlays.UserOrdersOverlay;
@@ -55,6 +57,7 @@ public class OverlaysConfig {
             text = "bazaarutils.config.overlays.bazaar_limits_visualizer.reset_limits.runnable",
             title = "bazaarutils.config.overlays.bazaar_limits_visualizer.reset_limits.label"
     )
+    @ShowIf(AdvancedConfigurationMode.class)
     public static final Runnable RESET_LIMITS_BUTTON = BazaarLimitsVisualizer::resetLimits;
 
     @ConfigEntry(

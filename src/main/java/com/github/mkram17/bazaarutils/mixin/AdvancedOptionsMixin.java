@@ -1,12 +1,13 @@
 package com.github.mkram17.bazaarutils.mixin;
 
-import com.github.mkram17.bazaarutils.config.util.SeparatorFieldStore;
+import com.github.mkram17.bazaarutils.config.util.ConfigElementFieldStore;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.config.util.api.conditions.ConfigCondition;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfigElement;
+import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfigButton;
 import com.teamresourceful.resourcefulconfig.api.types.elements.ResourcefulConfigEntryElement;
 import com.teamresourceful.resourcefulconfig.api.types.elements.ResourcefulConfigSeparatorElement;
 import com.teamresourceful.resourcefulconfig.api.types.entries.ResourcefulConfigFieldBackedValueEntry;
@@ -41,8 +42,8 @@ public class AdvancedOptionsMixin {
     private static boolean checkHidden(ResourcefulConfigElement element) {
         if (element.isHidden()) return true;
 
-        if (element instanceof ResourcefulConfigSeparatorElement sep) {
-            return SeparatorFieldStore.get(sep)
+        if (element instanceof ResourcefulConfigSeparatorElement || element instanceof ResourcefulConfigButton) {
+            return ConfigElementFieldStore.get(element)
                     .filter(ctx -> ctx.field().isAnnotationPresent(ShowIf.class))
                     .map(ctx -> hiddenByCondition(ctx.field(), ctx.owner()))
                     .orElse(false);

@@ -73,7 +73,7 @@ A Fabric client-side QoL mod for the Hypixel SkyBlock Bazaar.
 <summary><strong>Other</strong></summary>
 
 - **Modify Indicator**: Marks anything Bazaar Utils adds or changes on an item with a small ₿, so it's always clear what's the mod and what's Hypixel. Configurable display type.
-- **Auto Update**: Automatically updates the mod when a new version is found (toggleable in Advanced Settings).
+- **Auto Update**: Automatically updates the mod when a new version is found (toggleable in the main settings).
 - **Bazaar Flipper Setting**: Set your Bazaar Flipper account upgrade tier in the config so tax calculations and order limits are accurate.
 - **Mod Menu Integration**: Config accessible through Mod Menu, with mod-provided config widgets.
 - **Developer Mode**: Optional developer tools, debug messages, and error-notification toggles.

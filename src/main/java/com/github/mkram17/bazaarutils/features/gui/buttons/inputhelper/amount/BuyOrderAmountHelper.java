@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount;
 
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
@@ -38,6 +39,7 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
             translation = "bazaarutils.config.buttons.button.container.item_id.hint"
     )
     @ConfigOption.Renderer("bazaarutils:item")
+    @ShowIf(AdvancedConfigurationMode.class)
     public String itemId = "minecraft:green_stained_glass_pane";
 
     @ConfigEntry(
@@ -51,6 +53,7 @@ public class BuyOrderAmountHelper extends SignInputHelper.TransactionAmount impl
     @ContainerSlot(rows = 4, cols = 9, provider = "bazaar:buy_order_amount")
     @ConfigOption.Range(min = 0, max = 35)
     @ConfigOption.Renderer("bazaarutils:slot")
+    @ShowIf(AdvancedConfigurationMode.class)
     public int slotIndex;
 
     @ConfigEntry(

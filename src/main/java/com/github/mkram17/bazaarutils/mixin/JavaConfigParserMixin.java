@@ -1,8 +1,9 @@
 package com.github.mkram17.bazaarutils.mixin;
 
-import com.github.mkram17.bazaarutils.config.util.SeparatorFieldStore;
+import com.github.mkram17.bazaarutils.config.util.ConfigElementFieldStore;
 import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfigElement;
 import com.teamresourceful.resourcefulconfig.common.loader.JavaConfigParser;
+import com.teamresourceful.resourcefulconfig.common.loader.elements.ParsedButtonElement;
 import com.teamresourceful.resourcefulconfig.common.loader.elements.ParsedSeparator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -49,7 +50,7 @@ public class JavaConfigParserMixin {
     private static ParsedSeparator captureObjectSeparator(Field field) {
         ParsedSeparator separator = ParsedSeparator.of(field);
 
-        SeparatorFieldStore.put(separator, field, Optional.ofNullable(OBJECT_SCOPE.get()));
+        ConfigElementFieldStore.put(separator, field, Optional.ofNullable(OBJECT_SCOPE.get()));
 
         return separator;
     }
@@ -68,8 +69,22 @@ public class JavaConfigParserMixin {
     private static ParsedSeparator captureStaticSeparator(Field field) {
         ParsedSeparator separator = ParsedSeparator.of(field);
 
-        SeparatorFieldStore.put(separator, field, Optional.empty());
+        ConfigElementFieldStore.put(separator, field, Optional.empty());
 
         return separator;
+    }
+
+    /** Config buttons are static fields, and their parsed elements do not retain the field. */
+    @Redirect(
+            method = "populateEntries(Ljava/lang/Class;Lcom/teamresourceful/resourcefulconfig/api/types/ResourcefulConfig;[Ljava/lang/Class;)Lcom/teamresourceful/resourcefulconfig/api/types/ResourcefulConfig;",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lcom/teamresourceful/resourcefulconfig/common/loader/elements/ParsedButtonElement;of(Ljava/lang/reflect/Field;)Lcom/teamresourceful/resourcefulconfig/common/loader/elements/ParsedButtonElement;"
+            )
+    )
+    private static ParsedButtonElement captureStaticButton(Field field) {
+        ParsedButtonElement button = ParsedButtonElement.of(field);
+        ConfigElementFieldStore.put(button, field, Optional.empty());
+        return button;
     }
 }

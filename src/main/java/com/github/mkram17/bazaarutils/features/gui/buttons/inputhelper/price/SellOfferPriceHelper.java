@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price;
 
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
@@ -33,6 +35,7 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implem
             translation = "bazaarutils.config.buttons.button.container.item_id.hint"
     )
     @ConfigOption.Renderer("bazaarutils:item")
+    @ShowIf(AdvancedConfigurationMode.class)
     public String itemId = "minecraft:green_stained_glass_pane";
 
     @ConfigEntry(
@@ -46,6 +49,7 @@ public class SellOfferPriceHelper extends SignInputHelper.TransactionCost implem
     @ContainerSlot(rows = 4, cols = 9, provider = "bazaar:sell_offer_price")
     @ConfigOption.Range(min = 0, max = 35)
     @ConfigOption.Renderer("bazaarutils:slot")
+    @ShowIf(AdvancedConfigurationMode.class)
     public int slotIndex;
 
     @ConfigEntry(
