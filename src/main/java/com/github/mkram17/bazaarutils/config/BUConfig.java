@@ -64,7 +64,7 @@ public final class BUConfig {
             value = "Certain feature customization is hidden away from a normal configuration of the mod as they're options generally of no interest. Here you can toggle to see and configure them as well.",
             translation = "bazaarutils.config.advanced_configuration_mode.hint"
     )
-    public static Observable<Boolean> ADVANCED_CONFIGURATION_TOGGLE = Observable.of(true);
+    public static Observable<Boolean> ADVANCED_CONFIGURATION_TOGGLE = Observable.of(false);
 
     @ConfigEntry(
             id = "automatic_updates",
