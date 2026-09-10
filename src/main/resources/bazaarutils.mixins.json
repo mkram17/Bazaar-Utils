@@ -15,5 +15,10 @@
     "MixinAbstractContainerScreen",
     "MixinSignEditScreen",
     "AccessorSkyBlockBazaarReply"
+  ],
+  "mixins": [
+    "AdvancedOptionsMixin",
+    "JavaConfigParserMixin",
+    "ObservableConfigRefreshMixin"
   ]
 }

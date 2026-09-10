@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.config.features.gui;
 
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.data.stored.BookmarksStorage;
 import com.github.mkram17.bazaarutils.features.gui.buttons.bookmarks.BookmarkUtil;
 import com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.amount.BuyOrderAmountHelper;
@@ -195,12 +197,14 @@ public final class ButtonsConfig {
                 id = "size",
                 translation = "bazaarutils.config.buttons.button.widget.size.label"
         )
+        @ShowIf(AdvancedConfigurationMode.class)
         public int size = 18;
 
         @ConfigEntry(
                 id = "spacing",
                 translation = "bazaarutils.config.buttons.button.widget.spacing.label"
         )
+        @ShowIf(AdvancedConfigurationMode.class)
         public int spacing = 4;
 
         public WidgetButton(boolean enabled) {
@@ -231,6 +235,7 @@ public final class ButtonsConfig {
                 translation = "bazaarutils.config.buttons.button.container.item_id.hint"
         )
         @ConfigOption.Renderer("bazaarutils:item")
+        @ShowIf(AdvancedConfigurationMode.class)
         public String itemId = "minecraft:green_stained_glass_pane";
 
         @Getter
@@ -244,6 +249,7 @@ public final class ButtonsConfig {
         )
         @ConfigOption.Range(min = 0, max = 35)
         @ConfigOption.Renderer("bazaarutils:slot")
+        @ShowIf(AdvancedConfigurationMode.class)
         public int slotIndex;
 
         public SmallContainerButton(boolean enabled, int slotIndex) {

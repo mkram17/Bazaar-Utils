@@ -1,6 +1,5 @@
 package com.github.mkram17.bazaarutils.config;
 
-import com.github.mkram17.bazaarutils.config.features.AdvancedConfig;
 import com.github.mkram17.bazaarutils.config.hidden.MetadataConfig;
 import com.github.mkram17.bazaarutils.config.features.DeveloperConfig;
 import com.github.mkram17.bazaarutils.config.features.chat.ChatConfig;
@@ -12,6 +11,7 @@ import com.github.mkram17.bazaarutils.config.util.ConfigUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.PlayerAccountUpgrades;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.ModifyIndicator;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import com.teamresourceful.resourcefulconfig.api.types.entries.Observable;
 
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
@@ -25,7 +25,6 @@ import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
                 InventoryConfig.class,
                 OverlaysConfig.class,
                 NotificationsConfig.class,
-                AdvancedConfig.class,
                 DeveloperConfig.class
         },
         version = ConfigUtil.VERSION
@@ -56,6 +55,26 @@ public final class BUConfig {
             description = "bazaarutils.config.separator.introductory.hint"
     )
     public static boolean INTRODUCTORY_INFORMATION_SEPARATOR = true;
+
+    @ConfigEntry(
+            id = "advanced_configuration_mode",
+            translation = "bazaarutils.config.advanced_configuration_mode.label"
+    )
+    @Comment(
+            value = "Certain feature customization is hidden away from a normal configuration of the mod as they're options generally of no interest. Here you can toggle to see and configure them as well.",
+            translation = "bazaarutils.config.advanced_configuration_mode.hint"
+    )
+    public static Observable<Boolean> ADVANCED_CONFIGURATION_TOGGLE = Observable.of(false);
+
+    @ConfigEntry(
+            id = "automatic_updates",
+            translation = "bazaarutils.config.automatic_updates.label"
+    )
+    @Comment(
+            value = "Automatically update the mod when an update is found.",
+            translation = "bazaarutils.config.automatic_updates.hint"
+    )
+    public static boolean AUTOMATIC_UPDATES_TOGGLE = true;
 
     @ConfigEntry(
             id = "bazaar_flipper_account_upgrade",

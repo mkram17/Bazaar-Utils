@@ -3,6 +3,10 @@ The first full release of Bazaar Utils. Almost every part of the mod has been re
 settings screen, the button system, order tracking, and how the mod reads item data. There are many new features, and
 just as many old features that were improved.
 
+Advanced configuration mode now defaults to off for new configs. Enable it to customize button
+sizes, spacing, icons and slots, choose individual Bazaar messages to hide, reset tracked Bazaar
+limits, or access developer settings. Hiding these controls preserves their configured behavior.
+
 ---
 ## ⚠️ Please read before updating
 **Your settings will not carry over.** v1.0.0 uses a completely new config system and saves to a new
@@ -52,7 +56,7 @@ what's the mod and what's Hypixel. Show it as a name prefix, a name suffix, the 
 only on modified items, or turn it off entirely.
 ### Auto Update
 The mod can now update itself when a new version is released, matching the release channel you're
-already on (alpha/beta/stable). On by default; toggle it in **Advanced Settings**.
+already on (alpha/beta/stable). On by default; toggle it in the main settings.
 ### Translations
 The mod is now fully translated into **German, Polish, French, Simplified Chinese and Russian**, and
 follows your Minecraft language setting.

@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.config.features;
 
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.misc.NotificationType;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 
@@ -23,12 +25,14 @@ public final class DeveloperConfig {
             value = "Global toggle for all developer related functionalities/utilities.",
             translation = "bazaarutils.config.developer.enabled.hint"
     )
+    @ShowIf(AdvancedConfigurationMode.class)
     public static boolean DEVELOPER_MODE_TOGGLE = false;
 
     @ConfigEntry(
             id = "disable_error_notifications",
             translation = "bazaarutils.config.developer.disable_error_notifications.label"
     )
+    @ShowIf(AdvancedConfigurationMode.class)
     public static boolean DEVELOPER_MODE_DISABLE_ERROR_NOTIFICATIONS = false;
 
     @ConfigEntry(
@@ -40,6 +44,7 @@ public final class DeveloperConfig {
             translation = "bazaarutils.config.developer.debug_messages.hint"
     )
     @ConfigOption.Draggable
+    @ShowIf(AdvancedConfigurationMode.class)
     public static NotificationType[] DEVELOPER_MODE_DEBUG_MESSAGES = new NotificationType[]{};
 
     public static boolean isDeveloperVariableEnabled(NotificationType type) {

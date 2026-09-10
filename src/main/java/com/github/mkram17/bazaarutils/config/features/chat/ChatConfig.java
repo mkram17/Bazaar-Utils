@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.config.features.chat;
 
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.features.chat.StashMessagesRemover;
 import com.github.mkram17.bazaarutils.features.chat.UselessBazaarNotificationsRemover;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
@@ -34,6 +36,7 @@ public final class ChatConfig {
             translation = "bazaarutils.config.chat.useless_bazaar_notifications_remover.excluded_notifications.hint"
     )
     @ConfigOption.Draggable()
+    @ShowIf(AdvancedConfigurationMode.class)
     public static UselessBazaarNotificationsRemover.TransientBazaarMessages[] USELESS_BAZAAR_NOTIFICATIONS_REMOVER_EXCLUDED_NOTIFICATIONS = new UselessBazaarNotificationsRemover.TransientBazaarMessages[]{
             UselessBazaarNotificationsRemover.TransientBazaarMessages.CANCELLING_ORDER,
             UselessBazaarNotificationsRemover.TransientBazaarMessages.PUTTING_GOODS_IN_ESCROW,
