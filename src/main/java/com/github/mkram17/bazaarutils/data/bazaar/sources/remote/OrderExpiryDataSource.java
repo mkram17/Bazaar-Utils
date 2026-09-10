@@ -76,13 +76,14 @@ public final class OrderExpiryDataSource extends BUListener {
                     for (var order : entry.getValue()) {
                         if (order.unfilledAmount() <= 0) continue;
 
+                        var transaction = TransactionType.of(order.side(), TransactionType.Method.ORDER);
+
                         mutation = mutation.then(BookMutation.withdrawn(
-                                TransactionType.of(order.side(), TransactionType.Method.ORDER),
-                                order.pricePerItem(), order.unfilledAmount()));
+                                transaction, order.pricePerItem(), order.unfilledAmount()));
 
                         PlayerActionUtil.notifyAll("%s — Book decrement: %s %s Δ%d @ %.4f (order expired)".formatted(
                                         origin.describe(),
-                                        TransactionType.of(order.side(), TransactionType.Method.ORDER).getPriceType(),
+                                        transaction.getPriceType(),
                                         order.productId(), order.unfilledAmount(), order.pricePerItem()),
                                 NotificationType.BAZAARDATA);
                     }
