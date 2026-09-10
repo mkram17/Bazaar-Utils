@@ -94,7 +94,8 @@ daily limits are not touched.
 - REI, Skyblocker and Firmament compatibility handling is still in place.
 ---
 ## Fixes
-- There are too many fixes to list here, but using the mod should now be a less buggy experience.
+- **Outbid notification toggles now work independently.** The *Auto Open Bazaar* toggle had no effect, and neither the sound nor the auto-open would fire unless the chat message was also enabled.
+- There are too many other fixes to list here, but using the mod should now be a less buggy experience.
 ---
 ## ⌨️ Commands
 | Command | Status |
