@@ -8,7 +8,6 @@ import com.github.mkram17.bazaarutils.events.handlers.BUListener;
 import com.github.mkram17.bazaarutils.misc.orderinfo.OrderInfoContainer;
 import com.github.mkram17.bazaarutils.utils.ScreenInfo;
 import com.github.mkram17.bazaarutils.utils.Util;
-import com.github.mkram17.bazaarutils.utils.VersionCompat;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import lombok.Getter;
@@ -77,16 +76,11 @@ public class PriceCharts implements ItemTooltipCallback, BUListener {
 
         String productID = BazaarData.findProductIdOptional(itemName).get(); // All cached items are safe
         String link = "https://skyblock.finance/items/" + productID;
-        VersionCompat.setScreen(Minecraft.getInstance(), new ConfirmLinkScreen(confirmed -> {
-            if (confirmed) {
-                try {
-                    net.minecraft.util.Util.getPlatform().openUri(new URI(link));
-                } catch (URISyntaxException ex) {
-                    Util.notifyError("Failed to open skyblock.finance link.", ex);
-                }
-            }
-            VersionCompat.setScreen(Minecraft.getInstance(), null);
-        }, link, true));
+        try {
+            ConfirmLinkScreen.confirmLinkNow(null, new URI(link), true);
+        } catch (URISyntaxException ex) {
+            Util.notifyError("Failed to open skyblock.finance link.", ex);
+        }
         e.cancel();
     }
 

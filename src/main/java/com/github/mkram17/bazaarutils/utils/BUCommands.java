@@ -21,7 +21,6 @@ import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.network.chat.Component;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import static com.github.mkram17.bazaarutils.config.BUConfig.openGUI;
@@ -97,18 +96,7 @@ public class BUCommands {
         bazaarutils.then(ClientCommands.literal("discord")
                 .executes((context) -> {
                     Minecraft client = Minecraft.getInstance();
-                    client.schedule(() -> {
-                        VersionCompat.setScreen(context.getSource().getClient(), new ConfirmLinkScreen((confirmed) -> {
-                            if (confirmed) {
-                                    try {
-                                        net.minecraft.util.Util.getPlatform().openUri(new URI(Util.DISCORD_LINK));
-                                    } catch (URISyntaxException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                            }
-                            VersionCompat.setScreen(Minecraft.getInstance(), null);
-                        }, Util.DISCORD_LINK, true));
-                    });
+                    client.schedule(() -> ConfirmLinkScreen.confirmLinkNow(null, URI.create(Util.DISCORD_LINK), true));
                     return 1;
                 })
         );

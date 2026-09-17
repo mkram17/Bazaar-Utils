@@ -12,7 +12,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
-import org.lwjgl.glfw.GLFW;
 
 public class StashHelper {
     @Getter
@@ -21,8 +20,12 @@ public class StashHelper {
     private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.parse(BazaarUtils.MODID));
     private static final KeyMapping keyBinding = new KeyMapping(
        "Pick Up Stash",
-       InputConstants.Type.KEYSYM,
-       GLFW.GLFW_KEY_V,
+       //? if >=26.3 {
+       InputConstants.Type.KEYBOARD,
+       //?} else {
+       /*InputConstants.Type.KEYSYM,
+       *///?}
+       InputConstants.KEY_V,
        //? if > 1.21.8 {
        CATEGORY
        //?} else {

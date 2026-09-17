@@ -1,1 +1,2 @@
+- Add Minecraft 26.3 support.
 - Fix "Failed to deserialize ItemStack from JSON" error
