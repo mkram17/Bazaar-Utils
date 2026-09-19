@@ -1,0 +1,153 @@
+package com.github.mkram17.bazaarutils.utils.bazaar.market;
+
+import com.mojang.serialization.Codec;
+import lombok.Getter;
+
+/**
+ * Describes a bazaar transaction using both its side (buy/sell) and method (instant/order).
+ *
+ * <p>The resolved {@link PriceType} depends on both values: instant transactions use the same
+ * market side, while order transactions target the opposite side of the book.</p>
+ *
+ * <p>Two helper comparison methods are provided:
+ * <ul>
+ *   <li>{@link #is(TransactionType)} compares market-bucket equivalence by comparing the
+ *       resolved {@link PriceType} (i.e. whether two TransactionType instances map to the
+ *       same market bucket).</li>
+ *   <li>{@link #isStrictly(TransactionType)} compares the concrete intent by requiring both the
+ *       same {@link Method} and the same {@link Side} (exact side+method equality).</li>
+ * </ul></p>
+ */
+public class TransactionType {
+
+    public static final TransactionType SELL_OFFER = TransactionType.of(Side.SELL, Method.ORDER);
+
+    public static final TransactionType BUY_ORDER = TransactionType.of(Side.BUY, Method.ORDER);
+
+    public static final TransactionType INSTANT_SELL = TransactionType.of(Side.SELL, Method.INSTANT);
+
+    public static final TransactionType INSTANT_BUY = TransactionType.of(Side.BUY, Method.INSTANT);
+
+    /**
+     * Player intent side of the transaction.
+     */
+    public enum Side {
+        BUY,
+        SELL;
+
+        public static final Codec<Side> CODEC = Codec.STRING.xmap(TransactionType.Side::valueOf, Enum::name);
+
+        /**
+         * Returns the opposite player intent side.
+         */
+        public Side opposite() {
+            return this == BUY ? SELL : BUY;
+        }
+
+        /**
+         * Maps this side to the matching instant market bucket.
+         */
+        public PriceType asPriceType() {
+            return this == BUY ? PriceType.INSTABUY : PriceType.INSTASELL;
+        }
+
+        @Override
+        public String toString() {
+            return this == BUY ? "Buy" : "Sell";
+        }
+    }
+
+    public enum Method {
+        INSTANT,
+        ORDER;
+
+        @Override
+        public String toString() {
+            return this == INSTANT ? "Instant" : "Order";
+        }
+    }
+
+    //TransactionType
+    @Getter
+    private final PriceType priceType;
+
+    @Getter
+    private final Side side;
+
+    @Getter
+    private final Method method;
+
+    private TransactionType(Side side, Method method) {
+        this.side = side; this.method = method;
+        this.priceType = resolvePriceType(side, method);
+    }
+
+    public static TransactionType of(Side side, Method method) {
+        return new TransactionType(side, method);
+    }
+
+    /**
+     * Resolves the {@link PriceType} for this side+method pair.
+     * Instant transactions use the same side; orders use the opposite side.
+     */
+    public static PriceType resolvePriceType(Side side, Method method) {
+        if (method == Method.INSTANT) return side.asPriceType();
+        else return side.asPriceType().opposite();
+    }
+
+    public boolean higherIsBetter() {
+        return priceType.higherIsBetter();
+    }
+
+    public boolean isInstant() {
+        return method == Method.INSTANT;
+    }
+
+    public boolean isOrder() {
+        return method == Method.ORDER;
+    }
+
+    public boolean isBuy() {
+        return side == Side.BUY;
+    }
+
+    public boolean isSell() {
+        return side == Side.SELL;
+    }
+
+    /**
+     * Helper to easily check if this transaction resolves to a specific PriceType.
+     */
+    public boolean is(PriceType targetPriceType) {
+        return this.priceType == targetPriceType;
+    }
+
+    /**
+     * Checks whether this transaction resolves to the same {@link PriceType} as the target.
+     *
+     * <p>This compares market bucket equivalence, not exact side/method identity.</p>
+     */
+     public boolean is(TransactionType targetTransactionType) {
+         return this.priceType == targetTransactionType.getPriceType();
+     }
+
+    /**
+     * Checks whether this transaction is strictly the same as the target.
+     *
+     * <p>Unlike {@link #is(TransactionType)}, which considers two transactions equivalent when
+     * they resolve to the same market {@link PriceType}, this method requires exact equality
+     * of both the {@link Method} (INSTANT/ORDER) and the {@link Side} (BUY/SELL). Use this
+     * when you need to distinguish, for example, an ORDER-buy from an INSTANT-buy even though
+     * they map to the same price bucket.</p>
+     *
+     * @param targetTransactionType transaction to compare against
+     * @return {@code true} when method and side are identical
+     */
+    public boolean isStrictly(TransactionType targetTransactionType) {
+        return this.method == targetTransactionType.getMethod() && this.side == targetTransactionType.getSide();
+    }
+
+    public String getString() {
+        return method + " " + side;
+    }
+}
