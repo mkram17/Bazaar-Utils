@@ -4,11 +4,13 @@ import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigu
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
@@ -68,7 +70,37 @@ public class BuyOrderPriceHelper extends SignInputHelper.TransactionCost impleme
     )
     public PricingPosition pricingPosition;
 
-    public TransactionType transactionType = TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.ORDER);
+    @ConfigEntry(
+            id = "empty_market_price",
+            translation = "bazaarutils.config.buttons.button.container.empty_market_price.label"
+    )
+    @Comment(
+            value = """
+                    When the order book is completely empty, the helper has no price to reference.
+                    Set this to a value you'd be comfortable starting from — it gets treated
+                    the same way a live market price would, with your position strategy applied on top.
+                    """,
+            translation = "bazaarutils.config.buttons.button.container.empty_market_price.hint"
+    )
+    @ConfigOption.Range(min = 0.1, max = 1_000_000_000.0)
+    @ShowIf(AdvancedConfigurationMode.class)
+    public double emptyMarketPrice = 0.1;
+
+    @ConfigEntry(
+            id = "self_outbid",
+            translation = "bazaarutils.config.buttons.button.container.self_outbid.label"
+    )
+    @Comment(
+            value = """
+                When you're already the highest bidder, stepping above yourself gains you nothing in the queue and only costs more coins.
+                Leave this off and the helper holds steady when you're already ahead. Enable it if you want it to always bid competitively, even against your own orders.
+                """,
+            translation = "bazaarutils.config.buttons.button.container.self_outbid.hint"
+    )
+    @ShowIf(SignInputHelper.TransactionCost.WhenCompetitivePosition.AndAdvancedMode.class)
+    public boolean selfOutbid = false;
+
+    public TransactionType transactionType = TransactionType.BUY_ORDER;
 
     @Override
     public ItemRef getItemRef() {
