@@ -5,12 +5,12 @@ import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.minecraft.item.ItemRef;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
@@ -81,7 +81,7 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
     @ShowIf(SignInputHelper.TransactionAmount.WhenFixedStrategy.class)
     public int fixedAmount = 1;
 
-    public TransactionType transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
+    public TransactionType transactionType = TransactionType.SELL_OFFER;
 
     @Override
     public ItemRef getItemRef() {
@@ -115,8 +115,8 @@ public class SellOfferAmountHelper extends SignInputHelper.TransactionAmount imp
                 .filter(stack -> !stack.isEmpty())
                 .filter(stack -> Optional.ofNullable(stack.getCustomName())
                         .map(Component::getString)
-                        .flatMap(BazaarDataUtil::findProductIdOptional)
-                        .map(productId -> productId.equals(state.productId()))
+                        .flatMap(ProductInfo::fromDisplayName)
+                        .map(info -> info.getProductId().equals(state.productInfo().getProductId()))
                         .orElse(false))
                 .mapToInt(ItemStack::getCount)
                 .sum());

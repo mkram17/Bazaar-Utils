@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.events.predicates;
 
+import com.github.mkram17.bazaarutils.events.minecraft.ScreenChangeEvent;
 import com.github.mkram17.bazaarutils.utils.ScreenConstrained;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 
@@ -18,6 +19,11 @@ import java.lang.annotation.Target;
  *       {@link ScreenConstrained}.</li>
  * </ul>
  * {@link #except()} additionally removes screens from the match in every mode.
+ *
+ * <p>{@link #previous()} is orthogonal to all three: it swaps WHICH screen gets tested — the
+ * screen the player just left, rather than the current one — for handlers of screen-transition
+ * events such as {@link ScreenChangeEvent}. It never matches on event types that carry no such
+ * transition.</p>
  *
  * <p>Every attribute has a default, so a bare {@code @OnlyBazaarScreen} — or one that supplies
  * only {@link #except()} — names no screens. That form behaves as {@code any = true}, i.e. "any
@@ -56,4 +62,11 @@ public @interface OnlyBazaarScreen {
      * Mutually exclusive with {@code value()} and {@code any}.
      */
     boolean useConstraintsInterface() default false;
+
+    /**
+     * Matches against the screen the player just left instead of the current one — reclassified
+     * fresh from {@link ScreenChangeEvent#getOldScreen()} rather than read back from any cached
+     * history entry.
+     */
+    boolean previous() default false;
 }

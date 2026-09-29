@@ -82,10 +82,12 @@
     }
   },
 
-  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
-    "not_upgraded.label": "Not Upgraded",
-    "first_tier.label": "Bazaar Flipper I",
-    "second_tier.label": "Bazaar Flipper II"
+  "bazaarutils.hypixel.{}": {
+    "account_upgrades.bazaar_flipper.{}": {
+      "not_upgraded.label": "Not Upgraded",
+      "first_tier.label": "Bazaar Flipper I",
+      "second_tier.label": "Bazaar Flipper II"
+    }
   },
 
   "bazaarutils.config.{}": {
@@ -101,18 +103,6 @@
     "automatic_updates.{}": {
       "label": "Automatic Updates",
       "hint": "Automatically update the mod when an update is found."
-    },
-
-    "bazaar_flipper_account_upgrade.{}": {
-      "label": "Bazaar Flipper Account Upgrade",
-      "hint": [
-        "The tier of your ", { "translate": "bazaarutils.ref.bazaar_flipper" },
-        " Account Upgrade, which is factored in on tax calculation and current order limits.",
-        "\nYour Bazaar Flipper level can be upgraded by talking to ",
-        { "translate": "bazaarutils.ref.elizabeth" }, " at the ",
-        { "translate": "bazaarutils.ref.community_center" }, " in the ",
-        { "translate": "bazaarutils.ref.skyblock_hub" }, "."
-      ]
     },
 
     "modify_indicator.{}": {
@@ -229,6 +219,14 @@
           "fixed_amount.{}": {
             "label": "Fixed Amount",
             "hint": "The amount which will be used if FIXED is set as the amount strategy."
+          },
+          "self_outbid.{}": {
+            "label": "Self Outbid",
+            "hint": "When you're already the highest bidder, stepping above yourself gains you nothing in the queue and only costs more coins. Leave this off and the helper holds steady when you're already ahead. Enable it if you want it to always bid competitively, even against your own orders."
+          },
+          "empty_market_price.{}": {
+            "label": "Empty Market Price",
+            "hint": "When the order book is completely empty, the helper has no price to reference. Set this to a value you'd be comfortable starting from — it gets treated the same way a live market price would, with your position strategy applied on top."
           }
         }
       },
@@ -300,6 +298,16 @@
         "style.{}": {
           "label": "Highlight Style",
           "hint": "Determines how the status colors are rendered on your order slots."
+        },
+
+        "self_outbid.{}": {
+          "label": "Self Outbid",
+          "hint": "By default, your own volume at a price level doesn't count against you — so a spot you hold alone still shows as COMPETITIVE. Enable this if you'd rather any shared price level report MATCHED regardless of who owns the volume."
+        },
+
+        "settled_color.{}": {
+          "label": "Settled Color",
+          "hint": "The color to highlight orders which have been fully filled or have expired and are awaiting flip or claim.",
         },
 
         "competitive_color.{}": {
@@ -484,6 +492,7 @@
         "hint": "Global toggle for all developer features and utilities."
       },
       "disable_error_notifications.label": "Disable Error Notifications",
+      "disable_auto_resource_updates.label": "Disable Automatic Resource Updates",
       "debug_messages.{}": {
         "label": "Debug Messages",
         "hint": "Configures debug messages sent to chat regarding mod routines and state"

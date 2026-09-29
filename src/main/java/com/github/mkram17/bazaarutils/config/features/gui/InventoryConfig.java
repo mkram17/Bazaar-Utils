@@ -1,5 +1,7 @@
 package com.github.mkram17.bazaarutils.config.features.gui;
 
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.NumericRestrictBy;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
@@ -84,6 +86,17 @@ public final class InventoryConfig {
     public static SlotHighlight.HighlightStyle ORDER_STATUS_HIGHLIGHT_STYLE = SlotHighlight.HighlightStyle.BACKGROUND;
 
     @ConfigEntry(
+            id = "order_status_highlight:settled_color",
+            translation = "bazaarutils.config.inventory.order_status_highlight.settled_color.label"
+    )
+    @Comment(
+            value = "The color to highlight orders which have been fully filled or have expired and are awaiting flip or claim.",
+            translation = "bazaarutils.config.inventory.order_status_highlight.settled_color.hint"
+    )
+    @ConfigOption.Color(alpha = true)
+    public static int ORDER_STATUS_HIGHLIGHT_SETTLED_COLOR = 0xFFEEEEEE;
+
+    @ConfigEntry(
             id = "order_status_highlight:competitive_color",
             translation = "bazaarutils.config.inventory.order_status_highlight.competitive_color.label"
     )
@@ -115,6 +128,20 @@ public final class InventoryConfig {
     )
     @ConfigOption.Color(alpha = true)
     public static int ORDER_STATUS_HIGHLIGHT_OUTBID_COLOR = 0xFFFF5555;
+
+    @ConfigEntry(
+            id = "order_status_highlight:self_outbid",
+            translation = "bazaarutils.config.inventory.order_status_highlight.self_outbid.label"
+    )
+    @Comment(
+            value = """
+                By default, your own volume at a price level doesn't count against you — so a spot you hold alone still shows as COMPETITIVE.
+                Enable this if you'd rather any shared price level report MATCHED regardless of who owns the volume.
+                """,
+            translation = "bazaarutils.config.inventory.order_status_highlight.self_outbid.hint"
+    )
+    @ShowIf(AdvancedConfigurationMode.class)
+    public static boolean ORDER_STATUS_SELF_OUTBID_TOGGLE = false;
 
     @Category(value = "restrictions")
     @ConfigInfo(

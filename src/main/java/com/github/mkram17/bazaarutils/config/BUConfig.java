@@ -13,7 +13,6 @@ import com.github.mkram17.bazaarutils.utils.minecraft.item.modifier.ModifyIndica
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import com.teamresourceful.resourcefulconfig.api.types.entries.Observable;
 
-
 import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
 
 @Config(

@@ -5,12 +5,12 @@ import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.data.BazaarDataUtil;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.TransactionPageLayout;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.ProductInfo;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.SlotLookup;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
@@ -83,7 +83,7 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
     @ShowIf(SignInputHelper.TransactionAmount.WhenFixedStrategy.class)
     public int fixedAmount = 1;
 
-    public TransactionType transactionType = TransactionType.of(TransactionType.Side.BUY, TransactionType.Method.INSTANT);
+    public TransactionType transactionType = TransactionType.INSTANT_BUY;
 
     @Override
     public ItemRef getItemRef() {
@@ -126,8 +126,8 @@ public class InstantBuyAmountHelper extends SignInputHelper.TransactionAmount im
 
                             boolean isSameItem = Optional.ofNullable(stack.getCustomName())
                                     .map(Component::getString)
-                                    .flatMap(BazaarDataUtil::findProductIdOptional)
-                                    .map(id -> id.equals(state.productId()))
+                                    .flatMap(ProductInfo::fromDisplayName)
+                                    .map(info -> info.getProductId().equals(state.productInfo().getProductId()))
                                     .orElse(false);
 
                             return isSameItem ? maxStackSize - stack.getCount() : 0;

@@ -123,15 +123,11 @@ public class ScreenManager {
 
         if (resolved instanceof BazaarScreenType bst && bst.isEager()) resolved = null;
 
-        for (int i = 0; i < instance.history.size(); i++) {
-            ScreenContext ctx = instance.history.get(i);
+        int index = instance.indexOf(screen);
+        if (index < 0) return;
 
-            if (ctx != null && ctx.screen() == screen) {
-                instance.history.set(i, new ScreenContext(screen, resolved));
-                instance.logHistory("LOADED");
-                return;
-            }
-        }
+        instance.history.set(index, new ScreenContext(screen, resolved));
+        instance.logHistory("LOADED");
     }
 
     public void setCurrentScreen(Screen screen) {
@@ -170,6 +166,22 @@ public class ScreenManager {
 
     public Optional<ScreenContext> previous() {
         return getAtDepth(1);
+    }
+
+    public Optional<ScreenContext> find(@Nullable Screen screen) {
+        return getAtDepth(indexOf(screen));
+    }
+
+    private int indexOf(@Nullable Screen screen) {
+        if (screen == null) return -1;
+
+        for (int i = 0; i < history.size(); i++) {
+            ScreenContext ctx = history.get(i);
+
+            if (ctx != null && ctx.screen() == screen) return i;
+        }
+
+        return -1;
     }
 
     public Optional<ScreenContext> findBack(ScreenType... wanted) {
