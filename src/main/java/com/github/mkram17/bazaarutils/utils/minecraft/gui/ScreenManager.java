@@ -25,6 +25,7 @@ import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/** Tracks screen history before assignment; recognised screen types do not guarantee loaded contents. */
 public class ScreenManager {
     @Getter
     private static final ScreenManager instance = new ScreenManager();

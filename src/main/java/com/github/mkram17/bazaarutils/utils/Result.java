@@ -14,6 +14,7 @@ package com.github.mkram17.bazaarutils.utils;
  * to express a non-standard combination (unusual in practice).
  *
  * <table>
+ *   <caption>Handler outcomes</caption>
  *   <tr><th>Constant</th>   <th>acted</th><th>propagate</th><th>Meaning</th></tr>
  *   <tr><td>UNMODIFIED</td> <td>false</td><td>true</td>  <td>Pass-through; did nothing, pipeline continues.</td></tr>
  *   <tr><td>HANDLED</td>    <td>true</td> <td>true</td>  <td>Made a change; pipeline may still continue.</td></tr>

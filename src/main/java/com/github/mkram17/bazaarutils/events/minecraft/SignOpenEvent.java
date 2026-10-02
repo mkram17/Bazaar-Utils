@@ -5,14 +5,8 @@ import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
 
 /**
- * Event fired when a sign editing screen is opened.
+ * Posted after SignEditScreen initialization; excludes hanging sign screens.
  *
- * <p>
- * This event is triggered when the player opens a sign editing interface, typically when
- * interacting with bazaar order creation or other sign-based input systems.
- * </p>
- *
- * 
  * @see SignEditScreen
  * @see com.github.mkram17.bazaarutils.mixin.MixinSignEditScreen
  */

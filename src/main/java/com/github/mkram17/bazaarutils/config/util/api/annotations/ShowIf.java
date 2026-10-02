@@ -14,7 +14,7 @@ import java.lang.annotation.*;
  * all conditions must pass. For OR semantics, compose conditions explicitly inside
  * a single named class using {@link ConfigCondition#or}:
  *
- * <h3>Fail-open contract</h3>
+ * <h2>Fail-open contract</h2>
  *
  * <p>A condition class that cannot be instantiated is treated as if it had returned
  * {@code true} — the field is shown rather than silently hidden.

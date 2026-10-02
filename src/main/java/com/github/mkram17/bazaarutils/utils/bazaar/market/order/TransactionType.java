@@ -16,7 +16,7 @@ import lombok.Getter;
  *       same market bucket).</li>
  *   <li>{@link #isStrictly(TransactionType)} compares the concrete intent by requiring both the
  *       same {@link Method} and the same {@link Side} (exact side+method equality).</li>
- * </ul></p>
+ * </ul>
  */
 public class TransactionType {
 

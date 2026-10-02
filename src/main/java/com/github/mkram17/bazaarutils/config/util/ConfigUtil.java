@@ -96,6 +96,7 @@ public class ConfigUtil {
         ));
     }
 
+    /** Coalesces save requests into one save after 20 client ticks; requires ticking to complete. */
     public static void scheduleConfigSave() {
         if (!configSaveScheduled) {
             configSaveScheduled = true;
@@ -107,6 +108,7 @@ public class ConfigUtil {
         }
     }
 
+    /** Returns widgets appended by build-injected RegisterWidget factories. */
     public static List<AbstractWidget> getWidgets(){
         List<AbstractWidget> widgets = new ArrayList<>();
         //automatically added using @RegisterWidget annotation

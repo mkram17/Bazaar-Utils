@@ -26,6 +26,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Client entrypoint using generated module registries; Gradle appends RunOnInit calls.
+ * Direct Java compilation omits those injected calls.
+ */
 public class BazaarUtils implements ClientModInitializer {
     public static final String MOD_ID = "bazaarutils";
     public static final String MOD_NAME = "Bazaar Utils";

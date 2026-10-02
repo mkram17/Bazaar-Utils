@@ -17,42 +17,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Event fired when a chest/container GUI is fully loaded with all items.
- * <p><strong>Note: You cannot use the default Fabric event for this on Hypixel, as not all item slots are loaded with all their data at screen initialization.</strong></p>
- *
- * <p>
- * This event is triggered after a chest or container screen opens and all items have finished loading.
- * The mod waits for all item slots to be populated (checking that items are not in a "Loading..." state)
- * before firing this event. This ensures that listeners can safely access all container contents.
- * </p>
- *
- * <p>The event exposes:</p>
- * <ul>
- *   <li>the backing container inventory ({@code getContainer()})</li>
- *   <li>the container slots and the player-inventory slots as separate {@code List<Slot>}
- *       ({@code getContainerSlots()} / {@code getPlayerSlots()})</li>
- *   <li>the display name, both formatted and stripped ({@code getTitleComponent()} / {@code getTitle()})</li>
- *   <li>the resolved {@link ScreenType}, if the screen was recognised ({@code getType()})</li>
- * </ul>
- *
- * <p><strong>Usage Example:</strong></p>
- * <pre>
- * {@code
- * @Subscription
- * public void onContainerLoaded(ContainerLoadedEvent event) {
- *    List<Slot> slots = event.getContainerSlots();
- *    processBazaarItems(slots);
- * }
- * }
- * </pre>
- *
- * <p><strong>Implementation Note:</strong></p>
- * This event is posted by {@link ContainerLoadedHandler}, which polls once per tick (up to
- * 50 attempts, roughly 2.5 seconds) until the GUI has finished loading before firing.
- *
- * @see Container
- * @see Slot
- * @see ContainerLoadedHandler
+ * Posted on the client thread when chest loading heuristics pass: a nonempty final slot
+ * and no recognised Loading markers. Polling stops after 50 retries or a screen change.
+ * Slot lists retain empty slots and separate container slots from player-inventory slots.
  */
 @Getter
 public final class ContainerLoadedEvent extends SkyBlockEvent {

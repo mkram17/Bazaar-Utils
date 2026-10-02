@@ -17,6 +17,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
+/**
+ * Failed fetches retain the last snapshot; only changed timestamps emit update events.
+ * Events run on the API completion thread; marshal UI work to the client thread.
+ */
 public final class BazaarDataManager {
 
     @Getter

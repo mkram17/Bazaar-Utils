@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-// Utility class for current screen info
+/** Last loaded chest state; may remain stale after the screen closes. */
 public class ContainerManager {
     @Nullable
     private static AbstractContainerScreen<ChestMenu> screen = null;
@@ -85,6 +85,7 @@ public class ContainerManager {
                 .flatMap(container -> SlotLookup.getInventorySlotFromItemStack(container, wanted));
     }
 
+    /** Clicks after one tick using the captured container ID; callers must guard screen changes. */
     public static void clickSlot(int slotIndex, int button) {
         Optional<AbstractContainerMenu> menu = ScreenManager.getMenu(AbstractContainerMenu.class);
 

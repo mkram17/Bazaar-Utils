@@ -23,14 +23,8 @@ import java.util.Optional;
 import static com.github.mkram17.bazaarutils.BazaarUtils.EVENT_BUS;
 
 /**
- * Parses bazaar-related chat messages and <em>posts</em> {@link BazaarChatEvent}s. This is the
- * producer; do not confuse it with {@code BazaarChatEventHandler}, which is the consumer that
- * reacts to the events posted here.
- * <p>
- * This class listens to incoming game chat messages and parses them to detect bazaar-related
- * actions such as order creation, filling, claiming, instant transactions, and cancellations.
- * When a bazaar message is detected, it creates and posts the appropriate {@link BazaarChatEvent}.
- * </p>
+ * Parses English Bazaar messages using fixed component positions and posts BazaarChatEvents.
+ * Payloads may be newly parsed OrderInfo instances rather than stored orders.
  *
  * @see BazaarChatEvent
  * @see OrderInfo

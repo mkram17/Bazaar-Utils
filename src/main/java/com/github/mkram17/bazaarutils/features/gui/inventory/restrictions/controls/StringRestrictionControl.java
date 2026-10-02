@@ -47,6 +47,7 @@ public final class StringRestrictionControl implements RestrictionControl<String
         this("");
     }
 
+    /** Matches the full item name case-insensitively. */
     @Override
     public boolean shouldRestrict(OrderInfo container) {
         return container.getName().equalsIgnoreCase(name);

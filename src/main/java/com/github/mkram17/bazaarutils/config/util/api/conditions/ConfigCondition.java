@@ -17,7 +17,7 @@ import java.util.Optional;
  *       that have no owning instance at all)
  * </ul>
  *
- * <h3>Fail-open contract</h3>
+ * <h2>Fail-open contract</h2>
  *
  * <p>All implementations should treat an absent owner, a type mismatch, or any
  * reflection error as {@code true} — the field is shown. This prevents a broken

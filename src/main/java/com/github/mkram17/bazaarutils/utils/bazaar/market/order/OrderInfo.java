@@ -18,9 +18,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * Stores Bazaar item information while automatically tracking market price updates and performing
- * health checks on product identifiers. Intended for order-like data that does not need the full
- * {@link Order} lifecycle.
+ * Resolves initial product and pricing data without subscribing to events or scheduling health checks.
  */
 @ToString(callSuper=true)
 public class OrderInfo extends PriceInfo {
@@ -45,7 +43,7 @@ public class OrderInfo extends PriceInfo {
     private ItemInfo itemInfo;
 
     /**
-     * Creates a container that tracks market data for a specific Bazaar product.
+     * Resolves initial product ID and pricing position for the supplied order data.
      *
      * @param name         display name of the item
      * @param side         whether this is a buy or sell transaction
@@ -100,7 +98,7 @@ public class OrderInfo extends PriceInfo {
     }
 
     /**
-     * Determines whether the order price is competitive, matched, or outbid relative to the market.
+     * Compares price with the cached market; equality is MATCHED only when summary volume exceeds one.
      *
      * @return status reflecting how this order compares to current prices, if calculable
      */
@@ -149,10 +147,10 @@ public class OrderInfo extends PriceInfo {
     }
 
     /**
-     * Tests whether this order corresponds to another order, optionally using loose comparisons for volume and price.
+     * Null fields are wildcards; names ignore case and prices allow tolerance plus 1% in both modes.
      *
      * @param other    order to compare against
-     * @param isStrict when true requires exact matches, when false allows small deviations
+     * @param isStrict requires equal volumes; otherwise allows 5% deviation or the unclaimed quantity
      * @return {@code true} if the two orders can be considered the same
      */
     public boolean isSimilarTo(Order other, boolean isStrict) {
@@ -194,7 +192,7 @@ public class OrderInfo extends PriceInfo {
     }
 
     /**
-     * Finds a matching order in the provided list, preferring the closest match when multiple entries are similar.
+     * Selects a match by closest volume, then price, when multiple candidates remain.
      *
      * @param list list of existing orders to search
      * @return best matching order if one exists
@@ -217,7 +215,7 @@ public class OrderInfo extends PriceInfo {
      * Locates all orders in the provided list that resemble this order.
      *
      * @param list candidate orders
-     * @return list of matches, ordered first by strict then loose similarity
+     * @return strict matches, or loose matches only when there are no strict matches; preserves input order
      */
     public List<Order> findAllMatchesInList(List<Order> list) {
         List<Order> itemList = new ArrayList<>();
@@ -246,7 +244,7 @@ public class OrderInfo extends PriceInfo {
 
     /**
      * Projects each stored user order to a single variable, such as volume or price. For example,
-     * {@code getVariables(BazaarOrder::getPricePerItem)} extracts all prices from user orders in
+     * {@code getVariables(Order::getPricePerItem)} extracts all prices from user orders in
      * {@link UserOrdersStorage}.
      *
      * @param <T>      type of value extracted from each order
@@ -289,7 +287,7 @@ public class OrderInfo extends PriceInfo {
     }
 
     /**
-     * Converts the current container into a fully tracked {@link Order}.
+     * Creates an inert Order without copying ItemInfo; OrderUtil.trackUserOrder starts tracking it.
      */
     public Order toBazaarOrder() {
         return new Order(name, volume, pricePerItem, transactionType.getSide(), null);

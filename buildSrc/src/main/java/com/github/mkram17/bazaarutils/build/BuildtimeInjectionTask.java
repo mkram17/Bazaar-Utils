@@ -23,6 +23,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+/**
+ * Modifies compiled classes in place to inject init calls and ConfigUtil widget factories.
+ * Renamed injection targets and descriptors must also be updated here.
+ */
 public abstract class BuildtimeInjectionTask extends DefaultTask {
 
     @InputDirectory
