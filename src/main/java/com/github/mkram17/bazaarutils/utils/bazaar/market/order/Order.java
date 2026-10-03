@@ -140,7 +140,6 @@ public class Order extends OrderInfo implements AbstractListener {
         }
     }
 
-    /** Chat notifications currently gate sound and automatic opening as well. */
     private void onOutbid(boolean isOutbid) {
         NotificationsConfig.NotificationSettings settings = NotificationsConfig.ORDER_NOTIFICATIONS_OUTBID;
 
