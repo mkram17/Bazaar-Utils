@@ -125,6 +125,7 @@ public class Util {
         Runnable action;
     }
 
+    /** Queues an action for END_CLIENT_TICK on the client thread; delays are ticks, not milliseconds. */
     public static void tickExecuteLater(int ticks, Runnable action) {
         synchronized (tasks) {
             tasks.add(new ScheduledTask(ticks, action));

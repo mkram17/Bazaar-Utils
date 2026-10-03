@@ -23,7 +23,7 @@ import tech.thatgravyboat.skyblockapi.api.events.base.SkyBlockEvent;
  * }
  * }
  * </pre>
- * @see com.github.mkram17.bazaarutils.mixin.MinecraftMixin
+ * @see com.github.mkram17.bazaarutils.mixin.GuiMixin
  */
 public abstract class ScreenChangeEvent extends SkyBlockEvent {
     /**

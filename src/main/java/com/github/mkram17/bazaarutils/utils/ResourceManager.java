@@ -29,6 +29,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 //TODO move config to config/bazaarutils directory and rename to "config". See how REI does this.
+/**
+ * Maintains config/bazaarutils/bazaar-resources.json: product IDs mapped to display names.
+ * Seeds missing data from the bundled asset; remote updates can overwrite local edits.
+ */
 public class ResourceManager {
 
     private static final Path MOD_CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve(BazaarUtils.MOD_ID);
@@ -42,6 +46,7 @@ public class ResourceManager {
     private static volatile boolean conversionsLoaded = false;
 
 
+    /** Asynchronously seeds local data and checks updates; requires a ready resource manager. */
     public static void initialize() {
         CompletableFuture.runAsync(() -> {
             try {
@@ -75,6 +80,10 @@ public class ResourceManager {
         }
     }
 
+    /**
+     * Checks updates asynchronously; replacement saves the SHA and invalidates the reverse cache.
+     * @param manual whether to show progress and additional failures to the player
+     */
     public static void checkForUpdates(boolean manual) {
         CompletableFuture.runAsync(() -> {
             try {
@@ -137,6 +146,10 @@ public class ResourceManager {
         }
     }
 
+    /**
+     * Reads synchronously; only I/O failures trigger bundled fallback, not malformed JSON.
+     * @return conversion map, or an empty object if neither resource can be read
+     */
     public static JsonObject getResourceJson() {
         try {
             String content = Files.readString(LOCAL_RESOURCES_PATH);

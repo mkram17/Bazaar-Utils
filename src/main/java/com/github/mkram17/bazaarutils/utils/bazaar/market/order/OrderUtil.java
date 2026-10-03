@@ -53,7 +53,7 @@ public final class OrderUtil {
     }
 
     /**
-     * Opens the Bazaar order management screen after a short countdown if the player is not already there.
+     * Opens orders after a three-second countdown; the current screen is checked only before waiting.
      */
     public static void openBazaar() {
         if (ScreenManager.getInstance().isCurrent(BazaarScreenType.values())) {

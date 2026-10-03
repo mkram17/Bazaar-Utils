@@ -10,6 +10,7 @@ import lombok.Getter;
 public class TimeUtil {
     @Getter
     private static ZonedDateTime modInitTime;
+    /** UTC midnight captured at class initialization; does not advance during the session. */
     public static final ZonedDateTime LAST_BAZAAR_LIMIT_RESET_TIME = ZonedDateTime.of(LocalDate.now(ZoneOffset.UTC), LocalTime.MIDNIGHT, ZoneOffset.UTC);
     @Getter
     private static ZonedDateTime nextBazaarLimitReset;

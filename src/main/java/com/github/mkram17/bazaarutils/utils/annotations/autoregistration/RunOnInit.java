@@ -6,8 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a static method to be called automatically during mod initialization.
- * The method must be public, static, and take no arguments.
+ * Injects a call after handwritten client initialization; requires public static void with no args.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

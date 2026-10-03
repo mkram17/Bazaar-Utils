@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/** Writes other mods' settings; REI's JSON rewrite removes comments. */
 public class BUCompatibilityHelper {
     private static final String REI_MOD_ID = "roughlyenoughitems";
     public static final String SKYBLOCKER_MOD_ID = "skyblocker";
