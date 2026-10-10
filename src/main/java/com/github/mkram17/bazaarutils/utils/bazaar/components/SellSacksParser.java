@@ -52,6 +52,7 @@ public final class SellSacksParser {
 
             try {
                 int volume = Util.parseNumber(matcher.group("volume"));
+                if (volume == 0) continue;
                 double totalPrice = Double.parseDouble(matcher.group("price").replace(",", ""));
                 double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
 
