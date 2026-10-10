@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a static method to be automatically included in the widget registration system.
- * The annotated method must be public, static, take no arguments, and return a
- * java.util.List or java.util.Collection of ClickableWidget.
+ * Injects a widget factory into ConfigUtil.getWidgets; requires public static, no arguments,
+ * and a declared List or Collection return type containing AbstractWidget-compatible elements.
+ * Return an empty collection when inapplicable; factory ordering is unspecified.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)

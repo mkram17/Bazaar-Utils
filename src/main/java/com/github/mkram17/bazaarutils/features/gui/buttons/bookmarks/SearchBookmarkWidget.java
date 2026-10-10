@@ -86,6 +86,7 @@ public class SearchBookmarkWidget {
         return widgets;
     }
 
+    /** Deletes the stored bookmark; existing widgets remain until the screen is reopened. */
     public static void onWidgetShiftClick(Bookmark bookmark) {
         BookmarksStorage.remove(bookmark);
     }

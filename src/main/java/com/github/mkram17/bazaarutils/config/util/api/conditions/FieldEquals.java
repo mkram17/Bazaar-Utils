@@ -15,7 +15,7 @@ import java.util.Optional;
  * <p>The class hierarchy of the owner is walked from most-derived to least-derived,
  * so conditions defined on a supertype work correctly for subclass instances.
  *
- * <h3>Fail-open contract</h3>
+ * <h2>Fail-open contract</h2>
  *
  * <p>Returns {@code true} (show the field) when:
  * <ul>

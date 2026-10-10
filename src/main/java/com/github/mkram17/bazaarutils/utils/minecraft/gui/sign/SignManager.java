@@ -74,6 +74,7 @@ public class SignManager {
         PENDING.add(PendingHandler.of(handler));
     }
 
+    /** Updates four sign lines on the client thread, retrying briefly if no sign is available. */
     public static void setSignText(String text, boolean closeAfter) {
         setSignTextInternal(text, closeAfter, 5);
     }

@@ -16,8 +16,8 @@ import java.util.OptionalInt;
 
 public class BazaarDataUtil {
     /**
-     * Get the number of orders at an exact price for a product & price type.
-     * @return OptionalInt empty if reply / product / priceType invalid or not found.
+     * Returns summary volume at an exact price, despite the method name suggesting order count.
+     * @return zero if no price matches; empty if data or inputs are unavailable
      */
     public static OptionalInt getOrderCountOptional(String productId, TransactionType transactionType, double price) {
         CustomBazaarReply reply = BazaarDataManager.getCurrentReply();
@@ -63,10 +63,7 @@ public class BazaarDataUtil {
     }
 
     /**
-     * Find the top bazaar price for a product based on the given {@link TransactionType}.
-     * The returned {@link OptionalDouble} is empty if the reply, product ID, or derived {@link PriceType}
-     * is {@code null}, if the product cannot be found, or if an exception occurs while resolving the price.
-     * If the selected summary list exists but is empty, this method returns {@code OptionalDouble.of(0.0)}.
+     * Finds the top price in the cached snapshot; missing or empty summaries yield zero.
      *
      * @param productId       the bazaar product ID to look up
      * @param transactionType the transaction type whose {@link PriceType} controls which summary is queried
@@ -137,6 +134,7 @@ public class BazaarDataUtil {
         return ResourceManager.getNameToProductIdCache().containsValue(productId);
     }
 
+    /** Looks up a case-insensitive display name without trimming; unknown names return empty. */
     public static Optional<String> findProductIdOptional(String naturalName) {
         if (naturalName == null || naturalName.isBlank()) {
             return Optional.empty();

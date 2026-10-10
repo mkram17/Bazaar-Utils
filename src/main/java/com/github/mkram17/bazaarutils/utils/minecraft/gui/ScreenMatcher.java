@@ -102,12 +102,12 @@ public final class ScreenMatcher<T extends Enum<T> & ScreenType>
         return matches(ScreenManager.getInstance().currentOrNull());
     }
 
-    /** Defensive copy. Empty when {@link #isAnyMode()}. */
+    /** Defensive copy of included types; empty in any mode. */
     public EnumSet<T> includesAsEnumSet() {
         return included.isEmpty() ? EnumSet.noneOf(enumClass) : EnumSet.copyOf(included);
     }
 
-    /** Defensive copy. Empty when {@link #isAnyMode()}. */
+    /** Defensive copy of excluded types, which apply in any mode too. */
     public EnumSet<T> excludesAsEnumSet() {
         return excluded.isEmpty() ? EnumSet.noneOf(enumClass) : EnumSet.copyOf(excluded);
     }

@@ -16,6 +16,7 @@ import com.teamresourceful.resourcefulconfig.api.types.entries.Observable;
 
 import static com.github.mkram17.bazaarutils.BazaarUtils.MOD_ID;
 
+/** Global settings under config/bazaarutils/; profile-specific order data is stored separately. */
 @Config(
         value = MOD_ID + "/config",
         categories = {

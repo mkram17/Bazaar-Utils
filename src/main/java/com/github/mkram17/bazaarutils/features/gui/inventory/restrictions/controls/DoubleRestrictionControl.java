@@ -59,6 +59,7 @@ public final class DoubleRestrictionControl implements RestrictionControl<Numeri
         this(NumericRestrictBy.PRICE, 0);
     }
 
+    /** Uses total coin value or item quantity; equality with the threshold does not restrict. */
     @Override
     public boolean shouldRestrict(OrderInfo item) {
         return switch (rule) {

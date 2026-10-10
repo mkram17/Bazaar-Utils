@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Reconciles stored orders against English menu lore and fixed component positions.
+ * Stored orders absent from the parsed menu are removed.
+ */
 @Module
 public final class OrderUpdater extends BUListener {
     private static Container lowerChestInventory;

@@ -27,6 +27,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 
+/** Estimates limits from locally observed transactions per profile; no server history is fetched. */
 @Module
 public class BazaarLimitsVisualizer extends BUListener implements ToggleableFeature {
     private static final double COIN_LIMIT = 15_000_000_000d;

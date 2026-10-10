@@ -13,7 +13,7 @@ import java.util.function.Function;
  * <p>Unlike {@link FieldEquals}, this class uses no reflection: the accessor is a
  * plain {@link Function} — typically a method reference.
  *
- * <h3>Fail-open contract</h3>
+ * <h2>Fail-open contract</h2>
  *
  * <p>Returns {@code true} (show the field) when:
  * <ul>
