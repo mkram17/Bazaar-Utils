@@ -22,10 +22,14 @@ public record MovePatch(String from, String to) implements Patch {
 
     @Override
     public void patch(JsonObject json) {
-        JsonObject fromParent = JsonUtils.getOrCreatePath(json, from.contains(".") ? from.substring(0, from.lastIndexOf('.')) : "");
+        JsonElement fromParent = JsonUtils.getPath(json, from.contains(".") ? from.substring(0, from.lastIndexOf('.')) : "");
+
+        if (fromParent == null || !fromParent.isJsonObject()) {
+            return;
+        }
 
         String fromKey = from.substring(from.lastIndexOf('.') + 1);
-        JsonElement value = fromParent.remove(fromKey);
+        JsonElement value = fromParent.getAsJsonObject().remove(fromKey);
 
         if (value == null) {
             return;

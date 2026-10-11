@@ -174,6 +174,7 @@ public final class InstantSellParser {
 
         try {
             int volume = Integer.parseInt(amountStr.replace(",", "").trim());
+            if (volume == 0) return Optional.empty();
             double totalPrice = Double.parseDouble(priceStr.replace(",", "").trim());
             double pricePerUnit = Math.round(totalPrice / volume * 10) / 10.0;
 

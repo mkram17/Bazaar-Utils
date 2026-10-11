@@ -146,6 +146,11 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
     testCompileOnly("org.projectlombok:lombok:$lombokVersion")
     testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    testImplementation(platform("org.junit:junit-bom:5.13.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.mockito:mockito-core:5.20.0")
+    testRuntimeOnly("org.jetbrains.kotlin:kotlin-stdlib")
 
     include(implementation("com.moulberry:mixinconstraints:$mixinConstraintsVersion")!!)
 
@@ -220,6 +225,12 @@ tasks.processResources {
             "minor_update_notes" to rootProject.property("minor_update_notes")
         ))
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
+    workingDir = layout.buildDirectory.dir("test-work").get().asFile
+    doFirst { workingDir.mkdirs() }
 }
 
 tasks.classes {
