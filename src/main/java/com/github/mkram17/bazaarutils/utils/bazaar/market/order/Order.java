@@ -222,7 +222,7 @@ public class Order extends OrderInfo implements AbstractListener {
         List<Order> userOrders = UserOrdersStorage.INSTANCE.get();
 
         if (userOrders == null || !userOrders.remove(this)) {
-            PlayerActionUtil.notifyAll("Error removing " + name + " from user orders. Item couldn't be found.");
+            Util.notifyError("Error removing " + name + " from user orders. Item couldn't be found.", null);
         }
 
         new UserOrdersChangeEvent(this, UserOrdersChangeEvent.ChangeTypes.REMOVE).post(EVENT_BUS);

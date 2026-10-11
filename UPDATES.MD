@@ -95,6 +95,8 @@ daily limits are not touched.
 ---
 ## Fixes
 
+- Repeated errors while outside a world now queue only the latest message from each source, preventing a burst of duplicate errors when joining. Logs retain every occurrence.
+- Order-removal errors now use the shared error handler. Missing-claim details remain in the log, and manual resource-update failures show one error notification.
 - **Outbid notification toggles now work independently.** The *Auto Open Bazaar* toggle had no effect, and neither the sound nor the auto-open would fire unless the chat message was also enabled.
 - There are too many other fixes to list here, but using the mod should now be a less buggy experience.
 ---
