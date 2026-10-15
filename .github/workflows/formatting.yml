@@ -1,0 +1,40 @@
+name: formatting
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatting-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  formatting:
+    name: Formatting (advisory)
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    steps:
+      - name: Checkout repository and formatting baseline
+        uses: actions/checkout@v4
+        with:
+          # Spotless needs the target branch and merge-base history for ratcheting.
+          fetch-depth: 0
+      - name: Set up Java 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: 25
+          distribution: microsoft
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: Check formatting of changed files
+        id: formatting
+        env:
+          FORMATTING_BASE: origin/${{ github.base_ref }}
+        run: ./gradlew -p formatting spotlessCheck "-PformattingBase=$FORMATTING_BASE"
+      - name: Report formatting differences
+        if: ${{ failure() && steps.formatting.outcome == 'failure' }}
+        run: |
+          echo "::warning::Formatting check did not pass. See the check log; run ./gradlew -p formatting spotlessApply locally to fix formatting differences. This check is advisory."
+          echo 'Formatting check did not pass. Review the log and run `./gradlew -p formatting spotlessApply` locally to fix formatting differences. This check is advisory and does not block the build.' >> "$GITHUB_STEP_SUMMARY"

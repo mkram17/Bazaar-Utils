@@ -1,6 +1,9 @@
 #
 # https://help.github.com/articles/dealing-with-line-endings/
 #
+# Match the Java formatter on every platform, including Windows with autocrlf enabled.
+*.java         text eol=lf
+
 # Linux start script should use lf
 /gradlew        text eol=lf
 
