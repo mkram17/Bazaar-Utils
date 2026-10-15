@@ -64,7 +64,7 @@ val maxMcVersion = deps["core.maxMcVersion"]
 group = property("maven_group")!!
 val versionNumber = property("mod_version") as String
 val releaseChannel = property("mod_release_channel") as String
-val preReleaseNumber = property("mod_prerelease_number")
+val preReleaseNumber = property("mod_prerelease_number").toString().toInt()
 
 version = if (preReleaseNumber == 0) {
     "$versionNumber-$releaseChannel+mc$mcVersion"
@@ -161,7 +161,6 @@ java {
 publishMods {
     version.set(project.version.toString())
     file.set(tasks.jar.get().archiveFile)
-    version.set(project.version.toString())
     type.set(if(releaseChannel == "alpha") ALPHA else STABLE)
     modLoaders.add("fabric")
     changelog.set(rootProject.file("UPDATES.MD").readText())
@@ -170,7 +169,7 @@ publishMods {
     } else {
         "Bazaar Utils v$versionNumber-$releaseChannel.$preReleaseNumber for $mcVersion"
     }
-    dryRun = true
+    dryRun.set(providers.gradleProperty("publishDryRun").map(String::toBoolean).orElse(false))
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -183,12 +182,15 @@ publishMods {
     github {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "mkram17/Bazaar-Utils"
-        commitish = "modern"
+        commitish = providers.environmentVariable("RELEASE_COMMIT").getOrElse("modern")
         tagName = "v" + project.version.toString()
         type = STABLE
     }
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         projectId = "1342860"
+        minecraftVersions.add(mcVersion)
+        client = true
+        server = false
     }
 }

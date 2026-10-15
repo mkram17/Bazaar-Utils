@@ -157,6 +157,22 @@ The project uses [Stonecutter](https://stonecutter.kikugie.dev/) to build agains
 ./gradlew :26.2:build   # build a single version
 ```
 
+## Publishing
+
+Releases are published from GitHub Actions. Update the version in `gradle.properties` and the changelog in `UPDATES.MD`, then commit and push those changes to `modern`.
+
+Open **Actions > Publish modern > Run workflow**. The workflow always checks out `modern`, builds every configured Minecraft version with Java 25, and publishes to Modrinth, CurseForge, and GitHub Releases. GitHub release tags point to the exact commit that was built. Select **dry_run** to preview publishing without uploading releases.
+
+The job uses the `publishing` environment, which must contain `MODRINTH_TOKEN` and `CURSEFORGE_TOKEN`. GitHub supplies `GITHUB_TOKEN` automatically. Any approval or branch restrictions configured on that environment apply to the workflow run; select `modern` when running if the environment only allows that branch.
+
+GitHub requires the manual workflow file to exist on the repository's default branch. Keep `.github/workflows/publish.yml` identical on `modern` and the default branch (`v1.0.0`) so the button is available from the Actions page. Each Minecraft version retains its own release and version tag. On `modern`, beta versions intentionally publish as stable releases; `v1.0.0` retains its own release-channel settings.
+
+To preview the publishing configuration locally without credentials or uploads:
+
+```bash
+./gradlew publishMods -PpublishDryRun=true
+```
+
 ## Contributing
 
 Pull requests should target `modern`. See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions, or ask in the [Discord server](https://discord.gg/xDKjvm5hQd).
