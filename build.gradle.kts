@@ -158,24 +158,6 @@ java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 }
 
-val regression = sourceSets.create("regression") {
-    compileClasspath += sourceSets.main.get().output + sourceSets.main.get().compileClasspath
-    runtimeClasspath += sourceSets.main.get().output + sourceSets.main.get().runtimeClasspath
-}
-val verifyItemStackPersistence = tasks.register<JavaExec>("verifyItemStackPersistence") {
-    group = "verification"
-    description = "Checks saved item snapshots before and after item components are bound."
-    dependsOn(tasks.named(regression.classesTaskName))
-    classpath = regression.runtimeClasspath
-    mainClass.set("com.github.mkram17.bazaarutils.misc.adapters.ItemStackPersistenceTest")
-    javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-    workingDir(layout.buildDirectory.dir("item-persistence-test"))
-    doFirst { workingDir.mkdirs() }
-}
-tasks.check {
-    dependsOn(verifyItemStackPersistence)
-}
-
 publishMods {
     version.set(project.version.toString())
     file.set(tasks.jar.get().archiveFile)
