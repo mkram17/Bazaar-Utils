@@ -155,6 +155,7 @@ The project uses [Stonecutter](https://stonecutter.kikugie.dev/) to build agains
 ```bash
 ./gradlew build         # build every configured version (jars land in versions/*/build/libs)
 ./gradlew :26.2:build   # build a single version
+./gradlew verifyItemStackPersistence # check saved items before and after joining a world
 ```
 
 ## Contributing

@@ -5,7 +5,7 @@ import com.github.mkram17.bazaarutils.features.*;
 import com.github.mkram17.bazaarutils.features.FlipHelper.BiddingType;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSell;
 import com.github.mkram17.bazaarutils.features.restrictsell.RestrictSellControl;
-import com.github.mkram17.bazaarutils.misc.adapters.ItemStackCodecGsonAdapter;
+import com.github.mkram17.bazaarutils.misc.adapters.ItemStackTemplateGsonAdapter;
 import com.github.mkram17.bazaarutils.misc.adapters.ZonedDateTimeAdapter;
 import com.github.mkram17.bazaarutils.misc.orderinfo.BazaarOrder;
 import com.github.mkram17.bazaarutils.utils.Util;
@@ -21,7 +21,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.network.chat.Component;
 
 import java.lang.reflect.Field;
@@ -42,7 +42,7 @@ public class BUConfig {
             .serializer(config -> GsonConfigSerializerBuilder.create(config)
                     .setPath(FabricLoader.getInstance().getConfigDir().resolve("bazaarutils.json"))
                     .appendGsonBuilder(gsonBuilder -> gsonBuilder
-                            .registerTypeAdapter(ItemStack.class, new ItemStackCodecGsonAdapter())
+                            .registerTypeAdapter(ItemStackTemplate.class, new ItemStackTemplateGsonAdapter())
                             .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
                             .registerTypeAdapterFactory(customOrderAdapterFactory))
                     .build())

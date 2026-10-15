@@ -15,7 +15,6 @@ import com.github.mkram17.bazaarutils.misc.widgets.ItemSlotButtonWidget;
 import com.github.mkram17.bazaarutils.mixin.AccessorAbstractContainerScreen;
 import com.github.mkram17.bazaarutils.utils.*;
 import lombok.Getter;
-import lombok.Setter;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
@@ -26,6 +25,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -45,8 +45,8 @@ public class Bookmark extends CustomItemButton implements BUListener {
 
     @Getter
     public final String name;
-    @Getter @Setter
-    public ItemStack bookmarkedItemStack;
+    // Persist a template so config loading does not construct a stack before joining a world.
+    private ItemStackTemplate bookmarkedItemStack;
     @Getter
     private final OrderInfoContainer orderInfo;
     private static final int SIGN_SLOT_NUMBER = 45;
@@ -67,7 +67,7 @@ public class Bookmark extends CustomItemButton implements BUListener {
         // replacementItem stays null here and is created lazily in replaceItemEvent —
         // since 26.1, ItemStacks cannot be constructed until a world is loaded
         // ("Components not bound yet"), and Bookmarks are also created during client init.
-        this.bookmarkedItemStack = findItemStack(name);
+        setBookmarkedItemStack(findItemStack(name));
         this.orderInfo = new OrderInfoContainer(name, null, null, PriceInfoContainer.PriceType.INSTABUY, null);
 
         subscribe();
@@ -95,7 +95,7 @@ public class Bookmark extends CustomItemButton implements BUListener {
             return;
         SoundUtil.playSound(BUTTON_SOUND, BUTTON_VOLUME);
         reverseBookmarkStatus();
-        bookmarkedItemStack = findItemStack(name);
+        setBookmarkedItemStack(findItemStack(name));
         Util.scheduleConfigSave();
     }
 
@@ -172,6 +172,14 @@ public class Bookmark extends CustomItemButton implements BUListener {
         }
     }
 
+
+    public ItemStack getBookmarkedItemStack() {
+        return bookmarkedItemStack == null ? null : bookmarkedItemStack.create();
+    }
+
+    public void setBookmarkedItemStack(ItemStack stack) {
+        bookmarkedItemStack = stack == null || stack.isEmpty() ? null : ItemStackTemplate.fromNonEmptyStack(stack);
+    }
 
     private static ItemStack findItemStack(String name){
         AbstractContainerMenu handler = GUIUtils.getHandledScreen();

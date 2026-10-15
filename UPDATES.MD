@@ -1,1 +1,2 @@
 - Fixed StackOverflowError crash when loaded with Skyblock-API/SkyOcean caused by recursive ReplaceItemEvent loops
+- Fixed item deserialization errors on startup by loading saved order and bookmark items as templates until a world is joined.
