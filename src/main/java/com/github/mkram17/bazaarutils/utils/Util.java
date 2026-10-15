@@ -72,6 +72,9 @@ public class Util {
     public static void notifyError(String message, Throwable e) {
         String callingName = getCallingClassName();
         String simpleCallingName = callingName.substring(callingName.lastIndexOf(".") + 1);
+        // Log every occurrence before dispatch; only pending chat notifications are coalesced.
+        logError(message, simpleCallingName, e);
+
         Component messageText = Component.literal("[" + BazaarUtils.MOD_NAME + " Error]: " + message + ". Click here for support.")
                 .withStyle(style -> {
                     try {
@@ -84,10 +87,8 @@ public class Util {
                 });
 
         if (!BazaarUtilsModules.DisableErrorNotifications.isEnabled()) {
-            PlayerActionUtil.sendPlayerMessage(messageText);
+            PlayerActionUtil.sendErrorMessage(callingName, messageText);
         }
-
-        logError(message, simpleCallingName, e);
     }
 
     @RunOnInit

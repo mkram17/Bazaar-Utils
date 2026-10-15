@@ -394,7 +394,8 @@ public final class BazaarChatHandler extends BUListener {
         Optional<Order> orderOptional = item.findOrderInList(OrderUtil.getUserOrders());
 
         if (orderOptional.isEmpty()) {
-            PlayerActionUtil.notifyAll("Could not find claimed item: " + item.getName(), NotificationType.ORDERDATA);
+            // handleClaimed reports the player-facing error; retain the item details in the log.
+            Util.logMessage("Could not find claimed item: " + item.getName());
             return Optional.empty();
         }
         return orderOptional;

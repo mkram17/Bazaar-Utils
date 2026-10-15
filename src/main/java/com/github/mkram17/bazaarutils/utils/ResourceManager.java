@@ -118,7 +118,7 @@ public class ResourceManager {
                 }
             } catch (Exception e) {
                 if (manual) {
-                    Util.notifyError("An error occurred while checking for updates.", new Exception());
+                    Util.logError("An error occurred while checking for updates.", e);
                 }
 
                 Util.notifyError("Failed to check for resource updates", e);
