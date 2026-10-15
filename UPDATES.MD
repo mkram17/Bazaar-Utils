@@ -77,6 +77,7 @@ setting back to its default. Both ask for confirmation first. Your bookmarks, tr
 daily limits are not touched.
 ---
 ## Improvements
+- Updated the mod icon and in-game watermark to the new pixel-art Bazaar stall artwork.
 - **Custom buy amounts are now "Input Helpers"** and are configured in the settings screen instead of
   by command. Each button gets its own item, slot, and either a fixed amount or **Max** (the largest
   amount you can afford). Max is now just a setting on any button rather than a separate feature.
