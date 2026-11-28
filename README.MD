@@ -107,9 +107,9 @@ _Rules that stop you from instantly selling items in your inventory. Ex: a rule 
 
 ## Compatibility
 
-- **Minecraft**: `26.1.2` and `26.2`
-- **Java**: `21+` (the project itself builds with a JDK 25 toolchain)
-- **Fabric Loader**: `0.16.9+`
+- **Minecraft**: `26.1.2`, `26.2`, and `26.3`
+- **Java**: `25+`
+- **Fabric Loader**: `0.19.3+` (`0.19.5+` for Minecraft 26.3)
 - **Current mod version**: `0.6.2-beta.4`
 
 ## Using Bazaar Utils
@@ -154,7 +154,7 @@ The project uses [Stonecutter](https://stonecutter.kikugie.dev/) to build agains
 
 ```bash
 ./gradlew build         # build every configured version (jars land in versions/*/build/libs)
-./gradlew :26.2:build   # build a single version
+./gradlew :26.3:build   # build a single version
 ```
 
 ## Publishing
