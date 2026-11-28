@@ -3,11 +3,10 @@ package com.github.mkram17.bazaarutils.features.gui.inventory.restrictions;
 import com.github.mkram17.bazaarutils.config.features.gui.InventoryConfig;
 import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
 import com.github.mkram17.bazaarutils.data.SellableAPI;
-import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.annotations.modules.ItemModifier;
 import com.github.mkram17.bazaarutils.utils.bazaar.RestrictionHelper;
-import com.github.mkram17.bazaarutils.utils.bazaar.components.SellSacksParser;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.SellableItemList;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.SellablePageLayout;
@@ -79,7 +78,7 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
         if (sellSacksItem.isEmpty()) return Optional.empty();
 
         List<OrderInfo> items = SellableAPI.SellSacks.orders();
-        Optional<SellSacksParser.SellSacksResult.OtherItems> otherItems = SellableAPI.SellSacks.otherItems();
+        Optional<SellableItemList.OtherItems> otherItems = SellableAPI.SellSacks.otherItems();
 
         Set<RestrictionControl<?>> triggered = new LinkedHashSet<>(getRestrictors().stream()
                 .filter(control -> control.anyMatch(items))
@@ -88,14 +87,5 @@ public class SellSacksRestrictions extends RestrictionHelper<SellSacksRestrictio
         otherItems.ifPresent(other -> triggered.addAll(collectOtherItemsTriggered(other)));
 
         return Optional.of(new SellSacksState(sellSacksItem.get(), List.copyOf(triggered)));
-    }
-
-    private List<RestrictionControl<?>> collectOtherItemsTriggered(SellSacksParser.SellSacksResult.OtherItems otherItems) {
-        return getRestrictors().stream()
-                .filter(control -> control instanceof DoubleRestrictionControl doubleControl && switch (doubleControl.getRule()) {
-                    case PRICE -> otherItems.totalValue() > doubleControl.getAmount();
-                    case VOLUME -> otherItems.volume() > doubleControl.getAmount();
-                })
-                .toList();
     }
 }

@@ -1,0 +1,112 @@
+package com.github.mkram17.bazaarutils.data.bazaar.sources.lifecycle;
+
+import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
+import com.github.mkram17.bazaarutils.data.bazaar.pipeline.BookMutation;
+import com.github.mkram17.bazaarutils.data.bazaar.pipeline.FillInference;
+import com.github.mkram17.bazaarutils.data.stored.ProfileKey;
+import com.github.mkram17.bazaarutils.data.stored.UserOrdersStorage;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.bazaar.UserOrderEvent;
+import com.github.mkram17.bazaarutils.events.bazaar.data.BazaarDataUpdateEvent;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.DataSource;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.Order;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.order.OrderStatus;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.TimePassed;
+import tech.thatgravyboat.skyblockapi.api.events.time.TickEvent;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Periodically scans every known profile's active book orders and transitions any that
+ * have passed their 7-day Hypixel expiry timestamp to {@link OrderStatus.Expired},
+ * withdrawing their unfilled remainder from the order book.
+ */
+@DataSource
+public final class OrderExpiryDataSource extends BUListener {
+    public OrderExpiryDataSource() {}
+
+    @Subscription
+    @OnlyOnSkyBlock
+    @TimePassed(duration = "1m")
+    public void onTick(TickEvent ignored) {
+        var origin = new BazaarDataOrigin.OrderExpired(System.currentTimeMillis());
+        var changedProducts = new LinkedHashSet<String>();
+
+        for (var profileEntry : UserOrdersStorage.allKnown().entrySet()) {
+            ProfileKey key = profileEntry.getKey();
+            List<Order> storage = profileEntry.getValue();
+
+            var toExpire = storage.stream()
+                    .filter(order -> order.status() instanceof OrderStatus.BookState)
+                    .filter(order -> order.effectiveExpiresAt() <= origin.timestamp())
+                    .toList();
+
+            if (toExpire.isEmpty()) continue;
+
+            var expiredById = toExpire.stream()
+                    .collect(Collectors.toMap(Order::id, order -> order.expired(origin)));
+
+            var outcomes = toExpire.stream()
+                    .collect(Collectors.groupingBy(Order::productId))
+                    .entrySet().stream()
+                    .map(entry -> {
+                        BookMutation<BazaarDataOrigin.OrderExpired> mutation = BookMutation.none();
+
+                        for (var order : entry.getValue()) {
+                            if (order.unfilledAmount() <= 0) continue;
+
+                            var transaction = TransactionType.of(order.side(), TransactionType.Method.ORDER);
+                            mutation = mutation.then(BookMutation.withdrawn(
+                                    transaction, order.pricePerItem(), order.unfilledAmount()));
+                        }
+
+                        var outcome = mutation.apply(entry.getKey(), origin);
+                        if (outcome.changed()) {
+                            changedProducts.add(entry.getKey());
+                            for (var order : entry.getValue()) {
+                                if (order.unfilledAmount() <= 0) continue;
+                                var transaction = TransactionType.of(order.side(), TransactionType.Method.ORDER);
+                                PlayerActionUtil.notifyAll("%s — Book decrement: %s %s Δ%d @ %.4f (order expired)".formatted(
+                                                origin.describe(),
+                                                transaction.getPriceType(),
+                                                order.productId(), order.unfilledAmount(), order.pricePerItem()),
+                                        NotificationType.BAZAARDATA);
+                            }
+                        }
+
+                        return outcome;
+                    })
+                    .toList();
+
+            var result = FillInference.applyAndSettle(key, outcomes, origin, current -> current.stream()
+                    .map(order -> expiredById.getOrDefault(order.id(), order))
+                    .collect(Collectors.toCollection(ArrayList::new)));
+
+            changedProducts.addAll(result.changedProducts());
+
+            var committed = result.ordersOrElse(key, List.of());
+
+            committed.stream()
+                    .filter(order -> expiredById.containsKey(order.id()))
+                    .forEach(order -> {
+                        new UserOrderEvent.Expired(order, key).post(BazaarUtils.EVENT_BUS);
+
+                        PlayerActionUtil.notifyAll("%s — Expired (time-based): %s".formatted(
+                                        origin.describe(), order.describe()),
+                                NotificationType.ORDERDATA);
+                    });
+        }
+
+        // One event per distinct product whose book or inferred orders actually changed.
+        changedProducts.forEach(productId -> new BazaarDataUpdateEvent(productId, origin).post(BazaarUtils.EVENT_BUS));
+    }
+}

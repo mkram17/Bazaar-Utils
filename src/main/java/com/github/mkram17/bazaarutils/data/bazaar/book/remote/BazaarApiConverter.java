@@ -1,0 +1,69 @@
+package com.github.mkram17.bazaarutils.data.bazaar.book.remote;
+
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
+import com.github.mkram17.bazaarutils.data.bazaar.book.BookLevels;
+import com.github.mkram17.bazaarutils.data.bazaar.book.PriceLevel;
+import com.github.mkram17.bazaarutils.events.bazaar.remote.ApiSnapshotEvent;
+import com.github.mkram17.bazaarutils.mixin.AccessorSkyBlockBazaarReply;
+import com.github.mkram17.bazaarutils.utils.Util;
+import net.hypixel.api.reply.skyblock.SkyBlockBazaarReply;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * Converts a raw {@link net.hypixel.api.reply.skyblock.SkyBlockBazaarReply} into an
+ * {@link com.github.mkram17.bazaarutils.events.bazaar.remote.ApiSnapshotEvent}.
+ *
+ * <p>Hypixel's reply uses {@code buySummary} for sell offers (asks) and {@code sellSummary}
+ * for buy orders (bids) — the naming is from the market-taker's perspective. The conversion
+ * maps them to {@link BookLevels#askLevels()} and {@link BookLevels#bidLevels()} respectively.
+ */
+public final class BazaarApiConverter {
+    private BazaarApiConverter() {}
+
+    public static ApiSnapshotEvent convert(SkyBlockBazaarReply reply) {
+        long timestamp = ((AccessorSkyBlockBazaarReply) reply).getLastUpdated();
+        BazaarDataOrigin.ApiSnapshot origin = new BazaarDataOrigin.ApiSnapshot(timestamp);
+
+        Map<String, SkyBlockBazaarReply.Product> products = reply.getProducts();
+
+        Util.logMessage("Converting API reply — ts=%d products=%d".formatted(timestamp, products != null ? products.size() : 0));
+
+        Map<String, BookLevels<BazaarDataOrigin.ApiSnapshot>> batch = transformProducts(products, origin);
+
+        return new ApiSnapshotEvent(batch, timestamp);
+    }
+
+    private static Map<String, BookLevels<BazaarDataOrigin.ApiSnapshot>> transformProducts(Map<String, SkyBlockBazaarReply.Product> products, BazaarDataOrigin.ApiSnapshot origin) {
+        if (products == null || products.isEmpty()) return Map.of();
+
+        return products.entrySet().stream()
+                .filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                .collect(Collectors.toUnmodifiableMap(
+                        Map.Entry::getKey,
+                        entry -> {
+                            SkyBlockBazaarReply.Product data = entry.getValue();
+
+                            return new BookLevels<>(
+                                    toPriceLevels(data.getBuySummary(), origin),
+                                    toPriceLevels(data.getSellSummary(), origin)
+                            );
+                        }
+                ));
+    }
+
+    private static List<PriceLevel<BazaarDataOrigin.ApiSnapshot>> toPriceLevels(List<SkyBlockBazaarReply.Product.Summary> summaries, BazaarDataOrigin.ApiSnapshot origin) {
+        if (summaries == null || summaries.isEmpty()) return List.of();
+
+        return summaries.stream()
+                .map(summary -> new PriceLevel<>(
+                        summary.getPricePerUnit(),
+                        summary.getAmount(),
+                        (int) Math.clamp(summary.getOrders(), 0L, Integer.MAX_VALUE),
+                        origin
+                ))
+                .toList();
+    }
+}

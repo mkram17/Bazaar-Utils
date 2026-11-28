@@ -1,0 +1,107 @@
+package com.github.mkram17.bazaarutils.data.bazaar.sources.gui;
+
+import com.github.mkram17.bazaarutils.BazaarUtils;
+import com.github.mkram17.bazaarutils.data.bazaar.BazaarDataOrigin;
+import com.github.mkram17.bazaarutils.data.bazaar.book.PriceLevel;
+import com.github.mkram17.bazaarutils.data.bazaar.pipeline.BookMutation;
+import com.github.mkram17.bazaarutils.data.bazaar.pipeline.FillInference;
+import com.github.mkram17.bazaarutils.events.BUListener;
+import com.github.mkram17.bazaarutils.events.bazaar.data.BazaarDataUpdateEvent;
+import com.github.mkram17.bazaarutils.events.minecraft.ContainerLoadedEvent;
+import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
+import com.github.mkram17.bazaarutils.misc.NotificationType;
+import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
+import com.github.mkram17.bazaarutils.utils.Priority;
+import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.annotations.modules.DataSource;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.PageSummaryParser;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
+import com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts.ProductPageLayout;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.PriceType;
+import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
+import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
+import tech.thatgravyboat.skyblockapi.api.events.base.Subscription;
+import tech.thatgravyboat.skyblockapi.api.events.base.predicates.OnlyOnSkyBlock;
+
+import java.util.List;
+import java.util.NavigableMap;
+
+@DataSource
+public final class PageSummaryDataSource extends BUListener {
+    @Subscription(priority = Priority.HIGH)
+    @OnlyOnSkyBlock
+    @OnlyBazaarScreen(BazaarScreenType.PRODUCT_PAGE)
+    public void onContainerLoaded(ContainerLoadedEvent event) {
+        var origin = new BazaarDataOrigin.PageSummary(System.currentTimeMillis());
+
+        ScreenContext context = event.asContext();
+
+        var productInfo = ProductPageLayout.getDisplayProductInfo(context).orElse(null);
+        if (productInfo == null) return;
+
+        String productId = productInfo.getProductId();
+
+        var buyStack = ProductPageLayout.getCreateBuyOrderItem(context)
+                .map(ItemInfo::itemStack)
+                .orElse(null);
+
+        var sellStack = ProductPageLayout.getCreateSellOfferItem(context)
+                .map(ItemInfo::itemStack)
+                .orElse(null);
+
+        if (buyStack == null || sellStack == null) return;
+
+        var parsed = PageSummaryParser.parseItemPage(buyStack, sellStack);
+
+        var asks = parsed.askLevels().stream()
+                .map(level -> new PriceLevel<>(level.pricePerUnit(), level.volume(), level.orderCount(), origin))
+                .toList();
+
+        var bids = parsed.bidLevels().stream()
+                .map(level -> new PriceLevel<>(level.pricePerUnit(), level.volume(), level.orderCount(), origin))
+                .toList();
+
+        // Always splice even when empty — an empty exhaustive page proves stale levels gone.
+        var outcome = BookMutation.splice(PriceType.INSTABUY, asks)
+                .then(BookMutation.splice(PriceType.INSTASELL, bids))
+                .apply(productId, origin);
+
+        var data = outcome.book();
+
+        boolean settled = !FillInference.settle(List.of(outcome), origin, FillInference.Eligibility.SESSION).changedProducts().isEmpty();
+        boolean changed = outcome.changed() || settled;
+
+        PlayerActionUtil.notifyAll(
+                "%s: %s — %d ask levels, %d bid levels".formatted(
+                        origin.describe(),
+                        productId,
+                        asks.size(),
+                        bids.size()
+                ),
+                NotificationType.GUI
+        );
+
+        if (changed) {
+            new BazaarDataUpdateEvent(productId, origin).post(BazaarUtils.EVENT_BUS);
+        }
+
+        if (data != null) {
+            Util.logMessage(
+                    "%s: %s askBook=%s bidBook=%s".formatted(
+                            origin.describe(),
+                            productId,
+                            bestPrice(data.tradableLevels(PriceType.INSTABUY)),
+                            bestPrice(data.tradableLevels(PriceType.INSTASELL))
+                    )
+            );
+        }
+    }
+
+    private static String bestPrice(NavigableMap<Double, PriceLevel<?>> book) {
+        var entry = book.firstEntry();
+
+        return entry == null
+                ? "N/A"
+                : String.valueOf(entry.getValue().pricePerUnit());
+    }
+}

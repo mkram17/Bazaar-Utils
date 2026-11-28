@@ -31,23 +31,6 @@
       }
     }],
 
-    "bazaar_flipper": [{
-      "text": "Bazaar Flipper",
-      "color": "gold",
-      "hover_event": {
-        "action": "show_text",
-        "value": [
-          { "text": "Bazaar Flipper\n", "color": "gold", "bold": true },
-          { "text": "An Account Upgrade that reduces tax\nand increases your active order limit.\n\n", "color": "gray" },
-          { "text": "↗ Click to open wiki", "color": "dark_gray", "italic": true }
-        ]
-      },
-      "click_event": {
-        "action": "open_url",
-        "url": "https://wiki.hypixel.net/Bazaar_Flipper"
-      }
-    }],
-
     "elizabeth": [{
       "text": "Elizabeth",
       "color": "light_purple",
@@ -82,10 +65,12 @@
     }
   },
 
-  "bazaarutils.hypixel.account_upgrades.bazaar_flipper.{}": {
-    "not_upgraded.label": "Not Upgraded",
-    "first_tier.label": "Bazaar Flipper I",
-    "second_tier.label": "Bazaar Flipper II"
+  "bazaarutils.hypixel.{}": {
+    "account_upgrades.bazaar_flipper.{}": {
+      "not_upgraded.label": "Not Upgraded",
+      "first_tier.label": "Bazaar Flipper I",
+      "second_tier.label": "Bazaar Flipper II"
+    }
   },
 
   "bazaarutils.config.{}": {
@@ -224,11 +209,19 @@
           },
           "pricing_position.{}": {
             "label": "Pricing Position",
-            "hint": "The strategy with which to calculate the price to bid per item\n\nCOMPETITIVE: The bid will be +0.1 the current best offer on the market\nMATCHED: The bid will be equal to that of the current best offer on the market\nOUTBID: The bid will be -0.1 the current best offer on the market"
+            "hint": "The strategy with which to calculate the unit price relative to top of book\n\nCOMPETITIVE: Improves on the current best order by 0.1 coins (+0.1 for buys, -0.1 for sells)\nMATCHED: Matches the current best order on the market\nOUTBID: Steps behind the current best order by 0.1 coins (-0.1 for buys, +0.1 for sells)"
           },
           "fixed_amount.{}": {
             "label": "Fixed Amount",
             "hint": "The amount which will be used if FIXED is set as the amount strategy."
+          },
+          "self_outbid.{}": {
+            "label": "Self Outbid",
+            "hint": "When you're already the sole top-of-book order, stepping past yourself gains you nothing in the queue and only costs coins. Leave this off and the helper holds steady when you're already ahead. Enable it to always price competitively, even against your own orders."
+          },
+          "empty_market_price.{}": {
+            "label": "Empty Market Price",
+            "hint": "When the order book has no resting orders on this side, the helper has no live market price to reference. Set this to a fallback reference price — your pricing position offset and bounds are applied on top of it."
           }
         }
       },
@@ -300,6 +293,16 @@
         "style.{}": {
           "label": "Highlight Style",
           "hint": "Determines how the status colors are rendered on your order slots."
+        },
+
+        "self_outbid.{}": {
+          "label": "Self Outbid",
+          "hint": "By default, your own volume at a price level doesn't count against you — so a spot you hold alone still shows as COMPETITIVE. Enable this if you'd rather any shared price level report MATCHED regardless of who owns the volume."
+        },
+
+        "settled_color.{}": {
+          "label": "Settled Color",
+          "hint": "The color to highlight orders which have been fully filled or have expired and are awaiting flip or claim.",
         },
 
         "competitive_color.{}": {
@@ -484,6 +487,7 @@
         "hint": "Global toggle for all developer features and utilities."
       },
       "disable_error_notifications.label": "Disable Error Notifications",
+      "disable_auto_resource_updates.label": "Disable Automatic Resource Updates",
       "debug_messages.{}": {
         "label": "Debug Messages",
         "hint": "Configures debug messages sent to chat regarding mod routines and state"

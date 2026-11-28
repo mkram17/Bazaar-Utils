@@ -6,10 +6,12 @@ import com.github.mkram17.bazaarutils.events.BUListener;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyBazaarScreen;
 import com.github.mkram17.bazaarutils.events.predicates.OnlyWhenEnabled;
 import com.github.mkram17.bazaarutils.features.ItemModifiers;
+import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.DoubleRestrictionControl;
 import com.github.mkram17.bazaarutils.features.gui.inventory.restrictions.controls.RestrictionControl;
 import com.github.mkram17.bazaarutils.utils.PlayerActionUtil;
 import com.github.mkram17.bazaarutils.utils.Result;
 import com.github.mkram17.bazaarutils.utils.Util;
+import com.github.mkram17.bazaarutils.utils.bazaar.components.SellableItemList;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenContext;
@@ -190,6 +192,15 @@ public abstract class RestrictionHelper<T extends RestrictionHelper.RestrictionS
         return Optional.of(DataComponentPatch.builder()
                 .set(CustomDataComponents.CUSTOM_SIZE, String.valueOf(remaining))
                 .build());
+    }
+
+    protected List<RestrictionControl<?>> collectOtherItemsTriggered(@NotNull SellableItemList.OtherItems otherItems) {
+        return getRestrictors().stream()
+                .filter(control -> control instanceof DoubleRestrictionControl doubleControl && switch (doubleControl.getRule()) {
+                    case PRICE -> otherItems.totalValue() > doubleControl.getAmount();
+                    case VOLUME -> otherItems.volume() > doubleControl.getAmount();
+                })
+                .toList();
     }
 
     protected String getMessage(T state) {

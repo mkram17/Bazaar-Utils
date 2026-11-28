@@ -1,14 +1,15 @@
 package com.github.mkram17.bazaarutils.features.gui.buttons.inputhelper.price;
 
-import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
-import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
 import com.github.mkram17.bazaarutils.config.util.api.SlotProviders;
 import com.github.mkram17.bazaarutils.config.util.api.annotations.ContainerSlot;
+import com.github.mkram17.bazaarutils.config.util.api.annotations.ShowIf;
+import com.github.mkram17.bazaarutils.config.util.api.conditions.AdvancedConfigurationMode;
 import com.github.mkram17.bazaarutils.utils.bazaar.SignInputHelper;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenMatcher;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
-import com.github.mkram17.bazaarutils.utils.bazaar.market.order.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.TransactionType;
+import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PriceInfo;
 import com.github.mkram17.bazaarutils.utils.bazaar.market.price.PricingPosition;
 import com.github.mkram17.bazaarutils.utils.minecraft.components.CustomDataComponents;
 import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenMatcher;
@@ -58,17 +59,47 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip implem
     )
     @Comment(
             value = """
-                    The strategy with which to calculate the price to ask per item
-                    
-                    COMPETITIVE: The bid will be +0.1 the current best offer on the market
-                    MATCHED: The bid will be equal to that of the current best offer on the market
-                    OUTBID: The bid will be -0.1 the current best offer on the market
+                    The strategy with which to calculate the ask price per item
+
+                    COMPETITIVE: The ask will be -0.1 below the current best sell offer on the market
+                    MATCHED: The ask will be equal to the current best sell offer on the market
+                    OUTBID: The ask will be +0.1 above the current best sell offer on the market
                     """,
             translation = "bazaarutils.config.buttons.button.container.pricing_position.hint"
     )
     public PricingPosition pricingPosition;
 
-    public TransactionType transactionType = TransactionType.of(TransactionType.Side.SELL, TransactionType.Method.ORDER);
+    @ConfigEntry(
+            id = "empty_market_price",
+            translation = "bazaarutils.config.buttons.button.container.empty_market_price.label"
+    )
+    @Comment(
+            value = """
+                    When the order book is completely empty, the helper has no price to reference.
+                    Set this to a value you'd be comfortable starting from — it gets treated
+                    the same way a live market price would, with your position strategy applied on top.
+                    """,
+            translation = "bazaarutils.config.buttons.button.container.empty_market_price.hint"
+    )
+    @ConfigOption.Range(min = 0.1, max = 1_000_000_000.0)
+    @ShowIf(AdvancedConfigurationMode.class)
+    public double emptyMarketPrice = PriceInfo.MINIMUM_PRICE;
+
+    @ConfigEntry(
+            id = "self_outbid",
+            translation = "bazaarutils.config.buttons.button.container.self_outbid.label"
+    )
+    @Comment(
+            value = """
+                When you're already the lowest seller, stepping below yourself gains you nothing in the queue and only loses coins.
+                Leave this off and the helper holds steady when you're already ahead. Enable it if you want it to always price competitively, even against your own offers.
+                """,
+            translation = "bazaarutils.config.buttons.button.container.self_outbid.hint"
+    )
+    @ShowIf(SignInputHelper.TransactionCost.WhenCompetitivePosition.AndAdvancedMode.class)
+    public boolean selfOutbid = false;
+
+    public TransactionType transactionType = TransactionType.SELL_OFFER;
 
     @Override
     public ItemRef getItemRef() {
@@ -100,9 +131,9 @@ public class FlipOrderPriceHelper extends SignInputHelper.TransactionFlip implem
     @Override
     public Component getTitle(int index) {
         return Component.literal(switch (pricingPosition) {
-            case COMPETITIVE -> "Flips asking +0.1 above best bid";
-            case MATCHED -> "Flips asking equal to best bid";
-            case OUTBID -> "Flips asking -0.1 below best bid";
+            case COMPETITIVE -> "Flips asking -0.1 below best offer";
+            case MATCHED -> "Flips asking equal to best offer";
+            case OUTBID -> "Flips asking +0.1 above best offer";
         });
     }
 

@@ -61,10 +61,8 @@ public class BazaarUtils implements ClientModInitializer {
 
         BazaarUtilsModules.init();
 
+        BazaarUtilsDataSources.init();
         BazaarUtilsItemModifiers.init();
-
-        // Persisted orders are decoded through Order.CODEC, which runs the Order constructor and
-        // therefore subscribes them to the event bus already — no explicit subscription pass needed.
 
         if (RepoAPI.isInitialized()) {
             lateInitialize();

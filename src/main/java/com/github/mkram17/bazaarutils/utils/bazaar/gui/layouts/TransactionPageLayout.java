@@ -1,5 +1,6 @@
 package com.github.mkram17.bazaarutils.utils.bazaar.gui.layouts;
 
+import com.github.mkram17.bazaarutils.mixin.AccessorSignEditScreen;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarScreenType;
 import com.github.mkram17.bazaarutils.utils.bazaar.gui.BazaarSlots;
 import com.github.mkram17.bazaarutils.utils.minecraft.ItemInfo;
@@ -10,18 +11,18 @@ import com.github.mkram17.bazaarutils.utils.minecraft.gui.ScreenSwitch;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Layout utilities for the Bazaar item page.
+ * Layout utilities for Bazaar transaction confirmation, option, and sign-input screens.
  */
 public final class TransactionPageLayout {
 
-    public static final Pattern AMOUNT_PATTERN = Pattern.compile("Amount: (?<amount>[0-9,.]+)x");
-    public static final Pattern SELL_LIMIT_PATTERN = Pattern.compile("Inventory: (?<amount>[0-9,.]+) items");
-    public static final Pattern PURCHASE_LIMIT_PATTERN = Pattern.compile("Buy up to (?<amount>[0-9,.]+)x.");
+    private static final Pattern AMOUNT_PATTERN = Pattern.compile("Amount: (?<amount>[0-9,.]+)x");
+    private static final Pattern PURCHASE_LIMIT_PATTERN = Pattern.compile("Buy up to (?<amount>[0-9,.]+)x\\.");
 
     private TransactionPageLayout() {}
 
@@ -37,16 +38,24 @@ public final class TransactionPageLayout {
                 .orElse(Optional.empty());
     }
 
+    public static Optional<String[]> getFlipSignLines(@Nullable ScreenContext context) {
+        if (context == null) return Optional.empty();
+
+        return ScreenSwitch.<Optional<String[]>>on(context)
+                .when(BazaarScreenType.COMPLETED_BUY_ORDER_FLIP_PRICE_INPUT, ctx ->
+                        Optional.ofNullable(((AccessorSignEditScreen) ctx.screen()).getMessages())
+                )
+                .orElse(Optional.empty());
+    }
+
     public static Optional<Double> findOptionAmount(ItemStack option) {
-        return LoreParser.matchDouble(option, AMOUNT_PATTERN, "amount", "option amount on " + option.getCustomName());
+        String name = option.getCustomName() != null ? option.getCustomName().getString() : option.getHoverName().getString();
+        return LoreParser.matchDouble(option, AMOUNT_PATTERN, "amount", "option amount on " + name);
     }
 
     public static Optional<Integer> findBuyOrderAmountLimit(ItemStack inputSign) {
-        return LoreParser.matchInt(inputSign, PURCHASE_LIMIT_PATTERN, "amount", "buy order limit on " + inputSign.getCustomName());
-    }
-
-    public static Optional<Integer> findSellAmountLimit(ItemStack inputSign) {
-        return LoreParser.matchInt(inputSign, SELL_LIMIT_PATTERN, "amount", "sell limit on " + inputSign.getCustomName());
+        String name = inputSign.getCustomName() != null ? inputSign.getCustomName().getString() : inputSign.getHoverName().getString();
+        return LoreParser.matchInt(inputSign, PURCHASE_LIMIT_PATTERN, "amount", "buy order limit on " + name);
     }
 
     private static Optional<ItemInfo> getSlot(
